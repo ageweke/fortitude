@@ -125,7 +125,7 @@ EOS
     end
 
     def text(s)
-      s.fortitude_append_escaped_string(@output)
+      s.to_s.fortitude_append_escaped_string(@output)
     end
 
     def rawtext(s)
