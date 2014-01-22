@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.version       = Fortitude::VERSION
   s.authors       = ["Andrew Geweke"]
   s.email         = ["andrew@geweke.org"]
-  s.summary       = %q{TODO: Write a short summary. Required.}
-  s.description   = %q{TODO: Write a longer description. Optional.}
+  s.summary       = %q{Views Are Code: use all the power of Ruby to build views in your own language.}
+  s.description   = %q{Views Are Code: use all the power of Ruby to build views in your own language.}
   s.homepage      = ""
   s.license       = "MIT"
 
