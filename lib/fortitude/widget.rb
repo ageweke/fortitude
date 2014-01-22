@@ -84,10 +84,8 @@ module Fortitude
       h.each do |k,v|
         @output.concat(BEFORE_ATTRIBUTE_STRING)
         k.to_s.fortitude_append_escaped_string(@output)
-        # @output << ERB::Util.h(k)
         @output.concat(AFTER_ATTRIBUTE_STRING)
         v.to_s.fortitude_append_escaped_string(@output)
-        # @output << ERB::Util.h(v)
         @output.concat(AFTER_VALUE_STRING)
       end
     end
@@ -98,12 +96,11 @@ module Fortitude
     end
 
     def text(s)
-      # @output << ERB::Util.h(s)
       s.fortitude_append_escaped_string(@output)
     end
 
     def rawtext(s)
-      @output << s
+      @output.concat(s)
     end
   end
 end

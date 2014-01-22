@@ -17,6 +17,12 @@ void Init_fortitude_native_ext() {
 VALUE method_append_escaped_string(VALUE self, VALUE rb_output) {
     char buf[BUF_SIZE + 1];
     const char* c_self = RSTRING_PTR(self);
+    VALUE html_safe = rb_iv_get(self, "@html_safe");
+
+    if (RTEST(html_safe)) {
+        rb_str_cat2(rb_output, c_self);
+        return Qnil;
+    }
 
     const char* input_pos = c_self;
     char* buf_pos = buf;
