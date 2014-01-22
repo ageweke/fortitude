@@ -8,7 +8,7 @@ module Fortitude
     class Renderer
       class << self
         def render(widget_class, template_handler, local_assigns, is_partial)
-          widget = widget_class.new(local_assigns)
+          widget = widget_class.new(local_assigns.merge(template_handler.assigns).with_indifferent_access)
           template_handler.with_output_buffer do
             out = ""
             widget.to_html(out)

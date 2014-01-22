@@ -3,8 +3,31 @@ require 'fortitude/tag'
 module Fortitude
   class Widget
     class << self
+      def tags_module
+        @tags_module ||= begin
+          out = Module.new
+          include(out)
+          out
+        end
+      end
+
       def tag(name, options = { })
-        Fortitude::Tag.new(name, options).define_method_on!(self)
+        Fortitude::Tag.new(name, options).define_method_on!(tags_module)
+      end
+
+      def needs(*variables)
+        @needs ||= [ ]
+        @needs |= variables.map { |v| v.to_s.strip.downcase.to_sym }
+
+        @needs.each do |n|
+          class_eval <<-EOS
+  def #{n}
+    @_fortitude_assign_#{n}
+  end
+EOS
+        end
+
+        @needs
       end
     end
 
@@ -68,8 +91,10 @@ module Fortitude
     tag :br
     tag :hr
 
-    def initialize(assigns)
-      @assigns = assigns
+    def initialize(assigns = { })
+      self.class.needs.each do |n|
+        instance_variable_set("@_fortitude_assign_#{n}", assigns[n])
+      end
     end
 
     def content
@@ -93,6 +118,10 @@ module Fortitude
     def to_html(output)
       @output = output
       content
+    end
+
+    def widget(w)
+      w.to_html(@output)
     end
 
     def text(s)
