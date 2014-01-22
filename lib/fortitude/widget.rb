@@ -76,13 +76,17 @@ module Fortitude
       raise "Must override in #{self.class.name}"
     end
 
+    BEFORE_ATTRIBUTE_STRING = " ".freeze
+    AFTER_ATTRIBUTE_STRING = "=\"".freeze
+    AFTER_VALUE_STRING = "\"".freeze
+
     def _attributes(h)
       h.each do |k,v|
-        @output << " "
-        @output << k.to_s
-        @output << "=\""
-        @output << v.to_s
-        @output << "\""
+        @output.concat(BEFORE_ATTRIBUTE_STRING)
+        @output << ERB::Util.h(k)
+        @output.concat(AFTER_ATTRIBUTE_STRING)
+        @output << ERB::Util.h(v)
+        @output.concat(AFTER_VALUE_STRING)
       end
     end
 
@@ -92,7 +96,7 @@ module Fortitude
     end
 
     def text(s)
-      @output << s
+      @output << ERB::Util.h(s)
     end
 
     def rawtext(s)

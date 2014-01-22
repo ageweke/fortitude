@@ -7,6 +7,8 @@ module Fortitude
       @options = options
     end
 
+    CONCAT_METHOD = "concat"
+
     def define_method_on!(mod)
       mod.const_set(:FORTITUDE_TAG_PARTIAL_OPEN_END, ">".freeze) unless mod.const_defined?(:FORTITUDE_TAG_PARTIAL_OPEN_END)
       mod.const_set(:FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END, "/>".freeze) unless mod.const_defined?(:FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
@@ -22,26 +24,26 @@ module Fortitude
 
         if (! attributes)
           if block_given?
-            o << #{const_name(:OPEN)}
+            o.#{CONCAT_METHOD}(#{const_name(:OPEN)})
             yield
-            o << #{const_name(:CLOSE)}
+            o.#{CONCAT_METHOD}(#{const_name(:CLOSE)})
           else
-            o << #{const_name(:ALONE)}
+            o.#{CONCAT_METHOD}(#{const_name(:ALONE)})
           end
         elsif attributes.kind_of?(String)
-          o << #{const_name(:OPEN)}
-          o << attributes
-          o << #{const_name(:CLOSE)}
+          o.#{CONCAT_METHOD}(#{const_name(:OPEN)})
+          o.#{CONCAT_METHOD}(attributes)
+          o.#{CONCAT_METHOD}(#{const_name(:CLOSE)})
         else
-          o << #{const_name(:PARTIAL_OPEN)}
+          o.#{CONCAT_METHOD}(#{const_name(:PARTIAL_OPEN)})
           _attributes(attributes)
 
           if block_given?
-            o << FORTITUDE_TAG_PARTIAL_OPEN_END
+            o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_END)
             yield
-            o << #{const_name(:CLOSE)}
+            o.#{CONCAT_METHOD}(#{const_name(:CLOSE)})
           else
-            o << FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END
+            o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
           end
         end
       end
