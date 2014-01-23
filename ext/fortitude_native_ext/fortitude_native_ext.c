@@ -84,6 +84,10 @@ VALUE method_append_escaped_string(VALUE self, VALUE rb_output) {
     const char* c_self = RSTRING_PTR(self);
     VALUE html_safe = rb_iv_get(self, "@html_safe");
 
+    if (TYPE(rb_output) != T_STRING) {
+        rb_raise(rb_eArgError, "You can only append to a String (this is a native (C) method)");
+    }
+
     if (RTEST(html_safe)) {
         rb_str_cat2(rb_output, c_self);
         return Qnil;
@@ -158,10 +162,20 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
         method_append_as_attributes(value, rb_output, key);
     } else {
         rb_str_cat2(rb_output, " ");
-        if (TYPE(prefix) != T_NIL) {
-            fortitude_append_to(prefix, rb_output);
-            rb_str_cat2(rb_output, "-");
+
+        switch (TYPE(prefix)) {
+            case T_STRING:
+                fortitude_append_to(prefix, rb_output);
+                rb_str_cat2(rb_output, "-");
+                break;
+
+            case T_NIL:
+                break;
+
+            default:
+                rb_raise(rb_eArgError, "You can only use a String as a prefix (this is a native (C) method)");
         }
+
         fortitude_append_to(key, rb_output);
         rb_str_cat2(rb_output, "=\"");
         fortitude_append_to(value, rb_output);
@@ -173,6 +187,10 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
 
 
 VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix) {
+    if (TYPE(rb_output) != T_STRING) {
+        rb_raise(rb_eArgError, "You can only append to a String (this is a native (C) method)");
+    }
+
     struct fortitude_prefix_and_output prefix_and_output;
 
     prefix_and_output.prefix = prefix;
