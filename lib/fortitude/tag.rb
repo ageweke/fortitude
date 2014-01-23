@@ -33,10 +33,6 @@ module Fortitude
           else
             o.#{CONCAT_METHOD}(#{string_const_name(:ALONE)})
           end
-        elsif attributes.kind_of?(String)
-          o.#{CONCAT_METHOD}(#{string_const_name(:OPEN)})
-          o.#{CONCAT_METHOD}(attributes)
-          o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         else
           o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
           attributes.fortitude_append_as_attributes(o, nil)
