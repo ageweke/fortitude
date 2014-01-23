@@ -8,7 +8,7 @@ module Fortitude
       @name = name.to_s.strip.downcase.to_sym
       @options = options
 
-      @options.assert_valid_keys([ ])
+      # @options.assert_valid_keys([ ])
     end
 
     CONCAT_METHOD = "concat"
@@ -39,7 +39,7 @@ module Fortitude
           o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         else
           o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
-          _attributes(attributes)
+          attributes.fortitude_append_as_attributes(o, nil)
 
           if block_given?
             o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_END)
