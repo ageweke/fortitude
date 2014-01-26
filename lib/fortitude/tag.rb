@@ -47,6 +47,7 @@ module Fortitude
         else
           o.#{CONCAT_METHOD}(#{string_const_name(:OPEN)})
           attributes.to_s.fortitude_append_escaped_string(o)
+          yield if block_given?
           o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         end
       end
