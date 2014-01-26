@@ -11,7 +11,8 @@ describe "basic Rails integration" do
     @rails_server.stop!
   end
 
-  it "should do something" do
-    3.should == 3
+  it "should be able to render a trivial widget" do
+    data = @rails_server.get('basic_rails_system_spec/trivial_widget')
+    $stderr.puts "DATA: #{data.inspect}"
   end
 end

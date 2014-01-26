@@ -36,6 +36,16 @@ module Spec
         end
       end
 
+      def get(path)
+        uri_string = "http://localhost:#{@port}/#{path}"
+        uri = URI.parse(uri_string)
+        data = Net::HTTP.get_response(uri)
+        unless data.code.to_s == '200'
+          raise "'#{uri_string}' returned #{data.code.inspect}, not 200"
+        end
+        data.body.strip
+      end
+
       private
       def rails_env
         options[:rails_env] || 'production'
@@ -51,7 +61,7 @@ module Spec
           end
 
           in_rails_root do
-            with_correct_bundler_environment do
+            Bundler.with_clean_env do
               run_bundle_install!
               splat_template_files!
               start_server!
@@ -124,7 +134,7 @@ and output:
         # This is a little trick to specify the exact version of Rails you want to create it with...
         # http://stackoverflow.com/questions/379141/specifying-rails-version-to-use-when-creating-a-new-application
         rails_version_spec = @rails_version ? "_#{@rails_version}_" : ""
-        safe_system("rails #{rails_version_spec} new #{@name} -d sqlite3 -f", "creating a new Rails installation for '#{@name}'")
+        safe_system("rails #{rails_version_spec} new #{@name} -d sqlite3 -f -B", "creating a new Rails installation for '#{@name}'")
       end
 
       def update_gemfile!
@@ -136,10 +146,6 @@ and output:
 
       def run_bundle_install!
         safe_system("bundle install", "running 'bundle install'")
-      end
-
-      def with_correct_bundler_environment(&block)
-        with_env('BUNDLE_GEMFILE' => File.join(@rails_root, 'Gemfile'), &block)
       end
 
       def with_env(new_env)
