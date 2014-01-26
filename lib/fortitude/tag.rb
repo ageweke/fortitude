@@ -33,7 +33,7 @@ module Fortitude
           else
             o.#{CONCAT_METHOD}(#{string_const_name(:ALONE)})
           end
-        else
+        elsif attributes.kind_of?(Hash)
           o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
           attributes.fortitude_append_as_attributes(o, nil)
 
@@ -44,6 +44,10 @@ module Fortitude
           else
             o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
           end
+        else
+          o.#{CONCAT_METHOD}(#{string_const_name(:OPEN)})
+          attributes.to_s.fortitude_append_escaped_string(o)
+          o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         end
       end
 EOS
