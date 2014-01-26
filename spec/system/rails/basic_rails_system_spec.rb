@@ -53,4 +53,10 @@ The data is:
     expect_exception('basic_rails_system_spec/the_class_should_not_load', 'NameError',
       /uninitialized constant BasicRailsSystemSpecController::BasicRailsSystemSpec/i)
   end
+
+  it "should allow passing data to the widget through controller variables" do
+    data = get_success("passing_data_widget")
+    data.should match(/foo is: the_foo/i)
+    data.should match(/bar is: and_bar/i)
+  end
 end
