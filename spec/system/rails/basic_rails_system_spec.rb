@@ -15,4 +15,6 @@ describe "basic Rails integration" do
     data = @rails_server.get('basic_rails_system_spec/trivial_widget')
     $stderr.puts "DATA: #{data.inspect}"
   end
+
+  it "should not allow you to put Foo::Bar in app/views/foo/bar.rb and make it work"
 end

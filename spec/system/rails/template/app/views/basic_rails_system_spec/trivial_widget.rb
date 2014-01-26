@@ -1,4 +1,4 @@
-class Views::BasicRailsSystemSpec::TrivialWidget
+class Views::BasicRailsSystemSpec::TrivialWidget < Fortitude::Widget
   def content
     p "hello, world"
   end
