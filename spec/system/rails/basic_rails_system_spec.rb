@@ -96,6 +96,9 @@ The data is:
   end
 
   describe "ERb template integration" do
-    it "should let you call a widget from an ERb file with render :partial"
+    it "should let you call a widget from an ERb file with render :partial" do
+      expect_match("erb_to_widget_with_render_partial", /erb to widget with render partial widget/,
+        /erb_start/, /erb_end/, /erb_start.*erb to widget with render partial widget.*erb_end/m)
+    end
   end
 end

@@ -46,4 +46,7 @@ class BasicRailsSystemSpecController < ApplicationController
 
     render :locals => { :baz => 'the_baz' }
   end
+
+  def erb_to_widget_with_render_partial
+  end
 end
