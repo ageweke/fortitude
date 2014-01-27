@@ -1,0 +1,4 @@
+--format documentation
+--color
+--order random
+-r helpers/global_helper
