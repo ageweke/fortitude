@@ -6,7 +6,7 @@ require 'uri'
 module Spec
   module Helpers
     class RailsServer
-      def initialize(name, template_path, options = { })
+      def initialize(name, template_paths, options = { })
         @name = name || (raise ArgumentError, "Must specify a name")
         @rails_version = ENV['FORTITUDE_SPECS_RAILS_VERSION'] || options[:rails_version]
 
@@ -18,7 +18,7 @@ module Spec
 
         @gem_root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
         @spec_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-        @template_path = File.expand_path(File.join(@spec_root, template_path))
+        @template_paths = Array(template_paths).map { |t| File.expand_path(File.join(@spec_root, t)) }
 
         @options = options
         @server_pid = nil
@@ -115,7 +115,9 @@ and output:
       def setup_directories!
         return if @directories_setup
 
-        raise Errno::ENOENT, "You must specify a template path that exists; this doesn't: '#{@template_path}'" unless File.directory?(@template_path)
+        @template_paths.each do |template_path|
+          raise Errno::ENOENT, "You must specify template paths that exist; this doesn't: '#{template_path}'" unless File.directory?(template_path)
+        end
         FileUtils.rm_rf(@rails_root) if File.exist?(@rails_root)
         FileUtils.mkdir_p(@rails_root)
 
@@ -171,18 +173,20 @@ and output:
       end
 
       def splat_template_files!
-        Find.find(@template_path) do |file|
-          next unless File.file?(file)
+        @template_paths.each do |template_path|
+          Find.find(template_path) do |file|
+            next unless File.file?(file)
 
-          if file[0..(@template_path.length)] == "#{@template_path}/"
-            subpath = file[(@template_path.length + 1)..-1]
-          else
-            raise "#{file} isn't under #{@template_path}?!?"
+            if file[0..(template_path.length)] == "#{template_path}/"
+              subpath = file[(template_path.length + 1)..-1]
+            else
+              raise "#{file} isn't under #{template_path}?!?"
+            end
+            dest_file = File.join(@rails_root, subpath)
+
+            FileUtils.mkdir_p(File.dirname(dest_file))
+            FileUtils.cp(file, dest_file)
           end
-          dest_file = File.join(@rails_root, subpath)
-
-          FileUtils.mkdir_p(File.dirname(dest_file))
-          FileUtils.cp(file, dest_file)
         end
       end
 

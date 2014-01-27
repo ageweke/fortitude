@@ -55,7 +55,10 @@ The data is:
     def uses_rails_with_template(template_name)
       before :all do
         @rails_template_name = template_name
-        @rails_server = Spec::Helpers::RailsServer.new(template_name, "system/rails/templates/#{template_name}")
+
+        templates = [ 'base', template_name ].map { |t| "system/rails/templates/#{t}" }
+
+        @rails_server = Spec::Helpers::RailsServer.new(template_name, templates)
         @rails_server.start!
       end
 
