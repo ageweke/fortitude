@@ -46,6 +46,18 @@ module Fortitude
         alias_method_chain :autoloadable_module?, :fortitude
       end
 
+      ::ActionView::PathResolver.class_eval do
+        def find_templates_with_fortitude(name, prefix, partial, details)
+          templates = find_templates_without_fortitude(name, prefix, partial, details)
+          if partial && templates.empty? && details[:handlers] && details[:handlers].include?(:rb)
+            templates = find_templates_without_fortitude(name, prefix, false, details.merge(:handlers => [ :rb ]))
+          end
+          templates
+        end
+
+        alias_method_chain :find_templates, :fortitude
+      end
+
 
       require "fortitude/rails/template_handler"
     end
