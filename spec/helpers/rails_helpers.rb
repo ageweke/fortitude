@@ -7,7 +7,7 @@ module RailsHelpers
 
   included do
     before :all do
-      @rails_server = Spec::Helpers::RailsServer.new('basic', 'system/rails/template')
+      @rails_server = Spec::Helpers::RailsServer.new('basic', 'system/rails/templates/basic_rails_system_spec')
       @rails_server.start!
     end
 
