@@ -2,7 +2,7 @@ require 'fortitude'
 require 'helpers/rails_server'
 require 'json'
 
-describe "basic Rails integration" do
+describe "Fortitude Rails support" do
   before :all do
     @rails_server = Spec::Helpers::RailsServer.new('basic', 'system/rails/template')
     @rails_server.start!
@@ -93,6 +93,24 @@ The data is:
     it "should let you specify a widget with 'render :template =>'" do
       expect_match("render_with_colon_template", /hello, world/)
     end
+
+    it "should let you specify a widget with 'render :widget =>'"
+  end
+
+  describe "rendering partial invocation" do
+    it "should render a collection correctly if so invoked"
+    it "should support :as for rendering"
+    it "should support :object for rendering"
+    it "should support ERb partial layouts"
+    it "should support using a widget as an ERb partial layout"
+  end
+
+  describe "localization support" do
+    it "should allow you to provide localized widgets"
+  end
+
+  describe "development mode" do
+    it "should automatically reload widgets if they change on disk"
   end
 
   describe "ERb template integration" do
@@ -110,5 +128,18 @@ The data is:
       expect_match('fortitude_partial_with_underscore', /fortitude partial with underscore partial/,
         /erb_start.*fortitude partial with underscore partial.*erb_end/m)
     end
+
+    it "should let you call an ERb partial from a widget with render :partial"
+    it "should let you render other things from a widget with render, like :json"
+  end
+
+  describe "layout integration" do
+    it "should let you use a widget in an ERb layout, and render in the right order"
+    it "should let you use a widget as a layout with an ERb view, and render in the right order"
+    it "should let you use a widget as a layour with a widget view, and render in the right order"
+  end
+
+  describe "helper integration" do
+    it "should let you "
   end
 end
