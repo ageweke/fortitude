@@ -22,13 +22,20 @@ describe "basic Rails integration" do
     data
   end
 
-  def expect_exception(path, class_name, message)
-    data = @rails_server.get(path)
+  def expect_match(subpath, *regexes)
+    data = get_success(subpath)
+    regexes.each do |regex|
+      data.should match(regex)
+    end
+  end
+
+  def expect_exception(subpath, class_name, message)
+    data = get(subpath)
 
     json = begin
       JSON.parse(data)
     rescue => e
-      raise %{Expected a JSON response from '#{path}' (because we expected an exception),
+      raise %{Expected a JSON response from '#{subpath}' (because we expected an exception),
 but we couldn't parse it as JSON; when we tried, we got:
 
 (#{e.class.name}) #{e.message}
@@ -44,19 +51,47 @@ The data is:
   end
 
   it "should be able to render a trivial widget" do
-    data = get_success("trivial_widget")
-    data.should match(/layout_default/i)
-    data.should match(/hello, world/i)
+    expect_match("trivial_widget", /layout_default/, /hello, world/)
   end
 
-  it "should not allow you to put Foo::Bar in app/views/foo/bar.rb and make it work" do
-    expect_exception('basic_rails_system_spec/the_class_should_not_load', 'NameError',
-      /uninitialized constant BasicRailsSystemSpecController::BasicRailsSystemSpec/i)
+  describe "error cases" do
+    it "should not allow you to put Foo::Bar in app/views/foo/bar.rb and make it work" do
+      expect_exception('the_class_should_not_load', 'NameError',
+        /uninitialized constant BasicRailsSystemSpecController::BasicRailsSystemSpec/i)
+    end
   end
 
-  it "should allow passing data to the widget through controller variables" do
-    data = get_success("passing_data_widget")
-    data.should match(/foo is: the_foo/i)
-    data.should match(/bar is: and_bar/i)
+  describe "data passing" do
+    it "should allow passing data to the widget through controller variables" do
+      expect_match("passing_data_widget", /foo is: the_foo/, /bar is: and_bar/)
+    end
+
+    it "should allow passing data to the widget through :locals => { ... }" do
+      expect_match("passing_locals_widget", /foo is: local_foo/, /bar is: local_bar/)
+    end
+
+    it "should merge locals and controller variables, with locals winning" do
+      expect_match("passing_locals_and_controller_variables_widget", /foo is: controller_foo/, /bar is: local_bar/, /baz is: local_baz/)
+    end
+
+    it "should give you a reasonable error if you omit a variable" do
+      expect_exception('omitted_variable', 'FooError', /xxxx/)
+    end
+
+    it "should not propagate un-assigned variables"
+  end
+
+  describe "rendering types" do
+    it "should let you specify a widget with 'render :action =>'" do
+      expect_match("render_with_colon_action", /hello, world/)
+    end
+
+    it "should let you specify a widget with 'render :template =>'" do
+      expect_match("render_with_colon_template", /hello, world/)
+    end
+  end
+
+  describe "ERb template integration" do
+    it "should let you call a widget from an ERb file with render :partial"
   end
 end
