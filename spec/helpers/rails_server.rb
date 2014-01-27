@@ -145,7 +145,7 @@ and output:
       end
 
       def run_bundle_install!
-        safe_system("bundle install", "running 'bundle install'")
+        safe_system("bundle install --local", "running 'bundle install'")
       end
 
       def with_env(new_env)

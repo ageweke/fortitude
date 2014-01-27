@@ -75,10 +75,14 @@ The data is:
     end
 
     it "should give you a reasonable error if you omit a variable" do
-      expect_exception('omitted_variable', 'FooError', /xxxx/)
+      expect_exception('omitted_variable', 'Fortitude::Errors::MissingNeed', /bar/)
     end
 
-    it "should not propagate un-assigned variables"
+    it "should not propagate un-needed variables" do
+      expect_match("extra_variables", /foo method call: the_foo/, /foo instance var: nil/,
+        /bar method call: NoMethodError/, /bar instance var: nil/,
+        /baz method call: NoMethodError/, /baz instance var: nil/)
+    end
   end
 
   describe "rendering types" do

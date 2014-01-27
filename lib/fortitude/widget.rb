@@ -1,4 +1,5 @@
 require 'fortitude/tag'
+require 'fortitude/errors'
 
 module Fortitude
   class Widget
@@ -92,8 +93,18 @@ EOS
     tag :hr
 
     def initialize(assigns = { })
+      missing = [ ]
+
       self.class.needs.each do |n|
-        instance_variable_set("@_fortitude_assign_#{n}", assigns[n])
+        if assigns.has_key?(n)
+          instance_variable_set("@_fortitude_assign_#{n}", assigns[n])
+        else
+          missing << n
+        end
+      end
+
+      if missing.length > 0
+        raise Fortitude::Errors::MissingNeed.new(self, missing, assigns.keys)
       end
     end
 

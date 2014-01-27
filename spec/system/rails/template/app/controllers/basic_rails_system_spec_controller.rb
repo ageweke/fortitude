@@ -39,4 +39,11 @@ class BasicRailsSystemSpecController < ApplicationController
 
     render :action => 'passing_data_widget'
   end
+
+  def extra_variables
+    @foo = 'the_foo'
+    @bar = 'the_bar'
+
+    render :locals => { :baz => 'the_baz' }
+  end
 end
