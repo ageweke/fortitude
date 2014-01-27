@@ -210,7 +210,7 @@ and output:
       end
 
       def verify_server!
-        server_verify_url = "http://localhost:#{@port}/basic_rails_system_spec/rails_is_working"
+        server_verify_url = "http://localhost:#{@port}/working/rails_is_working"
         uri = URI.parse(server_verify_url)
         data = Net::HTTP.get_response(uri)
         unless data.code.to_s == '200'

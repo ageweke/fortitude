@@ -1,4 +1,4 @@
-class Views::BasicRailsSystemSpec::PassingLocalsAndControllerVariablesWidget < Fortitude::Widget
+class Views::DataPassingSystemSpec::PassingLocalsAndControllerVariablesWidget < Fortitude::Widget
   needs :foo, :bar, :baz
 
   def content

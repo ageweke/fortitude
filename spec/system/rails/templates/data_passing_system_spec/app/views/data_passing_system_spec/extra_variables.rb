@@ -1,4 +1,4 @@
-class Views::BasicRailsSystemSpec::ExtraVariables < Fortitude::Widget
+class Views::DataPassingSystemSpec::ExtraVariables < Fortitude::Widget
   needs :foo
 
   def content

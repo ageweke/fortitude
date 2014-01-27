@@ -1,4 +1,4 @@
-describe "Fortitude Rails support", :type => :rails do
+describe "basic Rails support", :type => :rails do
   uses_rails_with_template :basic_rails_system_spec
 
   it "should be able to render a trivial widget" do
@@ -9,30 +9,6 @@ describe "Fortitude Rails support", :type => :rails do
     it "should not allow you to put Foo::Bar in app/views/foo/bar.rb and make it work" do
       expect_exception('the_class_should_not_load', 'NameError',
         /uninitialized constant BasicRailsSystemSpec::ClassShouldNotLoad/i)
-    end
-  end
-
-  describe "data passing" do
-    it "should allow passing data to the widget through controller variables" do
-      expect_match("passing_data_widget", /foo is: the_foo/, /bar is: and_bar/)
-    end
-
-    it "should allow passing data to the widget through :locals => { ... }" do
-      expect_match("passing_locals_widget", /foo is: local_foo/, /bar is: local_bar/)
-    end
-
-    it "should merge locals and controller variables, with locals winning" do
-      expect_match("passing_locals_and_controller_variables_widget", /foo is: controller_foo/, /bar is: local_bar/, /baz is: local_baz/)
-    end
-
-    it "should give you a reasonable error if you omit a variable" do
-      expect_exception('omitted_variable', 'Fortitude::Errors::MissingNeed', /bar/)
-    end
-
-    it "should not propagate un-needed variables" do
-      expect_match("extra_variables", /foo method call: the_foo/, /foo instance var: nil/,
-        /bar method call: NoMethodError/, /bar instance var: nil/,
-        /baz method call: NoMethodError/, /baz instance var: nil/)
     end
   end
 
