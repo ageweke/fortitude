@@ -5,19 +5,12 @@ require 'helpers/rails_server'
 module RailsHelpers
   extend ActiveSupport::Concern
 
-  included do
-    before :all do
-      @rails_server = Spec::Helpers::RailsServer.new('basic', 'system/rails/templates/basic_rails_system_spec')
-      @rails_server.start!
-    end
-
-    after :all do
-      @rails_server.stop!
-    end
+  def rails_template_name
+    @rails_template_name || raise("No Rails template name!")
   end
 
   def get(subpath)
-    @rails_server.get("basic_rails_system_spec/#{subpath}")
+    @rails_server.get("#{rails_template_name}/#{subpath}")
   end
 
   def get_success(subpath)
@@ -55,6 +48,20 @@ The data is:
   end
 
   module ClassMethods
+    def rails_template_name
+      @rails_template_name || raise("No Rails template name!")
+    end
 
+    def uses_rails_with_template(template_name)
+      before :all do
+        @rails_template_name = template_name
+        @rails_server = Spec::Helpers::RailsServer.new(template_name, "system/rails/templates/#{template_name}")
+        @rails_server.start!
+      end
+
+      after :all do
+        @rails_server.stop!
+      end
+    end
   end
 end

@@ -7,7 +7,7 @@ class BasicRailsSystemSpecController < ApplicationController
   end
 
   def the_class_should_not_load
-    render :text => BasicRailsSystemSpec::ClassShouldNotLoad.new
+    render :text => BasicRailsSystemSpec::ClassShouldNotLoad.new.to_s
   end
 
   def passing_data_widget

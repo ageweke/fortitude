@@ -1,3 +1,3 @@
-Basic::Application.routes.draw do
+BasicRailsSystemSpec::Application.routes.draw do
   get ':controller/:action'
 end
