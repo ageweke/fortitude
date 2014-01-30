@@ -6,15 +6,6 @@ class BasicRailsSystemSpecController < ApplicationController
     render :text => BasicRailsSystemSpec::ClassShouldNotLoad.new.to_s
   end
 
-
-  def render_with_colon_action
-    render :action => 'trivial_widget'
-  end
-
-  def render_with_colon_template
-    render :template => 'basic_rails_system_spec/trivial_widget'
-  end
-
   def erb_to_widget_with_render_partial
   end
 

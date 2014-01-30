@@ -12,21 +12,6 @@ describe "basic Rails support", :type => :rails do
     end
   end
 
-  describe "rendering types" do
-    it "should let you specify a widget with 'render :action =>'" do
-      expect_match("render_with_colon_action", /hello, world/)
-    end
-
-    it "should let you specify a widget with 'render :template =>'" do
-      expect_match("render_with_colon_template", /hello, world/)
-    end
-
-    it "should let you specify a widget with 'render :widget =>'"
-    it "should let you render a widget with 'render \"foo\"'"
-    it "should let you render a widget with 'render :file =>'"
-    it "should let you render a widget inline with 'render :inline =>'"
-  end
-
   describe "rendering in a widget" do
     it "should let you render :json in a widget"
     it "should let you render :xml in a widget"
