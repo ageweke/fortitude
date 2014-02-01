@@ -75,9 +75,9 @@ module Fortitude
         #
         # The original method says:
         #
-        # Does the provided path_suffix correspond to an autoloadable module?
+        # "Does the provided path_suffix correspond to an autoloadable module?
         # Instead of returning a boolean, the autoload base for this module is
-        # returned.
+        # returned."
         #
         # So, we just need to strip off the leading +views/+ from the +path_suffix+,
         # and see if that maps to a directory underneath <tt>app/views/</tt>; if so,
@@ -98,6 +98,8 @@ module Fortitude
           end
         end
 
+        alias_method_chain :autoloadable_module?, :fortitude
+
         # When we delegate back to original methods, we want them to act as if
         # <tt>app/views/</tt> is _not_ on the autoload path. In order to be thread-safe
         # about that, we couple this method with our override of the writer side of the
@@ -112,43 +114,61 @@ module Fortitude
           end
         end
 
-        alias_method_chain :autoloadable_module?, :fortitude
+        # The use of 'class_eval' here may seem funny, and I think it is, but, without it,
+        # the +@@autoload_paths+ gets interpreted as a class variable for this *Railtie*,
+        # rather than for ::ActiveSupport::Dependencies. (Why is that? Got me...)
+        class_eval <<-EOS
+          def self.autoload_paths
+            Thread.current[:_fortitude_autoload_paths_override] || @@autoload_paths
+          end
+        EOS
 
+        # The original method says:
+        #
+        # "Search for a file in autoload_paths matching the provided suffix."
+        #
+        # So, we just look to see if the given +path_suffix+ is specifying something like
+        # <tt>views/foo/bar</tt>; if so, we glue it together properly, removing the initial
+        # <tt>views/</tt> first. (Otherwise, the mechanism would expect
+        # <tt>Views::Foo::Bar</tt> to show up in <tt>app/views/views/foo/bar</tt> (yes, a double
+        # +views+), since <tt>app/views</tt> is on the autoload path.)
         def search_for_file_with_fortitude(path_suffix)
+          # This just makes sure our path always ends in exactly one ".rb", whether it started
+          # with one or not.
           new_path_suffix = path_suffix.sub(/(\.rb)?$/, ".rb")
 
           if new_path_suffix =~ %r{^views(/.*)$}i
             path = File.join(@@_fortitude_views_root, $1)
-            if File.file?(path)
-              return path
-            end
+            return path if File.file?(path)
           end
 
-          out = search_for_file_without_fortitude(path_suffix)
-          if out
-            if out[0..(@@_fortitude_views_root.length)] == "#{@@_fortitude_views_root}/"
-              # We were looking for Foo::Bar, but found it as app/views/foo/bar.rb (because it's app/views on the
-              # autoload path, not just app/); we don't want to allow this. In order to avoid it, we have to do a
-              # seriously ugly workaround: we need to
-              with_fortitude_views_removed_from_autoload_path { out = search_for_file_without_fortitude(path_suffix) }
-            end
-          end
-          out
+          # Make sure that we remove the views autoload path before letting the rest of
+          # the dependency mechanism go searching for files, or else <tt>app/views/foo/bar.rb</tt>
+          # *will* be found when looking for just <tt>::Foo::Bar</tt>.
+          with_fortitude_views_removed_from_autoload_path { search_for_file_without_fortitude(path_suffix) }
         end
 
         alias_method_chain :search_for_file, :fortitude
       end
 
-      # It turns out that if we use the block form of class_eval here, @@autoload_paths ends up referring
-      # to the *Railtie*, not to ::ActiveSupport::Dependencies. So...we use the string form.
-      ::ActiveSupport::Dependencies.class_eval <<-EOS
-  def self.autoload_paths
-    Thread.current[:_fortitude_autoload_paths_override] || @@autoload_paths
-  end
-EOS
-
+      # And, finally, this is where we add our root to the set of autoload paths.
       ::ActiveSupport::Dependencies.autoload_paths << views_root
 
+      # This is our support for partials. Fortitude doesn't really have a distinction between
+      # partials and "full" templates -- everything is just a widget, which is much more elegant --
+      # but we still want you to be able to render a widget <tt>Views::Foo::Bar</tt> by saying
+      # <tt>render :partial => 'foo/bar'</tt> (from ERb, although you can do it from Fortitude if
+      # you want for some reason, too).
+      #
+      # Normally, ActionView only looks for partials in files starting with an underscore. We
+      # do want to allow this, too (in the above case, if you define the widget in the file
+      # <tt>app/views/foo/_bar.rb</tt>, it will still work fine); however, we also want to allow
+      # you to define it in a file that does _not_ start with an underscore ('cause these are
+      # Ruby classes, and that's just plain weird).
+      #
+      # So, we patch #find_templates: if it's looking for a partial, doesn't find one, and is
+      # searching Fortitude templates (the +.rb+ handler), then we try again, turning off the
+      # +partial+ flag, and return that instead.
       ::ActionView::PathResolver.class_eval do
         def find_templates_with_fortitude(name, prefix, partial, details)
           templates = find_templates_without_fortitude(name, prefix, partial, details)
@@ -160,7 +180,6 @@ EOS
 
         alias_method_chain :find_templates, :fortitude
       end
-
 
       require "fortitude/rails/template_handler"
     end
