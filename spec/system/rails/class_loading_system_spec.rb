@@ -29,6 +29,14 @@ describe "Rails class-loading support", :type => :rails do
     expect_match('autoload_one_widget_from_another', /about to run the sub widget.*this is the sub widget.*ran the sub widget/)
   end
 
+  it "should allow use of a widget defined in lib/ from a view widget" do
+    expect_match('use_lib_widget_from_view_widget', /about to run the lib widget.*this is the lib widget.*ran the lib widget/)
+  end
+
+  it "should allow use of a widget defined on another autoload path from a view widget" do
+    expect_match('use_models_widget_from_view_widget', /about to run the models widget.*this is the models widget.*ran the models widget/)
+  end
+
   it "should not allow me to define widgets outside of app/views/" do
     expect_exception('widget_defined_outside_app_views', 'ActionView::MissingTemplate', /class_loading_system_spec\/widget_defined_outside_app_views/)
   end

@@ -35,6 +35,14 @@ class ClassLoadingSystemSpecController < ApplicationController
     # nothing here
   end
 
+  def use_lib_widget_from_view_widget
+    # nothing here
+  end
+
+  def use_models_widget_from_view_widget
+    # nothing here
+  end
+
   def widget_defined_outside_app_views
     require 'views/class_loading_system_spec/widget_defined_outside_app_views'
 
