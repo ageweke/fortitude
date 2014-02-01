@@ -1,4 +1,4 @@
-module BasicRailsSystemSpec
+module ClassLoadingSystemSpec
   class ClassShouldNotLoad
     class << self
       def is_loaded
