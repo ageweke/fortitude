@@ -16,7 +16,8 @@ module Fortitude
       # class autoloading -- doesn't really support. We want app/views to be on the autoload path,
       # because there are now Ruby classes living there. (It usually isn't just because all that's there
       # are template source files, not actual Ruby code.) That isn't an issue, though -- adding it
-      # is trivial (just <tt>ActiveSupport::Dependencies << File.join(Rails.root, 'app/views')</tt>).
+      # is trivial (just do
+      # <tt>ActiveSupport::Dependencies.autoload_paths << File.join(Rails.root, 'app/views')</tt>).
       #
       # The real issue is that we want the class <tt>app/views/foo/bar.rb</tt> to define a class called
       # <tt>Views::Foo::Bar</tt>, not just plain <tt>Foo::Bar</tt>. This is what's different from what
