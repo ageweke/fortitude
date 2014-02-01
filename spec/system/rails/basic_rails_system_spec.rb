@@ -11,8 +11,4 @@ describe "basic Rails support", :type => :rails do
         /uninitialized constant BasicRailsSystemSpec::ClassShouldNotLoad/i)
     end
   end
-
-  describe "development mode" do
-    it "should automatically reload widgets if they change on disk"
-  end
 end

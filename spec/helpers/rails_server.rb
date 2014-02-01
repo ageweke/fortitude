@@ -6,6 +6,8 @@ require 'uri'
 module Spec
   module Helpers
     class RailsServer
+      attr_reader :rails_root
+
       def initialize(name, template_paths, options = { })
         @name = name || (raise ArgumentError, "Must specify a name")
         @rails_version = ENV['FORTITUDE_SPECS_RAILS_VERSION'] || options[:rails_version]
@@ -48,7 +50,7 @@ module Spec
 
       private
       def rails_env
-        options[:rails_env] || 'production'
+        (@options[:rails_env] || 'production').to_s
       end
 
       def do_start!
@@ -74,7 +76,7 @@ module Spec
       def with_rails_env
         old_rails_env = ENV['RAILS_ENV']
         begin
-          ENV['RAILS_ENV'] = old_rails_env
+          ENV['RAILS_ENV'] = rails_env
           yield
         ensure
           ENV['RAILS_ENV'] = old_rails_env

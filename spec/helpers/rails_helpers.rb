@@ -5,6 +5,8 @@ require 'helpers/rails_server'
 module RailsHelpers
   extend ActiveSupport::Concern
 
+  attr_reader :rails_server
+
   def rails_template_name
     @rails_template_name || raise("No Rails template name!")
   end
@@ -52,13 +54,13 @@ The data is:
       @rails_template_name || raise("No Rails template name!")
     end
 
-    def uses_rails_with_template(template_name)
+    def uses_rails_with_template(template_name, options = { })
       before :all do
         @rails_template_name = template_name
 
         templates = [ 'base', template_name ].map { |t| "system/rails/templates/#{t}" }
 
-        @rails_server = Spec::Helpers::RailsServer.new(template_name, templates)
+        @rails_server = Spec::Helpers::RailsServer.new(template_name, templates, options)
         @rails_server.start!
       end
 
