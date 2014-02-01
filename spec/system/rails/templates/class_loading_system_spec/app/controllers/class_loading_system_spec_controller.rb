@@ -40,4 +40,18 @@ class ClassLoadingSystemSpecController < ApplicationController
   def underscore_view
     # nothing here
   end
+
+  def underscore_widget
+    render :text => Views::ClassLoadingSystemSpec::UnderscoreWidget.data
+  end
+
+  def require_loaded_underscore_widget_without_views
+    require 'class_loading_system_spec/_loaded_underscore_widget'
+    render :text => "good!"
+  end
+
+  def require_loaded_underscore_widget_with_views
+    require 'views/class_loading_system_spec/_loaded_underscore_widget'
+    render :text => "good!"
+  end
 end

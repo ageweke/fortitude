@@ -33,6 +33,17 @@ describe "Rails class-loading support", :type => :rails do
     expect_exception('underscore_view', 'ActionView::MissingTemplate', /class_loading_system_spec\/underscore_view/)
   end
 
-  it "should let me define a widget in a file starting with an underscore, and use it for a widget"
+  it "should not let me define a widget in a file starting with an underscore, and autoload it" do
+    expect_exception('underscore_widget', 'NameError', /uninitialized constant Views::ClassLoadingSystemSpec::UnderscoreWidget/)
+  end
+
+  it "should not let me 'require' files in app/views without a views/ prefix" do
+    expect_exception('require_loaded_underscore_widget_without_views', 'LoadError', /cannot load such file/)
+  end
+
+  it "should not let me 'require' files in app/views with a views/ prefix" do
+    expect_exception('require_loaded_underscore_widget_with_views', 'LoadError', /cannot load such file/)
+  end
+
   it "should let me render a widget defined outside of app/views/ if I use render :widget"
 end
