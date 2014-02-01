@@ -6,4 +6,8 @@ class ClassLoadingSystemSpecController < ApplicationController
   def lib_views
     # nothing here
   end
+
+  def app_models
+    # nothing here
+  end
 end
