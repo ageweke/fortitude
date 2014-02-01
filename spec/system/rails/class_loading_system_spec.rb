@@ -14,7 +14,11 @@ describe "Rails class-loading support", :type => :rails do
     expect_match('app_models', /hello: i am app\/models/)
   end
 
-  it "should not create anonymous modules without the Views:: namespace for directories under app/views/"
+  it "should not create anonymous modules without the Views:: namespace for directories under app/views/" do
+    expect_exception('some_namespace', 'NameError', /uninitialized constant SomeNamespace/)
+    expect_exception('some_other_namespace', 'NameError', /uninitialized constant SomeNamespace/)
+  end
+
   it "should allow me to define widgets outside of app/views/, just in case I feel like it"
   it "should let me define a widget in a file starting with an underscore, yet use it like any other widget"
   it "should let me render a widget defined outside of app/views/ if I use render :widget"
