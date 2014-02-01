@@ -31,6 +31,10 @@ class ClassLoadingSystemSpecController < ApplicationController
     render :text => Views::AutoloadNamespace::AutoloadWidget.is_here
   end
 
+  def autoload_one_widget_from_another
+    # nothing here
+  end
+
   def widget_defined_outside_app_views
     require 'views/class_loading_system_spec/widget_defined_outside_app_views'
 
