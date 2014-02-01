@@ -21,8 +21,15 @@ describe "Rails class-loading support", :type => :rails do
     expect_match('views_some_other_namespace', /Views::SomeNamespace::SomeOtherNamespace/, :no_layout => true)
   end
 
-  it "should autoload widgets under app/views/"
-  it "should allow me to define widgets outside of app/views/, just in case I feel like it"
-  it "should let me define a widget in a file starting with an underscore, yet use it like any other widget"
+  it "should autoload widgets under app/views/" do
+    expect_match('autoload_widget', /autoload_widget is here!/, :no_layout => true)
+  end
+
+  it "should not allow me to define widgets outside of app/views/" do
+    expect_exception('widget_defined_outside_app_views', 'ActionView::MissingTemplate', /class_loading_system_spec\/widget_defined_outside_app_views/)
+  end
+
+  it "should let me define a widget in a file starting with an underscore, and use it for a view"
+  it "should let me define a widget in a file starting with an underscore, and use it for a widget"
   it "should let me render a widget defined outside of app/views/ if I use render :widget"
 end
