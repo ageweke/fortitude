@@ -41,34 +41,6 @@ module Fortitude
       ::ActiveSupport::Dependencies.module_eval do
         @@_fortitude_views_root = views_root
 
-        # Overrides #loadable_constants_for_path, which is described as follows:
-        #
-        # "Given +path+, a filesystem path to a ruby file, return an array of
-        # constant paths which would cause Dependencies to attempt to load this
-        # file."
-        #
-        # So this means that if we get a full path to <tt>.../app/views/foo/bar.rb</tt>,
-        # we need to return <tt>Views::Foo::Bar</tt>, while the original code would return
-        # just <tt>Foo::Bar</tt>. On the other hand, if we get a path that is anywhere
-        # outside <tt>.../app/views</tt>, then we just call the original method.
-        def loadable_constants_for_path_with_fortitude(path, bases = autoload_paths)
-          path = $` if path =~ /\.rb\z/
-          expanded_path = File.expand_path(path)
-
-          raise "kaboomba"
-
-          # Are we under the views root?
-          if %r{\A#{Regexp.escape(@@_fortitude_views_root)}(/|\\)} =~ expanded_path
-            # Yup -- so add "views" on the front.
-            nesting = "views" + expanded_path[(@@_fortitude_views_root.size)..-1]
-            [ nesting.camelize ]
-          else
-            loadable_constants_for_path_without_fortitude(path, bases)
-          end
-        end
-
-        # alias_method_chain :loadable_constants_for_path, :fortitude
-
         # This is the method that gets called to auto-generate namespacing empty
         # modules (_e.g._, the toplevel <tt>Views::</tt> module) for directories
         # under an autoload path.
