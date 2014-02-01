@@ -36,4 +36,8 @@ class ClassLoadingSystemSpecController < ApplicationController
 
     # nothing else here
   end
+
+  def underscore_view
+    # nothing here
+  end
 end

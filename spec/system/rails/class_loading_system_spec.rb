@@ -29,7 +29,10 @@ describe "Rails class-loading support", :type => :rails do
     expect_exception('widget_defined_outside_app_views', 'ActionView::MissingTemplate', /class_loading_system_spec\/widget_defined_outside_app_views/)
   end
 
-  it "should let me define a widget in a file starting with an underscore, and use it for a view"
+  it "should not let me define a widget in a file starting with an underscore, and use it for a view" do
+    expect_exception('underscore_view', 'ActionView::MissingTemplate', /class_loading_system_spec\/underscore_view/)
+  end
+
   it "should let me define a widget in a file starting with an underscore, and use it for a widget"
   it "should let me render a widget defined outside of app/views/ if I use render :widget"
 end
