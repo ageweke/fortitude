@@ -18,4 +18,12 @@ class ClassLoadingSystemSpecController < ApplicationController
   def some_other_namespace
     render :text => ::SomeNamespace::SomeOtherNamespace.name
   end
+
+  def views_some_namespace
+    render :text => ::Views::SomeNamespace.name
+  end
+
+  def views_some_other_namespace
+    render :text => ::Views::SomeNamespace::SomeOtherNamespace.name
+  end
 end

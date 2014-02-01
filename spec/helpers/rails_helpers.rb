@@ -15,14 +15,17 @@ module RailsHelpers
     @rails_server.get("#{rails_template_name}/#{subpath}")
   end
 
-  def get_success(subpath)
+  def get_success(subpath, options = { })
     data = get(subpath)
-    data.should match(/rails_spec_application/i)
+    data.should match(/rails_spec_application/i) unless options[:no_layout]
     data
   end
 
-  def expect_match(subpath, *regexes)
-    data = get_success(subpath)
+  def expect_match(subpath, *args)
+    options = args.extract_options!
+    regexes = args
+
+    data = get_success(subpath, options)
     regexes.each do |regex|
       data.should match(regex)
     end
