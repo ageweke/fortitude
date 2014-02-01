@@ -11,4 +11,8 @@ describe "basic Rails support", :type => :rails do
         /uninitialized constant BasicRailsSystemSpec::ClassShouldNotLoad/i)
     end
   end
+
+  it "should allow me to define classes under Views:: outside of app/views, like in lib/views"
+  it "should allow me to define classes under Views:: outside of app/views, but in some other autoloaded place, like app/models"
+  it "should not create anonymous modules without the Views:: namespace for directories under app/views/"
 end
