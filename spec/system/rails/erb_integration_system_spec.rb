@@ -1,4 +1,4 @@
-describe "basic Rails support", :type => :rails do
+describe "Rails ERb integration support", :type => :rails do
   uses_rails_with_template :erb_integration_system_spec
 
   it "should let you call a widget from an ERb file with render :partial" do

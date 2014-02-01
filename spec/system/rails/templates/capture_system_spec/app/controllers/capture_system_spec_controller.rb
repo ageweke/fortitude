@@ -1,0 +1,2 @@
+class CaptureSystemSpecController < ApplicationController
+end

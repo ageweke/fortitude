@@ -1,0 +1,2 @@
+class LayoutsSystemSpecController < ApplicationController
+end

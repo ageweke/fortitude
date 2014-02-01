@@ -1,0 +1,2 @@
+class HelpersSystemSpecController < ApplicationController
+end

@@ -1,0 +1,2 @@
+class LocalizationSystemSpecController < ApplicationController
+end
