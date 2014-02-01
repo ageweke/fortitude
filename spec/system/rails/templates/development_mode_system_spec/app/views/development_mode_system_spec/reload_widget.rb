@@ -1,6 +1,7 @@
 class Views::DevelopmentModeSystemSpec::ReloadWidget < Fortitude::Widget
+  needs :datum
+
   def content
-    p "Rails.env: #{Rails.env}"
-    p "before_reload"
+    p "before_reload: datum #{datum} datum"
   end
 end

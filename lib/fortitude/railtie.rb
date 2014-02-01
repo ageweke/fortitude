@@ -32,19 +32,34 @@ module Fortitude
           if path_suffix =~ %r{^views(/.*)?$}i
             subpath = $1
 
-            out = if subpath && subpath.length > 0
-              File.join(@@_fortitude_views_root, subpath)
-            else
-              @@_fortitude_views_root
+            if subpath.blank? || File.directory?(File.join(@@_fortitude_views_root, subpath))
+              log "autoloadable_module_with_fortitude?(#{path_suffix.inspect}) WITH -> #{@@_fortitude_views_root}"
+              return @@_fortitude_views_root
             end
-            out
-          else
-            autoloadable_module_without_fortitude?(path_suffix)
           end
+
+          out = autoloadable_module_without_fortitude?(path_suffix)
+          log "autoloadable_module_without_fortitude?(#{path_suffix.inspect}) -> #{out.inspect}"
+          out
         end
 
         alias_method_chain :autoloadable_module?, :fortitude
+
+        def search_for_file_with_fortitude(path_suffix)
+          path_suffix = path_suffix.sub(/(\.rb)?$/, ".rb")
+
+          if path_suffix =~ %r{^views(/.*)$}i
+            path = File.join(@@_fortitude_views_root, $1)
+            return path if File.file?(path)
+          end
+
+          return search_for_file_without_fortitude(path_suffix)
+        end
+
+        alias_method_chain :search_for_file, :fortitude
       end
+
+      ::ActiveSupport::Dependencies.autoload_paths << views_root
 
       ::ActionView::PathResolver.class_eval do
         def find_templates_with_fortitude(name, prefix, partial, details)
