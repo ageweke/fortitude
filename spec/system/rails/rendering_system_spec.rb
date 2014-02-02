@@ -10,9 +10,14 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_with_colon_template", /hello, world/)
     end
 
-    it "should let you specify a widget with 'render :widget =>'" do
-      # I *think* we want to patch in at ActionView::TemplateRenderer#determine_template(options)
-      expect_match("render_widget", /hello from a widget named Fred!/)
+    it "should let you specify a widget with 'render :widget =>', which should use a layout by default" do
+      data = expect_match("render_widget", /hello from a widget named Fred/)
+      expect(data).to match(/rails_spec_application/)
+    end
+
+    it "should let you omit the layout with 'render :widget =>', if you ask for it" do
+      data = expect_match("render_widget_without_layout", /hello from a widget named Fred/, :no_layout => true)
+      expect(data).not_to match(/rails_spec_application/)
     end
 
     it "should let you render a widget with 'render \"foo\"'"

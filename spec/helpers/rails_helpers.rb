@@ -29,6 +29,8 @@ module RailsHelpers
     regexes.each do |regex|
       data.should match(regex)
     end
+
+    data
   end
 
   def expect_exception(subpath, class_name, message)

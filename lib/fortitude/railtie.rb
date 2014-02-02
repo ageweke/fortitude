@@ -158,11 +158,15 @@ module Fortitude
 
       ::ActionController::Base.class_eval do
         def render_with_fortitude(*args, &block)
-          if args[0].kind_of?(Hash) && args[0][:widget]
-            w = args[0].delete(:widget)
+          if (options = args[0]).kind_of?(Hash) && (widget = args[0][:widget])
             output = ""
-            w.to_html(output)
-            new_args = [ args[0].merge(:text => output) ] + args[1..-1]
+            widget.to_html(output)
+
+            options = options.dup
+            options[:text] = output
+            options[:layout] = true unless options.has_key?(:layout)
+
+            new_args = [ options ] + args[1..-1]
             render_without_fortitude(*new_args, &block)
           else
             render_without_fortitude(*args, &block)
