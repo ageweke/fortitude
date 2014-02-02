@@ -155,6 +155,22 @@ module Fortitude
       end
 
       require "fortitude/rails/template_handler"
+
+      ::ActionController::Base.class_eval do
+        def render_with_fortitude(*args, &block)
+          if args[0].kind_of?(Hash) && args[0][:widget]
+            w = args[0].delete(:widget)
+            output = ""
+            w.to_html(output)
+            new_args = [ args[0].merge(:text => output) ] + args[1..-1]
+            render_without_fortitude(*new_args, &block)
+          else
+            render_without_fortitude(*args, &block)
+          end
+        end
+
+        alias_method_chain :render, :fortitude
+      end
     end
   end
 end
