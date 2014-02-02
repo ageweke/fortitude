@@ -22,4 +22,8 @@ describe "Rails data-passing support", :type => :rails do
       /bar method call: NoMethodError/, /bar instance var: nil/,
       /baz method call: NoMethodError/, /baz instance var: nil/)
   end
+
+  it "should not propagate a controller variable through a view to a child widget without being explicitly passed" do
+    expect_exception('parent_to_child_passing', 'Fortitude::Errors::MissingNeed', /foo/)
+  end
 end
