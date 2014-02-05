@@ -156,6 +156,17 @@ module Fortitude
 
       require "fortitude/rails/template_handler"
 
+      # This is our support for render :widget. Although, originally, it looked like creating a new subclass
+      # of ActionView::Template was going to be the correct thing to do here, it turns out it isn't: the entire
+      # template system is predicated around the idea that you have a template, which is compiled to output
+      # Ruby source code, and then that gets evaluated to actually generate output.
+      #
+      # Because <tt>render :widget => ...</tt> takes an already-instantiated widget as input, this simply isn't
+      # possible: you can't reverse-engineer an arbitrary Ruby object into source code, and, without source code,
+      # the whole templating paradigm doesn't make sense.
+      #
+      # So, instead, we simply transform <tt>render :widget => ...</tt> into a <tt>render :text => ...</tt> of the
+      # widget's output, and let Rails take it away from there.
       ::ActionController::Base.class_eval do
         def render_with_fortitude(*args, &block)
           if (options = args[0]).kind_of?(Hash) && (widget = args[0][:widget])
@@ -163,7 +174,7 @@ module Fortitude
             widget.to_html(output)
 
             options = options.dup
-            options[:text] = output
+            options[:text] = output.html_safe
             options[:layout] = true unless options.has_key?(:layout)
 
             new_args = [ options ] + args[1..-1]
