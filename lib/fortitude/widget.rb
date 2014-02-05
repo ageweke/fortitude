@@ -148,8 +148,8 @@ EOS
       @output.concat(s)
     end
 
-    def set_instance_variable(name, value)
-      @rendering_context.set_instance_variable(name, value)
+    def shared_instance_variables
+      @rendering_context.instance_variable_set
     end
   end
 end

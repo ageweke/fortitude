@@ -11,7 +11,6 @@ module Fortitude
       class << self
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
         def render(widget_class, template_handler, local_assigns, is_partial)
-          $stderr.puts "template_handler foo: #{template_handler.instance_variable_get("@foo").inspect}"
           widget = widget_class.new(template_handler.assigns.merge(local_assigns).with_indifferent_access)
           template_handler.with_output_buffer do
             rendering_context = ::Fortitude::RenderingContext.new(:instance_variables_object => template_handler)
