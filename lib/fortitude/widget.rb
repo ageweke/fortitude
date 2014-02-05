@@ -126,13 +126,18 @@ EOS
       end
     end
 
-    def to_html(output)
-      @output = output
-      content
+    def to_html(rendering_context)
+      begin
+        @rendering_context, old_rendering_context = rendering_context, @rendering_context
+        @output = @rendering_context.output
+        content
+      ensure
+        @rendering_context = old_rendering_context
+      end
     end
 
     def widget(w)
-      w.to_html(@output)
+      w.to_html(@rendering_context)
     end
 
     def text(s)
@@ -141,6 +146,10 @@ EOS
 
     def rawtext(s)
       @output.concat(s)
+    end
+
+    def set_instance_variable(name, value)
+      @rendering_context.set_instance_variable(name, value)
     end
   end
 end

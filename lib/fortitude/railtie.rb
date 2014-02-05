@@ -1,3 +1,5 @@
+require 'fortitude/rendering_context'
+
 if defined?(ActiveSupport)
   ActiveSupport.on_load(:before_initialize) do
     ActiveSupport.on_load(:action_view) do
@@ -170,11 +172,11 @@ module Fortitude
       ::ActionController::Base.class_eval do
         def render_with_fortitude(*args, &block)
           if (options = args[0]).kind_of?(Hash) && (widget = args[0][:widget])
-            output = ""
-            widget.to_html(output)
+            rendering_context = ::Fortitude::RenderingContext.new
+            widget.to_html(rendering_context)
 
             options = options.dup
-            options[:text] = output.html_safe
+            options[:text] = rendering_context.output.html_safe
             options[:layout] = true unless options.has_key?(:layout)
 
             new_args = [ options ] + args[1..-1]

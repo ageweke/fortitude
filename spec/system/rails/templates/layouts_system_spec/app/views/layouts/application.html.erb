@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>default_layout_erb</title>
+</head>
+<body>
+
+<%
+$order << :layout_pre
+%>
+
+<p>pre_layout foo: <%= @foo %></p>
+<p>pre_layout order: <%= $order.inspect %></p>
+
+<%= yield %>
+
+<%
+$order << :layout_post
+%>
+
+<p>post_layout foo: <%= @foo %></p>
+<p>post_layout order: <%= $order.inspect %></p>
+
+</body>
+</html>
