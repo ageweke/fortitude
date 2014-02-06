@@ -172,6 +172,8 @@ module Fortitude
       ::ActionController::Base.class_eval do
         def render_with_fortitude(*args, &block)
           if (options = args[0]).kind_of?(Hash) && (widget = args[0][:widget])
+            raise "kaboom"
+
             rendering_context = ::Fortitude::RenderingContext.new
             widget.to_html(rendering_context)
 

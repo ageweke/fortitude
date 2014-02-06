@@ -13,9 +13,14 @@ module Fortitude
         def render(widget_class, template_handler, local_assigns, is_partial)
           widget = widget_class.new(template_handler.assigns.merge(local_assigns).with_indifferent_access)
           template_handler.with_output_buffer do
+=begin
             rendering_context = ::Fortitude::RenderingContext.new(:instance_variables_object => template_handler)
             widget.to_html(rendering_context)
             template_handler.output_buffer << rendering_context.output
+=end
+            output = ""
+            widget.to_html(output)
+            template_handler.output_buffer << output.html_safe
           end
         end
       end
