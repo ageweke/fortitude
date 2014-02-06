@@ -126,13 +126,14 @@ EOS
       end
     end
 
-    def to_html(output)
-      @output = output
+    def to_html(rendering_context)
+      @rendering_context = rendering_context
+      @output = rendering_context.output
       content
     end
 
     def widget(w)
-      w.to_html(@output)
+      w.to_html(@rendering_context)
     end
 
 =begin

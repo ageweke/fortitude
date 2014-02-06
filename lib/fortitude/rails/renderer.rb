@@ -19,8 +19,8 @@ module Fortitude
             widget.to_html(rendering_context)
             template_handler.output_buffer << rendering_context.output
 =end
-            widget.to_html(rendering_context.output)
-            template_handler.output_buffer << output.html_safe
+            widget.to_html(rendering_context)
+            template_handler.output_buffer << rendering_context.output.html_safe
           end
         end
       end
