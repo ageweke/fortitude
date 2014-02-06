@@ -4,11 +4,9 @@ module Fortitude
   class RenderingContext
     attr_reader :output, :instance_variable_set
 
-    def initialize(options = { })
-      options.assert_valid_keys(:instance_variables_object, :output)
-
-      @instance_variable_set = Fortitude::InstanceVariableSet.new(options[:instance_variables_object]) if options[:instance_variables_object]
-      @output = (options[:output] || "").html_safe
+    def initialize(output, instance_variables_object)
+      @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
+      @output = output
     end
   end
 end
