@@ -129,28 +129,18 @@ EOS
     def to_html(rendering_context)
       @rendering_context = rendering_context
       @output = rendering_context.output
-      content
-    end
 
-    def widget(w)
-      w.to_html(@rendering_context)
-    end
-
-=begin
-    def to_html(rendering_context)
       begin
-        @rendering_context, old_rendering_context = rendering_context, @rendering_context
-        @output = @rendering_context.output
         content
       ensure
-        @rendering_context = old_rendering_context
+        @rendering_context = nil
       end
     end
 
     def widget(w)
       w.to_html(@rendering_context)
     end
-=end
+
     def text(s)
       s.to_s.fortitude_append_escaped_string(@output)
     end

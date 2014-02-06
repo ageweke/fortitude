@@ -15,10 +15,6 @@ module Fortitude
           template_handler.with_output_buffer do
             output = ""
             rendering_context = ::Fortitude::RenderingContext.new(output, template_handler)
-=begin
-            widget.to_html(rendering_context)
-            template_handler.output_buffer << rendering_context.output
-=end
             widget.to_html(rendering_context)
             template_handler.output_buffer << rendering_context.output.html_safe
           end
