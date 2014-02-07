@@ -173,7 +173,7 @@ module Fortitude
         def render_with_fortitude(*args, &block)
           if (options = args[0]).kind_of?(Hash) && (widget = args[0][:widget])
             output = ""
-            rendering_context = ::Fortitude::RenderingContext.new(output, self)
+            rendering_context = ::Fortitude::RenderingContext.new(output, self, nil)
             widget.to_html(rendering_context)
 
             options = options.dup

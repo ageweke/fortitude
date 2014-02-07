@@ -14,7 +14,13 @@ describe "Rails layout support", :type => :rails do
 
   it "should let you use a widget as a layout with an ERb view, and render in the right order" do
     data = get("erb_inside_widget_layout")
-    data.should match(/xxxx/i)
+    data.should match(/widget_layout/i)
+    data.should match(/this is erb_inside_widget_layout/i)
+    data.should match(/pre_layout order: \[:erb_inside_widget_layout, :widget_layout_pre\]/i)
+    data.should match(/post_layout order: \[:erb_inside_widget_layout, :widget_layout_pre, :widget_layout_post\]/i)
+    data.should match(/order inside erb: \[:erb_inside_widget_layout\]/i)
+    data.should match(/pre_layout foo: foo_from_erb_inside_widget_layout/i)
+    data.should match(/post_layout foo: foo_from_erb_inside_widget_layout/i)
   end
 
   it "should let you use a widget as a layout with a widget view, and render in the right order"
