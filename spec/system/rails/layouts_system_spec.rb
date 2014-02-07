@@ -12,8 +12,12 @@ describe "Rails layout support", :type => :rails do
     data.should match(/post_layout foo: foo_from_widget_inside_erb_layout/i)
   end
 
-  it "should let you use a widget as a layout with an ERb view, and render in the right order"
-  it "should let you use a widget as a layour with a widget view, and render in the right order"
+  it "should let you use a widget as a layout with an ERb view, and render in the right order" do
+    data = get("erb_inside_widget_layout")
+    data.should match(/xxxx/i)
+  end
+
+  it "should let you use a widget as a layout with a widget view, and render in the right order"
   it "should let you select the layout"
 
   it "should use a layout with render :widget by default"

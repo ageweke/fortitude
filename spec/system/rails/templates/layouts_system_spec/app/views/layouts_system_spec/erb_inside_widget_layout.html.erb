@@ -1,0 +1,8 @@
+<%
+@foo = "foo_from_erb_inside_widget_layout"
+%>
+<p>this is erb_inside_widget_layout</p>
+<%
+$order << :erb_inside_widget_layout
+%>
+<p>order inside erb: <%= $order.inspect %></p>

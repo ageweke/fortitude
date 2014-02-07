@@ -126,12 +126,16 @@ EOS
       end
     end
 
+    def yield_to_view(*args)
+      @rendering_context.yield_to_view(*args)
+    end
+
     def to_html(rendering_context)
       @rendering_context = rendering_context
       @output = rendering_context.output
 
       begin
-        content
+        content { |*args| @rendering_context.yield_to_view(*args) }
       ensure
         @rendering_context = nil
       end
@@ -149,7 +153,7 @@ EOS
       @output.concat(s)
     end
 
-    def shared_instance_variables
+    def shared_variables
       @rendering_context.instance_variable_set
     end
   end

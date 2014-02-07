@@ -10,13 +10,12 @@ module Fortitude
     class Renderer
       class << self
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
-        def render(widget_class, template_handler, local_assigns, is_partial)
+        def render(widget_class, template_handler, local_assigns, &block)
           widget = widget_class.new(template_handler.assigns.merge(local_assigns).with_indifferent_access)
           template_handler.with_output_buffer do
-            output = ""
-            rendering_context = ::Fortitude::RenderingContext.new(output, template_handler)
+            rendering_context = ::Fortitude::RenderingContext.new(template_handler, template_handler.output_buffer, block)
             widget.to_html(rendering_context)
-            template_handler.output_buffer << rendering_context.output.html_safe
+            rendering_context.flush!
           end
         end
       end
