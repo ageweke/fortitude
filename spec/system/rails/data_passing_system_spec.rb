@@ -49,5 +49,19 @@ describe "Rails data-passing support", :type => :rails do
     it "should let a widget read a controller variable set by an earlier ERb view"
     it "should let a widget write a controller variable that a later ERb view can read"
     it "should not allow reading instance variables that the widget framework uses itself"
+
+    it "should have the same set of copied variables for ERb and a widget" do
+      widget_copied_variables = JSON.parse(get('widget_copied_variables'))['widget_copied_variables'].sort
+      erb_copied_variables = JSON.parse(get('erb_copied_variables'))['erb_copied_variables'].sort
+
+      common = widget_copied_variables & erb_copied_variables
+      extra_widget = widget_copied_variables - erb_copied_variables
+      missing_widget = erb_copied_variables - widget_copied_variables
+
+      extra_widget = extra_widget.reject { |v| v =~ /^@_fortitude_/i }
+
+      expect(extra_widget).to eq([ ])
+      expect(missing_widget).to eq([ ])
+    end
   end
 end

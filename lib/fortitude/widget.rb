@@ -118,20 +118,20 @@ EOS
 
     def _attributes(h)
       h.each do |k,v|
-        @output.concat(BEFORE_ATTRIBUTE_STRING)
-        k.to_s.fortitude_append_escaped_string(@output)
-        @output.concat(AFTER_ATTRIBUTE_STRING)
-        v.to_s.fortitude_append_escaped_string(@output)
-        @output.concat(AFTER_VALUE_STRING)
+        @_fortitude_output.concat(BEFORE_ATTRIBUTE_STRING)
+        k.to_s.fortitude_append_escaped_string(@_fortitude_output)
+        @_fortitude_output.concat(AFTER_ATTRIBUTE_STRING)
+        v.to_s.fortitude_append_escaped_string(@_fortitude_output)
+        @_fortitude_output.concat(AFTER_VALUE_STRING)
       end
     end
 
     def yield_to_view(*args)
-      @rendering_context.yield_to_view(*args)
+      @_fortitude_rendering_context.yield_to_view(*args)
     end
 
     def transfer_shared_variables(*args, &block)
-      @rendering_context.instance_variable_set.with_instance_variable_copying(self, &block)
+      @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, &block)
     end
 
     class << self
@@ -220,32 +220,32 @@ EOS
 
 
     def to_html(rendering_context)
-      @rendering_context = rendering_context
-      @output = rendering_context.output
+      @_fortitude_rendering_context = rendering_context
+      @_fortitude_output = rendering_context.output
 
-      block = lambda { |*args| @rendering_context.yield_to_view(*args) }
+      block = lambda { |*args| @_fortitude_rendering_context.yield_to_view(*args) }
 
       begin
         run_content(&block)
       ensure
-        @rendering_context = nil
+        @_fortitude_rendering_context = nil
       end
     end
 
     def widget(w)
-      w.to_html(@rendering_context)
+      w.to_html(@_fortitude_rendering_context)
     end
 
     def text(s)
-      s.to_s.fortitude_append_escaped_string(@output)
+      s.to_s.fortitude_append_escaped_string(@_fortitude_output)
     end
 
     def rawtext(s)
-      @output.concat(s)
+      @_fortitude_output.concat(s)
     end
 
     def shared_variables
-      @rendering_context.instance_variable_set
+      @_fortitude_rendering_context.instance_variable_set
     end
   end
 end

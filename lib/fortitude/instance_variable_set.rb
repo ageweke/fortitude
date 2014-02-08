@@ -44,6 +44,8 @@ module Fortitude
 
     def copy_from_widget(widget, exclude_variables = [ ])
       (widget.instance_variable_names - exclude_variables).each do |instance_variable_name|
+        next if instance_variable_name =~ /^@_fortitude_/
+
         value = widget.instance_variable_get(instance_variable_name)
         target_object.instance_variable_set(instance_variable_name, value)
       end

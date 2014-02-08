@@ -43,4 +43,18 @@ class DataPassingSystemSpecController < ApplicationController
   def implicit_variable_read
     @foo = 'foo_from_controller'
   end
+
+  def widget_copied_variables
+    @foo = "foo_from_controller"
+    @bar = "bar_from_controller"
+
+    render :layout => false
+  end
+
+  def erb_copied_variables
+    @foo = "foo_from_controller"
+    @bar = "bar_from_controller"
+
+    render :layout => false
+  end
 end

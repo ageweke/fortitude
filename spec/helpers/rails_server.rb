@@ -43,7 +43,7 @@ module Spec
         uri = URI.parse(uri_string)
         data = Net::HTTP.get_response(uri)
         unless data.code.to_s == '200'
-          raise "'#{uri_string}' returned #{data.code.inspect}, not 200"
+          raise "'#{uri_string}' returned #{data.code.inspect}, not 200; body was: #{data.body.strip}"
         end
         data.body.strip
       end

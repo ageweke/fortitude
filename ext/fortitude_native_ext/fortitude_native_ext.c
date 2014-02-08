@@ -275,7 +275,7 @@ VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix) {
 
 // /*
 //       def #{element_name}(attributes = nil)
-//         o = @output
+//         o = @_fortitude_output
 
 //         if (! attributes)
 //           if block_given?
