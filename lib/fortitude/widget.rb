@@ -149,28 +149,22 @@ EOS
           [ ]
         end
 
-        superclass_methods + this_class_around_content_methods
+        (superclass_methods + this_class_around_content_methods).uniq
       end
 
       def rebuild_run_content!
         acm = around_content_methods
-        if acm.length == 0 && false
-          $stderr.puts "Alias_method run_content"
-          alias_method :run_content, :content
-        else
-          text = "def run_content(*args, &block)\n"
-          acm.each_with_index do |method_name, index|
-            text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
-          end
-          text += "  " + ("  " * acm.length) + "content(*args, &block)\n"
-          (0..(acm.length - 1)).each do |index|
-            text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
-          end
-          text += "end"
-
-          $stderr.puts "Rebuilt run_content:\n#{text}"
-          class_eval(text)
+        text = "def run_content(*args, &block)\n"
+        acm.each_with_index do |method_name, index|
+          text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
         end
+        text += "  " + ("  " * acm.length) + "content(*args, &block)\n"
+        (0..(acm.length - 1)).each do |index|
+          text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
+        end
+        text += "end"
+
+        class_eval(text)
       end
     end
 
