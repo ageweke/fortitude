@@ -45,5 +45,6 @@ describe "Rails data-passing support", :type => :rails do
     it "should let a widget write a controller variable implicitly"
     it "should let a widget read a controller variable set by an earlier ERb view"
     it "should let a widget write a controller variable that a later ERb view can read"
+    it "should not allow reading instance variables that the widget framework uses itself"
   end
 end
