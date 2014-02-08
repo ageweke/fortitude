@@ -24,7 +24,10 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_widget_via_file_path", /hello from a widget named Fred/)
     end
 
-    it "should let you render a widget with 'render :file =>'"
+    it "should let you render a widget with 'render :file =>'" do
+      expect_match("render_widget_via_colon_file", /hello from a widget named Fred/)
+    end
+
     it "should let you render a widget inline with 'render :inline =>'"
   end
 

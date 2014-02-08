@@ -19,4 +19,9 @@ class RenderingSystemSpecController < ApplicationController
     @name = "Fred"
     render File.join(Rails.root, 'app', 'views', 'widget_to_render')
   end
+
+  def render_widget_via_colon_file
+    @name = "Fred"
+    render :file => File.join(Rails.root, 'app', 'views', 'widget_to_render')
+  end
 end
