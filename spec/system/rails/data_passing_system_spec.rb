@@ -27,8 +27,15 @@ describe "Rails data-passing support", :type => :rails do
     expect_exception('parent_to_child_passing', 'Fortitude::Errors::MissingNeed', /foo/)
   end
 
-  it "should let a widget read a controller variable explicitly"
-  it "should let a widget read a controller variable set by an earlier ERb view"
+  it "should let a widget read a controller variable explicitly, as a Symbol or a String" do
+    expect_match("explicit_controller_variable_read", /explicit foo as symbol: the_foo/)
+    expect_match("explicit_controller_variable_read", /explicit foo as string: the_foo/)
+  end
+
+  it "should let a widget read a controller variable set by an earlier ERb view" do
+    expect_match("erb_to_parallel_widget_handoff", /widget foo: foo_from_erb/)
+  end
+
   it "should let a widget write a controller variable that a later ERb view can read"
 
   describe "backwards-compatible instance-variable mode" do

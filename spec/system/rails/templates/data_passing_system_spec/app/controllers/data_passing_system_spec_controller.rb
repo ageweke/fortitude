@@ -31,4 +31,12 @@ class DataPassingSystemSpecController < ApplicationController
   def parent_to_child_passing
     @foo = 'the_foo'
   end
+
+  def explicit_controller_variable_read
+    @foo = 'the_foo'
+  end
+
+  def erb_to_parallel_widget_handoff
+    # nothing here
+  end
 end
