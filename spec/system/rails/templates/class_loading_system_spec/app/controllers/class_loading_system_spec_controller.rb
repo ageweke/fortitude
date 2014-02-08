@@ -66,4 +66,9 @@ class ClassLoadingSystemSpecController < ApplicationController
     require 'views/class_loading_system_spec/_loaded_underscore_widget'
     render :text => "good!"
   end
+
+  def render_widget_outside_app_views
+    require 'arbitrary_name/some_widget'
+    render :widget => ArbitraryName::SomeWidget.new
+  end
 end

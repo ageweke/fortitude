@@ -57,5 +57,7 @@ describe "Rails class-loading support", :type => :rails do
     expect_exception('require_loaded_underscore_widget_with_views', 'LoadError', /cannot load such file/)
   end
 
-  it "should let me render a widget defined outside of app/views/ if I use render :widget"
+  it "should let me render a widget defined outside of app/views/ if I use render :widget" do
+    expect_match('render_widget_outside_app_views', /arbitrary_name_some_widget/)
+  end
 end
