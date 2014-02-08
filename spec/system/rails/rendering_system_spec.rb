@@ -20,12 +20,16 @@ describe "Rails rendering support", :type => :rails do
       expect(data).not_to match(/rails_spec_application/)
     end
 
-    it "should let you render a widget with 'render \"foo\"'"
+    it "should let you render a widget with 'render \"foo\"'" do
+      expect_match("render_widget_via_file_path", /hello from a widget named Fred/)
+    end
+
     it "should let you render a widget with 'render :file =>'"
     it "should let you render a widget inline with 'render :inline =>'"
   end
 
   describe "rendering in a widget" do
+    it "should let you render a partial in a widget"
     it "should let you render :json in a widget"
     it "should let you render :xml in a widget"
     it "should let you render :js in a widget"

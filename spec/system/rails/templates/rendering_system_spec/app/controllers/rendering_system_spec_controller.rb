@@ -14,4 +14,9 @@ class RenderingSystemSpecController < ApplicationController
   def render_widget_without_layout
     render :widget => Views::WidgetToRender.new(:name => 'Fred'), :layout => false
   end
+
+  def render_widget_via_file_path
+    @name = "Fred"
+    render File.join(Rails.root, 'app', 'views', 'widget_to_render')
+  end
 end
