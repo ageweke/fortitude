@@ -24,4 +24,8 @@ class LayoutsSystemSpecController < ApplicationController
   def render_widget_with_alt_layout
     render :widget => Views::LayoutsSystemSpec::TheRenderWidget.new, :layout => 'alternate'
   end
+
+  def yield_to_view_explicitly
+    render :layout => 'explicit_yield'
+  end
 end

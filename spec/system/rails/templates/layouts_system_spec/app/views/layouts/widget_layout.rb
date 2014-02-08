@@ -10,7 +10,7 @@ class Views::Layouts::WidgetLayout < Fortitude::Widget
         p "pre_layout foo: #{shared_variables[:foo]}"
         p "pre_layout order: #{$order.inspect}"
 
-        yield_to_view
+        yield
 
         $order << :widget_layout_post
 
