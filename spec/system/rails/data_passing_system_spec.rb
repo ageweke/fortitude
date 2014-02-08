@@ -36,7 +36,9 @@ describe "Rails data-passing support", :type => :rails do
     expect_match("erb_to_parallel_widget_handoff", /widget foo: foo_from_erb/)
   end
 
-  it "should let a widget write a controller variable that a later ERb view can read"
+  it "should let a widget write a controller variable that a later ERb view can read" do
+    expect_match("widget_to_parallel_erb_handoff", /erb foo: foo_from_widget/)
+  end
 
   describe "backwards-compatible instance-variable mode" do
     it "should let a widget read a controller variable implicitly"
