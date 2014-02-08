@@ -172,8 +172,7 @@ module Fortitude
       ::ActionController::Base.class_eval do
         def render_with_fortitude(*args, &block)
           if (options = args[0]).kind_of?(Hash) && (widget = args[0][:widget])
-            output = ""
-            rendering_context = ::Fortitude::RenderingContext.new(output, self, nil)
+            rendering_context = ::Fortitude::RenderingContext.new(self, self, nil, nil)
             widget.to_html(rendering_context)
 
             options = options.dup

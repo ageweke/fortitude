@@ -179,6 +179,10 @@ EOS
 
     rebuild_run_content!
 
+    def capture(*args, &block)
+      @_fortitude_rendering_context.helpers_object.capture(*args, &block)
+    end
+
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
       @_fortitude_output = rendering_context.output
