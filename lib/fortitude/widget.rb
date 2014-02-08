@@ -130,12 +130,16 @@ EOS
       @rendering_context.yield_to_view(*args)
     end
 
+    CONTENT_METHOD_NAME = :content
+
     def to_html(rendering_context)
       @rendering_context = rendering_context
       @output = rendering_context.output
 
+      block = lambda { |*args| @rendering_context.yield_to_view(*args) }
+
       begin
-        content { |*args| @rendering_context.yield_to_view(*args) }
+        send(CONTENT_METHOD_NAME, &block)
       ensure
         @rendering_context = nil
       end
