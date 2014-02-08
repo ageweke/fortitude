@@ -24,4 +24,8 @@ class RenderingSystemSpecController < ApplicationController
     @name = "Fred"
     render :file => File.join(Rails.root, 'app', 'views', 'widget_to_render')
   end
+
+  def render_partial_from_widget
+    # nothing here
+  end
 end

@@ -13,7 +13,7 @@ module Fortitude
     end
 
     def yield_to_view(*args)
-      raise "No layout to yield to!" unless yield_block
+      raise "No layout to yield to!" unless @yield_block
       @output << @yield_block.call(*args)
     end
 

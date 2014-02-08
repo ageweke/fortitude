@@ -183,6 +183,11 @@ EOS
       @_fortitude_rendering_context.helpers_object.capture(*args, &block)
     end
 
+    def render(*args, &block)
+      text @_fortitude_rendering_context.helpers_object.render(*args, &block)
+      nil
+    end
+
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
       @_fortitude_output = rendering_context.output
