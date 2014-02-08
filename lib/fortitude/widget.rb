@@ -130,9 +130,18 @@ EOS
       @rendering_context.yield_to_view(*args)
     end
 
+    def transfer_shared_variables(*args, &block)
+      @rendering_context.instance_variable_set.with_instance_variable_copying(self, &block)
+    end
+
     class << self
+      def implicit_shared_variable_access
+        around_content :transfer_shared_variables
+      end
+
       def around_content(*method_names)
         return if method_names.length == 0
+        @_around_content_methods ||= [ ]
         @_around_content_methods += method_names.map { |x| x.to_s.strip.downcase.to_sym }
         rebuild_run_content!
       end
