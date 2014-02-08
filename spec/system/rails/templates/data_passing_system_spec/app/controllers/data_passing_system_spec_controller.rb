@@ -39,4 +39,8 @@ class DataPassingSystemSpecController < ApplicationController
   def erb_to_parallel_widget_handoff
     # nothing here
   end
+
+  def implicit_variable_read
+    @foo = 'foo_from_controller'
+  end
 end

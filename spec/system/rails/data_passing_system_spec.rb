@@ -41,7 +41,10 @@ describe "Rails data-passing support", :type => :rails do
   end
 
   describe "backwards-compatible instance-variable mode" do
-    it "should let a widget read a controller variable implicitly"
+    it "should let a widget read a controller variable implicitly" do
+      expect_match("implicit_variable_read", /inner widget foo: foo_from_controller/)
+    end
+
     it "should let a widget write a controller variable implicitly"
     it "should let a widget read a controller variable set by an earlier ERb view"
     it "should let a widget write a controller variable that a later ERb view can read"
