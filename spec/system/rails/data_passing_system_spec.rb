@@ -45,10 +45,17 @@ describe "Rails data-passing support", :type => :rails do
       expect_match("implicit_variable_read", /inner widget foo: foo_from_controller/)
     end
 
-    it "should let a widget write a controller variable implicitly"
-    it "should let a widget read a controller variable set by an earlier ERb view"
-    it "should let a widget write a controller variable that a later ERb view can read"
-    it "should not allow reading instance variables that the widget framework uses itself"
+    it "should let a widget write a controller variable implicitly" do
+      expect_match("implicit_variable_write", /erb foo: foo_from_widget/)
+    end
+
+    it "should let a widget read a controller variable set by an earlier ERb view" do
+      expect_match("implicit_erb_to_widget_handoff", /widget foo: foo_from_erb/)
+    end
+
+    it "should not enable access to local variables via @foo directly" do
+      expect_match("implicit_shared_variable_access", /foo: nil/)
+    end
 
     it "should have the same set of copied variables for ERb and a widget" do
       widget_copied_variables = JSON.parse(get('widget_copied_variables'))['widget_copied_variables'].sort

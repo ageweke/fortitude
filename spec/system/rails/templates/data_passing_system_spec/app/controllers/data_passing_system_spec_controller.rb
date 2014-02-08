@@ -57,4 +57,16 @@ class DataPassingSystemSpecController < ApplicationController
 
     render :layout => false
   end
+
+  def implicit_variable_write
+    # nothing here
+  end
+
+  def implicit_erb_to_widget_handoff
+    # nothing here
+  end
+
+  def implicit_shared_variable_access
+    # nothing here
+  end
 end
