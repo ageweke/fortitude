@@ -179,46 +179,6 @@ EOS
 
     rebuild_run_content!
 
-=begin
-    Grandparent declares:
-       around_content :gp1
-       around_content :gp2
-
-    Parent declares:
-       around_content :p1
-       around_content :p2
-
-    Child declares:
-       around_content :c1
-       around_content :c2
-
-    What should run:
-       gp1 {
-         gp2 {
-           p1 {
-             p2 {
-               c1 {
-                 c2 {
-                   content
-                 }
-               }
-             }
-           }
-         }
-       }
-
-    How to do this:
-       - each class collects all filters declared
-       - each class defines run_content, that runs content with all those filters
-       - you *never* call super from run_content
-       - we start with:
-           def run_content(&block)
-             content(&block)
-           end
-         ...so that even with no around_content filters, it works
-=end
-
-
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
       @_fortitude_output = rendering_context.output
