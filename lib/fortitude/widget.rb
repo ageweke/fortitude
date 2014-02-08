@@ -130,7 +130,91 @@ EOS
       @rendering_context.yield_to_view(*args)
     end
 
-    CONTENT_METHOD_NAME = :content
+    class << self
+      def around_content(*method_names)
+        return if method_names.length == 0
+        @_around_content_methods += method_names.map { |x| x.to_s.strip.downcase.to_sym }
+        rebuild_run_content!
+      end
+
+      private
+      def this_class_around_content_methods
+        @_around_content_methods ||= [ ]
+      end
+
+      def around_content_methods
+        superclass_methods = if superclass.respond_to?(:around_content_methods)
+          superclass.around_content_methods
+        else
+          [ ]
+        end
+
+        superclass_methods + this_class_around_content_methods
+      end
+
+      def rebuild_run_content!
+        acm = around_content_methods
+        if acm.length == 0 && false
+          $stderr.puts "Alias_method run_content"
+          alias_method :run_content, :content
+        else
+          text = "def run_content(*args, &block)\n"
+          acm.each_with_index do |method_name, index|
+            text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
+          end
+          text += "  " + ("  " * acm.length) + "content(*args, &block)\n"
+          (0..(acm.length - 1)).each do |index|
+            text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
+          end
+          text += "end"
+
+          $stderr.puts "Rebuilt run_content:\n#{text}"
+          class_eval(text)
+        end
+      end
+    end
+
+    rebuild_run_content!
+
+=begin
+    Grandparent declares:
+       around_content :gp1
+       around_content :gp2
+
+    Parent declares:
+       around_content :p1
+       around_content :p2
+
+    Child declares:
+       around_content :c1
+       around_content :c2
+
+    What should run:
+       gp1 {
+         gp2 {
+           p1 {
+             p2 {
+               c1 {
+                 c2 {
+                   content
+                 }
+               }
+             }
+           }
+         }
+       }
+
+    How to do this:
+       - each class collects all filters declared
+       - each class defines run_content, that runs content with all those filters
+       - you *never* call super from run_content
+       - we start with:
+           def run_content(&block)
+             content(&block)
+           end
+         ...so that even with no around_content filters, it works
+=end
+
 
     def to_html(rendering_context)
       @rendering_context = rendering_context
@@ -139,7 +223,7 @@ EOS
       block = lambda { |*args| @rendering_context.yield_to_view(*args) }
 
       begin
-        send(CONTENT_METHOD_NAME, &block)
+        run_content(&block)
       ensure
         @rendering_context = nil
       end
