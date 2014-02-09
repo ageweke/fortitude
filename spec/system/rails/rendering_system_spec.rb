@@ -36,9 +36,16 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_partial_from_widget", /this is the widget.*this is the_partial.*this is the widget again/mi)
     end
 
-    it "should let you render :json in a widget"
-    it "should let you render :xml in a widget"
-    it "should let you render :js in a widget"
+    it "should let you render :text in a widget" do
+      expect_match("render_text_from_widget", /this is the widget.*this is render_text.*this is the widget again/mi)
+    end
+
+    it "should let you render :template in a widget" do
+      expect_match("render_template_from_widget", /this is the widget.*widget_with_name: Fred.*this is the widget again/mi)
+    end
+
+    it "should let you render :inline in a widget"
+    it "should let you render :file in a widget"
   end
 
   describe "render options" do

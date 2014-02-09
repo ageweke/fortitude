@@ -28,4 +28,12 @@ class RenderingSystemSpecController < ApplicationController
   def render_partial_from_widget
     # nothing here
   end
+
+  def render_text_from_widget
+    # nothing here
+  end
+
+  def render_template_from_widget
+    # nothing here
+  end
 end
