@@ -114,18 +114,7 @@ EOS
 
     def method_missing(name, *args, &block)
       if @_fortitude_rendering_context.helpers_object.respond_to?(name)
-        effective_block = if block
-          lambda do
-            reload_output!
-            block.call
-          end
-        end
-
-        begin
-          @_fortitude_rendering_context.helpers_object.send(name, *args, &effective_block)
-        ensure
-          reload_output!
-        end
+        @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       else
         super(name, *args, &block)
       end
@@ -178,6 +167,14 @@ EOS
         rebuild_run_content!
       end
 
+      def helper(name)
+        class_eval <<-EOS
+  def #{name}(*args, &block)
+    @_fortitude_rendering_context.helpers_object.#{name}(*args, &block)
+  end
+EOS
+      end
+
       private
       def this_class_around_content_methods
         @_fortitude_around_content_methods ||= [ ]
@@ -211,48 +208,7 @@ EOS
 
     rebuild_run_content!
 
-    def capture(*args, &block)
-      begin
-        @_fortitude_rendering_context.helpers_object.capture(*args) do
-          reload_output!
-          block.call
-        end
-      ensure
-        reload_output!
-      end
-    end
-
-    def content_for(*args, &block)
-      begin
-        net_block = nil
-
-        if block
-          net_block = lambda do
-            reload_output!
-            block.call
-          end
-        end
-
-        @_fortitude_rendering_context.helpers_object.content_for(*args, &net_block)
-      ensure
-        reload_output!
-      end
-    end
-
-    def provide(*args, &block)
-      begin
-        @_fortitude_rendering_context.helpers_object.provide(*args) do
-          reload_output!
-          block.call
-        end
-      ensure
-        reload_output!
-      end
-    end
-
-    def reload_output!
-      @_fortitude_output = @_fortitude_output_buffer_holder.output_buffer
-    end
+    helper :capture
 
     def render(*args, &block)
       text @_fortitude_rendering_context.helpers_object.render(*args, &block)
