@@ -40,11 +40,29 @@ describe "Rails capture support", :type => :rails do
         %r{Bar content is: <h3>this is content for bar!</h3>\s*<h3>this is more content for bar!</h3>}mi,
         :no_layout => true)
     end
+
+    it "when provided by a widget" do
+      expect_match('widget_layout_needing_content_yield_with_widget',
+        %r{widget_layout_needing_content}mi,
+        %r{Foo content is: <h5>this is content for foo!</h5>\s*<h5>this is more content for foo!</h5>}mi,
+        %r{Main content is: <h4>this is main_content!</h4>}mi,
+        %r{Bar content is: <h3>this is content for bar!</h3>\s*<h3>this is more content for bar!</h3>}mi,
+        :no_layout => true)
+    end
   end
 
   describe "should be able to retrieve stored content in a widget with content_for :name" do
     it "when provided by ERb" do
       expect_match('widget_layout_needing_content_content_for_with_erb',
+        %r{widget_layout_needing_content}mi,
+        %r{Foo content is: <h5>this is content for foo!</h5>\s*<h5>this is more content for foo!</h5>}mi,
+        %r{Main content is: <h4>this is main_content!</h4>}mi,
+        %r{Bar content is: <h3>this is content for bar!</h3>\s*<h3>this is more content for bar!</h3>}mi,
+        :no_layout => true)
+    end
+
+    it "when provided by a widget" do
+      expect_match('widget_layout_needing_content_content_for_with_widget',
         %r{widget_layout_needing_content}mi,
         %r{Foo content is: <h5>this is content for foo!</h5>\s*<h5>this is more content for foo!</h5>}mi,
         %r{Main content is: <h4>this is main_content!</h4>}mi,
