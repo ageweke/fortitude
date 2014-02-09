@@ -226,11 +226,7 @@ EOS
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
-
-    def render(*args, &block)
-      text @_fortitude_rendering_context.helpers_object.render(*args, &block)
-      nil
-    end
+    helper :render, :transform => :output_return_value
 
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
