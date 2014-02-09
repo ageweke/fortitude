@@ -192,10 +192,16 @@ EOS
 
     def content_for(*args, &block)
       begin
-        @_fortitude_rendering_context.helpers_object.content_for(*args) do
-          reload_output!
-          block.call
+        net_block = nil
+
+        if block
+          net_block = lambda do
+            reload_output!
+            block.call
+          end
         end
+
+        @_fortitude_rendering_context.helpers_object.content_for(*args, &net_block)
       ensure
         reload_output!
       end
