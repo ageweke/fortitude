@@ -112,6 +112,14 @@ EOS
       raise "Must override in #{self.class.name}"
     end
 
+    def method_missing(name, *args, &block)
+      if @_fortitude_rendering_context.helpers_object.respond_to?(name)
+        @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
+      else
+        super(name, *args, &block)
+      end
+    end
+
     BEFORE_ATTRIBUTE_STRING = " ".freeze
     AFTER_ATTRIBUTE_STRING = "=\"".freeze
     AFTER_VALUE_STRING = "\"".freeze
