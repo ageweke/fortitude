@@ -52,4 +52,12 @@ class RenderingSystemSpecController < ApplicationController
   def render_inline_from_widget
     # nothing here
   end
+
+  def render_with_content_type
+    render :action => 'trivial_widget', :content_type => 'boo/yeah'
+  end
+
+  def render_with_status
+    render :action => 'trivial_widget', :status => 768
+  end
 end

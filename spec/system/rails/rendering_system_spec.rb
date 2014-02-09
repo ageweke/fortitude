@@ -58,9 +58,18 @@ describe "Rails rendering support", :type => :rails do
   end
 
   describe "render options" do
-    it "should let you set the content-type"
+    it "should let you set the content-type" do
+      data = get_response("render_with_content_type")
+      expect(data.body.strip).to match(/hello, world/)
+      content_type = data.header['content-type']
+      expect(content_type).to match(%r{^boo/yeah(;.*)?$})
+    end
+
     it "should let you set the location"
-    it "should let you set the status"
+    it "should let you set the status" do
+      data = get_response("render_with_status", :ignore_status_code => true)
+      expect(data.code.to_s).to eq("768")
+    end
   end
 
   describe "rendering partial invocation" do

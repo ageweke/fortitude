@@ -38,14 +38,18 @@ module Spec
         end
       end
 
-      def get(path)
+      def get(path, options = { })
+        get_response(path, options).body.strip
+      end
+
+      def get_response(path, options = { })
         uri_string = "http://localhost:#{@port}/#{path}"
         uri = URI.parse(uri_string)
         data = Net::HTTP.get_response(uri)
-        unless data.code.to_s == '200'
+        unless data.code.to_s == '200' || options[:ignore_status_code]
           raise "'#{uri_string}' returned #{data.code.inspect}, not 200; body was: #{data.body.strip}"
         end
-        data.body.strip
+        data
       end
 
       private

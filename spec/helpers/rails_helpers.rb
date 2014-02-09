@@ -11,8 +11,12 @@ module RailsHelpers
     @rails_template_name || raise("No Rails template name!")
   end
 
-  def get(subpath)
-    @rails_server.get("#{rails_template_name}/#{subpath}")
+  def get(subpath, options = { })
+    @rails_server.get("#{rails_template_name}/#{subpath}", options)
+  end
+
+  def get_response(subpath, options = { })
+    @rails_server.get_response("#{rails_template_name}/#{subpath}", options)
   end
 
   def get_success(subpath, options = { })
