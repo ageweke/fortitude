@@ -91,7 +91,10 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_object", /partial is:.*word: donkey.*and that's all!/mi)
     end
 
-    it "should support ERb partial layouts"
+    it "should support ERb partial layouts" do
+      expect_match("render_partial_with_layout", /this is the partial:.*partial_layout before.*partial_with_layout.*partial_layout after.*done!/mi)
+    end
+
     it "should support using a widget as an ERb partial layout"
   end
 

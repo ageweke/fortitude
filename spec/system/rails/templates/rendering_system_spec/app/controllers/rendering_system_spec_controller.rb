@@ -72,4 +72,8 @@ class RenderingSystemSpecController < ApplicationController
   def render_collection_as
     # nothing here
   end
+
+  def render_partial_with_layout
+    # nothing here
+  end
 end
