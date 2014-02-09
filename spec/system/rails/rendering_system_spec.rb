@@ -28,7 +28,11 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_widget_via_colon_file", /hello from a widget named Fred/)
     end
 
-    it "should let you render a widget inline with 'render :inline =>'"
+    it "should let you render a widget inline with 'render :inline =>'" do
+      expect_match("render_widget_via_inline", /this is an inline widget named Fred/)
+    end
+
+    it "should let you render a widget inline, and use all instance and local variables"
   end
 
   describe "rendering in a widget" do

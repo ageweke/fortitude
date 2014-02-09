@@ -25,6 +25,14 @@ class RenderingSystemSpecController < ApplicationController
     render :file => File.join(Rails.root, 'app', 'views', 'widget_to_render')
   end
 
+  def render_widget_via_inline
+    @name = "Fred"
+    proc = lambda do
+      p "this is an inline widget named #{shared_variables[:name]}"
+    end
+    render :inline => proc, :type => :fortitude
+  end
+
   def render_partial_from_widget
     # nothing here
   end
