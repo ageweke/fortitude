@@ -36,4 +36,12 @@ class RenderingSystemSpecController < ApplicationController
   def render_template_from_widget
     # nothing here
   end
+
+  def render_file_from_widget
+    # nothing here
+  end
+
+  def render_inline_from_widget
+    # nothing here
+  end
 end

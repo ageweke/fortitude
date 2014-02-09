@@ -44,8 +44,13 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_template_from_widget", /this is the widget.*widget_with_name: Fred.*this is the widget again/mi)
     end
 
-    it "should let you render :inline in a widget"
-    it "should let you render :file in a widget"
+    it "should let you render :inline in a widget" do
+      expect_match("render_inline_from_widget", /this is the widget.*widget_with_name: Fred.*this is the widget again/mi)
+    end
+
+    it "should let you render :file in a widget" do
+      expect_match("render_file_from_widget", /this is the widget.*widget_with_name: Fred.*this is the widget again/mi)
+    end
   end
 
   describe "render options" do
