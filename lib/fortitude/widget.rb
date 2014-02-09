@@ -1,5 +1,6 @@
 require 'fortitude/tag'
 require 'fortitude/errors'
+require 'active_support/core_ext/hash'
 
 module Fortitude
   class Widget
@@ -167,10 +168,25 @@ EOS
         rebuild_run_content!
       end
 
-      def helper(name)
+      def helper(name, options = { })
+        options.assert_valid_keys(:transform)
+
+        prefix = "return"
+        suffix = ""
+        case (transform = options[:transform])
+        when :output_return_value
+          prefix = "text"
+          suffix = "; nil"
+        when :return_output
+          prefix = "return capture { "
+          suffix = " }"
+        when nil, false then nil
+        else raise ArgumentError, "Invalid value for :transform: #{transform.inspect}"
+        end
+
         class_eval <<-EOS
   def #{name}(*args, &block)
-    @_fortitude_rendering_context.helpers_object.#{name}(*args, &block)
+    #{prefix}(@_fortitude_rendering_context.helpers_object.#{name}(*args, &block))#{suffix}
   end
 EOS
       end
@@ -209,6 +225,7 @@ EOS
     rebuild_run_content!
 
     helper :capture
+    helper :form_tag, :transform => :output_return_value
 
     def render(*args, &block)
       text @_fortitude_rendering_context.helpers_object.render(*args, &block)
