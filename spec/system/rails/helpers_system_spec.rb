@@ -8,6 +8,11 @@ describe "Rails helper support", :type => :rails do
       %r{Select datetime:\s*<select.*name="date.*>.*<option.*value="2014".*</option>}mi)
   end
 
+  it "should support helpers that use blocks" do
+    expect_match("block_helpers",
+      %r{<body>\s*<form.*action="/form_dest".*>.*<input.*authenticity_token.*/>.*<p>inside the form</p>.*</form>}mi)
+  end
+
   it "should support both rendered and unrendered helpers properly"
   it "should support custom-defined helpers"
   it "should automatically expose helpers in app/helpers just like Rails does"

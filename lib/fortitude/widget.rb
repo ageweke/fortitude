@@ -114,7 +114,18 @@ EOS
 
     def method_missing(name, *args, &block)
       if @_fortitude_rendering_context.helpers_object.respond_to?(name)
-        @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
+        effective_block = if block
+          lambda do
+            reload_output!
+            block.call
+          end
+        end
+
+        begin
+          @_fortitude_rendering_context.helpers_object.send(name, *args, &effective_block)
+        ensure
+          reload_output!
+        end
       else
         super(name, *args, &block)
       end
