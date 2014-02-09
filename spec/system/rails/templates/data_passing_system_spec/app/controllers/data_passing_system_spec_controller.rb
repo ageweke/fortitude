@@ -4,6 +4,14 @@ class DataPassingSystemSpecController < ApplicationController
     @bar = 'and_bar'
   end
 
+  def extra_data_widget
+    @foo = "the_foo"
+    @bar = "and_bar"
+    @baz = "also_baz"
+
+    render :action => 'passing_data_widget'
+  end
+
   def passing_locals_widget
     render :locals => { :foo => 'local_foo', :bar => 'local_bar' }
   end

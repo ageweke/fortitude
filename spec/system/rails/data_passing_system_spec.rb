@@ -5,6 +5,10 @@ describe "Rails data-passing support", :type => :rails do
     expect_match("passing_data_widget", /foo is: the_foo/, /bar is: and_bar/)
   end
 
+  it "should not fail if the controller provides more data than it needs" do
+    expect_match("extra_data_widget", /foo is: the_foo/, /bar is: and_bar/)
+  end
+
   it "should allow passing data to the widget through :locals => { ... }" do
     expect_match("passing_locals_widget", /foo is: local_foo/, /bar is: local_bar/)
   end
