@@ -16,13 +16,21 @@ describe "Rails capture support", :type => :rails do
   it "should be able to provide content in a widget with content_for" do
     expect_match('widget_content_for',
       %r{erb_layout_needing_content}i,
+      %r{Foo content is: <h5>this is content for foo!</h5><h5>this is more content for foo!</h5>}mi,
+      %r{Main content is: <h4>this is main_content!</h4>}mi,
+      %r{Bar content is: <h3>this is content for bar!</h3><h3>this is more content for bar!</h3>}mi,
+      :no_layout => true)
+  end
+
+  it "should be able to provide content in a widget with provide" do
+    expect_match('widget_provide',
+      %r{erb_layout_needing_content}i,
       %r{Foo content is: <h5>this is content for foo!</h5>}mi,
       %r{Main content is: <h4>this is main_content!</h4>}mi,
       %r{Bar content is: <h3>this is content for bar!</h3>}mi,
       :no_layout => true)
   end
 
-  it "should be able to provide content in a widget with provide"
   it "should be able to retrieve stored content in a widget with content_for :name"
   it "should be able to retrieve stored content in a widget with yield :name"
 end
