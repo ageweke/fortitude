@@ -11,7 +11,7 @@ module Fortitude
       # @options.assert_valid_keys([ ])
     end
 
-    CONCAT_METHOD = "concat"
+    CONCAT_METHOD = "original_concat"
 
     def define_method_on!(mod)
       mod.send(:include, ::Fortitude::TagSupport) unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
