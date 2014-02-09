@@ -95,7 +95,9 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_partial_with_layout", /this is the partial:.*partial_layout before.*partial_with_layout.*partial_layout after.*done!/mi)
     end
 
-    it "should support using a widget as an ERb partial layout"
+    it "should support using a widget as an ERb partial layout" do
+      expect_match("render_partial_with_widget_layout", /this is the partial:.*widget_partial_layout before.*partial_with_layout.*widget_partial_layout after.*done!/mi)
+    end
   end
 
   describe "streaming support" do

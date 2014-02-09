@@ -76,4 +76,8 @@ class RenderingSystemSpecController < ApplicationController
   def render_partial_with_layout
     # nothing here
   end
+
+  def render_partial_with_widget_layout
+    # nothing here
+  end
 end
