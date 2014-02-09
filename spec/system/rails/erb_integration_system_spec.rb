@@ -16,5 +16,8 @@ describe "Rails ERb integration support", :type => :rails do
       /erb_start.*fortitude partial with underscore partial.*erb_end/m)
   end
 
-  it "should let you call an ERb partial from a widget with render :partial"
+  it "should let you call an ERb partial from a widget with render :partial" do
+    expect_match('erb_partial_from_widget',
+      /this is the widget.*this is the partial.*this is the widget again/mi)
+  end
 end
