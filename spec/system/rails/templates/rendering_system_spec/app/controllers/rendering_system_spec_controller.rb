@@ -64,4 +64,12 @@ class RenderingSystemSpecController < ApplicationController
   def render_with_location
     render :action => 'trivial_widget', :location => "http://somewhere/over/the/rainbow"
   end
+
+  def render_collection
+    # nothing here
+  end
+
+  def render_collection_as
+    # nothing here
+  end
 end
