@@ -65,7 +65,13 @@ describe "Rails rendering support", :type => :rails do
       expect(content_type).to match(%r{^boo/yeah(;.*)?$})
     end
 
-    it "should let you set the location"
+    it "should let you set the location" do
+      data = get_response("render_with_location")
+      expect(data.body.strip).to match(/hello, world/)
+      location = data.header['location']
+      expect(location).to eq("http://somewhere/over/the/rainbow")
+    end
+
     it "should let you set the status" do
       data = get_response("render_with_status", :ignore_status_code => true)
       expect(data.code.to_s).to eq("768")

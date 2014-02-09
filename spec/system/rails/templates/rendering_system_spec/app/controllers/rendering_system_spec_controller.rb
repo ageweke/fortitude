@@ -60,4 +60,8 @@ class RenderingSystemSpecController < ApplicationController
   def render_with_status
     render :action => 'trivial_widget', :status => 768
   end
+
+  def render_with_location
+    render :action => 'trivial_widget', :location => "http://somewhere/over/the/rainbow"
+  end
 end
