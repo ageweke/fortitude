@@ -1,7 +1,7 @@
 require 'json'
 
 class Views::DataPassingSystemSpec::WidgetCopiedVariables < Fortitude::Widget
-  implicit_shared_variable_access
+  implicit_shared_variable_access true
   needs :foo
 
   def content

@@ -131,24 +131,35 @@ EOS
     end
 
     def transfer_shared_variables(*args, &block)
-      @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, &block)
+      if self.class.implicit_shared_variable_access
+        @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, &block)
+      end
     end
 
     class << self
-      def implicit_shared_variable_access
-        around_content :transfer_shared_variables
+      def implicit_shared_variable_access(on_or_off = nil)
+        if on_or_off == nil
+          @_fortitude_implicit_shared_variable_access || false
+        elsif on_or_off
+          if (! @_fortitude_implicit_shared_variable_access)
+            @_fortitude_implicit_shared_variable_access = true
+            around_content :transfer_shared_variables
+          end
+        else
+          @_fortitude_implicit_shared_variable_access = false
+        end
       end
 
       def around_content(*method_names)
         return if method_names.length == 0
-        @_around_content_methods ||= [ ]
-        @_around_content_methods += method_names.map { |x| x.to_s.strip.downcase.to_sym }
+        @_fortitude_around_content_methods ||= [ ]
+        @_fortitude_around_content_methods += method_names.map { |x| x.to_s.strip.downcase.to_sym }
         rebuild_run_content!
       end
 
       private
       def this_class_around_content_methods
-        @_around_content_methods ||= [ ]
+        @_fortitude_around_content_methods ||= [ ]
       end
 
       def around_content_methods
