@@ -87,7 +87,10 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_collection_as", /collection is:.*widget_with_name: bonita.*widget_with_name: applebaum.*widget_with_name: the.*widget_with_name: dude.*and that's all!/mi)
     end
 
-    it "should support :object for rendering"
+    it "should support :object for rendering" do
+      expect_match("render_object", /partial is:.*word: donkey.*and that's all!/mi)
+    end
+
     it "should support ERb partial layouts"
     it "should support using a widget as an ERb partial layout"
   end
