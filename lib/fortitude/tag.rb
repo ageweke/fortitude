@@ -23,7 +23,7 @@ module Fortitude
 
       mod.module_eval <<-EOS
       def #{name}(attributes = nil)
-        o = @_fortitude_output
+        o = @_fortitude_output_buffer_holder.output_buffer
 
         if (! attributes)
           if block_given?

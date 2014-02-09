@@ -136,12 +136,14 @@ EOS
     AFTER_VALUE_STRING = "\"".freeze
 
     def _attributes(h)
+      o = @_fortitude_output_buffer_holder.output_buffer
+
       h.each do |k,v|
-        @_fortitude_output.concat(BEFORE_ATTRIBUTE_STRING)
-        k.to_s.fortitude_append_escaped_string(@_fortitude_output)
-        @_fortitude_output.concat(AFTER_ATTRIBUTE_STRING)
-        v.to_s.fortitude_append_escaped_string(@_fortitude_output)
-        @_fortitude_output.concat(AFTER_VALUE_STRING)
+        o.concat(BEFORE_ATTRIBUTE_STRING)
+        k.to_s.fortitude_append_escaped_string(o)
+        o.concat(AFTER_ATTRIBUTE_STRING)
+        v.to_s.fortitude_append_escaped_string(o)
+        o.concat(AFTER_VALUE_STRING)
       end
     end
 
@@ -259,7 +261,7 @@ EOS
 
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
-      @_fortitude_output = rendering_context.output
+      @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
 
       block = lambda { |*args| @_fortitude_rendering_context.yield_to_view(*args) }
 
@@ -275,11 +277,11 @@ EOS
     end
 
     def text(s)
-      s.to_s.fortitude_append_escaped_string(@_fortitude_output)
+      s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)
     end
 
     def rawtext(s)
-      @_fortitude_output.concat(s)
+      @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
     end
 
     def shared_variables
