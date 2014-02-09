@@ -18,4 +18,8 @@ class CaptureSystemSpecController < ApplicationController
   def widget_provide
     render :layout => 'erb_layout_needing_content'
   end
+
+  def widget_layout_needing_content_yield_with_erb
+    render :layout => 'widget_layout_needing_content_yield'
+  end
 end

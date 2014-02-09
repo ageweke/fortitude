@@ -16,9 +16,9 @@ describe "Rails capture support", :type => :rails do
   it "should be able to provide content in a widget with content_for" do
     expect_match('widget_content_for',
       %r{erb_layout_needing_content}i,
-      %r{Foo content is: <h5>this is content for foo!</h5><h5>this is more content for foo!</h5>}mi,
+      %r{Foo content is: <h5>this is content for foo!</h5>\s*<h5>this is more content for foo!</h5>}mi,
       %r{Main content is: <h4>this is main_content!</h4>}mi,
-      %r{Bar content is: <h3>this is content for bar!</h3><h3>this is more content for bar!</h3>}mi,
+      %r{Bar content is: <h3>this is content for bar!</h3>\s*<h3>this is more content for bar!</h3>}mi,
       :no_layout => true)
   end
 
@@ -31,6 +31,15 @@ describe "Rails capture support", :type => :rails do
       :no_layout => true)
   end
 
+  describe "should be able to retrieve stored content in a widget with yield :name" do
+    it "when provided by ERb" do
+      expect_match('widget_layout_needing_content_yield_with_erb',
+        %r{widget_layout_needing_content}mi,
+        %r{Foo content is: <h5>this is content for foo!</h5>\s*<h5>this is more content for foo!</h5>}mi,
+        %r{Main content is: <h4>this is main_content!</h4>}mi,
+        %r{Bar content is: <h3>this is content for bar!</h3>\s*<h3>this is more content for bar!</h3>}mi,
+        :no_layout => true)
+    end
+  end
   it "should be able to retrieve stored content in a widget with content_for :name"
-  it "should be able to retrieve stored content in a widget with yield :name"
 end
