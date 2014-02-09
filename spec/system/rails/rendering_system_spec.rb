@@ -54,4 +54,9 @@ describe "Rails rendering support", :type => :rails do
     it "should support ERb partial layouts"
     it "should support using a widget as an ERb partial layout"
   end
+
+  describe "streaming support" do
+    it "should let you stream a pure widget"
+    it "should let you stream from a widget that's in an ERb view"
+  end
 end

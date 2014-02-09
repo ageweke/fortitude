@@ -13,7 +13,15 @@ describe "Rails capture support", :type => :rails do
     expect_match('capture_widget_from_widget', %r{Rendered with widget:\s*<h3>\s*this is another_widget rendered_with_widget</h3>.*Rendered with render_partial:\s*<h3>\s*this is another_widget rendered_with_render_partial\s*</h3>\s*END}mi)
   end
 
-  it "should be able to provide content in a widget with content_for"
+  it "should be able to provide content in a widget with content_for" do
+    expect_match('widget_content_for',
+      %r{erb_layout_needing_content}i,
+      %r{Foo content is: <h5>this is content for foo!</h5>}mi,
+      %r{Main content is: <h4>this is main_content!</h4>}mi,
+      %r{Bar content is: <h3>this is content for bar!</h3>}mi,
+      :no_layout => true)
+  end
+
   it "should be able to provide content in a widget with provide"
   it "should be able to retrieve stored content in a widget with content_for :name"
   it "should be able to retrieve stored content in a widget with yield :name"
