@@ -180,7 +180,18 @@ EOS
     rebuild_run_content!
 
     def capture(*args, &block)
-      @_fortitude_rendering_context.helpers_object.capture(*args, &block)
+      begin
+        @_fortitude_rendering_context.helpers_object.capture(*args) do
+          reload_output!
+          block.call
+        end
+      ensure
+        reload_output!
+      end
+    end
+
+    def reload_output!
+      @_fortitude_output = @_fortitude_rendering_context.output
     end
 
     def render(*args, &block)

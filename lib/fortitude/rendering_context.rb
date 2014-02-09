@@ -13,7 +13,7 @@ module Fortitude
       else
         @output_buffer_object = OpenStruct.new
         @output_buffer_object.output_buffer = ActionView::OutputBuffer.new
-        output_buffer.force_encoding(Encoding::UTF_8)
+        @output_buffer_object.output_buffer.force_encoding(Encoding::UTF_8)
       end
 
       @yield_block = yield_block
