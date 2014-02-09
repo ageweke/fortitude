@@ -177,7 +177,7 @@ module Fortitude
               widget.to_html(rendering_context)
 
               options = options.dup
-              options[:text] = rendering_context.output.html_safe
+              options[:text] = rendering_context.output_buffer_holder.output_buffer.html_safe
               options[:layout] = true unless options.has_key?(:layout)
 
               new_args = [ options ] + args[1..-1]
@@ -190,7 +190,7 @@ module Fortitude
               widget.to_html(rendering_context)
 
               options = options.dup
-              options[:text] = rendering_context.output.html_safe
+              options[:text] = rendering_context.output_buffer_holder.output_buffer.html_safe
               options[:layout] = true unless options.has_key?(:layout)
 
               new_args = [ options ] + args[1..-1]

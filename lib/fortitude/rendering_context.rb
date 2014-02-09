@@ -21,7 +21,7 @@ module Fortitude
 
     def yield_to_view(*args)
       raise "No layout to yield to!" unless @yield_block
-      output << @yield_block.call(*args)
+      @output_buffer_holder.output_buffer << @yield_block.call(*args)
     end
 
     def flush!

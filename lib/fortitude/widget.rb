@@ -251,7 +251,7 @@ EOS
     end
 
     def reload_output!
-      @_fortitude_output = @_fortitude_rendering_context.output
+      @_fortitude_output = @_fortitude_output_buffer_holder.output_buffer
     end
 
     def render(*args, &block)
