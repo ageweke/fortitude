@@ -1,9 +1,7 @@
 class Views::HelpersSystemSpec::CustomOutputtingToReturning < Fortitude::Widget
-  helper :excitedly, :transform => :output_return_value
+  helper :say_how_awesome_it_is, :transform => :return_output
 
   def content
-    text "and: "
-    excitedly("awesome")
-    text ", yo"
+    text "and #{say_how_awesome_it_is}, yo"
   end
 end

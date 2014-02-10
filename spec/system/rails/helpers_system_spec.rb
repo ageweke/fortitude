@@ -36,10 +36,12 @@ describe "Rails helper support", :type => :rails do
   end
 
   it "should allow changing a custom-defined helper from outputting to returning" do
-    expect_match("custom_outputting_to_returning", %r{and: awesome!!!, yo}mi)
+    expect_match("custom_outputting_to_returning", %r{and super awesome!, yo}mi)
   end
 
-  it "should allow changing a custom-defined helper from returning to outputting"
+  it "should allow changing a custom-defined helper from returning to outputting" do
+    expect_match("custom_returning_to_outputting", %r{and awesome!!!, yo}mi)
+  end
 
   it "should inherit helper settings, but also let them be overridden"
 

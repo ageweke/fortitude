@@ -30,4 +30,8 @@ class HelpersSystemSpecController < ApplicationController
   def custom_outputting_to_returning
     # nothing here
   end
+
+  def custom_returning_to_outputting
+    # nothing here
+  end
 end
