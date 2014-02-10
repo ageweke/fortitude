@@ -64,4 +64,8 @@ class HelpersSystemSpecController < ApplicationController
   def automatic_helpers_disabled
     # nothing here
   end
+
+  def automatic_helpers_inheritance
+    # nothing here
+  end
 end
