@@ -20,11 +20,12 @@ describe "Rails helper support", :type => :rails do
   end
 
   it "should support custom-defined helpers" do
-    expect_match("custom_helpers_basic",
-      %r{excited: awesome!!!})
+    expect_match("custom_helpers_basic", %r{excited: awesome!!!})
   end
 
-  it "should support custom-defined helpers that output, rather than render, properly"
+  it "should support custom-defined helpers that output, rather than render, properly" do
+    expect_match("custom_helper_outputs", %r{how awesome: super awesome!})
+  end
 
   it "should allow changing a built-in Rails helper from outputting to rendering"
   it "should allow changing a built-in Rails helper from rendering to outputting"
