@@ -48,11 +48,15 @@ describe "Rails helper support", :type => :rails do
   end
 
   it "should inherit helper settings, but also let them be overridden" do
-    expect_match("helper_settings_inheritance", %r{it is really awesome!!!, yo\s*and super awesome!, too})
+    expect_match("helper_settings_inheritance", %r{it is really awesome!!!, yo\s*and super awesome!, too}mi)
   end
 
   it "should respect the Rails include_all_helpers setting"
-  it "should allow access to controller methods declared as helpers"
+
+  it "should allow access to controller methods declared as helpers" do
+    expect_match("controller_helper_method", %r{it is \*\~\* Fred \*\~\*\!}mi)
+  end
+
   it "should allow access to methods explicitly imported as helpers"
 
   it "should automatically expose helpers in app/helpers just like Rails does"

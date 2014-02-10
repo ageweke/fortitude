@@ -42,4 +42,14 @@ class HelpersSystemSpecController < ApplicationController
   def helper_settings_inheritance
     # nothing here
   end
+
+  def decorate(x)
+    "*~* #{x} *~*"
+  end
+
+  helper_method :decorate
+
+  def controller_helper_method
+    # nothing here
+  end
 end
