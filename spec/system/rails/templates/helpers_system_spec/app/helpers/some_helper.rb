@@ -7,4 +7,10 @@ module SomeHelper
     output_buffer << "super awesome!"
     "not at all awesome"
   end
+
+  def reverse_it
+    s = capture { yield "xx" }
+    output_buffer << s.reverse
+    "yy" + s
+  end
 end

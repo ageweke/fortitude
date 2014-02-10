@@ -27,6 +27,10 @@ describe "Rails helper support", :type => :rails do
     expect_match("custom_helper_outputs", %r{how awesome: super awesome!})
   end
 
+  it "should support custom-defined helpers that take a block" do
+    expect_match("custom_helpers_with_a_block", %r{fedxxcbayyabcxxdef})
+  end
+
   it "should allow changing a built-in Rails helper from outputting to returning" do
     expect_match("built_in_outputting_to_returning", %r{<body>\s*<p>\s*text is: this is the_text\s*</p>\s*</body>}mi)
   end
