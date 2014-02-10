@@ -35,8 +35,13 @@ describe "Rails helper support", :type => :rails do
     expect_match("built_in_rendering_to_outputting", %r{<body>\s*it was 3 months, yo\s*</body>}mi)
   end
 
-  it "should allow changing a custom-defined helper from outputting to rendering"
+  it "should allow changing a custom-defined helper from outputting to rendering" do
+    expect_match("custom_outputting_to_rendering", %r{and: awesome!!!, yo}mi)
+  end
+
   it "should allow changing a custom-defined helper from rendering to outputting"
+
+  it "should inherit helper settings, but also let them be overridden"
 
   it "should respect the Rails include_all_helpers setting"
   it "should allow access to controller methods declared as helpers"
