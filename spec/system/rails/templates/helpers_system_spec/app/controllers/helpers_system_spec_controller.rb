@@ -6,4 +6,12 @@ class HelpersSystemSpecController < ApplicationController
   def block_helpers
     # nothing here
   end
+
+  def built_in_outputting_helpers
+    # nothing here
+  end
+
+  def custom_helpers_basic
+    # nothing here
+  end
 end

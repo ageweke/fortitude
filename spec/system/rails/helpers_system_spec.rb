@@ -10,11 +10,31 @@ describe "Rails helper support", :type => :rails do
 
   it "should support helpers that use blocks" do
     expect_match("block_helpers",
-      %r{<body>\s*<form.*action="/form_dest".*>.*<input.*authenticity_token.*/>.*<p>inside the form</p>.*</form>}mi)
+      %r{<body>\s*<form.*action="/form_dest".*>.*<input.*authenticity_token.*/>.*<p>inside the form</p>.*</form>}mi,
+      %r{})
   end
 
-  it "should support both rendered and unrendered helpers properly"
-  it "should support custom-defined helpers"
+  it "should support built-in Rails helpers that output, rather than render, properly" do
+    expect_match("built_in_outputting_helpers",
+      %r{<div class=.concat_container.>.*this is concatted.*</div>.*<div class=.safe_concat_container.>.*this is safe_concatted.*</div>}mi)
+  end
+
+  it "should support custom-defined helpers" do
+    expect_match("custom_helpers_basic",
+      %r{excited: awesome!!!})
+  end
+
+  it "should support custom-defined helpers that output, rather than render, properly"
+
+  it "should allow changing a built-in Rails helper from outputting to rendering"
+  it "should allow changing a built-in Rails helper from rendering to outputting"
+  it "should allow changing a custom-defined helper from outputting to rendering"
+  it "should allow changing a custom-defined helper from rendering to outputting"
+
+  it "should respect the Rails include_all_helpers setting"
+  it "should allow access to controller methods declared as helpers"
+  it "should allow access to methods explicitly imported as helpers"
+
   it "should automatically expose helpers in app/helpers just like Rails does"
   it "should allow turning off automatic loading of helpers from app/helpers"
 end
