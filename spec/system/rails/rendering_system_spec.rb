@@ -101,7 +101,45 @@ describe "Rails rendering support", :type => :rails do
   end
 
   describe "streaming support" do
-    it "should let you stream a pure widget"
-    it "should let you stream from a widget that's in an ERb view"
+    # Actually trying to get streaming working completely is a VERY finicky business, and we don't want to fail
+    # our tests just because (e.g.) we can't get buffering 100% disabled on this platform. So, we:
+    #
+    # * Use Net::HTTP to collect the HTTP/1.1 transfer chunks of the response; there should be more than one if
+    #   we're actually streaming (and there ends up being just 1 if you don't tell it to stream, or if Rails
+    #   detects that your template engine doesn't support streaming);
+    # * Collect the rendering order server-side and output it; if streaming, we'll render the top of the layout,
+    #   then the widget, then the bottom of the layout, completely differently from Rails' default mechanism of
+    #   rendering the view first, then the layout.
+    def collect_chunks(path)
+      chunks = [ ]
+
+      uri = rails_server.uri_for(full_path(path))
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        request = Net::HTTP::Get.new uri.request_uri
+
+        http.request(request) do |response|
+          response.read_body do |chunk|
+            chunks << chunk
+          end
+        end
+      end
+
+      chunks
+    end
+
+    it "should let you stream a pure widget" do
+      chunks = collect_chunks("stream_widget")
+      expect(chunks.length).to be > 1
+    end
+
+    it "should let you stream from a widget that's in an ERb layout" do
+      chunks = collect_chunks("stream_widget_with_layout")
+      expect(chunks.length).to be > 1
+
+      full_text = chunks.join("")
+      expect(full_text).to match(/start_of_layout order:\s+\[:layout_start\]/mi)
+      expect(full_text).to match(/end_of_widget order:\s+\[:layout_start, :widget\]/mi)
+      expect(full_text).to match(/end_of_layout order:\s+\[:layout_start, :widget, :layout_end\]/mi)
+    end
   end
 end

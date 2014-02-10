@@ -270,6 +270,10 @@ EOS
       @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
     end
 
+    def output_buffer
+      @_fortitude_output_buffer_holder.output_buffer
+    end
+
     def shared_variables
       @_fortitude_rendering_context.instance_variable_set
     end

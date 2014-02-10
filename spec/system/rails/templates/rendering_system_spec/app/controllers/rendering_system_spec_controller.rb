@@ -80,4 +80,15 @@ class RenderingSystemSpecController < ApplicationController
   def render_partial_with_widget_layout
     # nothing here
   end
+
+  def stream_widget
+    $order = [ ]
+    render :layout => false, :stream => true
+    # render :stream => true
+  end
+
+  def stream_widget_with_layout
+    $order = [ ]
+    render :action => 'stream_widget', :stream => true
+  end
 end

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<%
+$order << :layout_start if $order
+%>
+start_of_layout order: <%= $order.inspect %>
+<html>
+<head>
+  <title>rails_spec_application layout_default</title>
+</head>
+<body>
+
+<%= yield %>
+
+</body>
+</html>
+<%
+$order << :layout_end if $order
+%>
+end_of_layout order: <%= $order.inspect %>

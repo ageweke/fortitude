@@ -12,6 +12,10 @@ module Fortitude
         Fortitude::Rails::Renderer.render(#{widget_class_name}, self, local_assigns) { |*args| yield *args }
         SRC
       end
+
+      def supports_streaming?
+        true
+      end
     end
   end
 end
