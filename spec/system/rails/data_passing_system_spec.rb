@@ -61,6 +61,10 @@ describe "Rails data-passing support", :type => :rails do
       expect_match("implicit_shared_variable_access", /foo: nil/)
     end
 
+    it "should inherit the setting for implicit_shared_variable_access properly" do
+      expect_match("implicit_shared_variable_access_inheritance", /C1: foo is , bar is .*C2: foo is the_foo, bar is the_bar/mi)
+    end
+
     it "should have the same set of copied variables for ERb and a widget" do
       widget_copied_variables = JSON.parse(get('widget_copied_variables'))['widget_copied_variables'].sort
       erb_copied_variables = JSON.parse(get('erb_copied_variables'))['erb_copied_variables'].sort

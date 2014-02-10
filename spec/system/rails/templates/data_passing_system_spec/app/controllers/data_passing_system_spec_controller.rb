@@ -77,4 +77,9 @@ class DataPassingSystemSpecController < ApplicationController
   def implicit_shared_variable_access
     # nothing here
   end
+
+  def implicit_shared_variable_access_inheritance
+    @foo = "the_foo"
+    @bar = "the_bar"
+  end
 end

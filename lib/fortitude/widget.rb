@@ -143,21 +143,25 @@ EOS
 
     def transfer_shared_variables(*args, &block)
       if self.class.implicit_shared_variable_access
-        @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, &block)
+        @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, *args, &block)
+      else
+        block.call(*args)
       end
     end
 
     class << self
       def implicit_shared_variable_access(on_or_off = nil)
         if on_or_off == nil
-          @_fortitude_implicit_shared_variable_access || false
+          return (@_fortitude_implicit_shared_variable_access == :yes) if @_fortitude_implicit_shared_variable_access
+          return superclass.implicit_shared_variable_access if superclass.respond_to?(:implicit_shared_variable_access)
+          false
         elsif on_or_off
           if (! @_fortitude_implicit_shared_variable_access)
-            @_fortitude_implicit_shared_variable_access = true
+            @_fortitude_implicit_shared_variable_access = :yes
             around_content :transfer_shared_variables
           end
         else
-          @_fortitude_implicit_shared_variable_access = false
+          @_fortitude_implicit_shared_variable_access = :no
         end
       end
 
