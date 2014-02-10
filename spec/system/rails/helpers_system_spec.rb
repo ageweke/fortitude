@@ -32,7 +32,7 @@ describe "Rails helper support", :type => :rails do
   end
 
   it "should allow changing a built-in Rails helper from rendering to outputting" do
-    expect_match("built_in_rendering_to_outputting", %r{<body>\s*it was 3 months, yo\s*</body>}mi)
+    expect_match("built_in_returning_to_outputting", %r{<body>\s*it was 3 months, yo\s*</body>}mi)
   end
 
   it "should allow changing a custom-defined helper from outputting to rendering" do

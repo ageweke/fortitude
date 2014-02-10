@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::BuiltInRenderingToOutputting < Fortitude::Widget
+class Views::HelpersSystemSpec::BuiltInReturningToOutputting < Fortitude::Widget
   helper :time_ago_in_words, :transform => :output_return_value
 
   def content

@@ -23,7 +23,7 @@ class HelpersSystemSpecController < ApplicationController
     # nothing here
   end
 
-  def built_in_rendering_to_outputting
+  def built_in_returning_to_outputting
     # nothing here
   end
 end
