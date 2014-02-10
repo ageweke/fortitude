@@ -38,4 +38,8 @@ class HelpersSystemSpecController < ApplicationController
   def custom_returning_to_outputting
     # nothing here
   end
+
+  def helper_settings_inheritance
+    # nothing here
+  end
 end

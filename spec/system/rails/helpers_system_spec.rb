@@ -47,7 +47,9 @@ describe "Rails helper support", :type => :rails do
     expect_match("custom_returning_to_outputting", %r{and awesome!!!, yo}mi)
   end
 
-  it "should inherit helper settings, but also let them be overridden"
+  it "should inherit helper settings, but also let them be overridden" do
+    expect_match("helper_settings_inheritance", %r{it is really awesome!!!, yo\s*and super awesome!, too})
+  end
 
   it "should respect the Rails include_all_helpers setting"
   it "should allow access to controller methods declared as helpers"
