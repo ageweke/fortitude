@@ -4,6 +4,8 @@ require 'active_support/core_ext/hash'
 
 module Fortitude
   class Widget
+    REQUIRED_NEED = Object.new
+
     class << self
       def tags_module
         @tags_module ||= begin
@@ -17,11 +19,23 @@ module Fortitude
         Fortitude::Tag.new(name, options).define_method_on!(tags_module)
       end
 
-      def needs(*variables)
-        @needs ||= [ ]
-        @needs |= variables.map { |v| v.to_s.strip.downcase.to_sym }
+      def needs(*names)
+        @needs ||= { }
 
-        @needs.each do |n|
+        with_defaults = { }
+        with_defaults = names.pop if names[-1] && names[-1].kind_of?(Hash)
+
+        names.each do |name|
+          name = name.to_s.strip.downcase.to_sym
+          @needs[name] = REQUIRED_NEED
+        end
+
+        with_defaults.each do |name, default_value|
+          name = name.to_s.strip.downcase.to_sym
+          @needs[name] = default_value
+        end
+
+        @needs.keys.each do |n|
           class_eval <<-EOS
   def #{n}
     @_fortitude_assign_#{n}
@@ -94,13 +108,19 @@ EOS
     tag :hr
 
     def initialize(assigns = { })
+      assign_locals_from(assigns)
+    end
+
+    def assign_locals_from(assigns)
       missing = [ ]
 
-      self.class.needs.each do |n|
-        if assigns.has_key?(n)
-          instance_variable_set("@_fortitude_assign_#{n}", assigns[n])
+      self.class.needs.each do |name, default_value|
+        if assigns.has_key?(name)
+          instance_variable_set("@_fortitude_assign_#{name}", assigns[name])
+        elsif default_value != REQUIRED_NEED
+          instance_variable_set("@_fortitude_assign_#{name}", default_value)
         else
-          missing << n
+          missing << name
         end
       end
 
@@ -114,7 +134,7 @@ EOS
     end
 
     def method_missing(name, *args, &block)
-      if self.class.automatic_helper_access && @_fortitude_rendering_context.helpers_object.respond_to?(name)
+      if self.class.automatic_helper_access && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name)
         @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       else
         super(name, *args, &block)
@@ -149,6 +169,8 @@ EOS
       end
     end
 
+    VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }
+
     class << self
       def implicit_shared_variable_access(on_or_off = nil)
         if on_or_off == nil
@@ -169,9 +191,21 @@ EOS
         if on_or_off == nil
           return (@_fortitude_automatic_helper_access == :yes) if @_fortitude_automatic_helper_access
           return superclass.automatic_helper_access if superclass.respond_to?(:automatic_helper_access)
-          falsen
+          false
         else on_or_off
           @_fortitude_automatic_helper_access = on_or_off ? :yes : :no
+        end
+      end
+
+      def extra_assigns(state = nil)
+        if state == nil
+          return @_fortitude_extra_assigns if @_fortitude_extra_assigns
+          return superclass.extra_assigns if superclass.respond_to?(:extra_assigns)
+          :error
+        elsif VALID_EXTRA_ASSIGNS_VALUES.include?(state.to_sym)
+          @_fortitude_extra_assigns = state.to_sym
+        else
+          raise ArgumentError, "Invalid value for extra_assigns: #{@_fortitude_extra_assigns.inspect}"
         end
       end
 
@@ -240,6 +274,7 @@ EOS
 
     rebuild_run_content!
     automatic_helper_access true
+    extra_assigns :error
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
