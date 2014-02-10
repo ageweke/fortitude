@@ -23,23 +23,23 @@ describe "Rails helper support", :type => :rails do
     expect_match("custom_helpers_basic", %r{excited: awesome!!!})
   end
 
-  it "should support custom-defined helpers that output, rather than render, properly" do
+  it "should support custom-defined helpers that output, rather than return, properly" do
     expect_match("custom_helper_outputs", %r{how awesome: super awesome!})
   end
 
-  it "should allow changing a built-in Rails helper from outputting to rendering" do
+  it "should allow changing a built-in Rails helper from outputting to returning" do
     expect_match("built_in_outputting_to_returning", %r{<body>\s*<p>\s*text is: this is the_text\s*</p>\s*</body>}mi)
   end
 
-  it "should allow changing a built-in Rails helper from rendering to outputting" do
+  it "should allow changing a built-in Rails helper from returning to outputting" do
     expect_match("built_in_returning_to_outputting", %r{<body>\s*it was 3 months, yo\s*</body>}mi)
   end
 
-  it "should allow changing a custom-defined helper from outputting to rendering" do
-    expect_match("custom_outputting_to_rendering", %r{and: awesome!!!, yo}mi)
+  it "should allow changing a custom-defined helper from outputting to returning" do
+    expect_match("custom_outputting_to_returning", %r{and: awesome!!!, yo}mi)
   end
 
-  it "should allow changing a custom-defined helper from rendering to outputting"
+  it "should allow changing a custom-defined helper from returning to outputting"
 
   it "should inherit helper settings, but also let them be overridden"
 

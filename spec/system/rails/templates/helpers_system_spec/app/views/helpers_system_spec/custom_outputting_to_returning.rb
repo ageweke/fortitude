@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::CustomOutputtingToRendering < Fortitude::Widget
+class Views::HelpersSystemSpec::CustomOutputtingToReturning < Fortitude::Widget
   helper :excitedly, :transform => :output_return_value
 
   def content
