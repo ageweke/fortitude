@@ -60,8 +60,10 @@ describe "Rails helper support", :type => :rails do
   end
 
   it "should allow turning off automatic helper access" do
-    expect_match("automatic_helpers_disabled")
+    expect_match("automatic_helpers_disabled", %r{excitedly: NoMethodError; time_ago_in_words: NoMethodError; number_to_currency: \$1,000,000.00})
   end
+
+  it "should inherit automatic helper access properly"
 
   it "should respect the Rails include_all_helpers setting"
 end

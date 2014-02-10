@@ -114,7 +114,7 @@ EOS
     end
 
     def method_missing(name, *args, &block)
-      if @_fortitude_rendering_context.helpers_object.respond_to?(name)
+      if self.class.automatic_helper_access && @_fortitude_rendering_context.helpers_object.respond_to?(name)
         @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       else
         super(name, *args, &block)
@@ -162,6 +162,16 @@ EOS
           end
         else
           @_fortitude_implicit_shared_variable_access = :no
+        end
+      end
+
+      def automatic_helper_access(on_or_off = nil)
+        if on_or_off == nil
+          return (@_fortitude_automatic_helper_access == :yes) if @_fortitude_automatic_helper_access
+          return superclass.automatic_helper_access if superclass.respond_to?(:automatic_helper_access)
+          falsen
+        else on_or_off
+          @_fortitude_automatic_helper_access = on_or_off ? :yes : :no
         end
       end
 
@@ -229,6 +239,7 @@ EOS
     end
 
     rebuild_run_content!
+    automatic_helper_access true
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
