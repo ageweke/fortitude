@@ -7,7 +7,7 @@ class Views::HelpersSystemSpec::BuiltInOutputtingHelpers < Fortitude::Widget
     end
 
     div(:class => "safe_concat_container") do
-      concat "this is safe_concatted"
+      safe_concat "this is safe_concatted"
     end
   end
 end

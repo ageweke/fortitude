@@ -169,7 +169,9 @@ EOS
       end
 
       def helper(name, options = { })
-        options.assert_valid_keys(:transform)
+        options.assert_valid_keys(:transform, :call)
+
+        source_method_name = options[:call] || name
 
         prefix = "return"
         suffix = ""
@@ -186,7 +188,7 @@ EOS
 
         class_eval <<-EOS
   def #{name}(*args, &block)
-    #{prefix}(@_fortitude_rendering_context.helpers_object.#{name}(*args, &block))#{suffix}
+    #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &block))#{suffix}
   end
 EOS
       end
