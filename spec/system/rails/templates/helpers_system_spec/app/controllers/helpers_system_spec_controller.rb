@@ -52,4 +52,12 @@ class HelpersSystemSpecController < ApplicationController
   def controller_helper_method
     # nothing here
   end
+
+  require 'some_stuff'
+
+  helper SomeStuff
+
+  def controller_helper_module
+    # nothing here
+  end
 end
