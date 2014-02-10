@@ -14,7 +14,7 @@ describe "Rails helper support", :type => :rails do
       %r{})
   end
 
-  it "should support built-in Rails helpers that output, rather than render, properly" do
+  it "should support built-in Rails helpers that output, rather than return, properly" do
     expect_match("built_in_outputting_helpers",
       %r{<div class=.concat_container.>.*this is concatted.*</div>.*<div class=.safe_concat_container.>.*this is safe_concatted.*</div>}mi)
   end
@@ -28,7 +28,7 @@ describe "Rails helper support", :type => :rails do
   end
 
   it "should allow changing a built-in Rails helper from outputting to rendering" do
-    expect_match("built_in_outputting_to_rendering", %r{<body>\s*<p>\s*text is: this is the_text\s*</p>\s*</body>}mi)
+    expect_match("built_in_outputting_to_returning", %r{<body>\s*<p>\s*text is: this is the_text\s*</p>\s*</body>}mi)
   end
 
   it "should allow changing a built-in Rails helper from rendering to outputting" do

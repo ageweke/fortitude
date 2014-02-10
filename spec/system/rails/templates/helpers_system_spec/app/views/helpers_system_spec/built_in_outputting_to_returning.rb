@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::BuiltInOutputtingToRendering < Fortitude::Widget
+class Views::HelpersSystemSpec::BuiltInOutputtingToReturning < Fortitude::Widget
   helper :concat, :transform => :return_output
 
   def content
