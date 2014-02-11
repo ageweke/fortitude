@@ -1,6 +1,7 @@
 require 'fortitude/tag'
 require 'fortitude/errors'
 require 'active_support/core_ext/hash'
+require 'stringio'
 
 module Fortitude
   class Widget
@@ -20,6 +21,8 @@ module Fortitude
       end
 
       def needs(*names)
+        return get_needs if names.length == 0
+
         @needs ||= { }
 
         with_defaults = { }
@@ -35,15 +38,7 @@ module Fortitude
           @needs[name] = default_value
         end
 
-        @needs.keys.each do |n|
-          class_eval <<-EOS
-  def #{n}
-    @_fortitude_assign_#{n}
-  end
-EOS
-        end
-
-        rebuild_assign_locals_from! if names.length > 0
+        rebuild_needs_methods!
 
         @needs
       end
@@ -52,47 +47,68 @@ EOS
         @needs || { }
       end
 
-      def rebuild_assign_locals_from!
+      def rebuild_needs_methods!
+        n = get_needs
         ivar_prefix = assign_instance_variable_prefix
 
-        method = <<-EOS
-  def assign_locals_from(assigns)
-    the_needs = self.class.get_needs
-    missing = [ ]
-    have_missing = false
+        method_text = StringIO.new
 
-EOS
-        (@needs || { }).each do |need, default_value|
-          method << <<-EOS
-    # Need '#{need}', default value #{default_value.inspect}
-    value = assigns[:#{need}]
+        method_text.puts "  def assign_locals_from(assigns)"
+        method_text.puts "    @_fortitude_raw_assigns = assigns"
+        method_text.puts "    the_needs = self.class.get_needs"
+        method_text.puts "    missing = [ ]"
+        method_text.puts "    have_missing = false"
 
-    if (! value) && (! assigns.has_key?(:#{need}))
-      s = '#{need}'.freeze
-      value = assigns[s]
-      if (! value) && (! assigns.has_key?(s))
-        value = the_needs[:#{need}]
-
-        if value == REQUIRED_NEED
-          missing << :#{need}
-          have_missing = true
-        end
-      end
-    end
-
-    @#{ivar_prefix}#{need} = value
-
-EOS
+        if [ :error, :use ].include?(extra_assigns)
+          method_text.puts "    extra = assigns.symbolize_keys"
         end
 
-        method << <<-EOS
+        n.each do |need, default_value|
+          method_text.puts "    # Need '#{need}' -------------------------------------------------"
+          method_text.puts "    value = assigns[:#{need}]"
 
-    raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if have_missing
+          if [ :error, :use ].include?(extra_assigns)
+            method_text.puts "    extra.delete(:#{need})"
+          end
+
+          method_text.puts "    if (! value) && (! assigns.has_key?(:#{need}))"
+          method_text.puts "      s = '#{need}'.freeze"
+          method_text.puts "      value = assigns[s]"
+          method_text.puts "      if (! value) && (! assigns.has_key?(s))"
+
+          if default_value == REQUIRED_NEED
+            method_text.puts "        missing << :#{need}"
+            method_text.puts "        have_missing = true"
+          else
+            method_text.puts "        value = the_needs[:#{need}]"
+          end
+          method_text.puts "      end"
+          method_text.puts "    end"
+          method_text.puts "    "
+          method_text.puts "    @#{ivar_prefix}#{need} = value"
+        end
+
+        if extra_assigns == :error
+          method_text.puts "    raise Fortitude::Errors::ExtraAssigns.new(self, extra) if extra.size > 0"
+        elsif extra_assigns == :use
+          method_text.puts "    extra.each do |key, value|"
+          method_text.puts "      @#{ivar_prefix}#{key} = value"
+          method_text.puts "    end"
+        end
+
+        method_text.puts "    raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if have_missing"
+        method_text.puts "  end"
+
+        # $stderr.puts "RUNNING: #{method_text.string}"
+        class_eval(method_text.string)
+
+        n.each do |need, default_value|
+          class_eval(<<-EOS)
+  def #{need}
+    @#{ivar_prefix}#{need}
   end
 EOS
-
-        $stderr.puts "RUNNING: #{method}"
-        class_eval(method)
+        end
       end
     end
 
@@ -160,81 +176,77 @@ EOS
       assign_locals_from(assigns)
     end
 
+    class AssignsProxy
+      def initialize(widget, keys)
+        @widget = widget
+        @keys = { }
+        keys.each { |k| @keys[k] = true }
+        @ivar_prefix = "@#{assign_instance_variable_prefix}"
+      end
+
+      def keys
+        @keys.keys
+      end
+
+      def has_key?(x)
+        @keys[x.to_sym]
+      end
+
+      def [](x)
+        @widget.instance_variable_get("#{@ivar_prefix}#{x}") if has_key?(x)
+      end
+
+      def []=(x, y)
+        @widget.instance_variable_set("#{@ivar_prefix}#{x}", y) if has_key?(x)
+      end
+
+      def to_hash
+        out = { }
+        keys.each { |k| out[k] = self[k] }
+        out
+      end
+
+      def to_h
+        to_hash
+      end
+
+      def length
+        @keys.length
+      end
+
+      def size
+        @keys.size
+      end
+
+      def to_s
+        "<Assigns for #{widget}: #{to_hash}>"
+      end
+
+      def inspect
+        "<Assigns for #{widget}: #{to_hash.inspect}>"
+      end
+
+      def member?(x)
+        has_key?(x)
+      end
+
+      def store(key, value)
+        self[key] = value
+      end
+
+      delegate :==, :assoc, :each, :each_pair, :each_key, :each_value, :empty?, :eql?, :fetch, :flatten,
+        :has_value?, :hash, :include?, :invert, :key, :key?, :merge, :rassoc, :reject, :select,
+        :to_a, :value?, :values, :values_at, :to => :to_hash
+    end
+
     def assigns
-      @_fortitude_all_assigns
-    end
+      @_fortitude_assigns_proxy ||= begin
+        keys = get_needs.keys
+        keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if extra_assigns == :use
 
-=begin
-    def assign_locals_from(assigns)
-      needs = self.class.needs
-      prefix = "@#{self.class.assign_instance_variable_prefix}"
-
-      missing = [ ]
-
-      needs.each do |name, default_value|
-        ivar_name = "#{prefix}#{name}"
-
-        # symbol
-        value = assigns[name]
-        if value || assigns.has_key?(name)
-          instance_variable_set(ivar_name, value)
-        else
-          name = name.to_s
-          value = assigns[name]
-          if value || assigns.has_key?(name)
-            instance_variable_set(ivar_name, value)
-          elsif default_value == REQUIRED_NEED
-            missing << name.to_sym
-          else
-            instance_variable_set(ivar_name, default_value)
-          end
-        end
+        AssignsProxy.new(self, keys)
       end
-
-      raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if missing.length > 0
     end
-
-    def assign_locals_from(assigns)
-      needs = self.class.needs
-      extra_assigns = self.class.extra_assigns
-      prefix = self.class.assign_instance_variable_prefix
-
-      extra = { }
-      net_assign_set = { }
-
-      assigns.each do |name, value|
-        name = name.to_sym
-        has_need = needs.has_key?(name)
-        default_value = needs[name]
-
-        if has_need || extra_assigns == :use
-          instance_variable_set("@#{prefix}#{name}", value)
-          net_assign_set[name] = value
-        else
-          extra[name] = value
-        end
-      end
-
-      raise Fortitude::Errors::ExtraAssigns.new(self, extra) if extra.size > 0 && extra_assigns == :error
-
-      missing = [ ]
-
-      needs.each do |name, default_value|
-        if (! assigns.has_key?(name))
-          if default_value != REQUIRED_NEED
-            instance_variable_set("@#{prefix}#{name}", default_value)
-            net_assign_set[name] = default_value
-          else
-            missing << name
-          end
-        end
-      end
-
-      raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if missing.length > 0
-
-      @_fortitude_all_assigns = net_assign_set.with_indifferent_access.freeze
-    end
-=end
 
     def content
       raise "Must override in #{self.class.name}"
@@ -318,7 +330,7 @@ EOS
           false
         else on_or_off
           @_fortitude_use_instance_variables_for_assigns = on_or_off ? :yes : :no
-          rebuild_assign_locals_from!
+          rebuild_needs_methods!
         end
       end
 
@@ -390,10 +402,10 @@ EOS
     end
 
     automatic_helper_access true
-    extra_assigns :error
+    extra_assigns :ignore
 
     rebuild_run_content!
-    rebuild_assign_locals_from!
+    rebuild_needs_methods!
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
