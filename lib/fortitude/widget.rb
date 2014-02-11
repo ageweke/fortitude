@@ -6,6 +6,7 @@ require 'stringio'
 module Fortitude
   class Widget
     REQUIRED_NEED = Object.new
+    NOT_PRESENT_NEED = Object.new
 
     class << self
       def tags_module
@@ -65,18 +66,17 @@ module Fortitude
 
         n.each do |need, default_value|
           method_text.puts "    # Need '#{need}' -------------------------------------------------"
-          method_text.puts "    value = assigns[:#{need}]"
-
           if [ :error, :use ].include?(extra_assigns)
             method_text.puts "    extra.delete(:#{need})"
           end
 
-          method_text.puts "    if (! value) && (! assigns.has_key?(:#{need}))"
-          method_text.puts "      s = '#{need}'.freeze"
-          method_text.puts "      value = assigns[s]"
-          method_text.puts "      if (! value) && (! assigns.has_key?(s))"
+          method_text.puts "    value = assigns.fetch(:#{need}, NOT_PRESENT_NEED)"
+          method_text.puts "    if value == NOT_PRESENT_NEED"
+          method_text.puts "      value = assigns.fetch('#{need}', NOT_PRESENT_NEED)"
+          method_text.puts "      if value == NOT_PRESENT_NEED"
 
           if default_value == REQUIRED_NEED
+            method_text.puts "        value = nil"
             method_text.puts "        missing << :#{need}"
             method_text.puts "        have_missing = true"
           else
