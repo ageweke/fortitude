@@ -43,7 +43,56 @@ module Fortitude
 EOS
         end
 
+        rebuild_assign_locals_from! if names.length > 0
+
         @needs
+      end
+
+      def get_needs
+        @needs || { }
+      end
+
+      def rebuild_assign_locals_from!
+        ivar_prefix = assign_instance_variable_prefix
+
+        method = <<-EOS
+  def assign_locals_from(assigns)
+    the_needs = self.class.get_needs
+    missing = [ ]
+    have_missing = false
+
+EOS
+        (@needs || { }).each do |need, default_value|
+          method << <<-EOS
+    # Need '#{need}', default value #{default_value.inspect}
+    value = assigns[:#{need}]
+
+    if (! value) && (! assigns.has_key?(:#{need}))
+      s = '#{need}'.freeze
+      value = assigns[s]
+      if (! value) && (! assigns.has_key?(s))
+        value = the_needs[:#{need}]
+
+        if value == REQUIRED_NEED
+          missing << :#{need}
+          have_missing = true
+        end
+      end
+    end
+
+    @#{ivar_prefix}#{need} = value
+
+EOS
+        end
+
+        method << <<-EOS
+
+    raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if have_missing
+  end
+EOS
+
+        $stderr.puts "RUNNING: #{method}"
+        class_eval(method)
       end
     end
 
@@ -108,12 +157,41 @@ EOS
     tag :hr
 
     def initialize(assigns = { })
-      assigns = assigns.with_indifferent_access
       assign_locals_from(assigns)
     end
 
     def assigns
       @_fortitude_all_assigns
+    end
+
+=begin
+    def assign_locals_from(assigns)
+      needs = self.class.needs
+      prefix = "@#{self.class.assign_instance_variable_prefix}"
+
+      missing = [ ]
+
+      needs.each do |name, default_value|
+        ivar_name = "#{prefix}#{name}"
+
+        # symbol
+        value = assigns[name]
+        if value || assigns.has_key?(name)
+          instance_variable_set(ivar_name, value)
+        else
+          name = name.to_s
+          value = assigns[name]
+          if value || assigns.has_key?(name)
+            instance_variable_set(ivar_name, value)
+          elsif default_value == REQUIRED_NEED
+            missing << name.to_sym
+          else
+            instance_variable_set(ivar_name, default_value)
+          end
+        end
+      end
+
+      raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if missing.length > 0
     end
 
     def assign_locals_from(assigns)
@@ -156,6 +234,7 @@ EOS
 
       @_fortitude_all_assigns = net_assign_set.with_indifferent_access.freeze
     end
+=end
 
     def content
       raise "Must override in #{self.class.name}"
@@ -189,7 +268,7 @@ EOS
         input = input.with_indifferent_access
 
         out = { }
-        needs.keys.each do |name|
+        get_needs.keys.each do |name|
           out[name] = input[name] if input.has_key?(name)
         end
         out
@@ -239,6 +318,7 @@ EOS
           false
         else on_or_off
           @_fortitude_use_instance_variables_for_assigns = on_or_off ? :yes : :no
+          rebuild_assign_locals_from!
         end
       end
 
@@ -309,9 +389,11 @@ EOS
       end
     end
 
-    rebuild_run_content!
     automatic_helper_access true
     extra_assigns :error
+
+    rebuild_run_content!
+    rebuild_assign_locals_from!
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
