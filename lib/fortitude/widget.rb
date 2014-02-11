@@ -108,25 +108,53 @@ EOS
     tag :hr
 
     def initialize(assigns = { })
+      assigns = assigns.with_indifferent_access
       assign_locals_from(assigns)
     end
 
-    def assign_locals_from(assigns)
-      missing = [ ]
+    def assigns
+      @_fortitude_all_assigns
+    end
 
-      self.class.needs.each do |name, default_value|
-        if assigns.has_key?(name)
-          instance_variable_set("@_fortitude_assign_#{name}", assigns[name])
-        elsif default_value != REQUIRED_NEED
-          instance_variable_set("@_fortitude_assign_#{name}", default_value)
+    def assign_locals_from(assigns)
+      needs = self.class.needs
+      extra_assigns = self.class.extra_assigns
+      prefix = self.class.assign_instance_variable_prefix
+
+      extra = { }
+      net_assign_set = { }
+
+      assigns.each do |name, value|
+        name = name.to_sym
+        has_need = needs.has_key?(name)
+        default_value = needs[name]
+
+        if has_need || extra_assigns == :use
+          instance_variable_set("@#{prefix}#{name}", value)
+          net_assign_set[name] = value
         else
-          missing << name
+          extra[name] = value
         end
       end
 
-      if missing.length > 0
-        raise Fortitude::Errors::MissingNeed.new(self, missing, assigns.keys)
+      raise Fortitude::Errors::ExtraAssigns.new(self, extra) if extra.size > 0 && extra_assigns == :error
+
+      missing = [ ]
+
+      needs.each do |name, default_value|
+        if (! assigns.has_key?(name))
+          if default_value != REQUIRED_NEED
+            instance_variable_set("@#{prefix}#{name}", default_value)
+            net_assign_set[name] = default_value
+          else
+            missing << name
+          end
+        end
       end
+
+      raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if missing.length > 0
+
+      @_fortitude_all_assigns = net_assign_set.with_indifferent_access.freeze
     end
 
     def content
@@ -134,26 +162,10 @@ EOS
     end
 
     def method_missing(name, *args, &block)
-      if self.class.automatic_helper_access && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name)
+      if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name)
         @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       else
         super(name, *args, &block)
-      end
-    end
-
-    BEFORE_ATTRIBUTE_STRING = " ".freeze
-    AFTER_ATTRIBUTE_STRING = "=\"".freeze
-    AFTER_VALUE_STRING = "\"".freeze
-
-    def _attributes(h)
-      o = @_fortitude_output_buffer_holder.output_buffer
-
-      h.each do |k,v|
-        o.concat(BEFORE_ATTRIBUTE_STRING)
-        k.to_s.fortitude_append_escaped_string(o)
-        o.concat(AFTER_ATTRIBUTE_STRING)
-        v.to_s.fortitude_append_escaped_string(o)
-        o.concat(AFTER_VALUE_STRING)
       end
     end
 
@@ -170,8 +182,19 @@ EOS
     end
 
     VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }
+    STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
     class << self
+      def extract_needed_assigns_from(input)
+        input = input.with_indifferent_access
+
+        out = { }
+        needs.keys.each do |name|
+          out[name] = input[name] if input.has_key?(name)
+        end
+        out
+      end
+
       def implicit_shared_variable_access(on_or_off = nil)
         if on_or_off == nil
           return (@_fortitude_implicit_shared_variable_access == :yes) if @_fortitude_implicit_shared_variable_access
@@ -207,6 +230,20 @@ EOS
         else
           raise ArgumentError, "Invalid value for extra_assigns: #{@_fortitude_extra_assigns.inspect}"
         end
+      end
+
+      def use_instance_variables_for_assigns(on_or_off = nil)
+        if on_or_off == nil
+          return (@_fortitude_use_instance_variables_for_assigns == :yes) if @_fortitude_use_instance_variables_for_assigns
+          return superclass.use_instance_variables_for_assigns if superclass.respond_to?(:use_instance_variables_for_assigns)
+          false
+        else on_or_off
+          @_fortitude_use_instance_variables_for_assigns = on_or_off ? :yes : :no
+        end
+      end
+
+      def assign_instance_variable_prefix
+        use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX
       end
 
       def around_content(*method_names)
