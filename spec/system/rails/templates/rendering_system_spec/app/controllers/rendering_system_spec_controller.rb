@@ -33,6 +33,15 @@ class RenderingSystemSpecController < ApplicationController
     render :inline => proc, :type => :fortitude
   end
 
+  def render_widget_via_inline_with_var_access
+    @name = "Fred"
+    @friend = "Sue"
+    proc = lambda do
+      p "this is an inline widget named #{@name}, and it is #{@age} years old, and friends with #{@friend}"
+    end
+    render :inline => proc, :type => :fortitude, :locals => { :friend => 'Mary', :age => 27 }
+  end
+
   def render_partial_from_widget
     # nothing here
   end

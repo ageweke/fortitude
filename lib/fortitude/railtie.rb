@@ -185,8 +185,18 @@ module Fortitude
             elsif (widget_block = options[:inline]) && (options[:type] == :fortitude)
               rendering_context = ::Fortitude::RenderingContext.new(self, self, nil, nil)
               widget_class = Class.new(Fortitude::Widget)
+              widget_class.use_instance_variables_for_assigns(true)
+              widget_class.extra_assigns(:use)
               widget_class.send(:define_method, :content, &widget_block)
-              widget = widget_class.new
+
+              assigns = { }
+              instance_variables.each do |ivar_name|
+                value = instance_variable_get(ivar_name)
+                assigns[$1.to_sym] = value if ivar_name =~ /^@(.*)$/
+              end
+              assigns = assigns.merge(options[:locals] || { })
+
+              widget = widget_class.new(assigns)
               widget.to_html(rendering_context)
 
               options = options.dup

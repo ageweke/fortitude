@@ -32,7 +32,9 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_widget_via_inline", /this is an inline widget named Fred/)
     end
 
-    it "should let you render a widget inline, and use all instance and local variables"
+    it "should let you render a widget inline, and use all instance and local variables, with locals overriding instance variables" do
+      expect_match("render_widget_via_inline_with_var_access", /this is an inline widget named Fred, and it is 27 years old, and friends with Mary/)
+    end
   end
 
   describe "rendering in a widget" do

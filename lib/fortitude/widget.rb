@@ -92,7 +92,7 @@ module Fortitude
           method_text.puts "    raise Fortitude::Errors::ExtraAssigns.new(self, extra) if extra.size > 0"
         elsif extra_assigns == :use
           method_text.puts "    extra.each do |key, value|"
-          method_text.puts "      @#{ivar_prefix}#{key} = value"
+          method_text.puts "      instance_variable_set(\"@#{ivar_prefix}\#{key}\", value)"
           method_text.puts "    end"
         end
 
@@ -318,6 +318,7 @@ EOS
           :error
         elsif VALID_EXTRA_ASSIGNS_VALUES.include?(state.to_sym)
           @_fortitude_extra_assigns = state.to_sym
+          rebuild_needs_methods!
         else
           raise ArgumentError, "Invalid value for extra_assigns: #{@_fortitude_extra_assigns.inspect}"
         end
@@ -333,6 +334,10 @@ EOS
           rebuild_needs_methods!
         end
       end
+
+      ### ==============================
+      ### TODO: Doesn't use_instance_variables_for_assigns conflict with implicit_shared_variable_access?
+      ### If you pass a parameter :foo into the widget, won't it copy that back out to the controller afterwards?
 
       def assign_instance_variable_prefix
         use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX
