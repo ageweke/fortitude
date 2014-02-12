@@ -14,7 +14,7 @@ module Fortitude
       @output_buffer_holder ||= OutputBufferHolder.new
       @helpers_object = options[:helpers_object] || options[:delegate_object] || BasicObject.new
 
-      instance_variables_object = options[:instance_variables_object] || options[:delegate_object] || BasicObject.new
+      instance_variables_object = options[:instance_variables_object] || options[:delegate_object] || Object.new
       @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
 
       @yield_block = options[:yield_block]
@@ -34,7 +34,12 @@ module Fortitude
       attr_reader :output_buffer
 
       def initialize
-        @output_buffer = ActionView::OutputBuffer.new
+        if defined?(::ActionView::OutputBuffer)
+          @output_buffer = ::ActionView::OutputBuffer.new
+        else
+          @output_buffer = ""
+        end
+
         @output_buffer.force_encoding(Encoding::UTF_8)
       end
     end

@@ -13,8 +13,8 @@ module Fortitude
     end
 
     def keys
-      target_object.instance_variable_names.map do |instance_variable_name|
-        $1.to_sym if instance_variable_name =~ /^@(.*)$/
+      target_object.instance_variables.map do |instance_variable_name|
+        $1.to_sym if instance_variable_name.to_s =~ /^@(.*)$/
       end.compact
     end
 
@@ -23,8 +23,8 @@ module Fortitude
     end
 
     def with_instance_variable_copying(widget)
-      before_copy = widget.instance_variable_names
-      skip_copy = before_copy - target_object.instance_variable_names
+      before_copy = widget.instance_variables
+      skip_copy = before_copy - target_object.instance_variables
 
       copy_to_widget(widget)
       begin
@@ -36,14 +36,14 @@ module Fortitude
 
     private
     def copy_to_widget(widget)
-      target_object.instance_variable_names.each do |instance_variable_name|
+      target_object.instance_variables.each do |instance_variable_name|
         value = target_object.instance_variable_get(instance_variable_name)
         widget.instance_variable_set(instance_variable_name, value)
       end
     end
 
     def copy_from_widget(widget, exclude_variables = [ ])
-      (widget.instance_variable_names - exclude_variables).each do |instance_variable_name|
+      (widget.instance_variables - exclude_variables).each do |instance_variable_name|
         next if instance_variable_name =~ /^@_fortitude_/
 
         value = widget.instance_variable_get(instance_variable_name)
