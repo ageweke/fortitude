@@ -71,7 +71,7 @@ The data is:
       before :all do
         @rails_template_name = template_name
 
-        templates = [ 'base', template_name ].map { |t| "system/rails/templates/#{t}" }
+        templates = [ 'base', template_name ].map { |t| "rails/templates/#{t}" }
 
         @rails_server = Spec::Helpers::RailsServer.new(template_name, templates, options)
         @rails_server.start!

@@ -14,7 +14,7 @@ module Spec
 
         @rails_install_dirname = @name.to_s
         @rails_install_dirname << "-#{@rails_version}" if @rails_version
-        @rails_root = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/spec/system/rails/#{@rails_install_dirname}"))
+        @rails_root = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/spec/rails/#{@rails_install_dirname}"))
 
         @port = 20_000 + rand(10_000)
 
