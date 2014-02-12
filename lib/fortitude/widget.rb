@@ -253,6 +253,11 @@ EOS
     end
 
     def method_missing(name, *args, &block)
+      if self.class.extra_assigns == :use
+        ivar_name = "@#{self.class.assign_instance_variable_prefix}#{name}"
+        return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
+      end
+
       if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name)
         @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       else
