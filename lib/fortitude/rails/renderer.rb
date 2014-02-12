@@ -15,7 +15,7 @@ module Fortitude
           needed_assigns = widget_class.extract_needed_assigns_from(total_assigns)
           widget = widget_class.new(needed_assigns)
           template_handler.with_output_buffer do
-            rendering_context = ::Fortitude::RenderingContext.new(template_handler, template_handler, template_handler, block)
+            rendering_context = ::Fortitude::RenderingContext.new(:delegate_object => template_handler, :yield_block => block)
             widget.to_html(rendering_context)
             rendering_context.flush!
           end
