@@ -15,6 +15,20 @@ describe "Fortitude needs", :type => :system do
       expect { child.new(:foo => 'f', :bar => 'b') }.to raise_error(Fortitude::Errors::MissingNeed)
       expect(render(child.new(:foo => 'f', :bar => 'b', :baz => 'z'))).to eq("foo: f, bar: b, baz: z")
     end
+
+    it "should let you add needs later, and it should apply to both that class and any subclasses" do
+      parent = widget_class_with_content { text "parent" }
+      child = widget_class(:superclass => parent) do
+        needs :bar
+        def content
+          super
+          text "; child: bar: #{bar}"
+        end
+      end
+
+      expect(render(parent)).to eq("parent")
+      expect(render(child.new(:bar => "the_bar"))).to eq("parent; child: bar: the_bar")
+    end
   end
 
   describe "defaults" do

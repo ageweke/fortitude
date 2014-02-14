@@ -14,13 +14,14 @@ module SystemHelpers
     end
   end
 
-  attr_reader :rendering_context, :ivars
+  attr_reader :ivars
 
-  def rc(options)
+  def rc(options = { })
+    options[:instance_variables_object] = ivars unless options.has_key?(:instance_variables_object)
     ::Fortitude::RenderingContext.new(options)
   end
 
-  def html
+  def html_from(rendering_context)
     rendering_context.output_buffer_holder.output_buffer.to_s
   end
 
@@ -48,8 +49,9 @@ module SystemHelpers
     else
       widget_or_class
     end
-    widget.to_html(@rendering_context)
-    html
+    rendering_context = options[:rendering_context] || rc
+    widget.to_html(rendering_context)
+    html_from(rendering_context)
   end
 
   def render_content(options = { }, &block)
@@ -63,7 +65,6 @@ module SystemHelpers
       @helpers = @helpers_class.new
       @ivars = IvarAccessible.new
       @yield_block = double("yield_block")
-      @rendering_context = rc(:helpers_object => @helpers, :instance_variables_object => @ivars, :yield_block => @yield_block)
     end
   end
 end
