@@ -24,28 +24,30 @@ module Fortitude
       def needs(*names)
         return get_needs if names.length == 0
 
-        @needs ||= { }
+        @this_class_needs ||= { }
 
         with_defaults = { }
         with_defaults = names.pop if names[-1] && names[-1].kind_of?(Hash)
 
         names.each do |name|
           name = name.to_s.strip.downcase.to_sym
-          @needs[name] = REQUIRED_NEED
+          @this_class_needs[name] = REQUIRED_NEED
         end
 
         with_defaults.each do |name, default_value|
           name = name.to_s.strip.downcase.to_sym
-          @needs[name] = default_value
+          @this_class_needs[name] = default_value
         end
 
         rebuild_needs_methods!
 
-        @needs
+        @this_class_needs
       end
 
       def get_needs
-        @needs || { }
+        out = { }
+        out = superclass.get_needs if superclass.respond_to?(:get_needs)
+        out.merge(@this_class_needs || { })
       end
 
       def rebuild_needs_methods!
