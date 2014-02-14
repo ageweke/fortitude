@@ -9,6 +9,15 @@ module Fortitude
     NOT_PRESENT_NEED = Object.new
 
     class << self
+      def direct_subclasses
+        @direct_subclasses || [ ]
+      end
+
+      def inherited(subclass)
+        @direct_subclasses ||= [ ]
+        @direct_subclasses |= [ subclass ]
+      end
+
       def tags_module
         @tags_module ||= begin
           out = Module.new
@@ -51,6 +60,11 @@ module Fortitude
       end
 
       def rebuild_needs_methods!
+        rebuild_my_needs_methods!
+        direct_subclasses.each { |s| s.rebuild_needs_methods! }
+      end
+
+      def rebuild_my_needs_methods!
         n = get_needs
         ivar_prefix = assign_instance_variable_prefix
 

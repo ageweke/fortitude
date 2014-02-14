@@ -28,6 +28,20 @@ describe "Fortitude needs", :type => :system do
 
       expect(render(parent)).to eq("parent")
       expect(render(child.new(:bar => "the_bar"))).to eq("parent; child: bar: the_bar")
+
+      parent.class_eval { needs :foo }
+      child.class_eval do
+        def content
+          super
+          text "; child: bar: #{bar}; foo: #{foo}"
+        end
+      end
+
+      expect { parent.new }.to raise_error(Fortitude::Errors::MissingNeed)
+      expect { child.new(:bar => 'the_bar') }.to raise_error(Fortitude::Errors::MissingNeed)
+
+      expect(render(parent.new(:foo => "the_foo"))).to eq("parent")
+      expect(render(child.new(:foo => "the_foo", :bar => "the_bar"))).to eq("parent; child: bar: the_bar; foo: the_foo")
     end
   end
 
