@@ -12,4 +12,8 @@ class LocalizationSystemSpecController < ApplicationController
   def t
     # nothing here
   end
+
+  def content_method
+    # nothing here
+  end
 end
