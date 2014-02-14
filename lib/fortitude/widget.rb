@@ -396,6 +396,32 @@ EOS
 EOS
       end
 
+      def method_added(method_name)
+        super(method_name)
+        check_localized_methods!
+      end
+
+      def method_removed(method_name)
+        super(method_name)
+        check_localized_methods!
+      end
+
+      def include(*args)
+        super(*args)
+        check_localized_methods!
+      end
+
+      LOCALIZED_CONTENT_PREFIX = "localized_content_"
+
+      def check_localized_methods!
+        currently_has = instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i }
+        if currently_has != @last_localized_methods_check_has
+          @last_localized_methods_check_has = currently_has
+          rebuild_run_content!
+        end
+        direct_subclasses.each { |s| s.check_localized_methods! }
+      end
+
       private
       def this_class_around_content_methods
         @_fortitude_around_content_methods ||= [ ]
@@ -417,7 +443,20 @@ EOS
         acm.each_with_index do |method_name, index|
           text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
         end
-        text += "  " + ("  " * acm.length) + "content(*args, &block)\n"
+
+        if @last_localized_methods_check_has
+          $stderr.puts "LOCALIZATION SUPPORT"
+          text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{I18n.locale || I18n.default_locale}\"\n"
+          text += "  " + ("  " * acm.length) + "if respond_to?(locale_method_name)\n"
+          text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
+          text += "  " + ("  " * acm.length) + "else\n"
+          text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
+          text += "  " + ("  " * acm.length) + "end\n"
+        else
+          $stderr.puts "NO LOCALIZATION SUPPORT"
+          text += "  " + ("  " * acm.length) + "content(*args, &block)\n"
+        end
+
         (0..(acm.length - 1)).each do |index|
           text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
         end

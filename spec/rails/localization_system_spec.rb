@@ -2,9 +2,9 @@ describe "basic Rails support", :type => :rails do
   uses_rails_with_template :localization_system_spec
 
   it "should allow you to provide localized content methods" do
-    expect_match("content_method?locale=en", /wassup? this is english/)
-    expect_match("content_method?locale=fr", /bienvenue, les mecs/)
-    expect_match("content_method?locale=pt", /i don't know that language/)
+    expect_match("content_method?locale=en", /wassup\? this is english/mi)
+    expect_match("content_method?locale=fr", /bienvenue, les mecs/mi)
+    expect_match("content_method?locale=pt", /i don't know that language/mi)
   end
 
   it "should let you translate strings with I18n.t" do
