@@ -12,7 +12,7 @@ module Fortitude
         @output_buffer_holder = options[:delegate_object]
       end
       @output_buffer_holder ||= OutputBufferHolder.new
-      @helpers_object = options[:helpers_object] || options[:delegate_object] || BasicObject.new
+      @helpers_object = options[:helpers_object] || options[:delegate_object] || Object.new
 
       instance_variables_object = options[:instance_variables_object] || options[:delegate_object] || Object.new
       @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)

@@ -80,8 +80,37 @@ describe "Fortitude needs", :type => :system do
       expect(render(child.new(:foo => 'the_foo'))).to eq('foo: the_foo, bar: def_bar, baz: child_def_baz; baz: child_def_baz, quux: child_quux')
     end
 
-    it "should allow overriding a default with a requirement"
-    it "should allow overriding a requirement with a default"
+    it "should allow overriding a default with a requirement" do
+      parent = widget_class do
+        needs :foo, :bar => 'def_bar'
+      end
+
+      child = widget_class(:superclass => parent) do
+        needs :bar
+        def content
+          text "foo: #{foo}, bar: #{bar}"
+        end
+      end
+
+      expect { child.new(:foo => 'the_foo') }.to raise_error(Fortitude::Errors::MissingNeed)
+      expect(render(child.new(:foo => 'the_foo', :bar => 'the_bar'))).to eq('foo: the_foo, bar: the_bar')
+    end
+
+    it "should allow overriding a requirement with a default" do
+      parent = widget_class do
+        needs :foo, :bar
+      end
+
+      child = widget_class(:superclass => parent) do
+        needs :foo => 'def_foo', :bar => 'def_bar'
+        def content
+          text "foo: #{foo}, bar: #{bar}"
+        end
+      end
+
+      expect(render(child.new)).to eq('foo: def_foo, bar: def_bar')
+      expect(render(child.new(:bar => 'the_bar'))).to eq('foo: def_foo, bar: the_bar')
+    end
   end
 
   describe "extra assigns" do
