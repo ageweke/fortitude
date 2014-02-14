@@ -1,2 +1,6 @@
 en:
   house: "house"
+  awesome: "not awesome"
+  localization_system_spec:
+    dot_notation:
+      awesome: "awesome!"

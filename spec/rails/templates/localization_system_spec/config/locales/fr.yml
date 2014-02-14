@@ -1,2 +1,6 @@
 fr:
   house: "maison"
+  awesome: "pas formidable"
+  localization_system_spec:
+    dot_notation:
+      awesome: "formidable!"
