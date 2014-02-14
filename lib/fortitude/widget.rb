@@ -8,6 +8,12 @@ module Fortitude
     REQUIRED_NEED = Object.new
     NOT_PRESENT_NEED = Object.new
 
+    if defined?(::Rails)
+      include Fortitude::Rails::WidgetMethods
+    else
+      include Fortitude::NonRailsWidgetMethods
+    end
+
     class << self
       def direct_subclasses
         @direct_subclasses || [ ]
@@ -437,6 +443,10 @@ EOS
         (superclass_methods + this_class_around_content_methods).uniq
       end
 
+      def has_localized_content_methods?
+        !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
+      end
+
       def rebuild_run_content!
         acm = around_content_methods
         text = "def run_content(*args, &block)\n"
@@ -444,16 +454,15 @@ EOS
           text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
         end
 
-        if @last_localized_methods_check_has
-          $stderr.puts "LOCALIZATION SUPPORT"
-          text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{I18n.locale || I18n.default_locale}\"\n"
-          text += "  " + ("  " * acm.length) + "if respond_to?(locale_method_name)\n"
+        if has_localized_content_methods?
+          text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
+          text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
+          text += "  " + ("  " * acm.length) + "if locale_method_name && respond_to?(locale_method_name)\n"
           text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
           text += "  " + ("  " * acm.length) + "else\n"
           text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
           text += "  " + ("  " * acm.length) + "end\n"
         else
-          $stderr.puts "NO LOCALIZATION SUPPORT"
           text += "  " + ("  " * acm.length) + "content(*args, &block)\n"
         end
 
