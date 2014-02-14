@@ -24,7 +24,7 @@ module RailsHelpers
   end
 
   def get_success(subpath, options = { })
-    data = get(subpath)
+    data = get(subpath, options)
     data.should match(/rails_spec_application/i) unless options[:no_layout]
     data
   end
