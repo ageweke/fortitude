@@ -131,7 +131,54 @@ describe "Fortitude needs", :type => :system do
       expect(render(c.new(:foo => 'the_foo', :bar => 'the_bar'))).to eq('foo: the_foo, bar: NameError')
     end
 
-    it "should fail if passed assigns it doesn't need, if asked to"
-    it "should use extra assigns it doesn't need, if asked to"
+    it "should ignore assigns it doesn't need, if told to" do
+      c = widget_class do
+        extra_assigns :ignore
+        needs :foo
+        def content
+          bar_value = begin
+            bar
+          rescue => e
+            e.class.name
+          end
+
+          text "foo: #{foo}, bar: #{bar_value}"
+        end
+      end
+
+      expect(render(c.new(:foo => 'the_foo', :bar => 'the_bar'))).to eq('foo: the_foo, bar: NameError')
+    end
+
+    it "should fail if passed assigns it doesn't need, if asked to" do
+      c = widget_class do
+        extra_assigns :error
+        needs :foo
+        def content
+          text "foo: #{foo}"
+        end
+      end
+
+      expect { c.new(:foo => 'the_foo', :bar => 'the_bar') }.to raise_error(Fortitude::Errors::ExtraAssigns, /bar/i)
+      expect(render(c.new(:foo => 'the_foo'))).to eq("foo: the_foo")
+    end
+
+    it "should use extra assigns it doesn't need, if asked to" do
+      c = widget_class do
+        extra_assigns :use
+        needs :foo
+        def content
+          bar_value = begin
+            bar
+          rescue => e
+            e.class.name
+          end
+
+          text "foo: #{foo}; bar: #{bar_value}"
+        end
+      end
+
+      expect(render(c.new(:foo => 'the_foo'))).to eq('foo: the_foo; bar: NameError')
+      expect(render(c.new(:foo => 'the_foo', :bar => 'the_bar'))).to eq('foo: the_foo; bar: the_bar')
+    end
   end
 end
