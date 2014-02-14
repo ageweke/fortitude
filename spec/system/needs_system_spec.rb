@@ -114,7 +114,23 @@ describe "Fortitude needs", :type => :system do
   end
 
   describe "extra assigns" do
-    it "should, by default, ignore assigns it doesn't need"
+    it "should, by default, ignore assigns it doesn't need" do
+      c = widget_class do
+        needs :foo
+        def content
+          bar_value = begin
+            bar
+          rescue => e
+            e.class.name
+          end
+
+          text "foo: #{foo}, bar: #{bar_value}"
+        end
+      end
+
+      expect(render(c.new(:foo => 'the_foo', :bar => 'the_bar'))).to eq('foo: the_foo, bar: NameError')
+    end
+
     it "should fail if passed assigns it doesn't need, if asked to"
     it "should use extra assigns it doesn't need, if asked to"
   end
