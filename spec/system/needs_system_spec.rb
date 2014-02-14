@@ -46,8 +46,40 @@ describe "Fortitude needs", :type => :system do
   end
 
   describe "defaults" do
-    it "should allow supplying defaults, and allow overriding them"
-    it "should inherit defaults properly"
+    it "should allow supplying defaults, and allow overriding them" do
+      c = widget_class do
+        needs :foo, :bar => 'def_bar', :baz => 'def_baz'
+        def content
+          text "foo: #{foo}, bar: #{bar}, baz: #{baz}"
+        end
+      end
+
+      expect { c.new }.to raise_error(Fortitude::Errors::MissingNeed)
+      expect(render(c.new(:foo => 'the_foo'))).to eq("foo: the_foo, bar: def_bar, baz: def_baz")
+      expect(render(c.new(:foo => 'the_foo', :baz => 'the_baz'))).to eq("foo: the_foo, bar: def_bar, baz: the_baz")
+    end
+
+    it "should inherit defaults properly" do
+      parent = widget_class do
+        needs :foo, :bar => 'def_bar', :baz => 'def_baz'
+        def content
+          text "foo: #{foo}, bar: #{bar}, baz: #{baz}"
+        end
+      end
+
+      child = widget_class(:superclass => parent) do
+        needs :baz => 'child_def_baz', :quux => 'child_quux'
+        def content
+          super
+          text "; baz: #{baz}, quux: #{quux}"
+        end
+      end
+
+      expect(render(parent.new(:foo => 'the_foo'))).to eq('foo: the_foo, bar: def_bar, baz: def_baz')
+      expect { child.new }.to raise_error(Fortitude::Errors::MissingNeed)
+      expect(render(child.new(:foo => 'the_foo'))).to eq('foo: the_foo, bar: def_bar, baz: child_def_baz; baz: child_def_baz, quux: child_quux')
+    end
+
     it "should allow overriding a default with a requirement"
     it "should allow overriding a requirement with a default"
   end
