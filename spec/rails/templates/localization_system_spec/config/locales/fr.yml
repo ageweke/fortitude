@@ -4,3 +4,5 @@ fr:
   localization_system_spec:
     dot_notation:
       awesome: "formidable!"
+    native_support:
+      awesome: "encore formidable %{number}!"

@@ -22,5 +22,8 @@ describe "basic Rails support", :type => :rails do
     expect_match("dot_notation?locale=fr", /awesome is: formidable!/)
   end
 
-  it "should let you translate strings with Fortitude translation support"
+  it "should let you translate strings with Fortitude translation support" do
+    expect_match("native_support?locale=en", /not translated; also awesome 127!; also not translated/i)
+    expect_match("native_support?locale=fr", /not translated; encore formidable 127!; also not translated/i)
+  end
 end

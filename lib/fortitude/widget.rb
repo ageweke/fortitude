@@ -506,6 +506,10 @@ EOS
       s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)
     end
 
+    def ttext(key, *args)
+      text t(".#{key}", *args)
+    end
+
     def rawtext(s)
       @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
     end
