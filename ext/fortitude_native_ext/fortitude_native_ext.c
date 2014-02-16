@@ -153,20 +153,29 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
     VALUE prefix = prefix_and_output->prefix;
     VALUE rb_output = prefix_and_output->rb_output;
 
-    ID fortitude_append_as_attributes_prefixed;
-    CONST_ID(fortitude_append_as_attributes_prefixed, "fortitude_append_as_attributes_prefixed");
-
     char buf[BUF_SIZE + 1];
 
     if (TYPE(value) == T_HASH) {
-        method_append_as_attributes(value, rb_output, key);
+        VALUE prefix_as_string;
+
+        ID dup;
+        CONST_ID(dup, "dup");
+        ID to_s;
+        CONST_ID(to_s, "to_s");
+        prefix_as_string = rb_funcall(key, to_s, 0);
+        if (prefix_as_string == key) {
+            prefix_as_string = rb_funcall(prefix_as_string, dup, 0);
+        }
+
+        rb_str_cat2(prefix_as_string, "-");
+
+        method_append_as_attributes(value, rb_output, prefix_as_string);
     } else {
         rb_str_cat2(rb_output, " ");
 
         switch (TYPE(prefix)) {
             case T_STRING:
                 fortitude_append_to(prefix, rb_output);
-                rb_str_cat2(rb_output, "-");
                 break;
 
             case T_NIL:
