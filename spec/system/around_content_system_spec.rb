@@ -244,5 +244,64 @@ describe "Fortitude around_content operations", :type => :system do
     expect(render(child.new)).to eq("gp1_beforegp2_beforep2_beforep1_beforec1_beforec2_beforecontentc2_afterc1_afterp1_afterp2_aftergp2_aftergp1_after")
   end
 
-  it "should allow two child classes to both inherit around_content methods of a parent, but add their own ones, as well"
+  it "should allow two child classes to both inherit around_content methods of a parent, but add their own ones, as well" do
+    parent = widget_class do
+      def p1
+        text "p1_before"
+        yield
+        text "p1_after"
+      end
+
+      def p2
+        text "p2_before"
+        yield
+        text "p2_after"
+      end
+
+      around_content :p1, :p2
+    end
+
+    c1 = widget_class(:superclass => parent) do
+      def c1a1
+        text "c1a1_before"
+        yield
+        text "c1a1_after"
+      end
+
+      def c1a2
+        text "c1a2_before"
+        yield
+        text "c1a2_after"
+      end
+
+      def content
+        text "content"
+      end
+
+      around_content :c1a1, :c1a2
+    end
+
+    c2 = widget_class(:superclass => parent) do
+      def c2a1
+        text "c2a1_before"
+        yield
+        text "c2a1_after"
+      end
+
+      def c2a2
+        text "c2a2_before"
+        yield
+        text "c2a2_after"
+      end
+
+      def content
+        text "content"
+      end
+
+      around_content :c2a1, :c2a2
+    end
+
+    expect(render(c1.new)).to eq("p1_beforep2_beforec1a1_beforec1a2_beforecontentc1a2_afterc1a1_afterp2_afterp1_after")
+    expect(render(c2.new)).to eq("p1_beforep2_beforec2a1_beforec2a2_beforecontentc2a2_afterc2a1_afterp2_afterp1_after")
+  end
 end

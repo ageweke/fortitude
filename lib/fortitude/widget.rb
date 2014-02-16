@@ -428,11 +428,6 @@ EOS
         direct_subclasses.each { |s| s.check_localized_methods! }
       end
 
-      private
-      def this_class_around_content_methods
-        @_fortitude_around_content_methods ||= [ ]
-      end
-
       def around_content_methods
         superclass_methods = if superclass.respond_to?(:around_content_methods)
           superclass.around_content_methods
@@ -441,10 +436,6 @@ EOS
         end
 
         (superclass_methods + this_class_around_content_methods).uniq
-      end
-
-      def has_localized_content_methods?
-        !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
       end
 
       def rebuild_run_content!
@@ -472,6 +463,17 @@ EOS
         text += "end"
 
         class_eval(text)
+
+        direct_subclasses.each { |s| s.rebuild_run_content! }
+      end
+
+      private
+      def this_class_around_content_methods
+        @_fortitude_around_content_methods ||= [ ]
+      end
+
+      def has_localized_content_methods?
+        !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
       end
     end
 
