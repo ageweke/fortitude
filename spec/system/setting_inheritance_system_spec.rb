@@ -52,6 +52,28 @@ describe "Fortitude setting inheritance", :type => :system do
     expect(render(klass.new, :rendering_context => rc_for_automatic_helper_access)).to match(/helper1: NameError/)
   end
 
+
+  def implicit_shared_variable_access_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.implicit_shared_variable_access).to eq(expected_result)
+      send("implicit_shared_variable_access_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def rc_for_implicit_shared_variable_access
+    @isva_obj = Object.new
+    @isva_obj.instance_variable_set("@bar", "this is bar!")
+    rc(:instance_variables_object => @isva_obj)
+  end
+
+  def implicit_shared_variable_access_should_be_true(klass)
+    expect(render(klass.new, :rendering_context => rc_for_implicit_shared_variable_access)).to match(/bar: &quot;this is bar!&quot;/)
+  end
+
+  def implicit_shared_variable_access_should_be_false(klass)
+    expect(render(klass.new, :rendering_context => rc_for_implicit_shared_variable_access)).to match(/bar: nil/)
+  end
+
   before :each do
     @grandparent = widget_class do
       def content
@@ -69,7 +91,9 @@ describe "Fortitude setting inheritance", :type => :system do
           e.class.name
         end
 
-        text "helper1: #{helper1_value}"
+        text "helper1: #{helper1_value}\n"
+
+        text "bar: #{@bar.inspect}"
       end
     end
 
@@ -80,6 +104,14 @@ describe "Fortitude setting inheritance", :type => :system do
     @parent2 = widget_class(:superclass => @grandparent)
     @child21 = widget_class(:superclass => @parent2)
     @child22 = widget_class(:superclass => @parent2)
+
+    $stderr.puts "grandparent: #{@grandparent}"
+    $stderr.puts "parent1: #{@parent1}"
+    $stderr.puts "child11: #{@child11}"
+    $stderr.puts "child12: #{@child12}"
+    $stderr.puts "parent2: #{@parent2}"
+    $stderr.puts "child21: #{@child21}"
+    $stderr.puts "child22: #{@child22}"
   end
 
   it "should properly inherit extra_assigns" do
@@ -129,6 +161,25 @@ describe "Fortitude setting inheritance", :type => :system do
     automatic_helper_access_should_be(false, @parent1, @child11, @child12)
   end
 
-  it "should properly inherit implicit_shared_variable_access"
+  it "should properly inherit implicit_shared_variable_access" do
+    implicit_shared_variable_access_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.implicit_shared_variable_access true
+    implicit_shared_variable_access_should_be(false, @grandparent, @parent2, @child21, @child22)
+    implicit_shared_variable_access_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.implicit_shared_variable_access false
+    implicit_shared_variable_access_should_be(false, @grandparent, @parent2, @child21, @child22)
+    implicit_shared_variable_access_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.implicit_shared_variable_access true
+    implicit_shared_variable_access_should_be(false, @parent2, @child21, @child22)
+    implicit_shared_variable_access_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.implicit_shared_variable_access false
+    implicit_shared_variable_access_should_be(false, @grandparent, @parent2, @child21, @child22)
+    implicit_shared_variable_access_should_be(true, @parent1, @child11, @child12)
+  end
+
   it "should properly inherit use_instance_variables_for_assigns"
 end
