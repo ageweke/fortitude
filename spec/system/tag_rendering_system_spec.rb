@@ -19,14 +19,21 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("<p>12345</p>") { p 12345 }
   end
 
-  it "should render an arbitrary object as content, using #to_s, and escaping it" do
-    foo = Object.new
-    class << foo
+  def arbitrary_object_with_to_s(value)
+    out = Object.new
+    class << out
+      attr_accessor :value
+
       def to_s
-        "this is <>&\" foo!"
+        @value
       end
     end
+    out.value = value
+    out
+  end
 
+  it "should render an arbitrary object as content, using #to_s, and escaping it" do
+    foo = arbitrary_object_with_to_s("this is <>&\" foo!")
     should_render_to("<p>this is &lt;&gt;&amp;&quot; foo!</p>") { p foo }
   end
 
@@ -114,5 +121,43 @@ describe "Fortitude tag rendering", :type => :system do
 
   it "should render attribute values that are hashes as a sequence of prefixed attributes" do
     should_render_to("<p data-foo=\"bar\" data-bar=\"baz\"/>") { p :data => { :foo => 'bar', :bar => 'baz' } }
+  end
+
+  it "should render an arbitrary object as an attribute key, escaping it" do
+    foo = arbitrary_object_with_to_s("and&<>\"this")
+    should_render_to("<p and&amp;&lt;&gt;&quot;this=\"bar\"/>") { p foo => "bar" }
+  end
+
+  it "should render an arbitrary object as an attribute value, escaping it" do
+    foo = arbitrary_object_with_to_s("and&<>\"this")
+    should_render_to("<p foo=\"and&amp;&lt;&gt;&quot;this\"/>") { p :foo => foo }
+  end
+
+  it "should render an arbitrary object as an attribute key nested in a hash, escaping it" do
+    foo = arbitrary_object_with_to_s("and&<>\"this")
+    should_render_to("<p data-and&amp;&lt;&gt;&quot;this=\"bar\"/>") { p :data => { foo => "bar" } }
+  end
+
+  it "should render an arbitrary object as an attribute value nested in a hash, escaping it" do
+    foo = arbitrary_object_with_to_s("and&<>\"this")
+    should_render_to("<p data-and&amp;&lt;&gt;&quot;this=\"bar\"/>") { p :data => { foo => "bar" } }
+  end
+
+  it "should allow an arbitrary object as an attribute key, mapping to a hash" do
+    foo = arbitrary_object_with_to_s("and&<>\"this")
+    should_render_to("<p and&amp;&lt;&gt;&quot;this-foo=\"bar\" and&amp;&lt;&gt;&quot;this-bar=\"baz\"/>") { p foo => { :foo => 'bar', :bar => 'baz' } }
+  end
+
+  it "should allow multi-level hash nesting" do
+    should_render_to("<p foo-bar=\"bar\" foo-baz-a=\"xxx\" foo-baz-b=\"yyy\"/>") { p :foo => { :bar => 'bar', :baz => { :a => 'xxx', 'b' => :yyy } } }
+  end
+
+  it "should allow arrays as attribute values, separating elements with spaces" do
+    should_render_to("<p foo=\"bar baz quux\"/>") { p :foo => [ 'bar', 'baz', 'quux' ]}
+  end
+
+  it "should allow arrays as attribute values, calling #to_s on values in them" do
+    quux = arbitrary_object_with_to_s("quux")
+    should_render_to("<p foo=\"bar baz quux\"/>") { p :foo => [ 'bar', :baz, quux ]}
   end
 end
