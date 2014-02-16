@@ -15,15 +15,41 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
   def extra_assigns_should_be_use(klass)
-    expect(render(klass.new(:foo => 'the_foo'))).to eq("foo: the_foo")
+    expect(render(klass.new(:foo => 'the_foo'))).to match(/foo: the_foo/)
   end
 
   def extra_assigns_should_be_ignore(klass)
-    expect(render(klass.new(:foo => 'the_foo'))).to eq("foo: NameError")
+    expect(render(klass.new(:foo => 'the_foo'))).to match(/foo: NameError/)
   end
 
   def extra_assigns_should_be_error(klass)
     expect { klass.new(:foo => 'the_foo') }.to raise_error(Fortitude::Errors::ExtraAssigns)
+  end
+
+
+  def automatic_helper_access_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.automatic_helper_access).to eq(expected_result)
+      send("automatic_helper_access_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def rc_for_automatic_helper_access
+    @aha_helpers_class ||= Class.new do
+      def helper1
+        "this is helper1!"
+      end
+    end
+
+    rc(:helpers_object => @aha_helpers_class.new)
+  end
+
+  def automatic_helper_access_should_be_true(klass)
+    expect(render(klass.new, :rendering_context => rc_for_automatic_helper_access)).to match(/helper1: this is helper1!/)
+  end
+
+  def automatic_helper_access_should_be_false(klass)
+    expect(render(klass.new, :rendering_context => rc_for_automatic_helper_access)).to match(/helper1: NameError/)
   end
 
   before :each do
@@ -35,7 +61,15 @@ describe "Fortitude setting inheritance", :type => :system do
           e.class.name
         end
 
-        text "foo: #{foo_value}"
+        text "foo: #{foo_value}\n"
+
+        helper1_value = begin
+          helper1
+        rescue => e
+          e.class.name
+        end
+
+        text "helper1: #{helper1_value}"
       end
     end
 
@@ -75,7 +109,26 @@ describe "Fortitude setting inheritance", :type => :system do
     extra_assigns_should_be(:ignore, @grandparent, @child22)
   end
 
-  it "should properly inherit automatic_helper_access"
+  it "should properly inherit automatic_helper_access" do
+    automatic_helper_access_should_be(true, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.automatic_helper_access false
+    automatic_helper_access_should_be(true, @grandparent, @parent2, @child21, @child22)
+    automatic_helper_access_should_be(false, @parent1, @child11, @child12)
+
+    @parent2.automatic_helper_access true
+    automatic_helper_access_should_be(true, @grandparent, @parent2, @child21, @child22)
+    automatic_helper_access_should_be(false, @parent1, @child11, @child12)
+
+    @grandparent.automatic_helper_access false
+    automatic_helper_access_should_be(true, @parent2, @child21, @child22)
+    automatic_helper_access_should_be(false, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.automatic_helper_access true
+    automatic_helper_access_should_be(true, @grandparent, @parent2, @child21, @child22)
+    automatic_helper_access_should_be(false, @parent1, @child11, @child12)
+  end
+
   it "should properly inherit implicit_shared_variable_access"
   it "should properly inherit use_instance_variables_for_assigns"
 end
