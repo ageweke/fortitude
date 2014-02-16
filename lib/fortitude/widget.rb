@@ -15,23 +15,6 @@ module Fortitude
     end
 
     class << self
-      def direct_subclasses
-        @direct_subclasses || [ ]
-      end
-
-      def inherited(subclass)
-        @direct_subclasses ||= [ ]
-        @direct_subclasses |= [ subclass ]
-      end
-
-      def tags_module
-        @tags_module ||= begin
-          out = Module.new
-          include(out)
-          out
-        end
-      end
-
       def tag(name, options = { })
         Fortitude::Tag.new(name, options).define_method_on!(tags_module)
       end
@@ -59,17 +42,20 @@ module Fortitude
         @this_class_needs
       end
 
+      # EFFECTIVELY PRIVATE
       def needs_as_hash
         out = { }
         out = superclass.needs_as_hash if superclass.respond_to?(:needs_as_hash)
         out.merge(@this_class_needs || { })
       end
 
+      # EFFECTIVELY PRIVATE
       def rebuild_needs_methods!
         rebuild_my_needs_methods!
         direct_subclasses.each { |s| s.rebuild_needs_methods! }
       end
 
+      private
       def rebuild_my_needs_methods!
         n = needs_as_hash
         ivar_prefix = assign_instance_variable_prefix
@@ -130,6 +116,23 @@ module Fortitude
     @#{ivar_prefix}#{need}
   end
 EOS
+        end
+      end
+
+      def direct_subclasses
+        @direct_subclasses || [ ]
+      end
+
+      def inherited(subclass)
+        @direct_subclasses ||= [ ]
+        @direct_subclasses |= [ subclass ]
+      end
+
+      def tags_module
+        @tags_module ||= begin
+          out = Module.new
+          include(out)
+          out
         end
       end
     end
