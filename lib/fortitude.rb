@@ -1,5 +1,4 @@
 require "fortitude/version"
-require "fortitude/rendering_context"
 
 module Fortitude
   # Your code goes here...
