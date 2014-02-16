@@ -1,4 +1,8 @@
 describe "Fortitude needs", :type => :system do
+  def required
+    Fortitude::Widget::REQUIRED_NEED
+  end
+
   describe "inheritance" do
     it "should require needs from all superclasses" do
       grandparent = widget_class { needs :foo }
@@ -14,6 +18,10 @@ describe "Fortitude needs", :type => :system do
       expect { child.new(:foo => 'f') }.to raise_error(Fortitude::Errors::MissingNeed)
       expect { child.new(:foo => 'f', :bar => 'b') }.to raise_error(Fortitude::Errors::MissingNeed)
       expect(render(child.new(:foo => 'f', :bar => 'b', :baz => 'z'))).to eq("foo: f, bar: b, baz: z")
+
+      expect(grandparent.needs).to eq({ :foo => required })
+      expect(parent.needs).to eq({ :foo => required, :bar => required })
+      expect(child.needs).to eq({ :foo => required, :bar => required, :baz => required })
     end
 
     it "should let you add needs later, and it should apply to both that class and any subclasses" do
@@ -28,6 +36,8 @@ describe "Fortitude needs", :type => :system do
 
       expect(render(parent)).to eq("parent")
       expect(render(child.new(:bar => "the_bar"))).to eq("parent; child: bar: the_bar")
+      expect(parent.needs).to eq({ })
+      expect(child.needs).to eq({ :bar => required })
 
       parent.class_eval { needs :foo }
       child.class_eval do
@@ -42,6 +52,9 @@ describe "Fortitude needs", :type => :system do
 
       expect(render(parent.new(:foo => "the_foo"))).to eq("parent")
       expect(render(child.new(:foo => "the_foo", :bar => "the_bar"))).to eq("parent; child: bar: the_bar; foo: the_foo")
+
+      expect(parent.needs).to eq(:foo => required)
+      expect(child.needs).to eq(:foo => required, :bar => required)
     end
   end
 
@@ -57,6 +70,8 @@ describe "Fortitude needs", :type => :system do
       expect { c.new }.to raise_error(Fortitude::Errors::MissingNeed)
       expect(render(c.new(:foo => 'the_foo'))).to eq("foo: the_foo, bar: def_bar, baz: def_baz")
       expect(render(c.new(:foo => 'the_foo', :baz => 'the_baz'))).to eq("foo: the_foo, bar: def_bar, baz: the_baz")
+
+      expect(c.needs).to eq(:foo => required, :bar => 'def_bar', :baz => 'def_baz')
     end
 
     it "should inherit defaults properly" do
@@ -78,6 +93,9 @@ describe "Fortitude needs", :type => :system do
       expect(render(parent.new(:foo => 'the_foo'))).to eq('foo: the_foo, bar: def_bar, baz: def_baz')
       expect { child.new }.to raise_error(Fortitude::Errors::MissingNeed)
       expect(render(child.new(:foo => 'the_foo'))).to eq('foo: the_foo, bar: def_bar, baz: child_def_baz; baz: child_def_baz, quux: child_quux')
+
+      expect(parent.needs).to eq(:foo => required, :bar => 'def_bar', :baz => 'def_baz')
+      expect(child.needs).to eq(:foo => required, :bar => 'def_bar', :baz => 'child_def_baz', :quux => 'child_quux')
     end
 
     it "should allow overriding a default with a requirement" do
@@ -94,6 +112,9 @@ describe "Fortitude needs", :type => :system do
 
       expect { child.new(:foo => 'the_foo') }.to raise_error(Fortitude::Errors::MissingNeed)
       expect(render(child.new(:foo => 'the_foo', :bar => 'the_bar'))).to eq('foo: the_foo, bar: the_bar')
+
+      expect(parent.needs).to eq(:foo => required, :bar => 'def_bar')
+      expect(child.needs).to eq(:foo => required, :bar => required)
     end
 
     it "should allow overriding a requirement with a default" do
@@ -110,6 +131,9 @@ describe "Fortitude needs", :type => :system do
 
       expect(render(child.new)).to eq('foo: def_foo, bar: def_bar')
       expect(render(child.new(:bar => 'the_bar'))).to eq('foo: def_foo, bar: the_bar')
+
+      expect(parent.needs).to eq(:foo => required, :bar => required)
+      expect(child.needs).to eq(:foo => 'def_foo', :bar => 'def_bar')
     end
   end
 
