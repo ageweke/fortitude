@@ -32,3 +32,9 @@ end
 
 require 'fortitude/widget'
 require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
+
+if defined?(::ActiveSupport::SafeBuffer)
+  ::ActiveSupport::SafeBuffer.class_eval do
+    public :original_concat
+  end
+end

@@ -212,10 +212,6 @@ module Fortitude
         end
 
         alias_method_chain :render, :fortitude
-
-        ::ActiveSupport::SafeBuffer.class_eval do
-          public :original_concat
-        end
       end
     end
   end
