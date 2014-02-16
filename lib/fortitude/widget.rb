@@ -37,7 +37,7 @@ module Fortitude
       end
 
       def needs(*names)
-        return get_needs if names.length == 0
+        return needs_as_hash if names.length == 0
 
         @this_class_needs ||= { }
 
@@ -59,9 +59,9 @@ module Fortitude
         @this_class_needs
       end
 
-      def get_needs
+      def needs_as_hash
         out = { }
-        out = superclass.get_needs if superclass.respond_to?(:get_needs)
+        out = superclass.needs_as_hash if superclass.respond_to?(:needs_as_hash)
         out.merge(@this_class_needs || { })
       end
 
@@ -71,14 +71,14 @@ module Fortitude
       end
 
       def rebuild_my_needs_methods!
-        n = get_needs
+        n = needs_as_hash
         ivar_prefix = assign_instance_variable_prefix
 
         method_text = StringIO.new
 
         method_text.puts "  def assign_locals_from(assigns)"
         method_text.puts "    @_fortitude_raw_assigns = assigns"
-        method_text.puts "    the_needs = self.class.get_needs"
+        method_text.puts "    the_needs = self.class.needs_as_hash"
         method_text.puts "    missing = [ ]"
         method_text.puts "    have_missing = false"
 
@@ -263,7 +263,7 @@ EOS
 
     def assigns
       @_fortitude_assigns_proxy ||= begin
-        keys = get_needs.keys
+        keys = needs_as_hash.keys
         keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if extra_assigns == :use
 
         AssignsProxy.new(self, keys)
@@ -307,7 +307,7 @@ EOS
         input = input.with_indifferent_access
 
         out = { }
-        get_needs.keys.each do |name|
+        needs_as_hash.keys.each do |name|
           out[name] = input[name] if input.has_key?(name)
         end
         out
