@@ -74,8 +74,26 @@ describe "Fortitude setting inheritance", :type => :system do
     expect(render(klass.new, :rendering_context => rc_for_implicit_shared_variable_access)).to match(/bar: nil/)
   end
 
+
+  def use_instance_variables_for_assigns_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.use_instance_variables_for_assigns).to eq(expected_result)
+      send("use_instance_variables_for_assigns_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def use_instance_variables_for_assigns_should_be_true(klass)
+    expect(render(klass.new(:baz => 'some_baz'))).to match(/baz: &quot;some_baz&quot;/)
+  end
+
+  def use_instance_variables_for_assigns_should_be_false(klass)
+    expect(render(klass.new(:baz => 'some_baz'))).to match(/baz: nil/)
+  end
+
   before :each do
     @grandparent = widget_class do
+      needs :baz => 'default_baz'
+
       def content
         foo_value = begin
           foo
@@ -92,8 +110,8 @@ describe "Fortitude setting inheritance", :type => :system do
         end
 
         text "helper1: #{helper1_value}\n"
-
-        text "bar: #{@bar.inspect}"
+        text "bar: #{@bar.inspect}\n"
+        text "baz: #{@baz.inspect}"
       end
     end
 
@@ -104,14 +122,6 @@ describe "Fortitude setting inheritance", :type => :system do
     @parent2 = widget_class(:superclass => @grandparent)
     @child21 = widget_class(:superclass => @parent2)
     @child22 = widget_class(:superclass => @parent2)
-
-    $stderr.puts "grandparent: #{@grandparent}"
-    $stderr.puts "parent1: #{@parent1}"
-    $stderr.puts "child11: #{@child11}"
-    $stderr.puts "child12: #{@child12}"
-    $stderr.puts "parent2: #{@parent2}"
-    $stderr.puts "child21: #{@child21}"
-    $stderr.puts "child22: #{@child22}"
   end
 
   it "should properly inherit extra_assigns" do
@@ -181,5 +191,23 @@ describe "Fortitude setting inheritance", :type => :system do
     implicit_shared_variable_access_should_be(true, @parent1, @child11, @child12)
   end
 
-  it "should properly inherit use_instance_variables_for_assigns"
+  it "should properly inherit use_instance_variables_for_assigns" do
+    use_instance_variables_for_assigns_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.use_instance_variables_for_assigns true
+    use_instance_variables_for_assigns_should_be(false, @grandparent, @parent2, @child21, @child22)
+    use_instance_variables_for_assigns_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.use_instance_variables_for_assigns false
+    use_instance_variables_for_assigns_should_be(false, @grandparent, @parent2, @child21, @child22)
+    use_instance_variables_for_assigns_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.use_instance_variables_for_assigns true
+    use_instance_variables_for_assigns_should_be(false, @parent2, @child21, @child22)
+    use_instance_variables_for_assigns_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.use_instance_variables_for_assigns false
+    use_instance_variables_for_assigns_should_be(false, @grandparent, @parent2, @child21, @child22)
+    use_instance_variables_for_assigns_should_be(true, @parent1, @child11, @child12)
+  end
 end
