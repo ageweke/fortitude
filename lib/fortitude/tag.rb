@@ -22,10 +22,10 @@ module Fortitude
       define_constant_string(mod, :PARTIAL_OPEN, "<#{name}")
 
       mod.module_eval <<-EOS
-      def #{name}(attributes = nil)
+      def #{name}(content_or_attributes = nil, attributes = nil)
         o = @_fortitude_output_buffer_holder.output_buffer
 
-        if (! attributes)
+        if (! content_or_attributes)
           if block_given?
             o.#{CONCAT_METHOD}(#{string_const_name(:OPEN)})
             yield
@@ -33,9 +33,9 @@ module Fortitude
           else
             o.#{CONCAT_METHOD}(#{string_const_name(:ALONE)})
           end
-        elsif attributes.kind_of?(Hash)
+        elsif content_or_attributes.kind_of?(Hash)
           o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
-          attributes.fortitude_append_as_attributes(o, nil)
+          content_or_attributes.fortitude_append_as_attributes(o, nil)
 
           if block_given?
             o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_END)
@@ -44,9 +44,17 @@ module Fortitude
           else
             o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
           end
-        else
+        elsif (! attributes)
           o.#{CONCAT_METHOD}(#{string_const_name(:OPEN)})
-          attributes.to_s.fortitude_append_escaped_string(o)
+          content_or_attributes.to_s.fortitude_append_escaped_string(o)
+          yield if block_given?
+          o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
+        else
+          o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
+          attributes.fortitude_append_as_attributes(o, nil)
+          o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_END)
+
+          content_or_attributes.to_s.fortitude_append_escaped_string(o)
           yield if block_given?
           o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         end

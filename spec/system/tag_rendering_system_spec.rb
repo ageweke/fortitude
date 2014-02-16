@@ -95,4 +95,24 @@ describe "Fortitude tag rendering", :type => :system do
   it "should render with both attributes and a block" do
     should_render_to("<p class=\"foo\" bar=\"baz\">hello, world</p>") { p(:class => 'foo', :bar => 'baz') { text "hello, world" } }
   end
+
+  it "should render with both attributes and direct content" do
+    should_render_to("<p class=\"foo\" bar=\"baz\">hello, world</p>") { p("hello, world", :class => 'foo', :bar => 'baz') }
+  end
+
+  it "should render with both direct content and a block" do
+    should_render_to("<p>hello, worldbienvenue, le monde</p>") { p("hello, world") { text "bienvenue, le monde" } }
+  end
+
+  it "should render with both attributes and a block" do
+    should_render_to("<p class=\"foo\" bar=\"baz\">hello, world</p>") { p(:class => :foo, :bar => :baz) { text "hello, world" } }
+  end
+
+  it "should render with attributes, direct content, and a block" do
+    should_render_to("<p class=\"foo\" bar=\"baz\">hello, worldbienvenue, le monde</p>") { p("hello, world", :class => :foo, :bar => :baz) { text "bienvenue, le monde" } }
+  end
+
+  it "should render attribute values that are hashes as a sequence of prefixed attributes" do
+    should_render_to("<p data-foo=\"bar\" data-bar=\"baz\"/>") { p :data => { :foo => 'bar', :bar => 'baz' } }
+  end
 end
