@@ -39,7 +39,7 @@ module Fortitude
 
         rebuild_needs_methods!
 
-        @this_class_needs
+        needs_as_hash
       end
 
       # EFFECTIVELY PRIVATE

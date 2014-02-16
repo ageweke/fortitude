@@ -3,6 +3,19 @@ describe "Fortitude needs", :type => :system do
     Fortitude::Widget::REQUIRED_NEED
   end
 
+  it "should return the current needs from .needs, with or without arguments" do
+    parent = widget_class
+    child = widget_class(:superclass => parent)
+
+    expect(parent.needs).to eq({ })
+    expect(parent.needs(:foo)).to eq(:foo => required)
+    expect(parent.needs(:bar => 'def_bar')).to eq(:foo => required, :bar => 'def_bar')
+
+    expect(child.needs).to eq(:foo => required, :bar => 'def_bar')
+    expect(child.needs(:bar)).to eq(:foo => required, :bar => required)
+    expect(child.needs(:baz => 'def_baz')).to eq(:foo => required, :bar => required, :baz => 'def_baz')
+  end
+
   describe "inheritance" do
     it "should require needs from all superclasses" do
       grandparent = widget_class { needs :foo }
