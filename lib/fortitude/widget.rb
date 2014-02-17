@@ -214,7 +214,7 @@ EOS
       end
 
       def has_key?(x)
-        @keys[x.to_sym]
+        !! @keys[x.to_sym]
       end
 
       def [](x)
@@ -244,11 +244,11 @@ EOS
       end
 
       def to_s
-        "<Assigns for #{widget}: #{to_hash}>"
+        "<Assigns for #{@widget}: #{to_hash}>"
       end
 
       def inspect
-        "<Assigns for #{widget}: #{to_hash.inspect}>"
+        "<Assigns for #{@widget}: #{to_hash.inspect}>"
       end
 
       def member?(x)
