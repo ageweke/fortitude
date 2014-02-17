@@ -283,7 +283,7 @@ EOS
         return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
       end
 
-      if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name)
+      if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name, true)
         @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       else
         super(name, *args, &block)

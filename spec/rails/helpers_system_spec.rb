@@ -66,4 +66,9 @@ describe "Rails helper support", :type => :rails do
   it "should inherit automatic helper access properly" do
     expect_match("automatic_helpers_inheritance", %r{C1: excitedly: NoMethodError; time_ago_in_words: NoMethodError; number_to_currency: \$1,000,000.00.*C2: excitedly: awesome!!!; time_ago_in_words: 3 months; number_to_currency: \$1,000,000.00})
   end
+
+  it "should allow access to private helpers in exactly the same way as ERb" do
+    expect_match("private_helper_erb", %r{a private helper: private!})
+    expect_match("private_helper_fortitude", %r{a private helper: private!})
+  end
 end

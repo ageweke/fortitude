@@ -13,4 +13,9 @@ module SomeHelper
     output_buffer << s.reverse
     "yy" + s
   end
+
+  private
+  def a_private_helper
+    "private!"
+  end
 end

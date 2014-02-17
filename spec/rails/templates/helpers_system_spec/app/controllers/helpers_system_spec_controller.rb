@@ -68,4 +68,12 @@ class HelpersSystemSpecController < ApplicationController
   def automatic_helpers_inheritance
     # nothing here
   end
+
+  def private_helper_erb
+    # nothing here
+  end
+
+  def private_helper_fortitude
+    # nothing here
+  end
 end
