@@ -69,13 +69,13 @@ module Fortitude
         method_text.puts "    have_missing = false"
 
         if [ :error, :use ].include?(extra_assigns)
-          method_text.puts "    extra = assigns.symbolize_keys"
+          method_text.puts "    @_fortitude_extra_assigns = assigns.symbolize_keys"
         end
 
         n.each do |need, default_value|
           method_text.puts "    # Need '#{need}' -------------------------------------------------"
           if [ :error, :use ].include?(extra_assigns)
-            method_text.puts "    extra.delete(:#{need})"
+            method_text.puts "    @_fortitude_extra_assigns.delete(:#{need})"
           end
 
           method_text.puts "    value = assigns.fetch(:#{need}, NOT_PRESENT_NEED)"
@@ -97,9 +97,9 @@ module Fortitude
         end
 
         if extra_assigns == :error
-          method_text.puts "    raise Fortitude::Errors::ExtraAssigns.new(self, extra) if extra.size > 0"
+          method_text.puts "    raise Fortitude::Errors::ExtraAssigns.new(self, @_fortitude_extra_assigns) if @_fortitude_extra_assigns.size > 0"
         elsif extra_assigns == :use
-          method_text.puts "    extra.each do |key, value|"
+          method_text.puts "    @_fortitude_extra_assigns.each do |key, value|"
           method_text.puts "      instance_variable_set(\"@#{ivar_prefix}\#{key}\", value)"
           method_text.puts "    end"
         end
@@ -288,6 +288,10 @@ EOS
       else
         super(name, *args, &block)
       end
+    end
+
+    def widget_extra_assigns
+      (@_fortitude_extra_assigns || { })
     end
 
     def yield_to_view(*args)

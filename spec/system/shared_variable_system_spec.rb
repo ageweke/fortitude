@@ -75,11 +75,46 @@ describe "Fortitude shared_variable access", :type => :system do
     describe "interactions with use_instance_variables_for_assigns and extra_assigns" do
       it "should have needs declarations pre-empt shared variables" do
         wc = widget_class do
+          use_instance_variables_for_assigns true
           implicit_shared_variable_access true
+          needs :foo, :bar => nil
+
+          def content
+            text "foo: #{@foo}, bar: #{@bar}, baz: #{@baz}"
+            @bar = "widget_bar"
+            @baz = "widget_baz"
+          end
         end
+
+        ivars[:foo] = "ivar_foo"
+        ivars[:bar] = "ivar_bar"
+        expect(render(wc.new(:foo => 'the_foo'))).to eq("foo: the_foo, bar: , baz: ")
+        expect(ivars[:foo]).to eq("ivar_foo")
+        expect(ivars[:bar]).to eq("ivar_bar")
       end
 
-      it "should have extra assigns pre-empt shared variables"
+      it "should have extra assigns pre-empt shared variables" do
+        wc = widget_class do
+          use_instance_variables_for_assigns true
+          implicit_shared_variable_access true
+          extra_assigns :use
+          needs :foo, :bar => nil
+
+          def content
+            text "foo: #{@foo}, bar: #{@bar}, baz: #{@baz}"
+            @bar = "widget_bar"
+            @baz = "widget_baz"
+          end
+        end
+
+        ivars[:foo] = "ivar_foo"
+        ivars[:bar] = "ivar_bar"
+        ivars[:baz] = "ivar_baz"
+        expect(render(wc.new(:foo => 'the_foo', :baz => 'some_baz'))).to eq("foo: the_foo, bar: , baz: some_baz")
+        expect(ivars[:foo]).to eq("ivar_foo")
+        expect(ivars[:bar]).to eq("ivar_bar")
+        expect(ivars[:baz]).to eq("ivar_baz")
+      end
     end
   end
 end
