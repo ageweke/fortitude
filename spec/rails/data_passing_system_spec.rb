@@ -27,6 +27,12 @@ describe "Rails data-passing support", :type => :rails do
       /baz method call: NoMethodError/, /baz instance var: nil/)
   end
 
+  it "should propagate un-needed variables, if asked" do
+    expect_match("extra_variables_requested", /foo method call: the_foo/, /foo instance var: nil/,
+      /bar method call: the_bar/, /bar instance var: nil/,
+      /baz method call: the_baz/, /baz instance var: nil/)
+  end
+
   it "should not propagate a controller variable through a view to a child widget without being explicitly passed" do
     expect_exception('parent_to_child_passing', 'Fortitude::Errors::MissingNeed', /foo/)
   end

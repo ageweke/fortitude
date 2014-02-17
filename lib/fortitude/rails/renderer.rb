@@ -12,7 +12,13 @@ module Fortitude
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
         def render(widget_class, template_handler, local_assigns, &block)
           total_assigns = template_handler.assigns.merge(local_assigns)
-          needed_assigns = widget_class.extract_needed_assigns_from(total_assigns)
+
+          needed_assigns = if widget_class.extra_assigns == :use
+            total_assigns
+          else
+            widget_class.extract_needed_assigns_from(total_assigns)
+          end
+
           widget = widget_class.new(needed_assigns)
           template_handler.with_output_buffer do
             rendering_context = ::Fortitude::RenderingContext.new(:delegate_object => template_handler, :yield_block => block)

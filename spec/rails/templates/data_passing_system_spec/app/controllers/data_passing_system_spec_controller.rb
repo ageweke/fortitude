@@ -36,6 +36,13 @@ class DataPassingSystemSpecController < ApplicationController
     render :locals => { :baz => 'the_baz' }
   end
 
+  def extra_variables_requested
+    @foo = 'the_foo'
+    @bar = 'the_bar'
+
+    render :locals => { :baz => 'the_baz' }
+  end
+
   def parent_to_child_passing
     @foo = 'the_foo'
   end

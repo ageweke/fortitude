@@ -72,8 +72,13 @@ describe "Fortitude shared_variable access", :type => :system do
       expect(ivars[:foo]).to eq("bar")
     end
 
-    describe "interactions with implicit_shared_variable_access and extra_assigns" do
-      it "should have needs declarations pre-empt shared variables"
+    describe "interactions with use_instance_variables_for_assigns and extra_assigns" do
+      it "should have needs declarations pre-empt shared variables" do
+        wc = widget_class do
+          implicit_shared_variable_access true
+        end
+      end
+
       it "should have extra assigns pre-empt shared variables"
     end
   end
