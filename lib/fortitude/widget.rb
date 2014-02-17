@@ -206,7 +206,7 @@ EOS
         @widget = widget
         @keys = { }
         keys.each { |k| @keys[k] = true }
-        @ivar_prefix = "@#{assign_instance_variable_prefix}"
+        @ivar_prefix = "@#{widget.class.assign_instance_variable_prefix}"
       end
 
       def keys
@@ -266,8 +266,8 @@ EOS
 
     def assigns
       @_fortitude_assigns_proxy ||= begin
-        keys = needs_as_hash.keys
-        keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if extra_assigns == :use
+        keys = self.class.needs_as_hash.keys
+        keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if self.class.extra_assigns == :use
 
         AssignsProxy.new(self, keys)
       end
