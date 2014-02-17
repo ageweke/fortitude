@@ -369,10 +369,6 @@ EOS
         end
       end
 
-      ### ==============================
-      ### TODO: Doesn't use_instance_variables_for_assigns conflict with implicit_shared_variable_access?
-      ### If you pass a parameter :foo into the widget, won't it copy that back out to the controller afterwards?
-
       def assign_instance_variable_prefix
         use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX
       end
@@ -384,29 +380,34 @@ EOS
         rebuild_run_content!
       end
 
-      def helper(name, options = { })
+      def helper(*args)
+        options = args.extract_options!
         options.assert_valid_keys(:transform, :call)
 
-        source_method_name = options[:call] || name
+        args.each do |name|
+          source_method_name = options[:call] || name
 
-        prefix = "return"
-        suffix = ""
-        case (transform = options[:transform])
-        when :output_return_value
-          prefix = "text"
-          suffix = "; nil"
-        when :return_output
-          prefix = "return capture { "
-          suffix = " }"
-        when nil, false then nil
-        else raise ArgumentError, "Invalid value for :transform: #{transform.inspect}"
-        end
+          prefix = "return"
+          suffix = ""
+          case (transform = options[:transform])
+          when :output_return_value
+            prefix = "text"
+            suffix = "; nil"
+          when :return_output
+            prefix = "return capture { "
+            suffix = " }"
+          when nil, false then nil
+          else raise ArgumentError, "Invalid value for :transform: #{transform.inspect}"
+          end
 
-        class_eval <<-EOS
-  def #{name}(*args, &block)
-    #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &block))#{suffix}
-  end
+          text = <<-EOS
+    def #{name}(*args, &block)
+      #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &block))#{suffix}
+    end
 EOS
+
+          class_eval text
+        end
       end
 
       def method_added(method_name)
