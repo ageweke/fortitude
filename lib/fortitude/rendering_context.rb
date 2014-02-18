@@ -17,7 +17,34 @@ module Fortitude
       instance_variables_object = options[:instance_variables_object] || options[:delegate_object] || Object.new
       @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
 
+      @indent = 0
+
       @yield_block = options[:yield_block]
+    end
+
+    def format_output?
+      true
+    end
+
+    def newline_and_indent!
+      @indent += 1
+      newline!
+    end
+
+    def newline_and_unindent!
+      @indent -= 1
+      newline!
+    end
+
+    NEWLINE = "\n"
+
+    def newline!
+      @output_buffer_holder.output_buffer.original_concat(NEWLINE)
+      indent!
+    end
+
+    def indent!
+      @output_buffer_holder.output_buffer.original_concat("  " * @indent)
     end
 
     def yield_to_view(*args)

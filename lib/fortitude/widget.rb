@@ -138,55 +138,55 @@ EOS
       end
     end
 
-    tag :html
-    tag :body
-    tag :head
-    tag :link
-    tag :style
+    tag :html, :newline_before => true
+    tag :body, :newline_before => true
+    tag :head, :newline_before => true
+    tag :link, :newline_before => true
+    tag :style, :newline_before => true
 
-    tag :header
-    tag :nav
-    tag :section
-    tag :footer
+    tag :header, :newline_before => true
+    tag :nav, :newline_before => true
+    tag :section, :newline_before => true
+    tag :footer, :newline_before => true
 
-    tag :script
-    tag :meta
-    tag :title
+    tag :script, :newline_before => true
+    tag :meta, :newline_before => true
+    tag :title, :newline_before => true
 
-    tag :h1
-    tag :h2
-    tag :h3
-    tag :h4
-    tag :h5
-    tag :h6
+    tag :h1, :newline_before => true
+    tag :h2, :newline_before => true
+    tag :h3, :newline_before => true
+    tag :h4, :newline_before => true
+    tag :h5, :newline_before => true
+    tag :h6, :newline_before => true
 
-    tag :div
-    tag :span
+    tag :div, :newline_before => true
+    tag :span, :newline_before => true
 
-    tag :ul
-    tag :ol
-    tag :li
+    tag :ul, :newline_before => true
+    tag :ol, :newline_before => true
+    tag :li, :newline_before => true
 
-    tag :p
+    tag :p, :newline_before => true
 
     tag :a
     tag :img
 
-    tag :form
-    tag :input
-    tag :submit
-    tag :button
-    tag :label
-    tag :select
-    tag :optgroup
-    tag :option
-    tag :textarea
-    tag :fieldset
+    tag :form, :newline_before => true
+    tag :input, :newline_before => true
+    tag :submit, :newline_before => true
+    tag :button, :newline_before => true
+    tag :label, :newline_before => true
+    tag :select, :newline_before => true
+    tag :optgroup, :newline_before => true
+    tag :option, :newline_before => true
+    tag :textarea, :newline_before => true
+    tag :fieldset, :newline_before => true
 
-    tag :table
-    tag :tr
-    tag :th
-    tag :td
+    tag :table, :newline_before => true
+    tag :tr, :newline_before => true
+    tag :th, :newline_before => true
+    tag :td, :newline_before => true
 
     tag :time
 
@@ -196,7 +196,7 @@ EOS
     tag :strong
 
     tag :br
-    tag :hr
+    tag :hr, :newline_before => true
 
     def initialize(assigns = { })
       assign_locals_from(assigns)
