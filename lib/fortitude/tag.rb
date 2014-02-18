@@ -30,15 +30,21 @@ module Fortitude
 EOS
 
       do_yield = "yield"
-      needs_newline = options[:enable_formatting] && @options[:newline_before]
-      if needs_newline
+
+      if options[:enable_formatting]
         method_text << <<-EOS
-        $stderr.puts "starting #{name}"
         rc = @_fortitude_rendering_context
         format_output = rc.format_output?
-        rc.newline! if format_output
 EOS
-        do_yield = "if format_output then $stderr.puts \'starting block inside #{name}\'; rc.newline_and_indent!; begin; yield; ensure; $stderr.puts 'ending block inside #{name}'; rc.newline_and_unindent!; end; else yield; end"
+        if @options[:newline_before]
+          method_text << <<-EOS
+        rc.newline_unless_just_had_one! if format_output
+EOS
+          do_yield = "if format_output then rc.newline_and_indent!; begin; yield; ensure; rc.newline_and_unindent!; end; else yield; end"
+        else
+          do_yield = "if format_output then rc.non_whitespace_output!; yield; else yield; end"
+        end
+
       end
 
       method_text << <<-EOS
@@ -77,19 +83,23 @@ EOS
         end
 EOS
 
-      if needs_newline
-        method_text << <<-EOS
+      if options[:enable_formatting]
+        if @options[:newline_before]
+          method_text << <<-EOS
         if format_output
           rc.newline!
         end
 EOS
+        else
+          method_text << <<-EOS
+          rc.non_whitespace_output!
+EOS
+        end
       end
 
       method_text << <<-EOS
       end
 EOS
-
-      $stderr.puts "EVAL: #{method_text}"
 
       mod.module_eval(method_text)
     end

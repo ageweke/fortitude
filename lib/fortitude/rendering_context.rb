@@ -18,12 +18,17 @@ module Fortitude
       @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
 
       @indent = 0
+      @last_was_non_whitespace = false
 
       @yield_block = options[:yield_block]
     end
 
     def format_output?
       true
+    end
+
+    def non_whitespace_output!
+      @last_was_non_whitespace = true
     end
 
     def newline_and_indent!
@@ -36,11 +41,20 @@ module Fortitude
       newline!
     end
 
+    def unindent!
+      @indent -= 1
+    end
+
     NEWLINE = "\n"
 
     def newline!
       @output_buffer_holder.output_buffer.original_concat(NEWLINE)
       indent!
+      @last_was_non_whitespace = false
+    end
+
+    def newline_unless_just_had_one!
+      newline! if @last_was_non_whitespace
     end
 
     def indent!

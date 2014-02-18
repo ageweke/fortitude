@@ -514,6 +514,7 @@ EOS
     end
 
     def text(s)
+      @_fortitude_rendering_context.non_whitespace_output!
       s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)
     end
 
@@ -522,6 +523,7 @@ EOS
     end
 
     def rawtext(s)
+      @_fortitude_rendering_context.non_whitespace_output!
       @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
     end
 
