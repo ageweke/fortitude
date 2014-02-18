@@ -18,7 +18,8 @@ module Fortitude
       @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
 
       @indent = 0
-      @last_was_non_whitespace = false
+      @newline_needed = false
+      @have_output = false
 
       @yield_block = options[:yield_block]
     end
@@ -27,39 +28,40 @@ module Fortitude
       true
     end
 
-    def non_whitespace_output!
-      @last_was_non_whitespace = true
-    end
-
-    def newline_and_indent!
+    def increase_indent!
       @indent += 1
-      newline!
     end
 
-    def newline_and_unindent!
+    def decrease_indent!
       @indent -= 1
-      newline!
     end
 
-    def unindent!
-      @indent -= 1
+    def needs_newline!
+      @newline_needed = true
+    end
+
+    def needs_newline_if_have_output_non_whitespace!
+      if @newline_needed
+        @newline_needed = false
+      else
+        @newline_needed = true
+      end
+    end
+
+    def about_to_output_non_whitespace!
+      if @newline_needed
+        if @have_output
+          o = @output_buffer_holder.output_buffer
+          o.original_concat(NEWLINE)
+          o.original_concat("  " * @indent)
+        end
+
+        @newline_needed = false
+        @have_output = true
+      end
     end
 
     NEWLINE = "\n"
-
-    def newline!
-      @output_buffer_holder.output_buffer.original_concat(NEWLINE)
-      indent!
-      @last_was_non_whitespace = false
-    end
-
-    def newline_unless_just_had_one!
-      newline! if @last_was_non_whitespace
-    end
-
-    def indent!
-      @output_buffer_holder.output_buffer.original_concat("  " * @indent)
-    end
 
     def yield_to_view(*args)
       raise "No layout to yield to!" unless @yield_block

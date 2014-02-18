@@ -14,7 +14,29 @@ module Fortitude
     CONCAT_METHOD = "original_concat"
 
     def define_method_on!(mod, options = { })
-      mod.send(:include, ::Fortitude::TagSupport) unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
+      unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
+        mod.send(:include, ::Fortitude::TagSupport)
+
+        mod.module_eval do
+    def _fortitude_formatted_output_tag_yield
+      rc = @_fortitude_rendering_context
+      if rc.format_output?
+        rc.needs_newline!
+        rc.increase_indent!
+        begin
+          yield
+        ensure
+          rc.decrease_indent!
+          # rc.needs_newline_if_have_output_non_whitespace!
+          rc.needs_newline!
+          rc.about_to_output_non_whitespace!
+        end
+      else
+        yield
+      end
+    end
+        end
+      end
 
       define_constant_string(mod, :ALONE, "<#{name}/>")
       define_constant_string(mod, :OPEN, "<#{name}>")
@@ -36,15 +58,19 @@ EOS
         rc = @_fortitude_rendering_context
         format_output = rc.format_output?
 EOS
+
         if @options[:newline_before]
           method_text << <<-EOS
-        rc.newline_unless_just_had_one! if format_output
+        rc.needs_newline! if format_output
 EOS
-          do_yield = "if format_output then rc.newline_and_indent!; begin; yield; ensure; rc.newline_and_unindent!; end; else yield; end"
+          do_yield = %{_fortitude_formatted_output_tag_yield { yield }}
         else
-          do_yield = "if format_output then rc.non_whitespace_output!; yield; else yield; end"
+          do_yield = %{yield; rc.about_to_output_non_whitespace!}
         end
 
+        method_text << <<-EOS
+        rc.about_to_output_non_whitespace! if format_output
+EOS
       end
 
       method_text << <<-EOS
@@ -70,7 +96,9 @@ EOS
         elsif (! attributes)
           o.#{CONCAT_METHOD}(#{string_const_name(:OPEN)})
           content_or_attributes.to_s.fortitude_append_escaped_string(o)
-          #{do_yield} if block_given?
+          if block_given?
+            #{do_yield}
+          end
           o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         else
           o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
@@ -78,28 +106,24 @@ EOS
           o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_END)
 
           content_or_attributes.to_s.fortitude_append_escaped_string(o)
-          #{do_yield} if block_given?
+          if block_given?
+            #{do_yield}
+          end
           o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         end
 EOS
 
-      if options[:enable_formatting]
-        if @options[:newline_before]
-          method_text << <<-EOS
-        if format_output
-          rc.newline!
-        end
+      if options[:enable_formatting] && @options[:newline_before]
+        method_text << <<-EOS
+        rc.needs_newline! if format_output
 EOS
-        else
-          method_text << <<-EOS
-          rc.non_whitespace_output!
-EOS
-        end
       end
 
       method_text << <<-EOS
       end
 EOS
+
+      $stderr.puts method_text
 
       mod.module_eval(method_text)
     end
