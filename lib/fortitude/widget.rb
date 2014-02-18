@@ -4,6 +4,7 @@ require 'active_support/core_ext/hash'
 require 'stringio'
 
 module Fortitude
+  # TODO: rename all non-interface methods as _fortitude_*
   class Widget
     REQUIRED_NEED = Object.new
     NOT_PRESENT_NEED = Object.new
