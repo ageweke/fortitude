@@ -31,7 +31,7 @@ module Fortitude
 
     private
     class OutputBufferHolder
-      attr_reader :output_buffer
+      attr_accessor :output_buffer
 
       def initialize
         if defined?(::ActionView::OutputBuffer)

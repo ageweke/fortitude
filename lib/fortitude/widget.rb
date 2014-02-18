@@ -531,5 +531,51 @@ EOS
     def shared_variables
       @_fortitude_rendering_context.instance_variable_set
     end
+
+    def capture(&block)
+      helpers = @_fortitude_rendering_context.helpers_object
+      if helpers && helpers.respond_to?(:capture, true) &&
+        [ 0, -1].include?(helpers.method(:capture).arity)
+        helpers.capture(&block)
+      else
+        _fortitude_builtin_capture(&block)
+      end
+    end
+
+    private
+    def _fortitude_builtin_capture(&block)
+      old_buffer = nil
+      new_buffer = nil
+      begin
+        new_buffer = _fortitude_new_buffer
+        old_buffer, @_fortitude_output_buffer_holder.output_buffer = @_fortitude_output_buffer_holder.output_buffer, new_buffer
+        _fortitude_new_buffer.force_encoding(old_buffer.encoding) if old_buffer && old_buffer.respond_to?(:encoding)
+        block.call
+        new_buffer
+      ensure
+        @_fortitude_output_buffer_holder.output_buffer = old_buffer
+      end
+    end
+
+    def _fortitude_new_buffer
+      _fortitude_class_for_new_buffer.new
+    end
+
+    POTENTIAL_NEW_BUFFER_CLASSES = %w{ActionView::OutputBuffer ActiveSupport::SafeBuffer String}
+
+    def _fortitude_class_for_new_buffer
+      @_fortitude_class_for_new_buffer ||= begin
+        out = nil
+        POTENTIAL_NEW_BUFFER_CLASSES.each do |class_name|
+          klass = eval(class_name) rescue nil
+          if klass
+            out = klass
+            break
+          end
+        end
+        raise "Huh? NONE of the following classes appear to be defined?!? #{POTENTIAL_NEW_BUFFER_CLASSES.inspect}" unless out
+        out
+      end
+    end
   end
 end
