@@ -117,6 +117,39 @@ describe "Fortitude helper support", :type => :system do
     expect(render(wc)).to eq("helper3: this is boo helper3, done")
   end
 
-  it "should allow aliasing helper method names"
-  it "should validate the options passed to .helper"
+  it "should allow aliasing helper method names" do
+    wc = widget_class do
+      helper :h2a, :call => :helper2
+      helper :h2b, :call => :helper2, :transform => :output_return_value
+
+      def content
+        h2b("yo")
+        text ", h2a: #{h2a('xx')}, done"
+      end
+    end
+
+    expect(render(wc)).to eq("this is yo helper2, h2a: this is xx helper2, done")
+  end
+
+
+  it "should allow declaring helpers with :transform = nil, false, or none" do
+    wc = widget_class do
+      automatic_helper_access false
+      helper :helper1, :transform => nil
+      helper :helper2, :transform => false
+      helper :helper3, :transform => :none
+
+      def content
+        text "helper1: #{helper1}, helper2: #{helper2('yo')}, helper3: "
+        helper3("hi")
+      end
+    end
+
+    expect(render(wc)).to eq("helper1: this is helper1, helper2: this is yo helper2, helper3: this is hi helper3")
+  end
+
+  it "should validate the options passed to .helper" do
+    expect { widget_class { helper :foo, :transform => :boo } }.to raise_error(ArgumentError)
+    expect { widget_class { helper :foo, :foo => :bar } }.to raise_error(ArgumentError)
+  end
 end

@@ -396,7 +396,7 @@ EOS
           when :return_output
             prefix = "return capture { "
             suffix = " }"
-          when nil, false then nil
+          when :none, nil, false then nil
           else raise ArgumentError, "Invalid value for :transform: #{transform.inspect}"
           end
 
