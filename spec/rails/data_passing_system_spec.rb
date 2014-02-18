@@ -54,6 +54,10 @@ describe "Rails data-passing support", :type => :rails do
     expect_match("widget_to_parallel_erb_handoff", /erb foo: foo_from_widget/)
   end
 
+  it "should let both controller variables and locals get picked up by the layout, as well as the view" do
+    expect_match("variables_to_layout", /widget_default_layout: foo = the_foo, bar = the_bar.*widget foo: the_foo, widget bar: the_bar/, :no_layout => true)
+  end
+
   describe "backwards-compatible instance-variable mode" do
     it "should let a widget read a controller variable implicitly" do
       expect_match("implicit_variable_read", /inner widget foo: foo_from_controller/)

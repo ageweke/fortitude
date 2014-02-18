@@ -93,4 +93,9 @@ class DataPassingSystemSpecController < ApplicationController
     @foo = "the_foo"
     @bar = "the_bar"
   end
+
+  def variables_to_layout
+    @foo = "the_foo"
+    render :layout => 'data_layout', :locals => { :bar => 'the_bar' }
+  end
 end
