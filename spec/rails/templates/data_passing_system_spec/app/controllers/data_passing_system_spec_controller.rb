@@ -47,6 +47,10 @@ class DataPassingSystemSpecController < ApplicationController
     @foo = 'the_foo'
   end
 
+  def parent_to_child_passing_partial
+    @foo = 'the_foo'
+  end
+
   def explicit_controller_variable_read
     @foo = 'the_foo'
   end

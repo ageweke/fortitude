@@ -37,6 +37,10 @@ describe "Rails data-passing support", :type => :rails do
     expect_exception('parent_to_child_passing', 'Fortitude::Errors::MissingNeed', /foo/)
   end
 
+  it "should propagate a controller variable through a view to a child widget without being explicitly passed, if invoked using render :partial" do
+    expect_match('parent_to_child_passing_partial', /parent before.*foo: the_foo.*parent after/)
+  end
+
   it "should let a widget read a controller variable explicitly, as a Symbol or a String" do
     expect_match("explicit_controller_variable_read", /explicit foo as symbol: the_foo/)
     expect_match("explicit_controller_variable_read", /explicit foo as string: the_foo/)
