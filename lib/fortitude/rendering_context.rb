@@ -40,14 +40,6 @@ module Fortitude
       @newline_needed = true
     end
 
-    def needs_newline_if_have_output_non_whitespace!
-      if @newline_needed
-        @newline_needed = false
-      else
-        @newline_needed = true
-      end
-    end
-
     def about_to_output_non_whitespace!
       if @newline_needed
         if @have_output
@@ -57,8 +49,9 @@ module Fortitude
         end
 
         @newline_needed = false
-        @have_output = true
       end
+
+      @have_output = true
     end
 
     NEWLINE = "\n"

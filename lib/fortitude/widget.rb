@@ -108,7 +108,6 @@ module Fortitude
         method_text.puts "    raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if have_missing"
         method_text.puts "  end"
 
-        # $stderr.puts "RUNNING: #{method_text.string}"
         class_eval(method_text.string)
 
         n.each do |need, default_value|
@@ -161,7 +160,7 @@ EOS
     tag :h6, :newline_before => true
 
     tag :div, :newline_before => true
-    tag :span, :newline_before => true
+    tag :span
 
     tag :ul, :newline_before => true
     tag :ol, :newline_before => true

@@ -18,7 +18,7 @@ module Fortitude
         mod.send(:include, ::Fortitude::TagSupport)
 
         mod.module_eval do
-    def _fortitude_formatted_output_tag_yield
+    def _fortitude_formatted_output_tag_yield(tag_name)
       rc = @_fortitude_rendering_context
       if rc.format_output?
         rc.needs_newline!
@@ -27,7 +27,6 @@ module Fortitude
           yield
         ensure
           rc.decrease_indent!
-          # rc.needs_newline_if_have_output_non_whitespace!
           rc.needs_newline!
           rc.about_to_output_non_whitespace!
         end
@@ -61,9 +60,11 @@ EOS
 
         if @options[:newline_before]
           method_text << <<-EOS
-        rc.needs_newline! if format_output
+        if format_output
+          rc.needs_newline!
+        end
 EOS
-          do_yield = %{_fortitude_formatted_output_tag_yield { yield }}
+          do_yield = %{_fortitude_formatted_output_tag_yield(#{name.inspect}) { yield }}
         else
           do_yield = %{yield; rc.about_to_output_non_whitespace!}
         end
@@ -123,7 +124,7 @@ EOS
       end
 EOS
 
-      $stderr.puts method_text
+      # $stderr.puts method_text
 
       mod.module_eval(method_text)
     end
