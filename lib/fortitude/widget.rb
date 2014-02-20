@@ -579,7 +579,7 @@ EOS
     tag :ol, :newline_before => true
     tag :li, :newline_before => true
 
-    tag :p, :newline_before => true#, :can_enclose => [ :b ], :valid_attributes => %w{class id}
+    tag :p, :newline_before => true, :can_enclose => [ :b ], :valid_attributes => %w{class id}
 
     tag :a
     tag :img
