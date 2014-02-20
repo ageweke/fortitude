@@ -12,4 +12,6 @@ describe "Fortitude attribute rules enforcement", :type => :system do
   it "should allow an attribute 'class' on <p>" do
     expect(render(widget_class_with_content { p :class => 'bar' })).to eq("<p class=\"bar\"/>")
   end
+
+  it "should not enforce rules on attributes represented as strings"
 end

@@ -12,4 +12,6 @@ describe "Fortitude tag rules enforcement", :type => :system do
   it "should allow a <b> inside a <p>" do
     expect(render(widget_class_with_content { p { b } })).to eq('<p><b/></p>')
   end
+
+  it "should not enforce rules if there's a render :partial in between two elements"
 end
