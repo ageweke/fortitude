@@ -7,7 +7,7 @@ module Fortitude
     FORTITUDE_TAG_PARTIAL_OPEN_END = ">".freeze
     FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END = "/>".freeze
 
-    def _fortitude_formatted_output_tag_yield
+    def _fortitude_formatted_output_tag_yield(tag_name)
       rc = @_fortitude_rendering_context
       if rc.format_output?
         rc.needs_newline!
@@ -16,6 +16,8 @@ module Fortitude
           yield
         ensure
           rc.decrease_indent!
+          rc.needs_newline!
+          rc.about_to_output_non_whitespace!
         end
       else
         yield

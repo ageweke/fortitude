@@ -38,33 +38,12 @@ module Fortitude
     def define_method_on!(mod, options = { })
       unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
         mod.send(:include, ::Fortitude::TagSupport)
-
-        mod.module_eval do
-    def _fortitude_formatted_output_tag_yield(tag_name)
-      rc = @_fortitude_rendering_context
-      if rc.format_output?
-        rc.needs_newline!
-        rc.increase_indent!
-        begin
-          yield
-        ensure
-          rc.decrease_indent!
-          rc.needs_newline!
-          rc.about_to_output_non_whitespace!
-        end
-      else
-        yield
-      end
-    end
-        end
       end
 
       define_constant_string(mod, :ALONE, "<#{name}/>")
       define_constant_string(mod, :OPEN, "<#{name}>")
       define_constant_string(mod, :CLOSE, "</#{name}>")
       define_constant_string(mod, :PARTIAL_OPEN, "<#{name}")
-
-      # options[:enable_formatting] = true
 
       validate_attributes = if options[:enforce_attribute_rules]
         "this_tag.validate_attributes(self, PARAM)"

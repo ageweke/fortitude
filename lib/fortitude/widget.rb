@@ -1,4 +1,5 @@
 require 'fortitude/tag'
+require 'fortitude/tags_module'
 require 'fortitude/errors'
 require 'active_support/core_ext/hash'
 require 'stringio'
@@ -168,11 +169,7 @@ EOS
       end
 
       def tags_module
-        @tags_module ||= begin
-          out = Module.new
-          include(out)
-          out
-        end
+        @tags_module ||= Fortitude::TagsModule.new(self)
       end
     end
 
