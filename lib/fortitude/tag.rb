@@ -42,7 +42,7 @@ module Fortitude
       define_constant_string(mod, :CLOSE, "</#{name}>")
       define_constant_string(mod, :PARTIAL_OPEN, "<#{name}")
 
-      options[:enable_formatting] = true
+      # options[:enable_formatting] = true
 
       method_text = <<-EOS
       def #{name}(content_or_attributes = nil, attributes = nil)

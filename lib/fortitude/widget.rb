@@ -17,7 +17,32 @@ module Fortitude
 
     class << self
       def tag(name, options = { })
-        Fortitude::Tag.new(name, options).define_method_on!(tags_module)
+        @_this_class_tags ||= { }
+        new_tag = Fortitude::Tag.new(name, options)
+        @_this_class_tags[name] = new_tag
+        rebuild_tag_methods!(name)
+      end
+
+      def this_class_tags
+        @_this_class_tags || { }
+      end
+
+      def all_tags
+        out = { }
+        out.merge!(superclass.all_tags) if superclass.respond_to?(:all_tags)
+        out.merge!(this_class_tags)
+        out
+      end
+
+      def rebuild_tag_methods!(which_tags = nil)
+        which_tags ||= all_tags.keys
+        which_tags = Array(which_tags)
+        $stderr.puts "Rebuilding tags: #{which_tags.inspect}"
+        which_tags.each do |name|
+          tag = all_tags[name]
+          raise "No tag #{name.inspect}? Have: #{all_tags.keys.inspect}" unless tag
+          tag.define_method_on!(tags_module, :enable_formatting => self.format_output)
+        end
       end
 
       def needs(*names)
@@ -136,66 +161,6 @@ EOS
         end
       end
     end
-
-    tag :html, :newline_before => true
-    tag :body, :newline_before => true
-    tag :head, :newline_before => true
-    tag :link, :newline_before => true
-    tag :style, :newline_before => true
-
-    tag :header, :newline_before => true
-    tag :nav, :newline_before => true
-    tag :section, :newline_before => true
-    tag :footer, :newline_before => true
-
-    tag :script, :newline_before => true
-    tag :meta, :newline_before => true
-    tag :title, :newline_before => true
-
-    tag :h1, :newline_before => true
-    tag :h2, :newline_before => true
-    tag :h3, :newline_before => true
-    tag :h4, :newline_before => true
-    tag :h5, :newline_before => true
-    tag :h6, :newline_before => true
-
-    tag :div, :newline_before => true
-    tag :span
-
-    tag :ul, :newline_before => true
-    tag :ol, :newline_before => true
-    tag :li, :newline_before => true
-
-    tag :p, :newline_before => true
-
-    tag :a
-    tag :img
-
-    tag :form, :newline_before => true
-    tag :input, :newline_before => true
-    tag :submit, :newline_before => true
-    tag :button, :newline_before => true
-    tag :label, :newline_before => true
-    tag :select, :newline_before => true
-    tag :optgroup, :newline_before => true
-    tag :option, :newline_before => true
-    tag :textarea, :newline_before => true
-    tag :fieldset, :newline_before => true
-
-    tag :table, :newline_before => true
-    tag :tr, :newline_before => true
-    tag :th, :newline_before => true
-    tag :td, :newline_before => true
-
-    tag :time
-
-    tag :i
-    tag :b
-    tag :em
-    tag :strong
-
-    tag :br
-    tag :hr, :newline_before => true
 
     def initialize(assigns = { })
       assign_locals_from(assigns)
@@ -340,7 +305,7 @@ EOS
           return (@_fortitude_automatic_helper_access == :yes) if @_fortitude_automatic_helper_access
           return superclass.automatic_helper_access if superclass.respond_to?(:automatic_helper_access)
           false
-        else on_or_off
+        else
           @_fortitude_automatic_helper_access = on_or_off ? :yes : :no
         end
       end
@@ -358,12 +323,24 @@ EOS
         end
       end
 
+      def format_output(state = nil)
+        if state == nil
+          return (@_fortitude_format_output == :yes) if @_fortitude_format_output
+          return superclass.format_output if superclass.respond_to?(:format_output)
+          false
+        else
+          @_fortitude_format_output = state ? :yes : :no
+          rebuild_text_methods!
+          rebuild_tag_methods!
+        end
+      end
+
       def use_instance_variables_for_assigns(on_or_off = nil)
         if on_or_off == nil
           return (@_fortitude_use_instance_variables_for_assigns == :yes) if @_fortitude_use_instance_variables_for_assigns
           return superclass.use_instance_variables_for_assigns if superclass.respond_to?(:use_instance_variables_for_assigns)
           false
-        else on_or_off
+        else
           @_fortitude_use_instance_variables_for_assigns = on_or_off ? :yes : :no
           rebuild_needs_methods!
         end
@@ -475,6 +452,44 @@ EOS
         direct_subclasses.each { |s| s.rebuild_run_content! }
       end
 
+      def rebuild_text_methods!
+        text = <<-EOS
+  def text(s)
+EOS
+
+        if format_output
+          text << <<-EOS
+    @_fortitude_rendering_context.about_to_output_non_whitespace!
+EOS
+        end
+
+        text << <<-EOS
+    s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)
+  end
+EOS
+
+        class_eval(text)
+
+        text = <<-EOS
+  def rawtext(s)
+EOS
+
+        if format_output
+          text << <<-EOS
+    @_fortitude_rendering_context.about_to_output_non_whitespace!
+EOS
+        end
+
+        text << <<-EOS
+    @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
+  end
+EOS
+
+        class_eval(text)
+
+        direct_subclasses.each { |s| s.rebuild_text_methods! }
+      end
+
       private
       def this_class_around_content_methods
         @_fortitude_around_content_methods ||= [ ]
@@ -490,11 +505,71 @@ EOS
 
     rebuild_run_content!
     rebuild_needs_methods!
+    rebuild_text_methods!
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
     helper :render, :transform => :output_return_value
 
+    tag :html, :newline_before => true
+    tag :body, :newline_before => true
+    tag :head, :newline_before => true
+    tag :link, :newline_before => true
+    tag :style, :newline_before => true
+
+    tag :header, :newline_before => true
+    tag :nav, :newline_before => true
+    tag :section, :newline_before => true
+    tag :footer, :newline_before => true
+
+    tag :script, :newline_before => true
+    tag :meta, :newline_before => true
+    tag :title, :newline_before => true
+
+    tag :h1, :newline_before => true
+    tag :h2, :newline_before => true
+    tag :h3, :newline_before => true
+    tag :h4, :newline_before => true
+    tag :h5, :newline_before => true
+    tag :h6, :newline_before => true
+
+    tag :div, :newline_before => true
+    tag :span
+
+    tag :ul, :newline_before => true
+    tag :ol, :newline_before => true
+    tag :li, :newline_before => true
+
+    tag :p, :newline_before => true
+
+    tag :a
+    tag :img
+
+    tag :form, :newline_before => true
+    tag :input, :newline_before => true
+    tag :submit, :newline_before => true
+    tag :button, :newline_before => true
+    tag :label, :newline_before => true
+    tag :select, :newline_before => true
+    tag :optgroup, :newline_before => true
+    tag :option, :newline_before => true
+    tag :textarea, :newline_before => true
+    tag :fieldset, :newline_before => true
+
+    tag :table, :newline_before => true
+    tag :tr, :newline_before => true
+    tag :th, :newline_before => true
+    tag :td, :newline_before => true
+
+    tag :time
+
+    tag :i
+    tag :b
+    tag :em
+    tag :strong
+
+    tag :br
+    tag :hr, :newline_before => true
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
       @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
@@ -512,18 +587,8 @@ EOS
       w.to_html(@_fortitude_rendering_context)
     end
 
-    def text(s)
-      @_fortitude_rendering_context.about_to_output_non_whitespace!
-      s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)
-    end
-
     def ttext(key, *args)
       text t(".#{key}", *args)
-    end
-
-    def rawtext(s)
-      @_fortitude_rendering_context.about_to_output_non_whitespace!
-      @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
     end
 
     def output_buffer

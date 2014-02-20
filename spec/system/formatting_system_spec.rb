@@ -1,6 +1,11 @@
 describe "Fortitude formatting support", :type => :system do
   def should_format_to(text, &block)
-    expect(render(widget_class_with_content(&block))).to eq(text)
+    wc = widget_class do
+      format_output true
+    end
+
+    wc.send(:define_method, :content, &block)
+    expect(render(wc)).to eq(text)
   end
 
   it "should add newlines around <div> and <p>" do
