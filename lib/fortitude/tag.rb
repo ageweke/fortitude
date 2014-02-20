@@ -8,6 +8,12 @@ module Fortitude
       @name = name.to_s.strip.downcase.to_sym
       @options = options
 
+      @valid_attributes = nil
+      if @options[:valid_attributes]
+        @valid_attributes = { }
+        @options[:valid_attributes].each { |a| @valid_attributes[a.to_s.strip.to_sym] = true }
+      end
+
       # @options.assert_valid_keys([ ])
     end
 
@@ -18,6 +24,15 @@ module Fortitude
       unless @options[:can_enclose].include?(tag_object.name)
         raise Fortitude::Errors::InvalidElementNesting.new(widget, name, tag_object.name)
       end
+    end
+
+    def validate_attributes(widget, attributes_hash)
+      return unless @valid_attributes
+      bad = { }
+      attributes_hash.each do |k, v|
+        bad[k] = v unless @valid_attributes.include?(k.to_sym)
+      end
+      raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @valid_attributes.keys) if bad.size > 0
     end
 
     def define_method_on!(mod, options = { })
@@ -51,15 +66,26 @@ module Fortitude
 
       # options[:enable_formatting] = true
 
+      validate_attributes = if options[:enforce_attribute_rules]
+        "this_tag.validate_attributes(self, PARAM)"
+      else
+        ""
+      end
+
       method_text = <<-EOS
       def #{name}(content_or_attributes = nil, attributes = nil)
         o = @_fortitude_output_buffer_holder.output_buffer
 
 EOS
 
-      if options[:enforce_element_nesting_rules]
+      if options[:enforce_element_nesting_rules] || options[:enforce_attribute_rules]
         method_text << <<-EOS
         this_tag = self.class.get_tag(:#{name})
+EOS
+      end
+
+      if options[:enforce_element_nesting_rules]
+        method_text << <<-EOS
         @_fortitude_rendering_context.start_element_for_rules(self, this_tag)
       begin
 EOS
@@ -99,6 +125,7 @@ EOS
             o.#{CONCAT_METHOD}(#{string_const_name(:ALONE)})
           end
         elsif content_or_attributes.kind_of?(Hash)
+          #{validate_attributes.gsub('PARAM', 'content_or_attributes')}
           o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
           content_or_attributes.fortitude_append_as_attributes(o, nil)
 
@@ -117,6 +144,7 @@ EOS
           end
           o.#{CONCAT_METHOD}(#{string_const_name(:CLOSE)})
         else
+          #{validate_attributes.gsub('PARAM', 'attributes')}
           o.#{CONCAT_METHOD}(#{string_const_name(:PARTIAL_OPEN)})
           attributes.fortitude_append_as_attributes(o, nil)
           o.#{CONCAT_METHOD}(FORTITUDE_TAG_PARTIAL_OPEN_END)

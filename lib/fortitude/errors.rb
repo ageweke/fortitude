@@ -33,5 +33,17 @@ module Fortitude
         @enclosed_element_name = enclosed_element_name
       end
     end
+
+    class InvalidElementAttributes < Base
+      attr_reader :widget, :element_name, :invalid_attributes_hash, :allowed_attribute_names
+
+      def initialize(widget, element_name, invalid_attributes_hash, allowed_attribute_names)
+        super(%{The widget #{widget.class.name} tried to render an element, <#{element_name}>, with attributes that are not allowed: #{invalid_attributes_hash.inspect}. Only these attributes are allowed: #{allowed_attribute_names.inspect}})
+        @widget = widget
+        @element_name = element_name
+        @invalid_attributes_hash = invalid_attributes_hash
+        @allowed_attribute_names = allowed_attribute_names
+      end
+    end
   end
 end

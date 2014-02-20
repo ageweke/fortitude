@@ -51,7 +51,7 @@ module Fortitude
         which_tags.each do |name|
           tag = @_all_tags[name]
           raise "No tag #{name.inspect}? Have: #{@_all_tags.keys.inspect}" unless tag
-          tag.define_method_on!(tags_module, :enable_formatting => self.format_output, :enforce_element_nesting_rules => self.enforce_element_nesting_rules)
+          tag.define_method_on!(tags_module, :enable_formatting => self.format_output, :enforce_element_nesting_rules => self.enforce_element_nesting_rules, :enforce_attribute_rules => self.enforce_attribute_rules)
         end
 
         @_all_tags = compute_all_tags
@@ -360,6 +360,17 @@ EOS
         end
       end
 
+      def enforce_attribute_rules(state = nil)
+        if state == nil
+          return (@_fortitude_enforce_attribute_rules == :yes) if @_fortitude_enforce_attribute_rules
+          return superclass.enforce_attribute_rules if superclass.respond_to?(:enforce_attribute_rules)
+          false
+        else
+          @_fortitude_enforce_attribute_rules = state ? :yes : :no
+          rebuild_tag_methods!
+        end
+      end
+
       def use_instance_variables_for_assigns(on_or_off = nil)
         if on_or_off == nil
           return (@_fortitude_use_instance_variables_for_assigns == :yes) if @_fortitude_use_instance_variables_for_assigns
@@ -529,6 +540,7 @@ EOS
     extra_assigns :ignore
     format_output false
     enforce_element_nesting_rules false
+    enforce_attribute_rules false
 
     rebuild_run_content!
     rebuild_needs_methods!
@@ -567,7 +579,7 @@ EOS
     tag :ol, :newline_before => true
     tag :li, :newline_before => true
 
-    tag :p, :newline_before => true, :can_enclose => [ :b ]
+    tag :p, :newline_before => true#, :can_enclose => [ :b ], :valid_attributes => %w{class id}
 
     tag :a
     tag :img
