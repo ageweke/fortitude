@@ -22,5 +22,16 @@ module Fortitude
         @extra_assigns = extra_assigns
       end
     end
+
+    class InvalidElementNesting < Base
+      attr_reader :widget, :enclosing_element_name, :enclosed_element_name
+
+      def initialize(widget, enclosing_element_name, enclosed_element_name)
+        super(%{The widget #{widget.class.name} tried to render an element that is not allowed by element nesting rules: you can't put a <#{enclosed_element_name}> inside a <#{enclosing_element_name}>.})
+        @widget = widget
+        @enclosing_element_name = enclosing_element_name
+        @enclosed_element_name = enclosed_element_name
+      end
+    end
   end
 end

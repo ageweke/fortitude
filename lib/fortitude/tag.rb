@@ -13,6 +13,13 @@ module Fortitude
 
     CONCAT_METHOD = "original_concat"
 
+    def validate_can_enclose!(widget, tag_object)
+      return unless @options[:can_enclose]
+      unless @options[:can_enclose].include?(tag_object.name)
+        raise Fortitude::Errors::InvalidElementNesting.new(widget, tag_object.name, name)
+      end
+    end
+
     def define_method_on!(mod, options = { })
       unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
         mod.send(:include, ::Fortitude::TagSupport)
@@ -49,6 +56,14 @@ module Fortitude
         o = @_fortitude_output_buffer_holder.output_buffer
 
 EOS
+
+      if options[:enforce_element_nesting_rules]
+        method_text << <<-EOS
+        this_tag = self.class.get_tag(:#{name})
+        @_fortitude_rendering_context.start_element_for_rules(self, this_tag)
+      begin
+EOS
+      end
 
       do_yield = "yield"
 
@@ -120,11 +135,17 @@ EOS
 EOS
       end
 
+      if options[:enforce_element_nesting_rules]
+        method_text << <<-EOS
+      ensure
+        @_fortitude_rendering_context.end_element_for_rules(self, this_tag)
+      end
+EOS
+      end
+
       method_text << <<-EOS
       end
 EOS
-
-      # $stderr.puts method_text
 
       mod.module_eval(method_text)
     end

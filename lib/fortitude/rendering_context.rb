@@ -20,8 +20,26 @@ module Fortitude
       @indent = 0
       @newline_needed = false
       @have_output = false
+      @current_element_nesting = [ ]
 
       @yield_block = options[:yield_block]
+    end
+
+    def start_element_for_rules(widget, tag_object)
+      validate_element_for_rules(widget, tag_object)
+      @current_element_nesting << tag_object
+    end
+
+    def end_element_for_rules(widget, tag_object)
+      last = @current_element_nesting.pop
+      unless last == tag_object
+        raise "Something horrible happened -- the last tag we started was #{last}, but now we're ending #{tag_object}?!?"
+      end
+    end
+
+    def validate_element_for_rules(widget, tag_object)
+      current = @current_element_nesting[-1]
+      current.validate_can_enclose!(widget, tag_object) if current
     end
 
     def format_output?

@@ -34,14 +34,17 @@ module Fortitude
         out
       end
 
+      def get_tag(name)
+        all_tags[name] || raise("no such tag: #{name.inspect}")
+      end
+
       def rebuild_tag_methods!(which_tags = nil)
         which_tags ||= all_tags.keys
         which_tags = Array(which_tags)
-        $stderr.puts "Rebuilding tags: #{which_tags.inspect}"
         which_tags.each do |name|
           tag = all_tags[name]
           raise "No tag #{name.inspect}? Have: #{all_tags.keys.inspect}" unless tag
-          tag.define_method_on!(tags_module, :enable_formatting => self.format_output)
+          tag.define_method_on!(tags_module, :enable_formatting => self.format_output, :enforce_element_nesting_rules => self.enforce_element_nesting_rules)
         end
       end
 
@@ -335,6 +338,17 @@ EOS
         end
       end
 
+      def enforce_element_nesting_rules(state = nil)
+        if state == nil
+          return (@_fortitude_enforce_element_nesting_rules == :yes) if @_fortitude_enforce_element_nesting_rules
+          return superclass.enforce_element_nesting_rules if superclass.respond_to?(:enforce_element_nesting_rules)
+          false
+        else
+          @_fortitude_enforce_element_nesting_rules = state ? :yes : :no
+          rebuild_tag_methods!
+        end
+      end
+
       def use_instance_variables_for_assigns(on_or_off = nil)
         if on_or_off == nil
           return (@_fortitude_use_instance_variables_for_assigns == :yes) if @_fortitude_use_instance_variables_for_assigns
@@ -502,6 +516,8 @@ EOS
 
     automatic_helper_access true
     extra_assigns :ignore
+    format_output false
+    enforce_element_nesting_rules false
 
     rebuild_run_content!
     rebuild_needs_methods!
@@ -540,7 +556,7 @@ EOS
     tag :ol, :newline_before => true
     tag :li, :newline_before => true
 
-    tag :p, :newline_before => true
+    tag :p, :newline_before => true, :can_enclose => [ :b ]
 
     tag :a
     tag :img
@@ -570,6 +586,7 @@ EOS
 
     tag :br
     tag :hr, :newline_before => true
+
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
       @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
