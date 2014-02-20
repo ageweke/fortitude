@@ -27,25 +27,36 @@ module Fortitude
         @_this_class_tags || { }
       end
 
-      def all_tags
+      def compute_all_tags
         out = { }
-        out.merge!(superclass.all_tags) if superclass.respond_to?(:all_tags)
+        out.merge!(superclass.compute_all_tags) if superclass.respond_to?(:compute_all_tags)
         out.merge!(this_class_tags)
         out
+      end
+
+      def all_tags
+        @_all_tags ||= compute_all_tags
       end
 
       def get_tag(name)
         all_tags[name] || raise("no such tag: #{name.inspect}")
       end
 
-      def rebuild_tag_methods!(which_tags = nil)
-        which_tags ||= all_tags.keys
+      def rebuild_tag_methods!(which_tags_in = nil)
+        which_tags = which_tags_in
+
+        @_all_tags = compute_all_tags
+        which_tags ||= @_all_tags.keys
         which_tags = Array(which_tags)
         which_tags.each do |name|
-          tag = all_tags[name]
-          raise "No tag #{name.inspect}? Have: #{all_tags.keys.inspect}" unless tag
+          tag = @_all_tags[name]
+          raise "No tag #{name.inspect}? Have: #{@_all_tags.keys.inspect}" unless tag
           tag.define_method_on!(tags_module, :enable_formatting => self.format_output, :enforce_element_nesting_rules => self.enforce_element_nesting_rules)
         end
+
+        @_all_tags = compute_all_tags
+
+        direct_subclasses.each { |s| s.rebuild_tag_methods!(which_tags_in) }
       end
 
       def needs(*names)

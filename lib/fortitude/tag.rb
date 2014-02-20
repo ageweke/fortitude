@@ -16,7 +16,7 @@ module Fortitude
     def validate_can_enclose!(widget, tag_object)
       return unless @options[:can_enclose]
       unless @options[:can_enclose].include?(tag_object.name)
-        raise Fortitude::Errors::InvalidElementNesting.new(widget, tag_object.name, name)
+        raise Fortitude::Errors::InvalidElementNesting.new(widget, name, tag_object.name)
       end
     end
 
