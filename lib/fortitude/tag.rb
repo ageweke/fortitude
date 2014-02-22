@@ -41,6 +41,10 @@ module Fortitude
       raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @valid_attributes.keys) if bad.size > 0
     end
 
+    def ucname
+      name.to_s.upcase
+    end
+
     def define_method_on!(mod, options = {})
       unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
         mod.send(:include, ::Fortitude::TagSupport)
@@ -50,6 +54,8 @@ module Fortitude
       define_constant_string(mod, :OPEN, "<#{name}>")
       define_constant_string(mod, :CLOSE, "</#{name}>")
       define_constant_string(mod, :PARTIAL_OPEN, "<#{name}")
+
+      const_set_or_replace(mod, "TAG_OBJECT_#{ucname}", self)
 
       needs_element_rules = !! options[:enforce_element_nesting_rules]
       needs_attribute_rules = !! options[:enforce_attribute_rules]
@@ -66,7 +72,7 @@ module Fortitude
         yield_call = "yield"
       end
 
-      substitutions = { 'name' => name.to_s, 'ucname' => name.to_s.upcase, 'yield_call' => yield_call }
+      substitutions = { 'name' => name.to_s, 'ucname' => ucname, 'yield_call' => yield_call }
 
       require 'stringio'
       output = StringIO.new
@@ -217,10 +223,14 @@ EOS
       "FORTITUDE_TAG_#{name.upcase}_#{key}".to_sym
     end
 
+    def const_set_or_replace(target, const_name, const_value)
+      target.send(:remove_const, const_name) if target.const_defined?(const_name)
+      target.const_set(const_name, const_value.freeze)
+    end
+
     def define_constant_string(target_module, key, value)
       const_name = string_const_name(key)
-      target_module.send(:remove_const, const_name) if target_module.const_defined?(const_name)
-      target_module.const_set(const_name, value.freeze)
+      const_set_or_replace(target_module, const_name, value)
     end
   end
 end

@@ -2,7 +2,7 @@ def #{name}(content_or_attributes = nil, attributes = nil)
   o = @_fortitude_output_buffer_holder.output_buffer
   rc = @_fortitude_rendering_context                                       # :if needs_rendering_context
 
-  this_tag = self.class.get_tag(:#{name})                                  # :if needs_tag
+  this_tag = TAG_OBJECT_#{ucname}                                          # :if needs_tag
   rc.with_element_for_rules(self, this_tag) do                             # :if needs_element_rules
     format_output = rc.format_output?                                      # :if needs_formatting
     if format_output                                                       # :if needs_formatting
