@@ -1,5 +1,12 @@
 module Fortitude
   class SimpleTemplate
+    class << self
+      def template(name)
+        @templates ||= { }
+        @templates[name] ||= new(File.join(File.dirname(__FILE__), "#{name}.rb.smpl"))
+      end
+    end
+
     def initialize(source_file)
       @lines = File.read(source_file).split(/\r\n|\r|\n/)
     end
@@ -18,11 +25,12 @@ module Fortitude
           next unless bindings_target.instance_eval(condition)
         end
 
-        while l =~ /\#\{([^}]+)\}/
+        while l =~ /[^\\]\#\{([^}]+)\}/
           name = $1
           value = bindings_target.send($1)
           l = l.gsub("\#\{#{$1}\}", value.to_s)
         end
+        l = l.gsub(/\\\#\{/, "\#\{")
 
         result_lines << l
       end

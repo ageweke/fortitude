@@ -1,0 +1,20 @@
+def assign_locals_from(assigns)
+  @_fortitude_raw_assigns = assigns
+  the_needs = self.class.needs_as_hash
+  missing = [ ]
+  have_missing = false
+
+  @_fortitude_extra_assigns = assigns.symbolize_keys          # :if [ :error, :use ].include?(extra_assigns)
+
+  #{needs_text}
+
+  if @_fortitude_extra_assigns.size > 0                       # :if extra_assigns == :error
+    raise Fortitude::Errors::ExtraAssigns.new(self, @_fortitude_extra_assigns) # :if extra_assigns == :error
+  end                                                         # :if extra_assigns == :error
+
+  @_fortitude_extra_assigns.each do |key, value|              # :if extra_assigns == :use
+    instance_variable_set("@#{ivar_prefix}\#{key}", value)    # :if extra_assigns == :use
+  end                                                         # :if extra_assigns == :use
+
+  raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if have_missing
+end

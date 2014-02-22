@@ -3,12 +3,6 @@ require 'fortitude/simple_template'
 
 module Fortitude
   class Tag
-    class << self
-      def template
-        @template ||= Fortitude::SimpleTemplate.new(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl'))
-      end
-    end
-
     attr_reader :name
 
     def initialize(name, options = { })
@@ -60,7 +54,7 @@ module Fortitude
         yield_call = "yield"
       end
 
-      text = self.class.template.result(
+      text = Fortitude::SimpleTemplate.template('tag_method_template').result(
         :name => name.to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
         :needs_element_rules => !! options[:enforce_element_nesting_rules],
         :needs_attribute_rules => !! options[:enforce_attribute_rules],

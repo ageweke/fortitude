@@ -122,63 +122,22 @@ module Fortitude
       private
       def rebuild_my_needs_methods!
         n = needs_as_hash
-        ivar_prefix = assign_instance_variable_prefix
 
-        method_text = StringIO.new
+        needs_text = n.map do |need, default_value|
+          Fortitude::SimpleTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
+            :need => need, :has_default => (default_value != REQUIRED_NEED),
+            :ivar_prefix => assign_instance_variable_prefix
+          )
+        end.join("\n\n")
 
-        method_text.puts "  def assign_locals_from(assigns)"
-        method_text.puts "    @_fortitude_raw_assigns = assigns"
-        method_text.puts "    the_needs = self.class.needs_as_hash"
-        method_text.puts "    missing = [ ]"
-        method_text.puts "    have_missing = false"
-
-        if [ :error, :use ].include?(extra_assigns)
-          method_text.puts "    @_fortitude_extra_assigns = assigns.symbolize_keys"
-        end
+        assign_locals_from_text = Fortitude::SimpleTemplate.template('assign_locals_from_template').result(
+          :extra_assigns => extra_assigns, :ivar_prefix => assign_instance_variable_prefix, :needs_text => needs_text)
+        class_eval(assign_locals_from_text)
 
         n.each do |need, default_value|
-          method_text.puts "    # Need '#{need}' -------------------------------------------------"
-          if [ :error, :use ].include?(extra_assigns)
-            method_text.puts "    @_fortitude_extra_assigns.delete(:#{need})"
-          end
-
-          method_text.puts "    value = assigns.fetch(:#{need}, NOT_PRESENT_NEED)"
-          method_text.puts "    if value == NOT_PRESENT_NEED"
-          method_text.puts "      value = assigns.fetch('#{need}', NOT_PRESENT_NEED)"
-          method_text.puts "      if value == NOT_PRESENT_NEED"
-
-          if default_value == REQUIRED_NEED
-            method_text.puts "        value = nil"
-            method_text.puts "        missing << :#{need}"
-            method_text.puts "        have_missing = true"
-          else
-            method_text.puts "        value = the_needs[:#{need}]"
-          end
-          method_text.puts "      end"
-          method_text.puts "    end"
-          method_text.puts "    "
-          method_text.puts "    @#{ivar_prefix}#{need} = value"
-        end
-
-        if extra_assigns == :error
-          method_text.puts "    raise Fortitude::Errors::ExtraAssigns.new(self, @_fortitude_extra_assigns) if @_fortitude_extra_assigns.size > 0"
-        elsif extra_assigns == :use
-          method_text.puts "    @_fortitude_extra_assigns.each do |key, value|"
-          method_text.puts "      instance_variable_set(\"@#{ivar_prefix}\#{key}\", value)"
-          method_text.puts "    end"
-        end
-
-        method_text.puts "    raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if have_missing"
-        method_text.puts "  end"
-
-        class_eval(method_text.string)
-
-        n.each do |need, default_value|
-          class_eval(<<-EOS)
-  def #{need}
-    @#{ivar_prefix}#{need}
-  end
-EOS
+          text = Fortitude::SimpleTemplate.template('need_method_template').result(
+            :need => need, :ivar_prefix => assign_instance_variable_prefix)
+          class_eval(text)
         end
       end
 

@@ -1,0 +1,15 @@
+# Need '#{need}' -------------------------------------------------
+@_fortitude_extra_assigns.delete(:#{need})           # :if [ :error, :use ].include?(extra_assigns)
+
+value = assigns.fetch(:#{need}, NOT_PRESENT_NEED)
+if value == NOT_PRESENT_NEED
+  value = assigns.fetch('#{need}', NOT_PRESENT_NEED)
+  if value == NOT_PRESENT_NEED
+    value = nil                                      # :if ! has_default
+    missing << :#{need}                              # :if ! has_default
+    have_missing = true                              # :if ! has_default
+    value = the_needs[:#{need}]                      # :if has_default
+  end
+end
+
+@#{ivar_prefix}#{need} = value

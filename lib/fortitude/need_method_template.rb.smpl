@@ -1,0 +1,3 @@
+def #{need}
+  @#{ivar_prefix}#{need}
+end
