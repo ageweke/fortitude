@@ -58,8 +58,6 @@ module Fortitude
       needs_formatting = !! options[:enable_formatting]
       content_allowed = @content_allowed
       newline_before = @newline_before
-      needs_tag = needs_element_rules || needs_attribute_rules
-      needs_rendering_context = needs_element_rules || needs_formatting
 
       if needs_formatting && newline_before
         yield_call = "_fortitude_formatted_output_tag_yield(:#{name}) { yield }"
