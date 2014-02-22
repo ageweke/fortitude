@@ -11,6 +11,22 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("<hr/>") { hr }
   end
 
+  it "should not allow passing text content in a block to a tag that doesn't take content" do
+    expect { r { br { text "hi" } } }.to raise_error(Fortitude::Errors::NoContentAllowed)
+  end
+
+  it "should not allow passing element content in a block to a tag that doesn't take content" do
+    expect { r { br { p } } }.to raise_error(Fortitude::Errors::NoContentAllowed)
+  end
+
+  it "should not allow passing text content to a tag that doesn't take content" do
+    expect { r { br "hi" } }.to raise_error(Fortitude::Errors::NoContentAllowed)
+  end
+
+  it "should not allow passing text content to a tag that doesn't take content, even if it has attributes" do
+    expect { r { br "hi", :class => 'yo' } }.to raise_error(Fortitude::Errors::NoContentAllowed)
+  end
+
   it "should render a tag with direct text content correctly" do
     should_render_to("<p>hello, world</p>") { p "hello, world" }
   end

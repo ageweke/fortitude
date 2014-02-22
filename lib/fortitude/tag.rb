@@ -15,6 +15,7 @@ module Fortitude
       end
 
       @newline_before = !! options[:newline_before]
+      @content_allowed = true unless options.has_key?(:content_allowed) && (! options[:content_allowed])
 
       # @options.assert_valid_keys([ ])
     end
@@ -60,6 +61,7 @@ module Fortitude
       needs_element_rules = !! options[:enforce_element_nesting_rules]
       needs_attribute_rules = !! options[:enforce_attribute_rules]
       needs_formatting = !! options[:enable_formatting]
+      content_allowed = @content_allowed
       newline_before = @newline_before
       needs_tag = needs_element_rules || needs_attribute_rules
       needs_rendering_context = needs_element_rules || needs_formatting

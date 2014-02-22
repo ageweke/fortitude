@@ -24,6 +24,10 @@ module Fortitude
       end
     end
 
+    def _fortitude_raise_no_content_allowed_error(tag_name)
+      raise Fortitude::Errors::NoContentAllowed.new(self, tag_name)
+    end
+
     module ClassMethods
       def fortitude_tag_support_included?
         true

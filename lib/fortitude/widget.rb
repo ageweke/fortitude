@@ -550,7 +550,7 @@ EOS
     tag :html, :newline_before => true
     tag :body, :newline_before => true
     tag :head, :newline_before => true
-    tag :link, :newline_before => true
+    tag :link, :newline_before => true, :content_allowed => false
     tag :style, :newline_before => true
 
     tag :header, :newline_before => true
@@ -559,7 +559,7 @@ EOS
     tag :footer, :newline_before => true
 
     tag :script, :newline_before => true
-    tag :meta, :newline_before => true
+    tag :meta, :newline_before => true, :content_allowed => false
     tag :title, :newline_before => true
 
     tag :h1, :newline_before => true
@@ -604,8 +604,8 @@ EOS
     tag :em
     tag :strong
 
-    tag :br
-    tag :hr, :newline_before => true
+    tag :br, :content_allowed => false
+    tag :hr, :newline_before => true, :content_allowed => false
 
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context

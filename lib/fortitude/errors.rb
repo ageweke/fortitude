@@ -45,5 +45,15 @@ module Fortitude
         @allowed_attribute_names = allowed_attribute_names
       end
     end
+
+    class NoContentAllowed < Base
+      attr_reader :widget, :element_name
+
+      def initialize(widget, element_name)
+        super(%{The widget #{widget.class.name} tried to render an element, <#{element_name}>, with content inside it, but that element doesn't accept content.})
+        @widget = widget
+        @element_name = element_name
+      end
+    end
   end
 end

@@ -12,6 +12,7 @@ def #{name}(content_or_attributes = nil, attributes = nil)
 
     if (! content_or_attributes)
       if block_given?
+        _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
         o.original_concat(FORTITUDE_TAG_#{ucname}_OPEN)
         #{yield_call}
         o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
@@ -24,6 +25,7 @@ def #{name}(content_or_attributes = nil, attributes = nil)
       content_or_attributes.fortitude_append_as_attributes(o, nil)
 
       if block_given?
+        _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
         o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_END)
         #{yield_call}
         o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
@@ -31,13 +33,16 @@ def #{name}(content_or_attributes = nil, attributes = nil)
         o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
       end
     elsif (! attributes)
+      _fortitude_raise_no_content_allowed_error(:#{name})                  # :if ! content_allowed
       o.original_concat(FORTITUDE_TAG_#{ucname}_OPEN)
       content_or_attributes.to_s.fortitude_append_escaped_string(o)
       if block_given?
+        _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
         #{yield_call}
       end
       o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
     else
+      _fortitude_raise_no_content_allowed_error(:#{name})                  # :if ! content_allowed
       this_tag.validate_attributes(self, attributes)                       # :if needs_attribute_rules
       o.original_concat(FORTITUDE_TAG_#{ucname}_PARTIAL_OPEN)
       attributes.fortitude_append_as_attributes(o, nil)
@@ -45,6 +50,7 @@ def #{name}(content_or_attributes = nil, attributes = nil)
 
       content_or_attributes.to_s.fortitude_append_escaped_string(o)
       if block_given?
+        _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
         #{yield_call}
       end
       o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
