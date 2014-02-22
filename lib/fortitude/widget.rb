@@ -17,6 +17,39 @@ module Fortitude
     end
 
     class << self
+      def _fortitude_class_inheritable_attribute(attribute_name, default_value, allowable_values)
+        metaclass = (class << self; self; end)
+        metaclass.send(:define_method, attribute_name) do |*args|
+          raise ArgumentError, "Invalid arguments: #{args.inspect}" if args.length > 1
+          instance_variable_name = "@_fortitude_#{attribute_name}"
+          if args.length == 0
+            return instance_variable_get(instance_variable_name) if instance_variable_defined?(instance_variable_name)
+            return superclass.send(attribute_name) if superclass.respond_to?(attribute_name)
+            raise "Fortitude class-inheritable attribute error: there should always be a declared value for #{attribute_name} at the top of the inheritance hierarchy somewhere"
+          else
+            new_value = args[0]
+            unless allowable_values.include?(new_value)
+              raise ArgumentError, "#{attribute_name} cannot be set to #{new_value.inspect}; valid values are: #{allowable_values.inspect}"
+            end
+            instance_variable_set(instance_variable_name, new_value)
+            changed_method = "_fortitude_#{attribute_name}_changed!"
+            send(changed_method, new_value) if respond_to?(changed_method)
+            new_value
+          end
+        end
+        send(attribute_name, default_value)
+      end
+    end
+
+    _fortitude_class_inheritable_attribute :format_output, false, [ true, false ]
+    _fortitude_class_inheritable_attribute :extra_assigns, :ignore, [ :error, :ignore, :use ]
+    _fortitude_class_inheritable_attribute :automatic_helper_access, true, [ true, false ]
+    _fortitude_class_inheritable_attribute :implicit_shared_variable_access, false, [ true, false ]
+    _fortitude_class_inheritable_attribute :enforce_element_nesting_rules, false, [ true, false ]
+    _fortitude_class_inheritable_attribute :enforce_attribute_rules, false, [ true, false ]
+    _fortitude_class_inheritable_attribute :use_instance_variables_for_assigns, false, [ true, false ]
+
+    class << self
       def tag(name, options = { })
         @_this_class_tags ||= { }
         new_tag = Fortitude::Tag.new(name, options)
@@ -296,87 +329,33 @@ EOS
         out
       end
 
-      def implicit_shared_variable_access(on_or_off = nil)
-        if on_or_off == nil
-          return (@_fortitude_implicit_shared_variable_access == :yes) if @_fortitude_implicit_shared_variable_access
-          return superclass.implicit_shared_variable_access if superclass.respond_to?(:implicit_shared_variable_access)
-          false
-        elsif on_or_off
-          if (! @_fortitude_implicit_shared_variable_access)
-            @_fortitude_implicit_shared_variable_access = :yes
-            around_content :transfer_shared_variables
-          end
+      def _fortitude_format_output_changed!(new_value)
+        rebuild_text_methods!
+        rebuild_tag_methods!
+      end
+
+      def _fortitude_extra_assigns_changed!(new_value)
+        rebuild_needs_methods!
+      end
+
+      def _fortitude_implicit_shared_variable_access_changed!(new_value)
+        if new_value
+          around_content :transfer_shared_variables
         else
-          @_fortitude_implicit_shared_variable_access = :no
+          # TODO 2014-02-21 ageweke -- remove_around_content
         end
       end
 
-      def automatic_helper_access(on_or_off = nil)
-        if on_or_off == nil
-          return (@_fortitude_automatic_helper_access == :yes) if @_fortitude_automatic_helper_access
-          return superclass.automatic_helper_access if superclass.respond_to?(:automatic_helper_access)
-          false
-        else
-          @_fortitude_automatic_helper_access = on_or_off ? :yes : :no
-        end
+      def _fortitude_enforce_element_nesting_rules_changed!(new_value)
+        rebuild_tag_methods!
       end
 
-      def extra_assigns(state = nil)
-        if state == nil
-          return @_fortitude_extra_assigns if @_fortitude_extra_assigns
-          return superclass.extra_assigns if superclass.respond_to?(:extra_assigns)
-          :error
-        elsif VALID_EXTRA_ASSIGNS_VALUES.include?(state.to_sym)
-          @_fortitude_extra_assigns = state.to_sym
-          rebuild_needs_methods!
-        else
-          raise ArgumentError, "Invalid value for extra_assigns: #{@_fortitude_extra_assigns.inspect}"
-        end
+      def _fortitude_enforce_attribute_rules_changed!(new_value)
+        rebuild_tag_methods!
       end
 
-      def format_output(state = nil)
-        if state == nil
-          return (@_fortitude_format_output == :yes) if @_fortitude_format_output
-          return superclass.format_output if superclass.respond_to?(:format_output)
-          false
-        else
-          @_fortitude_format_output = state ? :yes : :no
-          rebuild_text_methods!
-          rebuild_tag_methods!
-        end
-      end
-
-      def enforce_element_nesting_rules(state = nil)
-        if state == nil
-          return (@_fortitude_enforce_element_nesting_rules == :yes) if @_fortitude_enforce_element_nesting_rules
-          return superclass.enforce_element_nesting_rules if superclass.respond_to?(:enforce_element_nesting_rules)
-          false
-        else
-          @_fortitude_enforce_element_nesting_rules = state ? :yes : :no
-          rebuild_tag_methods!
-        end
-      end
-
-      def enforce_attribute_rules(state = nil)
-        if state == nil
-          return (@_fortitude_enforce_attribute_rules == :yes) if @_fortitude_enforce_attribute_rules
-          return superclass.enforce_attribute_rules if superclass.respond_to?(:enforce_attribute_rules)
-          false
-        else
-          @_fortitude_enforce_attribute_rules = state ? :yes : :no
-          rebuild_tag_methods!
-        end
-      end
-
-      def use_instance_variables_for_assigns(on_or_off = nil)
-        if on_or_off == nil
-          return (@_fortitude_use_instance_variables_for_assigns == :yes) if @_fortitude_use_instance_variables_for_assigns
-          return superclass.use_instance_variables_for_assigns if superclass.respond_to?(:use_instance_variables_for_assigns)
-          false
-        else
-          @_fortitude_use_instance_variables_for_assigns = on_or_off ? :yes : :no
-          rebuild_needs_methods!
-        end
+      def _fortitude_use_instance_variables_for_assigns_changed!(new_value)
+        rebuild_needs_methods!
       end
 
       def assign_instance_variable_prefix
@@ -532,12 +511,6 @@ EOS
         !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
       end
     end
-
-    automatic_helper_access true
-    extra_assigns :ignore
-    format_output false
-    enforce_element_nesting_rules false
-    enforce_attribute_rules false
 
     rebuild_run_content!
     rebuild_needs_methods!
