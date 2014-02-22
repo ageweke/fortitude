@@ -2,33 +2,30 @@ require 'fortitude/tag_support'
 
 module Fortitude
   class Tag
+    class << self
+      def template_text_lines
+        @template_text_lines ||= File.read(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl')).split(/\r\n|\r|\n/)
+      end
+    end
+
     attr_reader :name
 
     def initialize(name, options = { })
+      options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose)
+
       @name = name.to_s.strip.downcase.to_sym
-      @options = options
 
-      @valid_attributes = nil
-      if options[:valid_attributes]
-        @valid_attributes = { }
-        options[:valid_attributes].each { |a| @valid_attributes[a.to_s.strip.to_sym] = true }
-      end
-
+      @valid_attributes = to_symbol_hash(options[:valid_attributes])
+      @allowable_enclosed_elements = to_symbol_hash(options[:can_enclose])
       @newline_before = !! options[:newline_before]
       @content_allowed = true unless options.has_key?(:content_allowed) && (! options[:content_allowed])
-
-      # @options.assert_valid_keys([ ])
-    end
-
-    def newline_before?
-      @newline_before
     end
 
     CONCAT_METHOD = "original_concat"
 
     def validate_can_enclose!(widget, tag_object)
-      return unless @options[:can_enclose]
-      unless @options[:can_enclose].include?(tag_object.name)
+      return unless @allowable_enclosed_elements
+      unless @allowable_enclosed_elements[tag_object.name]
         raise Fortitude::Errors::InvalidElementNesting.new(widget, name, tag_object.name)
       end
     end
@@ -42,11 +39,9 @@ module Fortitude
       raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @valid_attributes.keys) if bad.size > 0
     end
 
-    def ucname
-      name.to_s.upcase
-    end
-
     def define_method_on!(mod, options = {})
+      options.assert_valid_keys(:enforce_element_nesting_rules, :enforce_attribute_rules, :enable_formatting)
+
       unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
         mod.send(:include, ::Fortitude::TagSupport)
       end
@@ -74,24 +69,28 @@ module Fortitude
         yield_call = "yield"
       end
 
-      substitutions = { 'name' => name.to_s, 'ucname' => ucname, 'yield_call' => yield_call }
+      substitutions = { 'name' => name.to_s, 'ucname' => ucname, 'yield_call' => yield_call, 'concat_method' => CONCAT_METHOD }
 
-      require 'stringio'
-      output = StringIO.new
-      File.open(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl')).each_line do |l|
+      lines = [ ]
+      self.class.template_text_lines.each do |l|
         if l =~ /^(.*)\#\s*\:if\s*(.*?)\s*$/i
-          text, condition = $1, $2
+          l, condition = $1, $2
           next unless eval(condition)
         end
 
         substitutions.each { |k,v| l = l.gsub("\#{#{k}}", v) }
-        output.puts l
+        lines << l
       end
 
-      mod.module_eval(output.string)
+      text = lines.join("\n")
+      mod.module_eval(text)
     end
 
     private
+    def ucname
+      name.to_s.upcase
+    end
+
     def string_const_name(key)
       "FORTITUDE_TAG_#{name.upcase}_#{key}".to_sym
     end
@@ -104,6 +103,14 @@ module Fortitude
     def define_constant_string(target_module, key, value)
       const_name = string_const_name(key)
       const_set_or_replace(target_module, const_name, value)
+    end
+
+    def to_symbol_hash(array)
+      if array
+        out = { }
+        array.each { |a| out[a.to_s.strip.to_sym] = true }
+        out
+      end
     end
   end
 end

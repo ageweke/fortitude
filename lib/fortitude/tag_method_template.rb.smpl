@@ -13,47 +13,47 @@ def #{name}(content_or_attributes = nil, attributes = nil)
     if (! content_or_attributes)
       if block_given?
         _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
-        o.original_concat(FORTITUDE_TAG_#{ucname}_OPEN)
+        o.#{concat_method}(FORTITUDE_TAG_#{ucname}_OPEN)
         #{yield_call}
-        o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+        o.#{concat_method}(FORTITUDE_TAG_#{ucname}_CLOSE)
       else
-        o.original_concat(FORTITUDE_TAG_#{ucname}_ALONE)
+        o.#{concat_method}(FORTITUDE_TAG_#{ucname}_ALONE)
       end
     elsif content_or_attributes.kind_of?(Hash)
       this_tag.validate_attributes(self, content_or_attributes)            # :if needs_attribute_rules
-      o.original_concat(FORTITUDE_TAG_#{ucname}_PARTIAL_OPEN)
+      o.#{concat_method}(FORTITUDE_TAG_#{ucname}_PARTIAL_OPEN)
       content_or_attributes.fortitude_append_as_attributes(o, nil)
 
       if block_given?
         _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
-        o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_END)
+        o.#{concat_method}(FORTITUDE_TAG_PARTIAL_OPEN_END)
         #{yield_call}
-        o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+        o.#{concat_method}(FORTITUDE_TAG_#{ucname}_CLOSE)
       else
-        o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
+        o.#{concat_method}(FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
       end
     elsif (! attributes)
       _fortitude_raise_no_content_allowed_error(:#{name})                  # :if ! content_allowed
-      o.original_concat(FORTITUDE_TAG_#{ucname}_OPEN)
+      o.#{concat_method}(FORTITUDE_TAG_#{ucname}_OPEN)
       content_or_attributes.to_s.fortitude_append_escaped_string(o)
       if block_given?
         _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
         #{yield_call}
       end
-      o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+      o.#{concat_method}(FORTITUDE_TAG_#{ucname}_CLOSE)
     else
       _fortitude_raise_no_content_allowed_error(:#{name})                  # :if ! content_allowed
       this_tag.validate_attributes(self, attributes)                       # :if needs_attribute_rules
-      o.original_concat(FORTITUDE_TAG_#{ucname}_PARTIAL_OPEN)
+      o.#{concat_method}(FORTITUDE_TAG_#{ucname}_PARTIAL_OPEN)
       attributes.fortitude_append_as_attributes(o, nil)
-      o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_END)
+      o.#{concat_method}(FORTITUDE_TAG_PARTIAL_OPEN_END)
 
       content_or_attributes.to_s.fortitude_append_escaped_string(o)
       if block_given?
         _fortitude_raise_no_content_allowed_error(:#{name})                # :if ! content_allowed
         #{yield_call}
       end
-      o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+      o.#{concat_method}(FORTITUDE_TAG_#{ucname}_CLOSE)
     end
     rc.needs_newline! if format_output                                     # :if needs_formatting && newline_before
   end                                                                      # :if needs_element_rules
