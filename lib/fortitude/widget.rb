@@ -363,40 +363,7 @@ EOS
       end
 
       def rebuild_text_methods!
-        text = <<-EOS
-  def text(s)
-EOS
-
-        if format_output
-          text << <<-EOS
-    @_fortitude_rendering_context.about_to_output_non_whitespace!
-EOS
-        end
-
-        text << <<-EOS
-    s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)
-  end
-EOS
-
-        class_eval(text)
-
-        text = <<-EOS
-  def rawtext(s)
-EOS
-
-        if format_output
-          text << <<-EOS
-    @_fortitude_rendering_context.about_to_output_non_whitespace!
-EOS
-        end
-
-        text << <<-EOS
-    @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
-  end
-EOS
-
-        class_eval(text)
-
+        class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output))
         direct_subclasses.each { |s| s.rebuild_text_methods! }
       end
 
