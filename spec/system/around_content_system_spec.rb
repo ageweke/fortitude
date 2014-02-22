@@ -163,6 +163,66 @@ describe "Fortitude around_content operations", :type => :system do
     expect(instance.marks).to eq([ :around1_before, :around2_before ])
   end
 
+  it "should let you remove around_content methods, and let you add them back, and remove them again" do
+    wc = widget_class do
+      def around1
+        text "around1"
+        yield
+      end
+
+      def around2
+        text "around2"
+        yield
+      end
+
+      def content
+        text "content"
+      end
+    end
+
+    expect(render(wc)).to eq("content")
+    wc.around_content :around1, :around2
+    expect(render(wc)).to eq("around1around2content")
+    wc.remove_around_content(:around2)
+    expect(render(wc)).to eq("around1content")
+    wc.around_content :around2
+    expect(render(wc)).to eq("around1around2content")
+
+    wc.remove_around_content :around2, :around1
+    expect(render(wc)).to eq("content")
+    wc.around_content :around2, :around1
+    expect(render(wc)).to eq("around2around1content")
+  end
+
+  it "should fail if you try to remove an around_content method that's not present, or defined on a superclass" do
+    parent = widget_class do
+      def around1
+        text "around1"
+        yield
+      end
+
+      around_content :around1
+    end
+
+    child = widget_class(:superclass => parent) do
+      def around2
+        text "around2"
+        yield
+      end
+
+      def content
+        text "content"
+      end
+
+      around_content :around2
+    end
+
+    expect { parent.remove_around_content(:foobar) }.to raise_error(ArgumentError)
+    expect { parent.remove_around_content(:around2) }.to raise_error(ArgumentError)
+    expect { child.remove_around_content(:foobar) }.to raise_error(ArgumentError)
+    expect { child.remove_around_content(:around1) }.to raise_error(ArgumentError)
+  end
+
   it "should run around_content methods in the order they are declared" do
     wc = widget_class do
       def around1

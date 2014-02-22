@@ -255,6 +255,18 @@ module Fortitude
         rebuild_run_content!
       end
 
+      def remove_around_content(*method_names)
+        not_found = [ ]
+        method_names.each do |method_name|
+          not_found << method_name unless (@_fortitude_around_content_methods || [ ]).delete(method_name)
+        end
+
+        rebuild_run_content!
+        if not_found.length > 0
+          raise ArgumentError, "no such methods: #{not_found.inspect}"
+        end
+      end
+
       def helper(*args)
         options = args.extract_options!
         options.assert_valid_keys(:transform, :call)
