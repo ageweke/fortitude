@@ -1,10 +1,15 @@
 require 'fortitude/tag_support'
+require 'fortitude/simple_template'
 
 module Fortitude
   class Tag
     class << self
       def template_text_lines
         @template_text_lines ||= File.read(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl')).split(/\r\n|\r|\n/)
+      end
+
+      def template
+        @template ||= Fortitude::SimpleTemplate.new(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl'))
       end
     end
 
@@ -53,13 +58,9 @@ module Fortitude
 
       const_set_or_replace(mod, "TAG_OBJECT_#{ucname}", self)
 
-      needs_element_rules = !! options[:enforce_element_nesting_rules]
-      needs_attribute_rules = !! options[:enforce_attribute_rules]
       needs_formatting = !! options[:enable_formatting]
-      content_allowed = @content_allowed
-      newline_before = @newline_before
 
-      if needs_formatting && newline_before
+      if needs_formatting && @newline_before
         yield_call = "_fortitude_formatted_output_tag_yield(:#{name}) { yield }"
       elsif needs_formatting
         yield_call = "yield; rc.about_to_output_non_whitespace!"
@@ -67,20 +68,13 @@ module Fortitude
         yield_call = "yield"
       end
 
-      substitutions = { 'name' => name.to_s, 'ucname' => ucname, 'yield_call' => yield_call, 'concat_method' => CONCAT_METHOD }
+      text = self.class.template.result(
+        :name => name.to_s, 'ucname' => ucname, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
+        :needs_element_rules => !! options[:enforce_element_nesting_rules],
+        :needs_attribute_rules => !! options[:enforce_attribute_rules],
+        :needs_formatting => !! options[:enable_formatting], :content_allowed => @content_allowed,
+        :newline_before => @newline_before)
 
-      lines = [ ]
-      self.class.template_text_lines.each do |l|
-        if l =~ /^(.*)\#\s*\:if\s*(.*?)\s*$/i
-          l, condition = $1, $2
-          next unless eval(condition)
-        end
-
-        substitutions.each { |k,v| l = l.gsub("\#{#{k}}", v) }
-        lines << l
-      end
-
-      text = lines.join("\n")
       mod.module_eval(text)
     end
 
