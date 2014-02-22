@@ -4,10 +4,6 @@ require 'fortitude/simple_template'
 module Fortitude
   class Tag
     class << self
-      def template_text_lines
-        @template_text_lines ||= File.read(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl')).split(/\r\n|\r|\n/)
-      end
-
       def template
         @template ||= Fortitude::SimpleTemplate.new(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl'))
       end
@@ -51,12 +47,8 @@ module Fortitude
         mod.send(:include, ::Fortitude::TagSupport)
       end
 
-      define_constant_string(mod, :ALONE, "<#{name}/>")
-      define_constant_string(mod, :OPEN, "<#{name}>")
-      define_constant_string(mod, :CLOSE, "</#{name}>")
-      define_constant_string(mod, :PARTIAL_OPEN, "<#{name}")
-
-      const_set_or_replace(mod, "TAG_OBJECT_#{ucname}", self)
+      ensure_constants(mod, :ALONE => "<#{name}/>", :OPEN => "<#{name}>", :CLOSE => "</#{name}>",
+        :PARTIAL_OPEN => "<#{name}", :TAG_OBJECT => self)
 
       needs_formatting = !! options[:enable_formatting]
 
@@ -69,32 +61,31 @@ module Fortitude
       end
 
       text = self.class.template.result(
-        :name => name.to_s, 'ucname' => ucname, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
+        :name => name.to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
         :needs_element_rules => !! options[:enforce_element_nesting_rules],
         :needs_attribute_rules => !! options[:enforce_attribute_rules],
-        :needs_formatting => !! options[:enable_formatting], :content_allowed => @content_allowed,
-        :newline_before => @newline_before)
+        :needs_formatting => needs_formatting, :content_allowed => @content_allowed,
+        :newline_before => @newline_before,
+        :alone_const => tag_constant_name(:ALONE), :open_const => tag_constant_name(:OPEN),
+        :close_const => tag_constant_name(:CLOSE), :partial_open_const => tag_constant_name(:PARTIAL_OPEN),
+        :tag_object_const => tag_constant_name(:TAG_OBJECT), :partial_open_end_const => :FORTITUDE_TAG_PARTIAL_OPEN_END,
+        :partial_open_alone_end_const => :FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
 
       mod.module_eval(text)
     end
 
     private
-    def ucname
-      name.to_s.upcase
-    end
-
-    def string_const_name(key)
+    def tag_constant_name(key)
       "FORTITUDE_TAG_#{name.upcase}_#{key}".to_sym
     end
 
-    def const_set_or_replace(target, const_name, const_value)
-      target.send(:remove_const, const_name) if target.const_defined?(const_name)
-      target.const_set(const_name, const_value.freeze)
+    def ensure_constants(target, map)
+      map.each { |name, value| ensure_constant(target, tag_constant_name(name), value) }
     end
 
-    def define_constant_string(target_module, key, value)
-      const_name = string_const_name(key)
-      const_set_or_replace(target_module, const_name, value)
+    def ensure_constant(target, const_name, const_value)
+      target.send(:remove_const, const_name) if target.const_defined?(const_name)
+      target.const_set(const_name, const_value.freeze)
     end
 
     def to_symbol_hash(array)

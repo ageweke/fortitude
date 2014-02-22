@@ -21,7 +21,7 @@ module Fortitude
         while l =~ /\#\{([^}]+)\}/
           name = $1
           value = bindings_target.send($1)
-          l = l.gsub("\#\{#{$1}\}", value)
+          l = l.gsub("\#\{#{$1}\}", value.to_s)
         end
 
         result_lines << l
