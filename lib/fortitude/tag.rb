@@ -9,12 +9,18 @@ module Fortitude
       @options = options
 
       @valid_attributes = nil
-      if @options[:valid_attributes]
+      if options[:valid_attributes]
         @valid_attributes = { }
-        @options[:valid_attributes].each { |a| @valid_attributes[a.to_s.strip.to_sym] = true }
+        options[:valid_attributes].each { |a| @valid_attributes[a.to_s.strip.to_sym] = true }
       end
 
+      @newline_before = !! options[:newline_before]
+
       # @options.assert_valid_keys([ ])
+    end
+
+    def newline_before?
+      @newline_before
     end
 
     CONCAT_METHOD = "original_concat"
@@ -35,7 +41,7 @@ module Fortitude
       raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @valid_attributes.keys) if bad.size > 0
     end
 
-    def define_method_on!(mod, options = { })
+    def define_method_on!(mod, options = {})
       unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
         mod.send(:include, ::Fortitude::TagSupport)
       end
@@ -44,6 +50,53 @@ module Fortitude
       define_constant_string(mod, :OPEN, "<#{name}>")
       define_constant_string(mod, :CLOSE, "</#{name}>")
       define_constant_string(mod, :PARTIAL_OPEN, "<#{name}")
+
+      needs_element_rules = !! options[:enforce_element_nesting_rules]
+      needs_attribute_rules = !! options[:enforce_attribute_rules]
+      needs_formatting = !! options[:enable_formatting]
+      newline_before = @newline_before
+      needs_tag = needs_element_rules || needs_attribute_rules
+      needs_rendering_context = needs_element_rules || needs_formatting
+
+      if needs_formatting && newline_before
+        yield_call = "_fortitude_formatted_output_tag_yield(:#{name}) { yield }"
+      elsif needs_formatting
+        yield_call = "yield; rc.about_to_output_non_whitespace!"
+      else
+        yield_call = "yield"
+      end
+
+      substitutions = { 'name' => name.to_s, 'ucname' => name.to_s.upcase, 'yield_call' => yield_call }
+
+      require 'stringio'
+      output = StringIO.new
+      File.open(File.join(File.dirname(__FILE__), 'tag_method_template.rb.smpl')).each_line do |l|
+        if l =~ /^(.*)\#\s*\:if\s*(.*?)\s*$/i
+          text, condition = $1, $2
+          next unless eval(condition)
+        end
+
+        substitutions.each { |k,v| l = l.gsub("\#{#{k}}", v) }
+        output.puts l
+      end
+
+      mod.module_eval(output.string)
+    end
+
+    def define_method_on_old!(mod, options = { })
+      unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
+        mod.send(:include, ::Fortitude::TagSupport)
+      end
+
+      define_constant_string(mod, :ALONE, "<#{name}/>")
+      define_constant_string(mod, :OPEN, "<#{name}>")
+      define_constant_string(mod, :CLOSE, "</#{name}>")
+      define_constant_string(mod, :PARTIAL_OPEN, "<#{name}")
+
+      options[:enforce_element_nesting_rules] = true
+      options[:enforce_attribute_rules] = true
+      options[:enable_formatting] = true
+      options[:newline_before] = true
 
       validate_attributes = if options[:enforce_attribute_rules]
         "this_tag.validate_attributes(self, PARAM)"
@@ -153,6 +206,8 @@ EOS
       method_text << <<-EOS
       end
 EOS
+
+      $stderr.puts method_text
 
       mod.module_eval(method_text)
     end

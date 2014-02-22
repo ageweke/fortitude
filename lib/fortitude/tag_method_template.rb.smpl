@@ -1,0 +1,54 @@
+def #{name}(content_or_attributes = nil, attributes = nil)
+  o = @_fortitude_output_buffer_holder.output_buffer
+  rc = @_fortitude_rendering_context                                       # :if needs_rendering_context
+
+  this_tag = self.class.get_tag(:#{name})                                  # :if needs_tag
+  rc.with_element_for_rules(self, this_tag) do                             # :if needs_element_rules
+    format_output = rc.format_output?                                      # :if needs_formatting
+    if format_output                                                       # :if needs_formatting
+      rc.needs_newline!                                                    # :if needs_formatting && newline_before
+      rc.about_to_output_non_whitespace!                                   # :if needs_formatting
+    end                                                                    # :if needs_formatting
+
+    if (! content_or_attributes)
+      if block_given?
+        o.original_concat(FORTITUDE_TAG_#{ucname}_OPEN)
+        #{yield_call}
+        o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+      else
+        o.original_concat(FORTITUDE_TAG_#{ucname}_ALONE)
+      end
+    elsif content_or_attributes.kind_of?(Hash)
+      this_tag.validate_attributes(self, content_or_attributes)            # :if needs_attribute_rules
+      o.original_concat(FORTITUDE_TAG_#{ucname}_PARTIAL_OPEN)
+      content_or_attributes.fortitude_append_as_attributes(o, nil)
+
+      if block_given?
+        o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_END)
+        #{yield_call}
+        o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+      else
+        o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
+      end
+    elsif (! attributes)
+      o.original_concat(FORTITUDE_TAG_#{ucname}_OPEN)
+      content_or_attributes.to_s.fortitude_append_escaped_string(o)
+      if block_given?
+        #{yield_call}
+      end
+      o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+    else
+      this_tag.validate_attributes(self, attributes)                       # :if needs_attribute_rules
+      o.original_concat(FORTITUDE_TAG_#{ucname}_PARTIAL_OPEN)
+      attributes.fortitude_append_as_attributes(o, nil)
+      o.original_concat(FORTITUDE_TAG_PARTIAL_OPEN_END)
+
+      content_or_attributes.to_s.fortitude_append_escaped_string(o)
+      if block_given?
+        #{yield_call}
+      end
+      o.original_concat(FORTITUDE_TAG_#{ucname}_CLOSE)
+    end
+    rc.needs_newline! if format_output                                     # :if needs_formatting && newline_before
+  end                                                                      # :if needs_element_rules
+end
