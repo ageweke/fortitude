@@ -84,6 +84,11 @@ module Fortitude
         direct_subclasses.each { |s| s.rebuild_tag_methods!(which_tags_in) }
       end
 
+      def is_valid_ruby_method_name?(s)
+        # Credit to http://stackoverflow.com/questions/4378670/what-is-a-ruby-regex-to-match-a-function-name
+        /[@$"]/ !~ s.to_sym.inspect
+      end
+
       def needs(*names)
         return needs_as_hash if names.length == 0
 
@@ -91,6 +96,9 @@ module Fortitude
 
         with_defaults = { }
         with_defaults = names.pop if names[-1] && names[-1].kind_of?(Hash)
+
+        bad_names = names.select { |n| ! is_valid_ruby_method_name?(n) }
+        raise ArgumentError, "Needs in a Fortitude widget class must be valid Ruby method names; these are not: #{bad_names.inspect}" if bad_names.length > 0
 
         names.each do |name|
           name = name.to_s.strip.downcase.to_sym

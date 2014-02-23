@@ -143,9 +143,54 @@ describe "Fortitude start/end comments support", :type => :system do
       ":foo => THIS IS TO_FORTITUDE_COMMENT_STRING --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
   end
 
-  it "should order the comment text in whatever order the needs are declared"
+  it "should order the comment text in whatever order the needs are declared" do
+    needed = [ ]
+    50.times { needed << "need#{rand(1_000_000_000)}".to_sym }
+    needed = needed.shuffle
+
+    wc = widget_class do
+      start_and_end_comments true
+
+      def content
+        p "hi"
+      end
+    end
+
+    remaining_needed = needed.dup
+    while remaining_needed.length > 0
+      this_slice = remaining_needed.shift(rand(4))
+      wc.needs *this_slice
+    end
+
+    params = { }
+    needed.shuffle.each { |n| params[n] = "value-#{n}" }
+
+    text = render(wc.new(params))
+
+    expected_output = "<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: "
+    expected_output << needed.map do |n|
+      ":#{n} => \"value-#{n}\""
+    end.join(", ")
+    expected_output << " --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->"
+  end
+
   it "should display the depth at which a widget is being rendered"
 
-  it "should escape any potentially invalid-comment text in assign keys"
+  it "should escape any potentially invalid-comment text in assign keys" do
+    wc = widget_class do
+      needs :">foo", :"fo -- bar", :"->bar", :"baz-"
+      start_and_end_comments true
+
+      def content
+        p "hi"
+      end
+    end
+
+    params = { :">foo" => "foo1", :"fo -- bar" => "foo2", :"->bar" => "bar1", :"baz-" => "baz1" }
+    expect(render.wc.new(params)).to eq("<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: " +
+      ":>foo => \"foo1\", :fo - -  bar => \"foo2\", :->bar => \"bar1\", :baz- => \"baz1\" " +
+      "--><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
+  end
+
   it "should escape any potentially invalid-comment text in assign values"
 end

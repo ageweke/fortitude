@@ -16,6 +16,29 @@ describe "Fortitude needs", :type => :system do
     expect(child.needs(:baz => 'def_baz')).to eq(:foo => required, :bar => required, :baz => 'def_baz')
   end
 
+  describe "names" do
+    BAD_METHOD_NAMES = [ " " ]
+
+    BAD_METHOD_NAMES.each do |bad_method_name|
+      it "should fail if you try to use a name for a need that's not a valid method name, like #{bad_method_name.inspect}" do
+        expect { widget_class { needs bad_method_name } }.to raise_error(ArgumentError)
+        expect { widget_class { needs bad_method_name.to_sym } }.to raise_error(ArgumentError)
+      end
+
+      it "should succeed if you use it as an extra assign" do
+        wc = widget_class do
+          extra_assigns :use
+
+          def content
+            text "#{assigns.keys.first.inspect} -> #{assigns[assigns.keys.first].inspect}"
+          end
+        end
+
+        expect(wc.new(bad_method_name => "foobar")).to eq("#{bad_method_name.inspect} -> \"foobar\"")
+      end
+    end
+  end
+
   describe "inheritance" do
     it "should require needs from all superclasses" do
       grandparent = widget_class { needs :foo }
