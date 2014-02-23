@@ -21,7 +21,7 @@ describe "Fortitude assigns access", :type => :system do
     expect(render(wc.new(:foo => 'the_foo'))).to eq("assigns[:foo] = the_foo, assigns[:bar] = def_bar")
   end
 
-  it "should not include extra needs, by default" do
+  it "should not include extra assigns, by default" do
     wc = widget_class do
       needs :foo
       def content
@@ -55,6 +55,90 @@ describe "Fortitude assigns access", :type => :system do
     end
 
     expect(render(wc.new(:foo => 'the_foo'))).to eq("foo = the_foo, assigns[:foo] = the_foo, now foo = new_foo, assigns[:foo] = new_foo")
+  end
+
+  it "should allow changing assigns from nil to something else, and always return the current value of the assign" do
+    wc = widget_class do
+      needs :foo
+      def content
+        text "foo = #{foo}, assigns[:foo] = #{assigns[:foo]}, "
+        assigns[:foo] = "new_foo"
+        text "now foo = #{foo}, assigns[:foo] = #{assigns[:foo]}"
+      end
+    end
+
+    expect(render(wc.new(:foo => nil))).to eq("foo = , assigns[:foo] = , now foo = new_foo, assigns[:foo] = new_foo")
+  end
+
+  it "should allow changing assigns from a default nil to something else, and always return the current value of the assign" do
+    wc = widget_class do
+      needs :foo => nil
+      def content
+        text "foo = #{foo}, assigns[:foo] = #{assigns[:foo]}, "
+        assigns[:foo] = "new_foo"
+        text "now foo = #{foo}, assigns[:foo] = #{assigns[:foo]}"
+      end
+    end
+
+    expect(render(wc.new)).to eq("foo = , assigns[:foo] = , now foo = new_foo, assigns[:foo] = new_foo")
+  end
+
+  it "should allow changing assigns from a default false to something else, and always return the current value of the assign" do
+    wc = widget_class do
+      needs :foo => false
+      def content
+        text "foo = #{foo}, assigns[:foo] = #{assigns[:foo]}, "
+        assigns[:foo] = "new_foo"
+        text "now foo = #{foo}, assigns[:foo] = #{assigns[:foo]}"
+      end
+    end
+
+    expect(render(wc.new)).to eq("foo = false, assigns[:foo] = false, now foo = new_foo, assigns[:foo] = new_foo")
+  end
+
+  it "should allow changing extra assigns, and always return the current value of the assign" do
+    wc = widget_class do
+      needs :bar => 'whatever'
+      extra_assigns :use
+
+      def content
+        text "foo = #{foo}, assigns[:foo] = #{assigns[:foo]}, "
+        assigns[:foo] = "new_foo"
+        text "now foo = #{foo}, assigns[:foo] = #{assigns[:foo]}"
+      end
+    end
+
+    expect(render(wc.new(:foo => 'the_foo'))).to eq("foo = the_foo, assigns[:foo] = the_foo, now foo = new_foo, assigns[:foo] = new_foo")
+  end
+
+  it "should allow changing extra assigns from nil to something else, and always return the current value of the assign" do
+    wc = widget_class do
+      needs :bar => 'whatever'
+      extra_assigns :use
+
+      def content
+        text "foo = #{foo}, assigns[:foo] = #{assigns[:foo]}, "
+        assigns[:foo] = "new_foo"
+        text "now foo = #{foo}, assigns[:foo] = #{assigns[:foo]}"
+      end
+    end
+
+    expect(render(wc.new(:foo => nil))).to eq("foo = , assigns[:foo] = , now foo = new_foo, assigns[:foo] = new_foo")
+  end
+
+  it "should allow changing extra assigns from false to something else, and always return the current value of the assign" do
+    wc = widget_class do
+      needs :bar => 'whatever'
+      extra_assigns :use
+
+      def content
+        text "foo = #{foo}, assigns[:foo] = #{assigns[:foo]}, "
+        assigns[:foo] = "new_foo"
+        text "now foo = #{foo}, assigns[:foo] = #{assigns[:foo]}"
+      end
+    end
+
+    expect(render(wc.new(:foo => false))).to eq("foo = false, assigns[:foo] = false, now foo = new_foo, assigns[:foo] = new_foo")
   end
 
   it "should not let you introduce new assigns" do

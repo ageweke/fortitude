@@ -25,18 +25,20 @@ describe "Fortitude needs", :type => :system do
         expect { widget_class { needs bad_method_name.to_sym } }.to raise_error(ArgumentError)
       end
 
-      it "should succeed if you use it as an extra assign" do
+      it "should ignore any extra assigns that aren't valid method names, like #{bad_method_name.inspect}" do
         wc = widget_class do
           extra_assigns :use
 
           def content
-            text "#{assigns.keys.first.inspect} -> #{assigns[assigns.keys.first].inspect}"
+            rawtext assigns.to_hash.inspect
           end
         end
 
-        expect(wc.new(bad_method_name => "foobar")).to eq("#{bad_method_name.inspect} -> \"foobar\"")
+        expect(render(wc.new(bad_method_name => "foobar", :foo => 'bar'))).to eq("{:foo=>\"bar\"}")
       end
     end
+
+    VALID_METHOD_NAMES = [ "o01239014", "______", "_", "foo?" ]
   end
 
   describe "inheritance" do

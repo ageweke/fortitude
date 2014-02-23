@@ -86,7 +86,7 @@ module Fortitude
 
       def is_valid_ruby_method_name?(s)
         # Credit to http://stackoverflow.com/questions/4378670/what-is-a-ruby-regex-to-match-a-function-name
-        /[@$"]/ !~ s.to_sym.inspect
+        (/[@$"]/ !~ s.to_sym.inspect)
       end
 
       def needs(*names)
@@ -209,6 +209,8 @@ module Fortitude
         block.call(*args)
       end
     end
+
+    # TODO 2014-02-23 ageweke -- Cache #needs_as_hash at the *instance* level, since it can't change there
 
     MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
     START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze

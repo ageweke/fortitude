@@ -176,21 +176,24 @@ describe "Fortitude start/end comments support", :type => :system do
 
   it "should display the depth at which a widget is being rendered"
 
-  it "should escape any potentially invalid-comment text in assign keys" do
-    wc = widget_class do
-      needs :">foo", :"fo -- bar", :"->bar", :"baz-"
-      start_and_end_comments true
+  BAD_VALUES = [ ">foo", "fo -- bar", "--", "->bar", "baz-" ]
 
-      def content
-        p "hi"
+  BAD_VALUES.each do |bad_value|
+    it "should escape any potentially invalid-comment text in assign values, like #{bad_value.inspect}" do
+      wc = widget_class do
+        needs :foo
+        start_and_end_comments true
+
+        def content
+          p "hi"
+        end
       end
+
+      instance = wc.new(:foo => bad_value)
+      text = render(instance)
+      expect(text).to match(%r{^<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: :foo => (.*) --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->$})
+      data = $1
+      $stderr.puts data
     end
-
-    params = { :">foo" => "foo1", :"fo -- bar" => "foo2", :"->bar" => "bar1", :"baz-" => "baz1" }
-    expect(render.wc.new(params)).to eq("<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: " +
-      ":>foo => \"foo1\", :fo - -  bar => \"foo2\", :->bar => \"bar1\", :baz- => \"baz1\" " +
-      "--><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
   end
-
-  it "should escape any potentially invalid-comment text in assign values"
 end
