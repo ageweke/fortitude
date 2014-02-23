@@ -202,6 +202,9 @@ module Fortitude
       end
     end
 
+    MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
+    START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze
+
     def start_and_end_comments
       if self.class.start_and_end_comments
         comment_text = "BEGIN Fortitude widget #{self.class.name}"
@@ -214,7 +217,12 @@ module Fortitude
             value = assigns[assign]
             comment_text << ":#{assign} => "
             comment_text << "(DEFAULT) " if assigns.is_default?(assign)
-            comment_text << value.inspect
+
+            value_string = if value.respond_to?(:to_fortitude_comment_string) then value.to_fortitude_comment_string else value.inspect end
+            if value_string.length > MAX_START_COMMENT_VALUE_STRING_LENGTH
+              value_string = value_string[0..(MAX_START_COMMENT_VALUE_STRING_LENGTH - START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS.length)] + START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS
+            end
+            comment_text << value_string
           end
         end
         comment comment_text
