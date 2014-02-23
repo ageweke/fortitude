@@ -109,22 +109,25 @@ module Fortitude
           @this_class_needs[name] = default_value
         end
 
-        rebuild_needs_methods!
+        rebuild_needs!
 
         needs_as_hash
       end
 
       # EFFECTIVELY PRIVATE
       def needs_as_hash
-        out = { }
-        out = superclass.needs_as_hash if superclass.respond_to?(:needs_as_hash)
-        out.merge(@this_class_needs || { }).freeze
+        @_fortitude_needs_as_hash ||= begin
+          out = { }
+          out = superclass.needs_as_hash if superclass.respond_to?(:needs_as_hash)
+          out.merge(@this_class_needs || { })
+        end
       end
 
       # EFFECTIVELY PRIVATE
-      def rebuild_needs_methods!
+      def rebuild_needs!
+        @_fortitude_needs_as_hash = nil
         rebuild_my_needs_methods!
-        direct_subclasses.each { |s| s.rebuild_needs_methods! }
+        direct_subclasses.each { |s| s.rebuild_needs! }
       end
 
       private
@@ -291,7 +294,7 @@ module Fortitude
       end
 
       def _fortitude_extra_assigns_changed!(new_value)
-        rebuild_needs_methods!
+        rebuild_needs!
       end
 
       def _fortitude_implicit_shared_variable_access_changed!(new_value)
@@ -311,7 +314,7 @@ module Fortitude
       end
 
       def _fortitude_use_instance_variables_for_assigns_changed!(new_value)
-        rebuild_needs_methods!
+        rebuild_needs!
       end
 
       def _fortitude_start_and_end_comments_changed!(new_value)
@@ -466,7 +469,7 @@ EOS
     end
 
     rebuild_run_content!
-    rebuild_needs_methods!
+    rebuild_needs!
     rebuild_text_methods!
 
     helper :capture
