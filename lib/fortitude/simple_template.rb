@@ -25,9 +25,13 @@ module Fortitude
           next unless bindings_target.instance_eval(condition)
         end
 
-        while l =~ /[^\\]\#\{([^}]+)\}/
+        while l =~ /[^\\]\#\{([^}]+)\}/ || l =~ /^\#\{([^}]+)\}/
           name = $1
-          value = bindings_target.send($1)
+          begin
+            value = bindings_target.send($1)
+          rescue => e
+            raise "Failed when processing #{l.inspect}: #{e.inspect}"
+          end
           l = l.gsub("\#\{#{$1}\}", value.to_s)
         end
         l = l.gsub(/\\\#\{/, "\#\{")

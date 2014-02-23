@@ -134,17 +134,17 @@ module Fortitude
         needs_text = n.map do |need, default_value|
           Fortitude::SimpleTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
             :need => need, :has_default => (default_value != REQUIRED_NEED),
-            :ivar_prefix => assign_instance_variable_prefix
+            :ivar_name => instance_variable_name_for(need)
           )
         end.join("\n\n")
 
         assign_locals_from_text = Fortitude::SimpleTemplate.template('assign_locals_from_template').result(
-          :extra_assigns => extra_assigns, :ivar_prefix => assign_instance_variable_prefix, :needs_text => needs_text)
+          :extra_assigns => extra_assigns, :needs_text => needs_text)
         class_eval(assign_locals_from_text)
 
         n.each do |need, default_value|
           text = Fortitude::SimpleTemplate.template('need_method_template').result(
-            :need => need, :ivar_prefix => assign_instance_variable_prefix)
+            :need => need, :ivar_name => instance_variable_name_for(need))
           class_eval(text)
         end
       end
@@ -180,9 +180,11 @@ module Fortitude
       raise "Must override in #{self.class.name}"
     end
 
+    delegate :instance_variable_name_for, :to => :class
+
     def method_missing(name, *args, &block)
       if self.class.extra_assigns == :use
-        ivar_name = "@#{self.class.assign_instance_variable_prefix}#{name}"
+        ivar_name = self.class.instance_variable_name_for(name)
         return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
       end
 
@@ -318,9 +320,16 @@ module Fortitude
         end
       end
 
-      def assign_instance_variable_prefix
-        use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX
+      def instance_variable_name_for(assign_name)
+        effective_name = assign_name.to_s
+        effective_name.gsub!("!", "_fortitude_bang")
+        effective_name.gsub!("?", "_fortitude_question")
+        "@" + (use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX) + effective_name
       end
+
+      # def assign_instance_variable_prefix
+      #   use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX
+      # end
 
       def around_content(*method_names)
         return if method_names.length == 0

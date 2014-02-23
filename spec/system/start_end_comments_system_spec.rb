@@ -145,7 +145,7 @@ describe "Fortitude start/end comments support", :type => :system do
 
   it "should order the comment text in whatever order the needs are declared" do
     needed = [ ]
-    50.times { needed << "need#{rand(1_000_000_000)}".to_sym }
+    5.times { needed << "need#{rand(1_000_000_000)}".to_sym }
     needed = needed.shuffle
 
     wc = widget_class do
@@ -158,7 +158,7 @@ describe "Fortitude start/end comments support", :type => :system do
 
     remaining_needed = needed.dup
     while remaining_needed.length > 0
-      this_slice = remaining_needed.shift(rand(4))
+      this_slice = remaining_needed.shift(rand(3))
       wc.needs *this_slice
     end
 

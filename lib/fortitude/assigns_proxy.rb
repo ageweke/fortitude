@@ -4,7 +4,6 @@ module Fortitude
       @widget = widget
       @keys = { }
       keys.each { |k| @keys[k] = true }
-      @ivar_prefix = "@#{widget.class.assign_instance_variable_prefix}"
     end
 
     def is_default?(x)
@@ -20,11 +19,17 @@ module Fortitude
     end
 
     def [](x)
-      @widget.instance_variable_get("#{@ivar_prefix}#{x}") if has_key?(x)
+      if has_key?(x)
+        ivar_name = @widget.class.instance_variable_name_for(x)
+        @widget.instance_variable_get(ivar_name)
+      end
     end
 
     def []=(x, y)
-      @widget.instance_variable_set("#{@ivar_prefix}#{x}", y) if has_key?(x)
+      if has_key?(x)
+        ivar_name = @widget.class.instance_variable_name_for(x)
+        @widget.instance_variable_set(ivar_name, y)
+      end
     end
 
     def to_hash

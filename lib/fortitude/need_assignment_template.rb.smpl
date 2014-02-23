@@ -13,4 +13,4 @@ if value == NOT_PRESENT_NEED
   end
 end
 
-@#{ivar_prefix}#{need} = value
+#{ivar_name} = value

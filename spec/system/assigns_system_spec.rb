@@ -162,18 +162,18 @@ describe "Fortitude assigns access", :type => :system do
 
   it "should return assigns in the order in which they were 'need'ed, or passed to the class" do
     needed = [ ]
-    50.times { needed << "need#{rand(1_000_000_000)}".to_sym }
+    5.times { needed << "need#{rand(1_000_000_000)}".to_sym }
     needed = needed.shuffle
 
     not_needed = [ ]
-    50.times { not_needed << "need#{rand(1_000_000_000)}".to_sym }
+    5.times { not_needed << "need#{rand(1_000_000_000)}".to_sym }
     not_needed = not_needed.shuffle
 
     wc = widget_class { extra_assigns :use }
 
     remaining_needed = needed.dup
     while remaining_needed.length > 0
-      this_slice = remaining_needed.shift(rand(4))
+      this_slice = remaining_needed.shift(rand(3))
       wc.needs *this_slice
     end
 
