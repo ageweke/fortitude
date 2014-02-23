@@ -22,10 +22,13 @@ module Fortitude
       @have_output = false
       @current_element_nesting = [ ]
 
+      @current_widget_nesting = [ ]
+      @all_widgets = [ ]
+
       @yield_block = options[:yield_block]
     end
 
-    def with_element_for_rules(widget, tag_object)
+    def record_tag(widget, tag_object)
       validate_element_for_rules(widget, tag_object)
       @current_element_nesting << tag_object
 
@@ -37,23 +40,6 @@ module Fortitude
           raise "Something horrible happened -- the last tag we started was #{last}, but now we're ending #{tag_object}?!?"
         end
       end
-    end
-
-    def start_element_for_rules(widget, tag_object)
-      validate_element_for_rules(widget, tag_object)
-      @current_element_nesting << tag_object
-    end
-
-    def end_element_for_rules(widget, tag_object)
-      last = @current_element_nesting.pop
-      unless last == tag_object
-        raise "Something horrible happened -- the last tag we started was #{last}, but now we're ending #{tag_object}?!?"
-      end
-    end
-
-    def validate_element_for_rules(widget, tag_object)
-      current = @current_element_nesting[-1]
-      current.validate_can_enclose!(widget, tag_object) if current
     end
 
     def format_output?
@@ -98,6 +84,11 @@ module Fortitude
     end
 
     private
+    def validate_element_for_rules(widget, tag_object)
+      current = @current_element_nesting[-1]
+      current.validate_can_enclose!(widget, tag_object) if current
+    end
+
     class OutputBufferHolder
       attr_accessor :output_buffer
 

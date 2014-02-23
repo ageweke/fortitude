@@ -1,4 +1,12 @@
 describe "Fortitude start/end comments support", :type => :system do
+  def eb(widget_class)
+    "BEGIN Fortitude widget #{widget_class.name}"
+  end
+
+  def ee(widget_class)
+    "END Fortitude widget #{widget_class.name}"
+  end
+
   EXPECTED_START_COMMENT_BOILERPLATE = "BEGIN Fortitude widget "
   EXPECTED_END_COMMENT_BOILERPLATE = "END Fortitude widget "
 
@@ -21,7 +29,7 @@ describe "Fortitude start/end comments support", :type => :system do
       end
     end
 
-    expect(render(wc)).to eq("<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name} --><p>hi!</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
+    expect(render(wc)).to eq("<!-- #{eb(wc)} --><p>hi!</p><!-- #{ee(wc)} -->")
   end
 
   it "should add passed assigns, including defaults" do
@@ -36,9 +44,9 @@ describe "Fortitude start/end comments support", :type => :system do
     end
 
     expect(render(wc.new(:foo => 'the_foo', :bar => /whatever/i, :quux => 'the_quux'))).to eq(
-      "<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: " +
+      "<!-- #{eb(wc)}: " +
       ":foo => \"the_foo\", :bar => /whatever/i, :baz => (DEFAULT) \"def_baz\", :quux => \"the_quux\"" +
-      " --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
+      " --><p>hi</p><!-- #{ee(wc)} -->")
   end
 
   it "should not display extra assigns if we're not using them" do
@@ -51,8 +59,8 @@ describe "Fortitude start/end comments support", :type => :system do
       end
     end
 
-    expect(render(wc.new(:foo => 'bar', :bar => 'baz'))).to eq("<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: " +
-      ":foo => \"bar\" --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
+    expect(render(wc.new(:foo => 'bar', :bar => 'baz'))).to eq("<!-- #{eb(wc)}: " +
+      ":foo => \"bar\" --><p>hi</p><!-- #{ee(wc)} -->")
   end
 
   it "should display extra assigns if we're using them" do
@@ -66,8 +74,8 @@ describe "Fortitude start/end comments support", :type => :system do
       end
     end
 
-    expect(render(wc.new(:foo => 'bar', :bar => 'baz'))).to eq("<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: " +
-      ":foo => \"bar\", :bar => \"baz\" --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
+    expect(render(wc.new(:foo => 'bar', :bar => 'baz'))).to eq("<!-- #{eb(wc)}: " +
+      ":foo => \"bar\", :bar => \"baz\" --><p>hi</p><!-- #{ee(wc)} -->")
   end
 
   it "should not display all of the text of long assigns" do
@@ -83,8 +91,8 @@ describe "Fortitude start/end comments support", :type => :system do
     assigns = { :foo => "a" * 1000 }
     text = render(wc.new(assigns))
 
-    expect(text).to match(%r{^<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: :foo => \"aaaaa})
-    expect(text).to match(%r{aaa... --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->$})
+    expect(text).to match(%r{^<!-- #{eb(wc)}: :foo => \"aaaaa})
+    expect(text).to match(%r{aaa... --><p>hi</p><!-- #{ee(wc)} -->$})
     expect(text.length).to be < 500
     expect(text).not_to match("a" * 500)
   end
@@ -110,8 +118,8 @@ describe "Fortitude start/end comments support", :type => :system do
       end
     end
 
-    expect(render(wc.new(:foo => obj))).to eq("<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: " +
-      ":foo => THIS IS INSPECT --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
+    expect(render(wc.new(:foo => obj))).to eq("<!-- #{eb(wc)}: " +
+      ":foo => THIS IS INSPECT --><p>hi</p><!-- #{ee(wc)} -->")
   end
 
   it "should allow overriding the text returned for assigns" do
@@ -139,8 +147,8 @@ describe "Fortitude start/end comments support", :type => :system do
       end
     end
 
-    expect(render(wc.new(:foo => obj))).to eq("<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: " +
-      ":foo => THIS IS TO_FORTITUDE_COMMENT_STRING --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->")
+    expect(render(wc.new(:foo => obj))).to eq("<!-- #{eb(wc)}: " +
+      ":foo => THIS IS TO_FORTITUDE_COMMENT_STRING --><p>hi</p><!-- #{ee(wc)} -->")
   end
 
   it "should order the comment text in whatever order the needs are declared" do
@@ -167,14 +175,16 @@ describe "Fortitude start/end comments support", :type => :system do
 
     text = render(wc.new(params))
 
-    expected_output = "<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: "
+    expected_output = "<!-- #{eb(wc)}: "
     expected_output << needed.map do |n|
       ":#{n} => \"value-#{n}\""
     end.join(", ")
-    expected_output << " --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->"
+    expected_output << " --><p>hi</p><!-- #{ee(wc)} -->"
   end
 
-  it "should display the depth at which a widget is being rendered"
+  it "should display the depth at which a widget is being rendered" do
+
+  end
 
   BAD_VALUES = [ ">foo", "fo -- bar", "--", "->bar", "baz-" ]
 
@@ -191,7 +201,7 @@ describe "Fortitude start/end comments support", :type => :system do
 
       instance = wc.new(:foo => bad_value)
       text = render(instance)
-      expect(text).to match(%r{^<!-- #{EXPECTED_START_COMMENT_BOILERPLATE}#{wc.name}: :foo => (.*) --><p>hi</p><!-- #{EXPECTED_END_COMMENT_BOILERPLATE}#{wc.name} -->$})
+      expect(text).to match(%r{^<!-- #{eb(wc)}: :foo => (.*) --><p>hi</p><!-- #{ee(wc)} -->$})
       data = $1
       $stderr.puts data
     end
