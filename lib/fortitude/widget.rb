@@ -118,7 +118,7 @@ module Fortitude
       def needs_as_hash
         out = { }
         out = superclass.needs_as_hash if superclass.respond_to?(:needs_as_hash)
-        out.merge(@this_class_needs || { })
+        out.merge(@this_class_needs || { }).freeze
       end
 
       # EFFECTIVELY PRIVATE
@@ -167,9 +167,13 @@ module Fortitude
       assign_locals_from(assigns)
     end
 
+    def needs_as_hash
+      @needs_as_hash ||= self.class.needs_as_hash
+    end
+
     def assigns
       @_fortitude_assigns_proxy ||= begin
-        keys = self.class.needs_as_hash.keys
+        keys = needs_as_hash.keys
         keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if self.class.extra_assigns == :use
 
         Fortitude::AssignsProxy.new(self, keys)
@@ -210,8 +214,6 @@ module Fortitude
         block.call(*args)
       end
     end
-
-    # TODO 2014-02-23 ageweke -- Cache #needs_as_hash at the *instance* level, since it can't change there
 
     MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
     START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze

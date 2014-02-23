@@ -36,7 +36,7 @@ module Fortitude
 
     private
     def copy_to_widget(widget)
-      needs = widget.class.needs_as_hash
+      needs = widget.needs_as_hash
       extras = widget.widget_extra_assigns
 
       target_object.instance_variables.each do |instance_variable_name|
@@ -52,7 +52,7 @@ module Fortitude
     end
 
     def copy_from_widget(widget, exclude_variables = [ ])
-      needs = widget.class.needs_as_hash
+      needs = widget.needs_as_hash
       extras = widget.widget_extra_assigns
 
       (widget.instance_variables - exclude_variables).each do |instance_variable_name|
