@@ -180,7 +180,7 @@ module Fortitude
     end
 
     def needs_as_hash
-      @needs_as_hash ||= self.class.needs_as_hash
+      @_fortitude_needs_as_hash ||= self.class.needs_as_hash
     end
 
     def assigns
