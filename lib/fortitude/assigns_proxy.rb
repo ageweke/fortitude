@@ -7,6 +7,10 @@ module Fortitude
       @ivar_prefix = "@#{widget.class.assign_instance_variable_prefix}"
     end
 
+    def is_default?(x)
+      !! @widget._fortitude_default_assigns[x.to_sym]
+    end
+
     def keys
       @keys.keys
     end

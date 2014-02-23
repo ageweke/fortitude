@@ -76,6 +76,58 @@ describe "Fortitude assigns access", :type => :system do
     expect(render(wc)).to eq("assigns[:quux]: nil, quux: NameError")
   end
 
+  it "should return assigns in the order in which they were 'need'ed, or passed to the class" do
+    needed = [ ]
+    50.times { needed << "need#{rand(1_000_000_000)}".to_sym }
+    needed = needed.shuffle
+
+    not_needed = [ ]
+    50.times { not_needed << "need#{rand(1_000_000_000)}".to_sym }
+    not_needed = not_needed.shuffle
+
+    wc = widget_class { extra_assigns :use }
+
+    remaining_needed = needed.dup
+    while remaining_needed.length > 0
+      this_slice = remaining_needed.shift(rand(4))
+      wc.needs *this_slice
+    end
+
+    params = { }
+    needed.shuffle.each { |n| params[n] = "value-#{n}" }
+    not_needed.each { |nn| params[nn] = "value-#{nn}" }
+
+    instance = wc.new(params)
+
+    expect(instance.assigns.keys).to eq(needed + not_needed)
+
+    each_output = [ ]
+    instance.assigns.each { |k,v| each_output << k }
+    expect(each_output).to eq(needed + not_needed)
+  end
+
+  it "should tell you whether an assign is the default" do
+    wc = widget_class do
+      needs :foo, :bar => nil, :baz => 'def_baz', :quux => 'whatever', :marph => 'yep'
+
+      def content
+        text "hi"
+      end
+    end
+
+    instance = wc.new(:foo => 'the_foo', :bar => nil, :baz => 'def_baz', :marph => 'nope')
+    expect(instance.assigns[:foo]).to eq('the_foo')
+    expect(instance.assigns.is_default?(:foo)).to be_false
+    expect(instance.assigns[:bar]).to eq(nil)
+    expect(instance.assigns.is_default?(:bar)).to be_false
+    expect(instance.assigns[:baz]).to eq('def_baz')
+    expect(instance.assigns.is_default?(:baz)).to be_false
+    expect(instance.assigns[:quux]).to eq('whatever')
+    expect(instance.assigns.is_default?(:quux)).to be_true
+    expect(instance.assigns[:marph]).to eq('nope')
+    expect(instance.assigns.is_default?(:marph)).to be_false
+  end
+
   it "should return the same assigns proxy every time" do
     wc = widget_class_with_content do
       text "assigns proxy 1: #{assigns.object_id}, "

@@ -5,6 +5,12 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - implicit_shared_variable_access
   #   - use_instance_variables_for_assigns
   #
+  # TODO 2014-02-22 ageweke -- NEED TO ADD:
+  #   - format_output
+  #   - enforce_element_nesting_rules
+  #   - enforce_attribute_rules
+  #   - start_and_end_comments
+  #
   # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec.
 
   def extra_assigns_should_be(expected_result, *klasses)

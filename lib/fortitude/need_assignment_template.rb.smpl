@@ -9,6 +9,7 @@ if value == NOT_PRESENT_NEED
     missing << :#{need}                              # :if ! has_default
     have_missing = true                              # :if ! has_default
     value = the_needs[:#{need}]                      # :if has_default
+    @_fortitude_default_assigns[:#{need}] = true     # :if has_default
   end
 end
 

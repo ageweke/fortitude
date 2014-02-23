@@ -223,6 +223,38 @@ describe "Fortitude around_content operations", :type => :system do
     expect { child.remove_around_content(:around1) }.to raise_error(ArgumentError)
   end
 
+
+  it "should not fail if you try to remove an around_content method that's not present, and you tell it not to care" do
+    parent = widget_class do
+      def around1
+        text "around1"
+        yield
+      end
+
+      around_content :around1
+    end
+
+    child = widget_class(:superclass => parent) do
+      def around2
+        text "around2"
+        yield
+      end
+
+      def content
+        text "content"
+      end
+
+      around_content :around2
+    end
+
+    parent.remove_around_content(:foobar, :fail_if_not_present => false)
+    parent.remove_around_content(:around2, :fail_if_not_present => false)
+    child.remove_around_content(:foobar, :fail_if_not_present => false)
+    child.remove_around_content(:around1, :fail_if_not_present => false)
+
+    expect(render(child)).to eq("around1around2content")
+  end
+
   it "should run around_content methods in the order they are declared" do
     wc = widget_class do
       def around1

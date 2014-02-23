@@ -1,5 +1,6 @@
 def assign_locals_from(assigns)
   @_fortitude_raw_assigns = assigns
+  @_fortitude_default_assigns = { }
   the_needs = self.class.needs_as_hash
   missing = [ ]
   have_missing = false

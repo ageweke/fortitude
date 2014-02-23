@@ -48,6 +48,7 @@ module Fortitude
     _fortitude_class_inheritable_attribute :enforce_element_nesting_rules, false, [ true, false ]
     _fortitude_class_inheritable_attribute :enforce_attribute_rules, false, [ true, false ]
     _fortitude_class_inheritable_attribute :use_instance_variables_for_assigns, false, [ true, false ]
+    _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
 
     class << self
       def tag(name, options = { })
@@ -201,6 +202,54 @@ module Fortitude
       end
     end
 
+    def start_and_end_comments
+      if self.class.start_and_end_comments
+        comment_text = "BEGIN Fortitude widget #{self.class.name}"
+
+        assign_keys = assigns.keys
+        if assign_keys.length > 0
+          comment_text << ": "
+          assign_keys.each_with_index do |assign, index|
+            comment_text << ", " unless index == 0
+            value = assigns[assign]
+            comment_text << ":#{assign} => "
+            comment_text << "(DEFAULT) " if assigns.is_default?(assign)
+            comment_text << value.inspect
+          end
+        end
+        comment comment_text
+        yield
+        comment "END Fortitude widget #{self.class.name}"
+      else
+        yield
+      end
+    end
+
+    # From http://www.w3.org/TR/html5/syntax.html#comments:
+    #
+    # Comments must start with the four character sequence U+003C LESS-THAN SIGN, U+0021 EXCLAMATION MARK,
+    # U+002D HYPHEN-MINUS, U+002D HYPHEN-MINUS (<!--). Following this sequence, the comment may have text,
+    # with the additional restriction that the text must not start with a single ">" (U+003E) character,
+    # nor start with a U+002D HYPHEN-MINUS character (-) followed by a ">" (U+003E) character, nor contain
+    # two consecutive U+002D HYPHEN-MINUS characters (--), nor end with a U+002D HYPHEN-MINUS character (-).
+    # Finally, the comment must be ended by the three character sequence U+002D HYPHEN-MINUS, U+002D HYPHEN-MINUS,
+    # U+003E GREATER-THAN SIGN (-->).
+    def comment_escape(string)
+      string = "_#{string}" if string =~ /^\s*(>|->)/
+      string = string.gsub("--", "- - ") if string =~ /\-\-/ # don't gsub if it doesn't match to avoid generating garbage
+      string = "#{string}_" if string =~ /\-\s*$/i
+      string
+    end
+
+    def comment(s)
+      raise ArgumentError, "You cannot pass a block to a comment" if block_given?
+      rawtext "<!-- "
+      rawtext comment_escape(s)
+      rawtext " -->"
+    end
+
+    attr_reader :_fortitude_default_assigns
+
     VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }
     STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
@@ -228,7 +277,7 @@ module Fortitude
         if new_value
           around_content :transfer_shared_variables
         else
-          # TODO 2014-02-21 ageweke -- remove_around_content
+          remove_around_content :transfer_shared_variables, :fail_if_not_present => false
         end
       end
 
@@ -244,6 +293,14 @@ module Fortitude
         rebuild_needs_methods!
       end
 
+      def _fortitude_start_and_end_comments_changed!(new_value)
+        if new_value
+          around_content :start_and_end_comments
+        else
+          remove_around_content :start_and_end_comments, :fail_if_not_present => false
+        end
+      end
+
       def assign_instance_variable_prefix
         use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX
       end
@@ -256,13 +313,16 @@ module Fortitude
       end
 
       def remove_around_content(*method_names)
+        options = method_names.extract_options!
+        options.assert_valid_keys(:fail_if_not_present)
+
         not_found = [ ]
         method_names.each do |method_name|
           not_found << method_name unless (@_fortitude_around_content_methods || [ ]).delete(method_name)
         end
 
         rebuild_run_content!
-        if not_found.length > 0
+        unless (not_found.length == 0) || (options.has_key?(:fail_if_not_present) && (! options[:fail_if_not_present]))
           raise ArgumentError, "no such methods: #{not_found.inspect}"
         end
       end
