@@ -1,10 +1,10 @@
 describe "Fortitude start/end comments support", :type => :system do
-  def eb(widget_class)
-    "BEGIN Fortitude widget #{widget_class.name}"
+  def eb(widget_class, expected_depth = 0)
+    "BEGIN Fortitude widget #{widget_class.name} depth #{expected_depth}"
   end
 
-  def ee(widget_class)
-    "END Fortitude widget #{widget_class.name}"
+  def ee(widget_class, expected_depth = 0)
+    "END Fortitude widget #{widget_class.name} depth #{expected_depth}"
   end
 
   EXPECTED_START_COMMENT_BOILERPLATE = "BEGIN Fortitude widget "

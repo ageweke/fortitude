@@ -221,9 +221,13 @@ module Fortitude
     MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
     START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze
 
+    def widget_nesting_depth
+      @_fortitude_widget_nesting_depth ||= @_fortitude_rendering_context.current_widget_depth
+    end
+
     def start_and_end_comments
       if self.class.start_and_end_comments
-        comment_text = "BEGIN Fortitude widget #{self.class.name}"
+        comment_text = "BEGIN Fortitude widget #{self.class.name} depth #{widget_nesting_depth}"
 
         assign_keys = assigns.keys
         if assign_keys.length > 0
@@ -243,7 +247,7 @@ module Fortitude
         end
         comment comment_text
         yield
-        comment "END Fortitude widget #{self.class.name}"
+        comment "END Fortitude widget #{self.class.name} depth #{widget_nesting_depth}"
       else
         yield
       end
@@ -542,10 +546,12 @@ EOS
 
       block = lambda { |*args| @_fortitude_rendering_context.yield_to_view(*args) }
 
-      begin
-        run_content(&block)
-      ensure
-        @_fortitude_rendering_context = nil
+      rendering_context.record_widget(self) do
+        begin
+          run_content(&block)
+        ensure
+          @_fortitude_rendering_context = nil
+        end
       end
     end
 

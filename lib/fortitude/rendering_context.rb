@@ -28,6 +28,23 @@ module Fortitude
       @yield_block = options[:yield_block]
     end
 
+    def record_widget(widget)
+      @all_widgets << widget
+      @current_widget_nesting << widget
+      begin
+        yield
+      ensure
+        last = @current_widget_nesting.pop
+        unless last.equal?(widget)
+          raise "Something horrible happened -- the last widget we started was #{last}, but now we're ending #{widget}?!?"
+        end
+      end
+    end
+
+    def current_widget_depth
+      @current_widget_nesting.length - 1
+    end
+
     def record_tag(widget, tag_object)
       validate_element_for_rules(widget, tag_object)
       @current_element_nesting << tag_object
@@ -36,7 +53,7 @@ module Fortitude
         yield
       ensure
         last = @current_element_nesting.pop
-        unless last == tag_object
+        unless last.equal?(tag_object)
           raise "Something horrible happened -- the last tag we started was #{last}, but now we're ending #{tag_object}?!?"
         end
       end
