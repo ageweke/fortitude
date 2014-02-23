@@ -75,6 +75,23 @@ describe "Fortitude needs", :type => :system do
         expect(render(i)).to eq("<p>value: foo</p>")
       end
     end
+
+    it "should not allow defining a needs method that conflicts with a built-in method, by default" do
+      expect { widget_class { needs :p } }.to raise_error(Fortitude::Errors::NeedConflictsWithMethod)
+      expect { widget_class { needs :comment} }.to raise_error(Fortitude::Errors::NeedConflictsWithMethod)
+    end
+
+    it "should allow defining a needs method that conflicts with a built-in method, if you tell it to" do
+      wc = widget_class do
+        needs :p, :fortitude_allow_overriding_methods_with_needs => true
+
+        def content
+          text "p is: #{p}"
+        end
+      end
+
+      expect(render(wc.new(:p => 'the_p'))).to eq("p is: the_p")
+    end
   end
 
   describe "inheritance" do

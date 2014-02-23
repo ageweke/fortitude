@@ -89,23 +89,32 @@ module Fortitude
       end
 
       def needs(*names)
-        return needs_as_hash if names.length == 0
+        previous_needs = needs_as_hash
+        return previous_needs if names.length == 0
 
         @this_class_needs ||= { }
 
+        with_defaults_raw = { }
+        with_defaults_raw = names.pop if names[-1] && names[-1].kind_of?(Hash)
+        allow_overriding = true if with_defaults_raw.delete(:fortitude_allow_overriding_methods_with_needs)
+
+        names = names.map { |n| n.to_s.strip.downcase.to_sym }
         with_defaults = { }
-        with_defaults = names.pop if names[-1] && names[-1].kind_of?(Hash)
+        with_defaults_raw.each { |k,v| with_defaults[k.to_s.strip.downcase.to_sym] = v }
 
         bad_names = names.select { |n| ! is_valid_ruby_method_name?(n) }
         raise ArgumentError, "Needs in a Fortitude widget class must be valid Ruby method names; these are not: #{bad_names.inspect}" if bad_names.length > 0
 
+        unless allow_overriding
+          has_methods = names.select { |n| instance_methods(true).include?(n.to_sym) && (! previous_needs.has_key?(n)) }
+          raise Fortitude::Errors::NeedConflictsWithMethod.new(self, has_methods) if has_methods.length > 0
+        end
+
         names.each do |name|
-          name = name.to_s.strip.downcase.to_sym
           @this_class_needs[name] = REQUIRED_NEED
         end
 
         with_defaults.each do |name, default_value|
-          name = name.to_s.strip.downcase.to_sym
           @this_class_needs[name] = default_value
         end
 
@@ -227,7 +236,9 @@ module Fortitude
 
     def start_and_end_comments
       if self.class.start_and_end_comments
-        comment_text = "BEGIN Fortitude widget #{self.class.name} depth #{widget_nesting_depth}"
+        fo = self.class.format_output
+
+        comment_text = "BEGIN #{self.class.name} depth #{widget_nesting_depth}"
 
         assign_keys = assigns.keys
         if assign_keys.length > 0
@@ -247,7 +258,7 @@ module Fortitude
         end
         comment comment_text
         yield
-        comment "END Fortitude widget #{self.class.name} depth #{widget_nesting_depth}"
+        comment "END #{self.class.name} depth #{widget_nesting_depth}"
       else
         yield
       end
@@ -270,10 +281,13 @@ module Fortitude
     end
 
     def comment(s)
+      fo = self.class.format_output
+      @_fortitude_rendering_context.needs_newline! if fo
       raise ArgumentError, "You cannot pass a block to a comment" if block_given?
       rawtext "<!-- "
       rawtext comment_escape(s)
       rawtext " -->"
+      @_fortitude_rendering_context.needs_newline! if fo
     end
 
     attr_reader :_fortitude_default_assigns

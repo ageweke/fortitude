@@ -216,5 +216,7 @@ describe "Fortitude tag rendering", :type => :system do
     it "should not allow passing a block" do
       expect { render { comment { text "hi" } } }.to raise_error(ArgumentError)
     end
+
+    it "should put comments on their own lines if we're formatting output"
   end
 end

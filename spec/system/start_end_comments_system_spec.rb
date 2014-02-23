@@ -1,14 +1,11 @@
 describe "Fortitude start/end comments support", :type => :system do
   def eb(widget_class, expected_depth = 0)
-    "BEGIN Fortitude widget #{widget_class.name} depth #{expected_depth}"
+    "BEGIN #{widget_class.name} depth #{expected_depth}"
   end
 
   def ee(widget_class, expected_depth = 0)
-    "END Fortitude widget #{widget_class.name} depth #{expected_depth}"
+    "END #{widget_class.name} depth #{expected_depth}"
   end
-
-  EXPECTED_START_COMMENT_BOILERPLATE = "BEGIN Fortitude widget "
-  EXPECTED_END_COMMENT_BOILERPLATE = "END Fortitude widget "
 
   it "should not add comments by default" do
     wc = widget_class do
@@ -182,9 +179,9 @@ describe "Fortitude start/end comments support", :type => :system do
     expected_output << " --><p>hi</p><!-- #{ee(wc)} -->"
   end
 
-  it "should display the depth at which a widget is being rendered" do
-
-  end
+  it "should display the depth at which a widget is being rendered"
+  it "should put comments on their own lines if we're formatting output"
+  it "should put assignments on their own lines if they're long enough and we're formatting output"
 
   BAD_VALUES = [ ">foo", "fo -- bar", "--", "->bar", "baz-" ]
 

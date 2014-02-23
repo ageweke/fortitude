@@ -55,5 +55,15 @@ module Fortitude
         @element_name = element_name
       end
     end
+
+    class NeedConflictsWithMethod < Base
+      attr_reader :widget_class, :need_names
+
+      def initialize(widget_class, need_names)
+        super(%{The widget class #{widget_class.name} tried to declare that it needs #{need_names.inspect}, but that/those are already valid method names on the widget class. Pass :fortitude_allow_overriding_methods_with_needs => true if you want to allow this.})
+        @widget_class = widget_class
+        @need_names = need_names
+      end
+    end
   end
 end
