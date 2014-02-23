@@ -17,7 +17,7 @@ describe "Fortitude needs", :type => :system do
   end
 
   describe "names" do
-    BAD_METHOD_NAMES = [ " " ]
+    BAD_METHOD_NAMES = [ " ", "0123", "0foo", "?baz", "!yo", "!", "?", "abc??" ]
 
     BAD_METHOD_NAMES.each do |bad_method_name|
       it "should fail if you try to use a name for a need that's not a valid method name, like #{bad_method_name.inspect}" do
@@ -38,7 +38,43 @@ describe "Fortitude needs", :type => :system do
       end
     end
 
-    VALID_METHOD_NAMES = [ "o01239014", "______", "_", "foo?" ]
+    VALID_METHOD_NAMES = [ "o01239014", "______", "_", "foo?", "bar!", "_0123" ]
+
+    VALID_METHOD_NAMES.each do |valid_method_name|
+      it "should allow you to use corner-case names for a need, like #{valid_method_name.inspect}" do
+        wc = widget_class do
+          needs valid_method_name.to_sym
+
+          attr_accessor :method_name
+
+          def content
+            eval("p \"value: \#{#{method_name}}\"")
+          end
+        end
+
+        i = wc.new(valid_method_name => "foo")
+        i.method_name = valid_method_name
+
+        expect(render(i)).to eq("<p>value: foo</p>")
+      end
+
+      it "should allow you to pass corner-case names for an extra assign, like #{valid_method_name.inspect}" do
+        wc = widget_class do
+          extra_assigns :use
+
+          attr_accessor :method_name
+
+          def content
+            eval("p \"value: \#{#{method_name}}\"")
+          end
+        end
+
+        i = wc.new(valid_method_name => "foo")
+        i.method_name = valid_method_name
+
+        expect(render(i)).to eq("<p>value: foo</p>")
+      end
+    end
   end
 
   describe "inheritance" do

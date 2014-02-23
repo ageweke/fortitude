@@ -85,8 +85,7 @@ module Fortitude
       end
 
       def is_valid_ruby_method_name?(s)
-        # Credit to http://stackoverflow.com/questions/4378670/what-is-a-ruby-regex-to-match-a-function-name
-        (/[@$"]/ !~ s.to_sym.inspect)
+        s =~ /^[A-Za-z_][A-Za-z0-9_]*[\?\!]?$/
       end
 
       def needs(*names)
