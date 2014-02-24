@@ -324,9 +324,9 @@ hi
     expect(render(outer)).to eq(%{<div>
   <div>
     <!-- #{eb(inner,1 )}:
-      :foo => \"#{"a" * 47}...,
-      :bar => \"#{"b" * 47}...
-    -->
+         :foo => \"#{"a" * 97}...
+         :bar => \"#{"b" * 97}...
+     -->
     hi
     <!-- #{ee(inner, 1)} -->
   </div>

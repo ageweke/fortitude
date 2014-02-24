@@ -75,12 +75,16 @@ module Fortitude
       @newline_needed = true
     end
 
+    def current_indent
+      ("  " * @indent).freeze
+    end
+
     def about_to_output_non_whitespace!
       if @newline_needed
         if @have_output
           o = @output_buffer_holder.output_buffer
           o.original_concat(NEWLINE)
-          o.original_concat("  " * @indent)
+          o.original_concat(current_indent)
         end
 
         @newline_needed = false
