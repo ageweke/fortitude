@@ -651,6 +651,10 @@ EOS
       w.to_html(@_fortitude_rendering_context)
     end
 
+    def invoke_helper(name, *args, &block)
+      @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
+    end
+
     def t(key, *args)
       base = self.class.translation_base
       if base && key.to_s =~ /^\./

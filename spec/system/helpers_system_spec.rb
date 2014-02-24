@@ -22,6 +22,19 @@ describe "Fortitude helper support", :type => :system do
         output_buffer << "this is #{input} helper3"
       end
 
+      def helper4(arg)
+        result = yield(arg)
+        "foo #{result} bar"
+      end
+
+      def p(input)
+        "pp#{input}pp"
+      end
+
+      def kaboom
+        raise "kaboom!"
+      end
+
       def output_buffer
         @output_buffer_holder.output_buffer
       end
@@ -35,6 +48,43 @@ describe "Fortitude helper support", :type => :system do
     @output_buffer.clear
     super(widget_or_class, { :rendering_context => rc(
       :helpers_object => @helpers_object, :output_buffer_holder => @output_buffer_holder) }.merge(options))
+  end
+
+  describe "manual invocation of helpers using #invoke_helper" do
+    it "should work for a very simple helper, without arguments" do
+      expect(render(widget_class_with_content { s = invoke_helper(:helper1); text s })).to eq("this is helper1")
+    end
+
+    it "should allow passing arguments" do
+      expect(render(widget_class_with_content { s = invoke_helper(:helper2, 'foo'); text s })).to eq("this is foo helper2")
+    end
+
+    it "should work even if automatic_helper_access is off" do
+      wc = widget_class do
+        automatic_helper_access false
+        def content
+          text invoke_helper(:helper1)
+        end
+      end
+
+      expect(render(wc)).to eq("this is helper1")
+    end
+
+    it "should allow passing a block" do
+      expect(render(widget_class_with_content { text invoke_helper(:helper4, "b") { |a| "x#{a}x" } })).to eq("foo xbx bar")
+    end
+
+    it "should return an exception properly" do
+      expect { render(widget_class_with_content { invoke_helper(:kaboom) }) }.to raise_error(/kaboom!/i)
+    end
+
+    it "should allow calling a helper that outputs" do
+      expect(render(widget_class_with_content { invoke_helper(:helper3, "aaa") })).to eq("this is aaa helper3")
+    end
+
+    it "should allow calling a method that's overridden on Widget" do
+      expect(render(widget_class_with_content { text invoke_helper(:p, "a") })).to eq("ppapp")
+    end
   end
 
   it "should, by default, allow automatic access to helpers" do
@@ -130,7 +180,6 @@ describe "Fortitude helper support", :type => :system do
 
     expect(render(wc)).to eq("this is yo helper2, h2a: this is xx helper2, done")
   end
-
 
   it "should allow declaring helpers with :transform = nil, false, or none" do
     wc = widget_class do
