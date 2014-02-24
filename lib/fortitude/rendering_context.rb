@@ -20,6 +20,8 @@ module Fortitude
       @indent = 0
       @newline_needed = false
       @have_output = false
+      @indenting_disabled = false
+
       @current_element_nesting = [ ]
 
       @current_widget_nesting = [ ]
@@ -79,12 +81,22 @@ module Fortitude
       ("  " * @indent).freeze
     end
 
+    def with_indenting_disabled
+      old_indenting_disabled = @indenting_disabled
+      @indenting_disabled = true
+      begin
+        yield
+      ensure
+        @indenting_disabled = old_indenting_disabled
+      end
+    end
+
     def about_to_output_non_whitespace!
       if @newline_needed
         if @have_output
           o = @output_buffer_holder.output_buffer
           o.original_concat(NEWLINE)
-          o.original_concat(current_indent)
+          o.original_concat(current_indent) unless @indenting_disabled
         end
 
         @newline_needed = false

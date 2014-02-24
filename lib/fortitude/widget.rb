@@ -655,6 +655,29 @@ EOS
       @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
     end
 
+    def default_javascript_options
+      { :type => 'text/javascript' }
+    end
+
+    def javascript(content = nil, &block)
+      args = if content.kind_of?(Hash)
+        [ default_javascript_options.merge(content) ]
+      elsif content
+        if block
+          raise ArgumentError, "You can't supply JavaScript content both via text and a block"
+        else
+          block = lambda { rawtext content }
+          [ default_javascript_options ]
+        end
+      else
+        [ default_javascript_options ]
+      end
+
+      @_fortitude_rendering_context.with_indenting_disabled do
+        script(*args, &block)
+      end
+    end
+
     def t(key, *args)
       base = self.class.translation_base
       if base && key.to_s =~ /^\./
