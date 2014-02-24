@@ -2,7 +2,7 @@ describe "Fortitude convenience methods", :type => :system do
   describe "#javascript" do
     it "should output JavaScript inside the proper tag, by default" do
       expect(render(widget_class_with_content { javascript "hi, there" })).to eq(
-        %{<script type="text/javascript">hi, there</script>})
+        %{<script>hi, there</script>})
     end
 
     it "should include newlines if we're formatting output, but not indent it" do
@@ -20,7 +20,7 @@ describe "Fortitude convenience methods", :type => :system do
 
       expect(render(wc)).to eq(%{<div>
   hi
-<script type="text/javascript">
+<script>
 hi, there
 </script>
   bye

@@ -3,7 +3,6 @@ require 'fortitude/instance_variable_set'
 module Fortitude
   class RenderingContext
     attr_reader :output_buffer_holder, :instance_variable_set, :helpers_object
-    attr_accessor :current_doctype
 
     def initialize(options)
       options.assert_valid_keys(:delegate_object, :output_buffer_holder, :helpers_object, :instance_variables_object, :yield_block)
@@ -17,8 +16,6 @@ module Fortitude
 
       instance_variables_object = options[:instance_variables_object] || options[:delegate_object] || Object.new
       @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
-
-      @current_doctype = nil
 
       @indent = 0
       @newline_needed = false

@@ -68,6 +68,27 @@ module Fortitude
         rebuild_tag_methods!(name)
       end
 
+      def doctype(new_doctype = nil)
+        if new_doctype
+          new_doctype = case new_doctype
+          when Fortitude::Doctypes::Base then new_doctype
+          when Symbol then Fortitude::Doctypes.standard_doctype(new_doctype)
+          else raise ArgumentError, "You must supply a Symbol or an instance of Fortitude::Doctypes::Base, not: #{new_doctype.inspect}"
+          end
+
+          current_doctype = doctype
+          if current_doctype && new_doctype != current_doctype
+            raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
+          end
+
+          @_fortitude_doctype = new_doctype
+        else
+          return @_fortitude_doctype if @_fortitude_doctype
+          return superclass.doctype if superclass.respond_to?(:doctype)
+          nil
+        end
+      end
+
       def this_class_tags
         @_this_class_tags || { }
       end
@@ -337,27 +358,6 @@ module Fortitude
         rawtext s
         rawtext CDATA_END
       end
-    end
-
-    def doctype=(s)
-      doctype = if s.kind_of?(Fortitude::Doctypes::Base)
-        s
-      elsif s.kind_of?(Symbol)
-        Fortitude::Doctypes.standard_doctype(s)
-      else
-        Fortitude::Doctypes::UnknownDoctype.new(s)
-      end
-
-      @rendering_context.current_doctype = doctype
-    end
-
-    def current_doctype
-      @_fortitude_rendering_context.current_doctype
-    end
-
-    def doctype(s)
-      self.doctype = s
-      current_doctype.declare!(self)
     end
 
     attr_reader :_fortitude_default_assigns
@@ -643,26 +643,32 @@ EOS
       w.to_html(@_fortitude_rendering_context)
     end
 
+    def doctype!
+      dt = self.class.doctype
+      raise "You must set a doctype at the class level, using something like 'doctype :html5', before you can use this method." unless dt
+      dt.declare!(self)
+    end
+
+    def doctype(string)
+      rawtext "<!DOCTYPE #{string}>"
+    end
+
     def invoke_helper(name, *args, &block)
       @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
     end
 
-    def default_javascript_options
-      { :type => 'text/javascript' }
-    end
-
     def javascript(content = nil, &block)
       args = if content.kind_of?(Hash)
-        [ default_javascript_options.merge(content) ]
+        [ self.class.doctype.default_javascript_tag_attributes.merge(content) ]
       elsif content
         if block
           raise ArgumentError, "You can't supply JavaScript content both via text and a block"
         else
           block = lambda { rawtext content }
-          [ default_javascript_options ]
+          [ self.class.doctype.default_javascript_tag_attributes ]
         end
       else
-        [ default_javascript_options ]
+        [ self.class.doctype.default_javascript_tag_attributes ]
       end
 
       @_fortitude_rendering_context.with_indenting_disabled do

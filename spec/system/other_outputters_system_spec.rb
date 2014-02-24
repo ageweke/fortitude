@@ -109,28 +109,9 @@ man]]>
     end
   end
 
-  describe "doctype" do
-    it "should output a doctype of any string if asked" do
+  describe "doctype instance method" do
+    it "should output a doctype with any string if asked" do
       should_render_to("<!DOCTYPE foobar>") { doctype 'foobar' }
-    end
-
-    it "should output well-known doctypes" do
-      should_render_to("<!DOCTYPE html>") { doctype :html5 }
-      should_render_to('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">') { doctype :html4_strict }
-      should_render_to('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">') { doctype :html4_transitional }
-      should_render_to('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">') { doctype :html4_frameset }
-      should_render_to('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">') { doctype :xhtml1_strict }
-      should_render_to('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">') { doctype :xhtml1_transitional }
-      should_render_to('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">') { doctype :xhtml1_frameset }
-      should_render_to('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">') { doctype :xhtml11 }
-    end
-
-    it "should fail if passed an unknown symbol" do
-      expect { render(widget_class_with_content { doctype :foo }) }.to raise_error(ArgumentError)
-    end
-
-    it "should fail if passed nil" do
-      expect { render(widget_class_with_content { doctype :foo }) }.to raise_error(ArgumentError)
     end
   end
 end

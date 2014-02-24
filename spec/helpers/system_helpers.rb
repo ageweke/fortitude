@@ -30,7 +30,7 @@ module SystemHelpers
   end
 
   def widget_class(options = { }, &block)
-    klass = Class.new(options[:superclass] || ::Fortitude::Widget, &block)
+    klass = Class.new(options[:superclass] || ::Fortitude::Html5Widget, &block)
     $spec_widget_seq ||= 0
     $spec_widget_seq += 1
     ::Object.const_set("SpecWidget#{$spec_widget_seq}", klass)

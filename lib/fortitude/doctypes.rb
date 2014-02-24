@@ -28,14 +28,18 @@ module Fortitude
       ].each do |doctype|
         out[doctype.name] = doctype
       end
+
+      out
     end
 
-    def standard_doctype(type)
-      out = KNOWN_DOCTYPES[type]
-      unless out
-        raise ArgumentError, "Unknown standard doctype #{type.inspect}; I know about: #{KNOWN_DOCTYPES.keys.inspect}"
+    class << self
+      def standard_doctype(type)
+        out = KNOWN_DOCTYPES[type]
+        unless out
+          raise ArgumentError, "Unknown standard doctype #{type.inspect}; I know about: #{KNOWN_DOCTYPES.keys.inspect}"
+        end
+        out
       end
-      out
     end
   end
 end

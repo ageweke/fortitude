@@ -9,7 +9,11 @@ module Fortitude
       end
 
       def declare!(w)
-        w.rawtext "<!DOCTYPE #{@doctype_line}>"
+        w.doctype @doctype_line
+      end
+
+      def to_s
+        "<Doctype #{name.inspect}>"
       end
     end
   end
