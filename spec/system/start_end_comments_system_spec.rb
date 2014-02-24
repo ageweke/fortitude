@@ -179,9 +179,159 @@ describe "Fortitude start/end comments support", :type => :system do
     expected_output << " --><p>hi</p><!-- #{ee(wc)} -->"
   end
 
-  it "should display the depth at which a widget is being rendered"
-  it "should put comments on their own lines if we're formatting output"
-  it "should put assignments on their own lines if they're long enough and we're formatting output"
+  it "should display the depth at which a widget is being rendered" do
+    inner = widget_class do
+      start_and_end_comments true
+      def content
+        text "hi!"
+      end
+    end
+
+    middle = widget_class do
+      start_and_end_comments true
+      cattr_accessor :klass
+      def content
+        widget klass.new
+      end
+    end
+
+    outer = widget_class do
+      start_and_end_comments true
+      cattr_accessor :klass
+      def content
+        widget klass.new
+      end
+    end
+
+    outer.klass = middle
+    middle.klass = inner
+
+    expect(render(outer)).to eq(
+      "<!-- #{eb(outer, 0)} -->" +
+      "<!-- #{eb(middle, 1)} -->" +
+      "<!-- #{eb(inner, 2)} -->" +
+      "hi!" +
+      "<!-- #{ee(inner, 2)} -->" +
+      "<!-- #{ee(middle, 1)} -->" +
+      "<!-- #{ee(outer, 0)} -->")
+  end
+
+  it "should display the depth at which a widget is being rendered, even if outer widgets aren't rendering comments" do
+    inner = widget_class do
+      start_and_end_comments true
+      def content
+        text "hi!"
+      end
+    end
+
+    middle = widget_class do
+      cattr_accessor :klass
+      def content
+        widget klass.new
+      end
+    end
+
+    outer = widget_class do
+      cattr_accessor :klass
+      def content
+        widget klass.new
+      end
+    end
+
+    outer.klass = middle
+    middle.klass = inner
+
+    expect(render(outer)).to eq(
+      "<!-- #{eb(inner, 2)} -->" +
+      "hi!" +
+      "<!-- #{ee(inner, 2)} -->")
+  end
+
+  it "should put comments on their own lines if we're formatting output" do
+    wc = widget_class do
+      start_and_end_comments true
+      format_output true
+
+      def content
+        text "hi"
+      end
+    end
+
+    expect(render(wc)).to eq(%{<!-- #{eb(wc)} -->
+hi
+<!-- #{ee(wc)} -->})
+  end
+
+  it "should put comments on their own lines, nested inside another widget, if we're formatting output" do
+    outer = widget_class do
+      format_output true
+      cattr_accessor :klass
+
+      def content
+        div do
+          div do
+            widget klass.new
+          end
+        end
+      end
+    end
+
+    inner = widget_class do
+      start_and_end_comments true
+      format_output true
+
+      def content
+        text "hi"
+      end
+    end
+
+    outer.klass = inner
+    expect(render(outer)).to eq(%{<div>
+  <div>
+    <!-- #{eb(inner, 1)} -->
+    hi
+    <!-- #{ee(inner, 1)} -->
+  </div>
+</div>})
+  end
+
+  it "should put assignments on their own lines, with indentation, if they're long enough and we're formatting output" do
+    outer = widget_class do
+      format_output true
+      cattr_accessor :klass
+
+      def content
+        div do
+          div do
+            widget klass.new(:foo => "a" * 1000, :bar => "b" * 1000)
+          end
+        end
+      end
+    end
+
+    inner = widget_class do
+      needs :foo, :bar
+      start_and_end_comments true
+      format_output true
+
+      def content
+        text "hi"
+      end
+    end
+
+    outer.klass = inner
+
+    expect(render(outer)).to eq(%{<div>
+  <div>
+    <!-- #{eb(inner,1 )}:
+      :foo => \"#{"a" * 47}...,
+      :bar => \"#{"b" * 47}...
+    -->
+    hi
+    <!-- #{ee(inner, 1)} -->
+  </div>
+</div>})
+  end
 
   BAD_VALUES = [ ">foo", "fo -- bar", "--", "->bar", "baz-" ]
 
