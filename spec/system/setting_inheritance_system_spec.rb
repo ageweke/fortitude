@@ -10,6 +10,7 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - enforce_element_nesting_rules
   #   - enforce_attribute_rules
   #   - start_and_end_comments
+  #   - translation_base
   #
   # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec.
 

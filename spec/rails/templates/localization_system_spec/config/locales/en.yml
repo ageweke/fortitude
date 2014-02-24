@@ -6,3 +6,9 @@ en:
       awesome: "awesome!"
     native_support:
       awesome: "also awesome %{number}!"
+    readjust_base:
+      awesome: "we should not be using this, %{number}!"
+  some:
+    other:
+      base:
+        awesome: "SUPA-awesome %{number}!"

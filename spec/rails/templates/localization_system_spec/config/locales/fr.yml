@@ -6,3 +6,9 @@ fr:
       awesome: "formidable!"
     native_support:
       awesome: "encore formidable %{number}!"
+    readjust_base:
+      awesome: "on ne doit pas le utiliser, %{number}!"
+  some:
+    other:
+      base:
+        awesome: "TOUS formidable, %{number}!"

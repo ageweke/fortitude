@@ -16,4 +16,12 @@ class LocalizationSystemSpecController < ApplicationController
   def content_method
     # nothing here
   end
+
+  def native_support
+    # nothing here
+  end
+
+  def readjust_base
+    # nothing here
+  end
 end

@@ -28,8 +28,16 @@ module Fortitude
             raise "Fortitude class-inheritable attribute error: there should always be a declared value for #{attribute_name} at the top of the inheritance hierarchy somewhere"
           else
             new_value = args[0]
-            unless allowable_values.include?(new_value)
-              raise ArgumentError, "#{attribute_name} cannot be set to #{new_value.inspect}; valid values are: #{allowable_values.inspect}"
+            allowed = if allowable_values.respond_to?(:call)
+              allowable_values.call(new_value)
+            else
+              allowable_values.include?(new_value)
+            end
+
+            if (! allowed)
+              error = "#{attribute_name} cannot be set to #{new_value.inspect}"
+              error << "; valid values are: #{allowable_values.inspect}" unless allowable_values.respond_to?(:call)
+              raise ArgumentError, error
             end
             instance_variable_set(instance_variable_name, new_value)
             changed_method = "_fortitude_#{attribute_name}_changed!"
@@ -49,6 +57,7 @@ module Fortitude
     _fortitude_class_inheritable_attribute :enforce_attribute_rules, false, [ true, false ]
     _fortitude_class_inheritable_attribute :use_instance_variables_for_assigns, false, [ true, false ]
     _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
+    _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
 
     class << self
       def tag(name, options = { })
@@ -590,6 +599,15 @@ EOS
 
     def widget(w)
       w.to_html(@_fortitude_rendering_context)
+    end
+
+    def t(key, *args)
+      base = self.class.translation_base
+      if base && key.to_s =~ /^\./
+        super("#{base}#{key}", *args)
+      else
+        super(key, *args)
+      end
     end
 
     def ttext(key, *args)

@@ -26,4 +26,9 @@ describe "basic Rails support", :type => :rails do
     expect_match("native_support?locale=en", /not translated; also awesome 127!; also not translated/i)
     expect_match("native_support?locale=fr", /not translated; encore formidable 127!; also not translated/i)
   end
+
+  it "should let you readjust the translation base" do
+    expect_match("readjust_base?locale=en", /SUPA-awesome 127!/)
+    expect_match("readjust_base?locale=fr", /TOUS formidable, 127!/)
+  end
 end
