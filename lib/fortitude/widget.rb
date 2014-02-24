@@ -318,6 +318,26 @@ module Fortitude
       @_fortitude_rendering_context.needs_newline! if fo
     end
 
+    CDATA_START = "<![CDATA[".freeze
+    CDATA_END = "]]>".freeze
+
+    def cdata(s)
+      components = s.split("]]>")
+
+      if components.length > 1
+        components.each_with_index do |s, i|
+          this_component = s
+          this_component = ">#{this_component}" if i > 0
+          this_component = "#{this_component}]]" if i < (components.length - 1)
+          cdata(this_component)
+        end
+      else
+        rawtext CDATA_START
+        rawtext s
+        rawtext CDATA_END
+      end
+    end
+
     attr_reader :_fortitude_default_assigns
 
     VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }

@@ -176,47 +176,4 @@ describe "Fortitude tag rendering", :type => :system do
     quux = arbitrary_object_with_to_s("quux")
     should_render_to("<p foo=\"bar baz quux\"/>") { p :foo => [ 'bar', :baz, quux ]}
   end
-
-  describe "comments" do
-    it "should render a simple comment" do
-      should_render_to("<!-- foo -->") { comment "foo" }
-    end
-
-    it "should escape anything potentially comment-ending in a comment" do
-      [ "fo --> oo", "fo -- oo", "fo --", "--", "-----", "---", " -- ", "-- ", " --", "- -",
-        ">", " > ", ">>", "-->" ].each do |string|
-        text = render(widget_class_with_content { comment string })
-        if text =~ /^<!--(.*)-->$/
-          contents = $1
-        else
-          raise "Not a comment?!? #{text.inspect}"
-        end
-
-        # From http://www.w3.org/TR/html5/syntax.html#comments:
-        #
-        # Comments must start with the four character sequence U+003C LESS-THAN SIGN, U+0021 EXCLAMATION MARK,
-        # U+002D HYPHEN-MINUS, U+002D HYPHEN-MINUS (<!--). Following this sequence, the comment may have text,
-        # with the additional restriction that the text must not start with a single ">" (U+003E) character,
-        # nor start with a U+002D HYPHEN-MINUS character (-) followed by a ">" (U+003E) character, nor contain
-        # two consecutive U+002D HYPHEN-MINUS characters (--), nor end with a U+002D HYPHEN-MINUS character (-).
-        # Finally, the comment must be ended by the three character sequence U+002D HYPHEN-MINUS, U+002D HYPHEN-MINUS,
-        # U+003E GREATER-THAN SIGN (-->).
-        expect(contents).not_to match(/\-\-/)
-        expect(contents).not_to match(/^\s*>/)
-        expect(contents).not_to match(/^\s*\->/)
-        expect(contents).not_to match(/>$/)
-      end
-    end
-
-    it "should not escape standard HTML escape characters inside a comment" do
-      expect(render(widget_class_with_content { comment 'mind your "p"s & "q"s' })).to eq('<!-- mind your "p"s & "q"s -->')
-      expect(render(widget_class_with_content { comment 'is 3 < 4, or is 4 > 3?' })).to eq('<!-- is 3 < 4, or is 4 > 3? -->')
-    end
-
-    it "should not allow passing a block" do
-      expect { render { comment { text "hi" } } }.to raise_error(ArgumentError)
-    end
-
-    it "should put comments on their own lines if we're formatting output"
-  end
 end
