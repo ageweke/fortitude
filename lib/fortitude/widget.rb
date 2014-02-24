@@ -2,6 +2,7 @@ require 'fortitude/tag'
 require 'fortitude/tags_module'
 require 'fortitude/errors'
 require 'fortitude/assigns_proxy'
+require 'fortitude/doctypes'
 require 'active_support/core_ext/hash'
 
 module Fortitude
@@ -338,34 +339,25 @@ module Fortitude
       end
     end
 
-    VALID_DOCTYPE_SYMBOLS = {
-      :html5 => "html".freeze,
-
-      :html4_strict => 'HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"'.freeze,
-      :html4_transitional => 'HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"'.freeze,
-      :html4_frameset => 'HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd"'.freeze,
-
-      :xhtml1_strict => 'html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"'.freeze,
-      :xhtml1_transitional => 'html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"'.freeze,
-      :xhtml1_frameset => 'html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd"'.freeze,
-
-      :xhtml11 => 'html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"'.freeze
-    }
-
-    def doctype(s)
-      rawtext "<!DOCTYPE "
-
-      if s.kind_of?(Symbol)
-        output = VALID_DOCTYPE_SYMBOLS[s]
-        raise ArgumentError, "No known doctype #{s.inspect}; known doctypes are: #{VALID_DOCTYPE_SYMBOLS.keys.inspect}" unless output
-        rawtext output
-      elsif s.kind_of?(String)
-        text s
+    def doctype=(s)
+      doctype = if s.kind_of?(Fortitude::Doctypes::Base)
+        s
+      elsif s.kind_of?(Symbol)
+        Fortitude::Doctypes.standard_doctype(s)
       else
-        raise ArgumentError, "Invalid doctype parameter: #{s.inspect}"
+        Fortitude::Doctypes::UnknownDoctype.new(s)
       end
 
-      rawtext ">"
+      @rendering_context.current_doctype = doctype
+    end
+
+    def current_doctype
+      @_fortitude_rendering_context.current_doctype
+    end
+
+    def doctype(s)
+      self.doctype = s
+      current_doctype.declare!(self)
     end
 
     attr_reader :_fortitude_default_assigns
