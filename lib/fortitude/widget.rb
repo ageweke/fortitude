@@ -60,6 +60,11 @@ module Fortitude
     _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
     _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
 
+    def with_element_nesting_rules(on_or_off)
+      raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
+      @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
+    end
+
     class << self
       def tag(name, options = { })
         @_this_class_tags ||= { }

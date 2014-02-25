@@ -74,6 +74,95 @@ describe "Fortitude tag rules enforcement", :type => :system do
     expect { render(outer_instance) }.to raise_error(Fortitude::Errors::InvalidElementNesting)
   end
 
-  it "should allow you to disable enforcement with a block"
-  it "should let you re-enable enforcement with a block"
+  it "should allow you to disable enforcement with a block" do
+    wc = widget_class_with_content do
+      p do
+        with_element_nesting_rules(false) do
+          div do
+            text "hi"
+          end
+        end
+      end
+    end
+
+    expect(render(wc)).to eq("<p><div>hi</div></p>")
+  end
+
+  it "should allow you to disable enforcement with a block, even across widget boundaries" do
+    outer = widget_class do
+      attr_accessor :inner
+      def content
+        p do
+          with_element_nesting_rules(false) do
+            widget inner
+          end
+        end
+      end
+    end
+
+    inner = widget_class_with_content { div { text "hi" } }
+
+    outer_instance = outer.new
+    inner_instance = inner.new
+    outer_instance.inner = inner_instance
+
+    expect(render(outer_instance)).to eq("<p><div>hi</div></p>")
+  end
+
+  it "should allow you to re-enable enforcement with a block" do
+    wc = widget_class_with_content do
+      with_element_nesting_rules(false) do
+        p do
+          with_element_nesting_rules(true) do
+            div do
+              text "hi"
+            end
+          end
+        end
+      end
+    end
+
+    expect { render(wc) }.to raise_error(Fortitude::Errors::InvalidElementNesting)
+  end
+
+  it "should let you re-enable enforcement with a block, even across widget boundaries" do
+    outer = widget_class do
+      attr_accessor :inner
+      def content
+        with_element_nesting_rules(false) do
+          p do
+            widget inner
+          end
+        end
+      end
+    end
+
+    inner = widget_class_with_content { with_element_nesting_rules(true) { div { text "hi" } } }
+
+    outer_instance = outer.new
+    inner_instance = inner.new
+    outer_instance.inner = inner_instance
+
+    expect { render(outer_instance) }.to raise_error(Fortitude::Errors::InvalidElementNesting)
+  end
+
+  it "should raise an error if you try to enable enforcement with a block in a widget that isn't enforcing in the first place" do
+    wc = widget_class_with_content(:no_enforcement => true) do
+      with_element_nesting_rules(true) do
+        text "hi"
+      end
+    end
+
+    expect { render(wc) }.to raise_error(ArgumentError)
+  end
+
+  it "should not raise an error if you try to DISable enforcement with a block in a widget that isn't enforcing in the first place" do
+    wc = widget_class_with_content(:no_enforcement => true) do
+      with_element_nesting_rules(false) do
+        text "hi"
+      end
+    end
+
+    expect(render(wc)).to eq("hi")
+  end
 end

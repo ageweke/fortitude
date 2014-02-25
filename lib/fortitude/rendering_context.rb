@@ -30,6 +30,16 @@ module Fortitude
       @yield_block = options[:yield_block]
     end
 
+    def with_element_nesting_validation(value)
+      old_value = @element_nesting_validation_disabled
+      @element_nesting_validation_disabled = !value
+      begin
+        yield
+      ensure
+        @element_nesting_validation_disabled = old_value
+      end
+    end
+
     def record_widget(widget)
       @all_widgets << widget
       @current_widget_nesting << widget
@@ -119,7 +129,7 @@ module Fortitude
     private
     def validate_element_for_rules(widget, tag_object)
       current = @current_element_nesting[-1]
-      current.validate_can_enclose!(widget, tag_object) if current
+      current.validate_can_enclose!(widget, tag_object) if current && (! @element_nesting_validation_disabled)
     end
 
     class OutputBufferHolder
