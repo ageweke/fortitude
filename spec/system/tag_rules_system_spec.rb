@@ -13,5 +13,6 @@ describe "Fortitude tag rules enforcement", :type => :system do
     expect(render(widget_class_with_content { p { b } })).to eq('<p><b/></p>')
   end
 
-  it "should not enforce rules if there's a render :partial in between two elements"
+  it "should not enforce rules inside a widget with the setting off, even if surrounding widgets have it on"
+  it "should still enforce rules from one widget to the next"
 end
