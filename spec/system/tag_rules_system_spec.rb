@@ -1,7 +1,7 @@
 describe "Fortitude tag rules enforcement", :type => :system do
-  def widget_class_with_content(options = { }, &block)
+  def widget_class(options = { }, &block)
     out = super(options, &block)
-    out.class_eval { enforce_element_nesting_rules true }
+    out.class_eval { enforce_element_nesting_rules true } unless options[:no_enforcement]
     out
   end
 
@@ -13,6 +13,67 @@ describe "Fortitude tag rules enforcement", :type => :system do
     expect(render(widget_class_with_content { p { b } })).to eq('<p><b/></p>')
   end
 
-  it "should not enforce rules inside a widget with the setting off, even if surrounding widgets have it on"
-  it "should still enforce rules from one widget to the next"
+  it "should not enforce rules inside a widget with the setting off, even if surrounding widgets have it on" do
+    outer = widget_class do
+      attr_accessor :inner
+      def content
+        p do
+          widget inner
+        end
+      end
+    end
+
+    middle = widget_class(:no_enforcement => true) do
+      attr_accessor :inner
+      def content
+        div do
+          p do
+            widget inner
+          end
+        end
+      end
+    end
+
+    inner = widget_class_with_content do
+      text "yo"
+    end
+
+    outer_instance = outer.new
+    middle_instance = middle.new
+    inner_instance = inner.new
+
+    outer_instance.inner = middle_instance
+    middle_instance.inner = inner_instance
+
+    expect(render(outer_instance)).to eq("<p><div><p>yo</p></div></p>")
+  end
+
+  it "should still enforce rules from one widget to the next" do
+    outer = widget_class do
+      attr_accessor :inner
+      def content
+        p do
+          widget inner
+        end
+      end
+    end
+
+    middle = widget_class do
+      def content
+        div do
+          text "hi"
+        end
+      end
+    end
+
+    outer_instance = outer.new
+    middle_instance = middle.new
+
+    outer_instance.inner = middle_instance
+
+    expect { render(outer_instance) }.to raise_error(Fortitude::Errors::InvalidElementNesting)
+  end
+
+  it "should allow you to disable enforcement with a block"
+  it "should let you re-enable enforcement with a block"
 end
