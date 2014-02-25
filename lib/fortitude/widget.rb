@@ -343,19 +343,27 @@ module Fortitude
     CDATA_START = "<![CDATA[".freeze
     CDATA_END = "]]>".freeze
 
-    def cdata(s)
-      components = s.split("]]>")
+    def cdata(s = nil, &block)
+      if s
+        raise ArgumentError, "You can only pass literal text or a block, not both" if block
 
-      if components.length > 1
-        components.each_with_index do |s, i|
-          this_component = s
-          this_component = ">#{this_component}" if i > 0
-          this_component = "#{this_component}]]" if i < (components.length - 1)
-          cdata(this_component)
+        components = s.split("]]>")
+
+        if components.length > 1
+          components.each_with_index do |s, i|
+            this_component = s
+            this_component = ">#{this_component}" if i > 0
+            this_component = "#{this_component}]]" if i < (components.length - 1)
+            cdata(this_component)
+          end
+        else
+          rawtext CDATA_START
+          rawtext s
+          rawtext CDATA_END
         end
       else
         rawtext CDATA_START
-        rawtext s
+        yield
         rawtext CDATA_END
       end
     end
@@ -671,8 +679,17 @@ EOS
         [ self.class.doctype.default_javascript_tag_attributes ]
       end
 
+      actual_block = block
+      if self.class.doctype.needs_cdata_in_javascript_tag?
+        actual_block = lambda do
+          rawtext "\n//#{CDATA_START}\n"
+          block.call
+          rawtext "\n//#{CDATA_END}\n"
+        end
+      end
+
       @_fortitude_rendering_context.with_indenting_disabled do
-        script(*args, &block)
+        script(*args, &actual_block)
       end
     end
 

@@ -11,7 +11,7 @@ module Fortitude
         { :type => 'text/javascript'.freeze }.freeze
       end
 
-      def needs_pcdata_in_javascript_tag?
+      def needs_cdata_in_javascript_tag?
         true
       end
     end
