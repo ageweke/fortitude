@@ -23,10 +23,17 @@ module Fortitude
           template_handler.with_output_buffer do
             rendering_context_options = { :delegate_object => template_handler, :yield_block => block }
             controller = template_handler.controller
-            rendering_context = if controller.respond_to?(:fortitude_rendering_context)
-              controller.fortitude_rendering_context(rendering_context_options)
+
+            rendering_context = if (rc = controller.instance_variable_get("@_fortitude_rendering_context_object"))
+              rc
             else
-              ::Fortitude::RenderingContext.new(rendering_context_options)
+              rc = if controller.respond_to?(:fortitude_rendering_context)
+                controller.fortitude_rendering_context(rendering_context_options)
+              else
+                ::Fortitude::RenderingContext.new(rendering_context_options)
+              end
+              controller.instance_variable_set("@_fortitude_rendering_context_object", rc)
+              rc
             end
 
             widget.to_html(rendering_context)

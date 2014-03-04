@@ -8,4 +8,14 @@ describe "Rails RenderingContext support", :type => :rails do
   it "should still use that context even for partials invoked by ERb" do
     expect_match("uses_specified_context_in_partials", /before partial.*context is: SimpleRc, value 23456.*after partial/mi)
   end
+
+  it "should use that context for partials through multiple layers of nesting" do
+    text = get_success("uses_specified_context_through_nesting")
+    if text =~ /view rc: SimpleRc, 34567, (\d+).*partial.*inner partial rc: SimpleRc, 34567, (\d+)/mi
+      first_value, second_value = Integer($1), Integer($2)
+      expect(first_value).to eq(second_value)
+    else
+      raise "Text did not match: #{text.inspect}"
+    end
+  end
 end
