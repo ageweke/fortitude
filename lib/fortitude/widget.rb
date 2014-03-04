@@ -652,6 +652,10 @@ EOS
       end
     end
 
+    def rendering_context
+      @_fortitude_rendering_context
+    end
+
     def widget(w)
       w.to_html(@_fortitude_rendering_context)
     end
