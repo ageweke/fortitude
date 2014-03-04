@@ -1,7 +1,7 @@
 class SimpleRc < Fortitude::RenderingContext
   def initialize(options)
-    super
-    @the_value = options[:the_value]
+    @the_value = options.delete(:the_value)
+    super(options)
   end
 
   attr_reader :the_value
