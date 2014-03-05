@@ -12,6 +12,7 @@ module Fortitude
 
       @valid_attributes = to_symbol_hash(options[:valid_attributes])
       @allowable_enclosed_elements = to_symbol_hash(options[:can_enclose])
+      @allowable_enclosed_elements[:_fortitude_partial_placeholder] = true if @allowable_enclosed_elements
       @newline_before = !! options[:newline_before]
       @content_allowed = true unless options.has_key?(:content_allowed) && (! options[:content_allowed])
     end

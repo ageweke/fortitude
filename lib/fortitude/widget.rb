@@ -3,6 +3,7 @@ require 'fortitude/tags_module'
 require 'fortitude/errors'
 require 'fortitude/assigns_proxy'
 require 'fortitude/doctypes'
+require 'fortitude/partial_tag_placeholder'
 require 'active_support/core_ext/hash'
 
 module Fortitude
@@ -575,7 +576,16 @@ EOS
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
-    helper :render, :transform => :output_return_value
+
+    def render(*args, &block)
+      call_through = lambda { rawtext(invoke_helper(:render, *args, &block)) }
+
+      if self.class.enforce_element_nesting_rules && args[0].kind_of?(Hash) && args[0].has_key?(:partial)
+        @_fortitude_rendering_context.record_tag(self, Fortitude::PartialTagPlaceholder.instance, &call_through)
+      else
+        call_through.call
+      end
+    end
 
     tag :html, :newline_before => true
     tag :body, :newline_before => true
