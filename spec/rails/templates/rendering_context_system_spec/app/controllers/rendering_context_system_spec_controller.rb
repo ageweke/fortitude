@@ -16,7 +16,7 @@ class RenderingContextSystemSpecController < ApplicationController
     @the_rendering_context_options = { :the_value => 34567 }
   end
 
-  def fortitude_rendering_context(options)
+  def create_fortitude_rendering_context(options)
     @the_rendering_context_class.new((@the_rendering_context_options || { }).merge(options))
   end
 end

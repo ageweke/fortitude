@@ -23,18 +23,7 @@ module Fortitude
           template_handler.with_output_buffer do
             rendering_context_options = { :delegate_object => template_handler, :yield_block => block }
             controller = template_handler.controller
-
-            rendering_context = if (rc = controller.instance_variable_get("@_fortitude_rendering_context_object"))
-              rc
-            else
-              rc = if controller.respond_to?(:fortitude_rendering_context)
-                controller.fortitude_rendering_context(rendering_context_options)
-              else
-                ::Fortitude::RenderingContext.new(rendering_context_options)
-              end
-              controller.instance_variable_set("@_fortitude_rendering_context_object", rc)
-              rc
-            end
+            rendering_context = controller.fortitude_rendering_context(rendering_context_options)
 
             # TODO: Refactor this -- both passing it into the constructor and setting yield_block here is gross.
             #
