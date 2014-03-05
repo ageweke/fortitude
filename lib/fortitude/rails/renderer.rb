@@ -36,7 +36,15 @@ module Fortitude
               rc
             end
 
-            widget.to_html(rendering_context)
+            # TODO: Refactor this -- both passing it into the constructor and setting yield_block here is gross.
+            #
+            # We need to call #with_yield_block here, because we can actually be invoked with different yield blocks
+            # in the case of "partial layouts" (which most people probably don't even realize exist); we use the same
+            # RC for both the initial view rendering and for the partial layout, but they need different yield blocks.
+            # Yuck, but this does the job.
+            rendering_context.with_yield_block(block) do
+              widget.to_html(rendering_context)
+            end
             rendering_context.flush!
           end
         end

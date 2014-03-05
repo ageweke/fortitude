@@ -115,6 +115,15 @@ module Fortitude
       @have_output = true
     end
 
+    def with_yield_block(new_yield_block)
+      old_yield_block, @yield_block = @yield_block, new_yield_block
+      begin
+        yield
+      ensure
+        @yield_block = old_yield_block
+      end
+    end
+
     NEWLINE = "\n"
 
     def yield_to_view(*args)
