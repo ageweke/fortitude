@@ -18,4 +18,7 @@ describe "Rails RenderingContext support", :type => :rails do
       raise "Text did not match: #{text.inspect}"
     end
   end
+
+  it "should call start_widget! and end_widget! properly on widgets in Rails"
+  it "should call start_widget! and end_widget! through ERb partials, passing them as hashes"
 end

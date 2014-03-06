@@ -23,9 +23,7 @@ module Fortitude
       @indenting_disabled = false
 
       @current_element_nesting = [ ]
-
       @current_widget_nesting = [ ]
-      @all_widgets = [ ]
 
       @yield_block = options[:yield_block]
     end
@@ -41,7 +39,7 @@ module Fortitude
     end
 
     def record_widget(widget)
-      @all_widgets << widget
+      start_widget!(widget)
       @current_widget_nesting << widget
       begin
         yield
@@ -50,7 +48,16 @@ module Fortitude
         unless last.equal?(widget)
           raise "Something horrible happened -- the last widget we started was #{last}, but now we're ending #{widget}?!?"
         end
+        end_widget!(widget)
       end
+    end
+
+    def start_widget!(widget)
+      # nothing here
+    end
+
+    def end_widget!(widget)
+      # nothing here
     end
 
     def current_widget_depth
