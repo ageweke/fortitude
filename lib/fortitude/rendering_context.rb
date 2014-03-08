@@ -24,6 +24,7 @@ module Fortitude
 
       @current_element_nesting = [ ]
       @current_widget_nesting = [ ]
+      @ids_used = { }
 
       @yield_block = options[:yield_block]
     end
@@ -154,6 +155,16 @@ module Fortitude
 
     def flush!
       # nothing here right now
+    end
+
+    def validate_id_uniqueness(widget, tag_name, id)
+      id = id.to_s
+      if @ids_used[id]
+        (already_used_widget, already_used_tag_name) = @ids_used[id]
+        raise Fortitude::Errors::DuplicateId.new(widget, id, already_used_widget, already_used_tag_name, tag_name)
+      else
+        @ids_used[id] = [ widget, tag_name ]
+      end
     end
 
     private

@@ -2,7 +2,7 @@ def #{name}(content_or_attributes = nil, attributes = nil)
   o = @_fortitude_output_buffer_holder.output_buffer
   rc = @_fortitude_rendering_context                                       # :if needs_element_rules || needs_formatting
 
-  this_tag = #{tag_object_const}                                           # :if needs_element_rules || needs_attribute_rules
+  this_tag = #{tag_object_const}                                           # :if needs_element_rules || needs_attribute_rules || needs_id_uniqueness
   rc.record_tag(self, this_tag) do                                         # :if needs_element_rules
     format_output = rc.format_output?                                      # :if needs_formatting
     if format_output                                                       # :if needs_formatting
@@ -21,6 +21,7 @@ def #{name}(content_or_attributes = nil, attributes = nil)
       end
     elsif content_or_attributes.kind_of?(Hash)
       this_tag.validate_attributes(self, content_or_attributes)            # :if needs_attribute_rules
+      this_tag.validate_id_uniqueness(self, content_or_attributes)         # :if needs_id_uniqueness
       o.#{concat_method}(#{partial_open_const})
       content_or_attributes.fortitude_append_as_attributes(o, nil)
 
@@ -44,6 +45,7 @@ def #{name}(content_or_attributes = nil, attributes = nil)
     else
       _fortitude_raise_no_content_allowed_error(:#{name})                  # :if ! content_allowed
       this_tag.validate_attributes(self, attributes)                       # :if needs_attribute_rules
+      this_tag.validate_id_uniqueness(self, attributes)                    # :if needs_id_uniqueness
       o.#{concat_method}(#{partial_open_const})
       attributes.fortitude_append_as_attributes(o, nil)
       o.#{concat_method}(#{partial_open_end_const})

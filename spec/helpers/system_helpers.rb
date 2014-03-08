@@ -54,6 +54,17 @@ module SystemHelpers
     html_from(rendering_context)
   end
 
+  def capture_exception(klass = StandardError, &block)
+    out = nil
+    begin
+      block.call
+    rescue klass => e
+      out = e
+    end
+    raise "Exception of class #{klass.inspect} was expected, but none was raised" unless out
+    out
+  end
+
   def render_content(options = { }, &block)
     widget_class = widget_class_with_content(options, &block)
     render(widget_class, options)

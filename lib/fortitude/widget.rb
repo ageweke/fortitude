@@ -57,6 +57,7 @@ module Fortitude
     _fortitude_class_inheritable_attribute :implicit_shared_variable_access, false, [ true, false ]
     _fortitude_class_inheritable_attribute :enforce_element_nesting_rules, false, [ true, false ]
     _fortitude_class_inheritable_attribute :enforce_attribute_rules, false, [ true, false ]
+    _fortitude_class_inheritable_attribute :enforce_id_uniqueness, false, [ true, false ]
     _fortitude_class_inheritable_attribute :use_instance_variables_for_assigns, false, [ true, false ]
     _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
     _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
@@ -120,7 +121,11 @@ module Fortitude
         which_tags.each do |name|
           tag = tags[name]
           raise "No tag #{name.inspect}? Have: #{tags.keys.inspect}" unless tag
-          tag.define_method_on!(tags_module, :enable_formatting => self.format_output, :enforce_element_nesting_rules => self.enforce_element_nesting_rules, :enforce_attribute_rules => self.enforce_attribute_rules)
+          tag.define_method_on!(tags_module,
+            :enable_formatting => self.format_output,
+            :enforce_element_nesting_rules => self.enforce_element_nesting_rules,
+            :enforce_attribute_rules => self.enforce_attribute_rules,
+            :enforce_id_uniqueness => self.enforce_id_uniqueness)
         end
 
         direct_subclasses.each { |s| s.rebuild_tag_methods!(which_tags_in) }
@@ -417,6 +422,10 @@ module Fortitude
       end
 
       def _fortitude_enforce_attribute_rules_changed!(new_value)
+        rebuild_tag_methods!
+      end
+
+      def _fortitude_enforce_id_uniqueness_changed!(new_value)
         rebuild_tag_methods!
       end
 

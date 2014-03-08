@@ -39,8 +39,13 @@ module Fortitude
       raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @valid_attributes.keys) if bad.size > 0
     end
 
+    def validate_id_uniqueness(widget, attributes_hash)
+      id = attributes_hash[:id] || attributes_hash['id']
+      widget.rendering_context.validate_id_uniqueness(widget, name, id) if id
+    end
+
     def define_method_on!(mod, options = {})
-      options.assert_valid_keys(:enforce_element_nesting_rules, :enforce_attribute_rules, :enable_formatting)
+      options.assert_valid_keys(:enforce_element_nesting_rules, :enforce_attribute_rules, :enable_formatting, :enforce_id_uniqueness)
 
       unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
         mod.send(:include, ::Fortitude::TagSupport)
@@ -63,6 +68,7 @@ module Fortitude
         :name => name.to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
         :needs_element_rules => !! options[:enforce_element_nesting_rules],
         :needs_attribute_rules => !! options[:enforce_attribute_rules],
+        :needs_id_uniqueness => !! options[:enforce_id_uniqueness],
         :needs_formatting => needs_formatting, :content_allowed => @content_allowed,
         :newline_before => @newline_before,
         :alone_const => tag_constant_name(:ALONE), :open_const => tag_constant_name(:OPEN),
