@@ -142,6 +142,40 @@ module Fortitude
         s =~ /^[A-Za-z_][A-Za-z0-9_]*[\?\!]?$/
       end
 
+      def static(*method_names)
+        method_names.each do |method_name|
+          method_name = method_name.to_sym
+          static_method_name = "_#{method_name}_static".to_sym
+          dynamic_method_name = "_#{method_name}_dynamic".to_sym
+
+          instance = new
+          results = instance._one_method_to_html(method_name)
+          results_const_name = "FORTITUDE_STATIC_CONTENTS_#{method_name.upcase}"
+          remove_const(results_const_name) if const_defined?(results_const_name)
+          const_set(results_const_name, results.freeze)
+
+          alias_method dynamic_method_name, method_name unless instance_methods.include?(dynamic_method_name)
+
+          if results.kind_of?(Array)
+            class_eval <<-EOS
+  def #{static_method_name}
+    results = #{results_const_name}
+    rawtext results[0]
+    yield
+    rawtext results[1]
+  end
+EOS
+          else
+            class_eval <<-EOS
+  def #{static_method_name}
+    rawtext #{results_const_name}
+  end
+EOS
+          end
+          alias_method method_name, static_method_name
+        end
+      end
+
       def needs(*names)
         previous_needs = needs_as_hash
         return previous_needs if names.length == 0
@@ -684,6 +718,31 @@ EOS
         ensure
           @_fortitude_rendering_context = nil
         end
+      end
+    end
+
+    def _one_method_to_html(method_name)
+      @_fortitude_rendering_context = Fortitude::RenderingContext.new({ })
+      @_fortitude_output_buffer_holder = @_fortitude_rendering_context.output_buffer_holder
+
+      before_yield = nil
+      yielded = false
+
+      begin
+        send(method_name) do
+          before_yield = @_fortitude_rendering_context.output_buffer_holder.output_buffer.dup.freeze
+          @_fortitude_rendering_context.output_buffer_holder.output_buffer.clear
+          yielded = true
+        end
+      ensure
+        @_fortitude_rendering_context = nil
+      end
+
+      after_yield = @_fortitude_output_buffer_holder.output_buffer.dup.freeze
+      if yielded
+        [ before_yield, after_yield ]
+      else
+        after_yield
       end
     end
 
