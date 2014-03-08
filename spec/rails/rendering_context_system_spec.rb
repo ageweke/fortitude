@@ -19,6 +19,10 @@ describe "Rails RenderingContext support", :type => :rails do
     end
   end
 
-  it "should call start_widget! and end_widget! properly on widgets in Rails"
+  it "should call start_widget! and end_widget! properly on widgets in Rails" do
+    text = get_success("start_end_widget_basic")
+    expect(text).to match(%r{0: start Views::RenderingContextSystemSpec::StartEndWidgetBasic.*1: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 1.*2: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 1.*3: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 2.*4: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner.*5: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner.*6: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 2}mi)
+  end
+
   it "should call start_widget! and end_widget! through ERb partials, passing them as hashes"
 end

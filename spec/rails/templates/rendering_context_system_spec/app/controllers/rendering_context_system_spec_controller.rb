@@ -19,4 +19,8 @@ class RenderingContextSystemSpecController < ApplicationController
   def create_fortitude_rendering_context(options)
     @the_rendering_context_class.new((@the_rendering_context_options || { }).merge(options))
   end
+
+  def start_end_widget_basic
+    @the_rendering_context_class = SimpleRc
+  end
 end
