@@ -85,11 +85,121 @@ describe "Fortitude ID uniqueness", :type => :system do
     expect(e.tag_name).to eq(:p)
   end
 
-  it "should not enforce uniqueness inside a widget with the setting off, even if surrounding widgets have it on"
-  it "should allow you to disable enforcement with a block"
-  it "should allow you to disable enforcement with a block, even across widget boundaries"
-  it "should allow you to re-enable enforcement with a block"
-  it "should let you re-enable enforcement with a block, even across widget boundaries"
-  it "should raise an error if you try to enable enforcement with a block in a widget that isn't enforcing in the first place"
-  it "should not raise an error if you try to DISable enforcement with a block in a widget that isn't enforcing in the first place"
+  it "should not enforce uniqueness inside a widget with the setting off, even if surrounding widgets have it on" do
+    outer = widget_class do
+      attr_accessor :inner
+      def content
+        p :id => 'foo'
+        widget inner
+        p :id => 'bar'
+      end
+    end
+
+    inner = widget_class_with_content(:no_enforcement => true) do
+      p :id => :foo
+    end
+
+    outer_instance = outer.new
+    inner_instance = inner.new
+    outer_instance.inner = inner_instance
+
+    expect(render(outer_instance)).to eq("<p id=\"foo\"/><p id=\"foo\"/><p id=\"bar\"/>")
+  end
+
+  it "should allow you to disable enforcement with a block" do
+    wc = widget_class_with_content do
+      p :id => :foo
+      with_id_uniqueness(false) do
+        p :id => :foo
+      end
+      begin
+        p :id => :foo
+      rescue => e
+        text e.class.name
+      end
+    end
+
+    expect(render(wc)).to eq('<p id="foo"/><p id="foo"/>Fortitude::Errors::DuplicateId')
+  end
+
+  it "should allow you to disable enforcement with a block, even across widget boundaries" do
+    outer = widget_class do
+      attr_accessor :inner
+      def content
+        p :id => 'foo'
+        with_id_uniqueness(false) do
+          widget inner
+        end
+        p :id => 'bar'
+      end
+    end
+
+    inner = widget_class_with_content do
+      p :id => :foo
+    end
+
+    outer_instance = outer.new
+    inner_instance = inner.new
+    outer_instance.inner = inner_instance
+
+    expect(render(outer_instance)).to eq("<p id=\"foo\"/><p id=\"foo\"/><p id=\"bar\"/>")
+  end
+
+  it "should allow you to re-enable enforcement with a block" do
+    wc = widget_class_with_content do
+      p :id => :foo
+      with_id_uniqueness(false) do
+        with_id_uniqueness(true) do
+          p :id => :foo
+        end
+      end
+    end
+
+    expect { render(wc) }.to raise_error(Fortitude::Errors::DuplicateId)
+  end
+
+  it "should let you re-enable enforcement with a block, even across widget boundaries" do
+    outer = widget_class do
+      attr_accessor :inner
+      def content
+        p :id => 'foo'
+        with_id_uniqueness(false) do
+          widget inner
+        end
+      end
+    end
+
+    inner = widget_class_with_content do
+      with_id_uniqueness(true) do
+        p :id => :foo
+      end
+    end
+
+    outer_instance = outer.new
+    inner_instance = inner.new
+    outer_instance.inner = inner_instance
+
+    expect { render(outer_instance) }.to raise_error(Fortitude::Errors::DuplicateId)
+  end
+
+  it "should raise an error if you try to enable enforcement with a block in a widget that isn't enforcing in the first place" do
+    wc = widget_class_with_content(:no_enforcement => true) do
+      with_id_uniqueness(true) do
+        p :id => "foo"
+      end
+    end
+
+    expect { render(wc) }.to raise_error(ArgumentError)
+  end
+
+  it "should not raise an error if you try to DISable enforcement with a block in a widget that isn't enforcing in the first place" do
+    wc = widget_class_with_content(:no_enforcement => true) do
+      with_id_uniqueness(false) do
+        p :id => "foo"
+        p :id => "foo"
+      end
+    end
+
+    expect(render(wc)).to eq('<p id="foo"/><p id="foo"/>')
+  end
 end

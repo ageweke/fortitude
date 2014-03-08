@@ -49,6 +49,16 @@ module Fortitude
       end
     end
 
+    def with_id_uniqueness(value)
+      old_value = @id_uniqueness_disabled
+      @id_uniqueness_disabled = !value
+      begin
+        yield
+      ensure
+        @id_uniqueness_disabled = old_value
+      end
+    end
+
     def attribute_validation_disabled?
       !! @attribute_validation_disabled
     end
@@ -159,7 +169,7 @@ module Fortitude
 
     def validate_id_uniqueness(widget, tag_name, id)
       id = id.to_s
-      if @ids_used[id]
+      if @ids_used[id] && (! @id_uniqueness_disabled)
         (already_used_widget, already_used_tag_name) = @ids_used[id]
         raise Fortitude::Errors::DuplicateId.new(widget, id, already_used_widget, already_used_tag_name, tag_name)
       else

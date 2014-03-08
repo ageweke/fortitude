@@ -8,6 +8,8 @@ require 'active_support/core_ext/hash'
 
 module Fortitude
   # TODO: rename all non-interface methods as _fortitude_*
+  # TODO: Make 'element' vs. 'tag' naming consistent
+  # TODO: Make naming consistent across enforcement/validation/rules (tag nesting, attributes, ID uniqueness)
   class Widget
     REQUIRED_NEED = Object.new
     NOT_PRESENT_NEED = Object.new
@@ -70,6 +72,11 @@ module Fortitude
     def with_attribute_rules(on_or_off)
       raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
       @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
+    end
+
+    def with_id_uniqueness(on_or_off)
+      raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
+      @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
     end
 
     class << self
