@@ -4,6 +4,7 @@ require 'fortitude/errors'
 require 'fortitude/assigns_proxy'
 require 'fortitude/doctypes'
 require 'fortitude/partial_tag_placeholder'
+require 'fortitude/disabled_dynamic_methods'
 require 'active_support/core_ext/hash'
 
 module Fortitude
@@ -149,6 +150,7 @@ module Fortitude
           dynamic_method_name = "_#{method_name}_dynamic".to_sym
 
           instance = new
+          instance._enforce_staticness!(method_name)
           results = instance._one_method_to_html(method_name)
           results_const_name = "FORTITUDE_STATIC_CONTENTS_#{method_name.upcase}"
           remove_const(results_const_name) if const_defined?(results_const_name)
@@ -721,6 +723,19 @@ EOS
       end
     end
 
+    def _enforce_staticness!(method_name)
+      mod = Fortitude::DisabledDynamicMethods.new
+
+      self.class.needs_as_hash.keys.each do |need_name|
+        mod.define_method(need_name) do
+          raise Fortitude::Errors::DynamicAccessFromStaticMethod.new(self, method_name, need_name)
+        end
+      end
+
+      metaclass = (class << self; self; end)
+      metaclass.send(:include, mod)
+    end
+
     def _one_method_to_html(method_name)
       @_fortitude_rendering_context = Fortitude::RenderingContext.new({ })
       @_fortitude_output_buffer_holder = @_fortitude_rendering_context.output_buffer_holder
@@ -730,6 +745,7 @@ EOS
 
       begin
         send(method_name) do
+          raise "You cannot make a method static if it yields more than once" if yielded
           before_yield = @_fortitude_rendering_context.output_buffer_holder.output_buffer.dup.freeze
           @_fortitude_rendering_context.output_buffer_holder.output_buffer.clear
           yielded = true

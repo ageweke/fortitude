@@ -64,6 +64,42 @@ describe "Fortitude staticization behavior", :type => :system do
     expect(render(wc)).to eq('content before:23456foo before:12345yield inside:23456foo after:12345content after:23456')
   end
 
-  it "should not allow you to yield more than once from a method that's made static"
-  it "should raise an error if you try to access a variable from within a method that's being made static"
+  it "should not allow you to yield more than once from a method that's made static" do
+    wc = widget_class do
+      def content
+        foo do
+          text "yo"
+        end
+      end
+
+      def foo
+        text "one"
+        yield
+        text "two"
+        yield
+        text "three"
+      end
+    end
+
+    expect { wc.class_eval { static :foo } }.to raise_error(/yields more than once/i)
+  end
+
+  it "should raise an error if you try to access a variable from within a method that's being made static" do
+    wc = widget_class do
+      needs :foo => 12345
+
+      def content
+        bar
+      end
+
+      def bar
+        text "foo is: #{foo}"
+      end
+    end
+
+    e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { wc.class_eval { static :bar } }
+    expect(e.widget.class).to be(wc)
+    expect(e.static_method_name).to eq(:bar)
+    expect(e.method_called).to eq(:foo)
+  end
 end
