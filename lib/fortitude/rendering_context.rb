@@ -38,6 +38,20 @@ module Fortitude
       end
     end
 
+    def with_attribute_validation(value)
+      old_value = @attribute_validation_disabled
+      @attribute_validation_disabled = !value
+      begin
+        yield
+      ensure
+        @attribute_validation_disabled = old_value
+      end
+    end
+
+    def attribute_validation_disabled?
+      !! @attribute_validation_disabled
+    end
+
     def record_widget(widget)
       start_widget!(widget)
       @current_widget_nesting << widget

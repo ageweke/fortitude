@@ -28,6 +28,10 @@ module Fortitude
 
     def validate_attributes(widget, attributes_hash)
       return unless @valid_attributes
+      disabled_sym = attributes_hash.delete(:_fortitude_skip_attribute_rule_enforcement)
+      disabled_string = attributes_hash.delete('_fortitude_skip_attribute_rule_enforcement')
+      return if disabled_sym || disabled_string
+      return if widget.rendering_context.attribute_validation_disabled?
       bad = { }
       attributes_hash.each do |k, v|
         bad[k] = v unless @valid_attributes.include?(k.to_sym)

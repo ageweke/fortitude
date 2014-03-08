@@ -66,6 +66,11 @@ module Fortitude
       @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
     end
 
+    def with_attribute_rules(on_or_off)
+      raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
+      @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
+    end
+
     class << self
       def tag(name, options = { })
         @_this_class_tags ||= { }
