@@ -1,7 +1,7 @@
 describe "Rails RenderingContext support", :type => :rails do
   uses_rails_with_template :rendering_context_system_spec
 
-  it "should use the context returned by fortitude_rendering_context in the view" do
+  it "should use the context returned by create_fortitude_rendering_context in the view" do
     expect_match("uses_specified_context_in_view", /context is: SimpleRc, value 12345/)
   end
 
@@ -17,6 +17,22 @@ describe "Rails RenderingContext support", :type => :rails do
     else
       raise "Text did not match: #{text.inspect}"
     end
+  end
+
+  it "should use that context for widgets rendered with render :widget" do
+    expect_match("uses_specified_context_in_render_widget", /context is: SimpleRc, value 45678/)
+  end
+
+  it "should use that context for widgets rendered with render :inline" do
+    expect_match("uses_specified_context_in_render_inline", /context is: SimpleRc, value 56789/)
+  end
+
+  it "should use the context returned by just plain fortitude_rendering_context in the view" do
+    expect_match("uses_direct_context_in_view", /context is: SimpleRc, value 67890/)
+  end
+
+  it "should still call that method for all widgets" do
+    expect_match("uses_direct_context_for_all_widgets", /context is: SimpleRc, value 67890.*context is: SimpleRc, value 67891.*context is: SimpleRc, value 67890/mi)
   end
 
   it "should call start_widget! and end_widget! properly on widgets in Rails" do

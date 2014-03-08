@@ -181,7 +181,7 @@ module Fortitude
         def render_with_fortitude(*args, &block)
           if (options = args[0]).kind_of?(Hash)
             if (widget = options[:widget])
-              rendering_context = ::Fortitude::RenderingContext.new(:delegate_object => self)
+              rendering_context = fortitude_rendering_context(:delegate_object => self)
               widget.to_html(rendering_context)
 
               options = options.dup
@@ -191,7 +191,7 @@ module Fortitude
               new_args = [ options ] + args[1..-1]
               return render_without_fortitude(*new_args, &block)
             elsif (widget_block = options[:inline]) && (options[:type] == :fortitude)
-              rendering_context = ::Fortitude::RenderingContext.new(:delegate_object => self)
+              rendering_context = fortitude_rendering_context(:delegate_object => self)
               widget_class = Class.new(Fortitude::Widget)
               widget_class.use_instance_variables_for_assigns(true)
               widget_class.extra_assigns(:use)
