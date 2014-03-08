@@ -98,7 +98,7 @@ describe "Fortitude staticization behavior", :type => :system do
     end
 
     e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { wc.class_eval { static :bar } }
-    expect(e.widget.class).to be(wc)
+    expect(e.widget_class).to be(wc)
     expect(e.static_method_name).to eq(:bar)
     expect(e.method_called).to eq(:foo)
   end
@@ -108,7 +108,7 @@ describe "Fortitude staticization behavior", :type => :system do
     subclass.send(:define_method, :bar, &block)
 
     e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { subclass.static :bar }
-    expect(e.widget.class).to be(subclass)
+    expect(e.widget_class).to be(subclass)
     expect(e.static_method_name).to eq(:bar)
     expect(e.method_called).to eq(method_called)
   end
@@ -124,5 +124,24 @@ describe "Fortitude staticization behavior", :type => :system do
 
     check_dynamic_raises(base_class, :foo) { foo }
     check_dynamic_raises(base_class, :assigns) { assigns }
+  end
+
+  it "should allow static-izing a widget that has required needs" do
+    wc = widget_class do
+      needs :foo
+
+      def content
+        text "foo: #{foo}"
+        bar
+      end
+
+      def bar
+        text "bar!"
+      end
+
+      static :bar
+    end
+
+    expect(render(wc.new(:foo => 12345))).to eq("foo: 12345bar!")
   end
 end

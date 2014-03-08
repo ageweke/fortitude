@@ -149,8 +149,10 @@ module Fortitude
           static_method_name = "_#{method_name}_static".to_sym
           dynamic_method_name = "_#{method_name}_dynamic".to_sym
 
-          instance = new
-          instance._enforce_staticness!(method_name)
+          subclass = Class.new(self)
+          subclass.send(:define_method, :initialize) { }
+          instance = subclass.new
+          instance._enforce_staticness!(self, method_name)
           results = instance._one_method_to_html(method_name)
           results_const_name = "FORTITUDE_STATIC_CONTENTS_#{method_name.upcase}"
           remove_const(results_const_name) if const_defined?(results_const_name)
@@ -723,17 +725,17 @@ EOS
       end
     end
 
-    def _enforce_staticness!(method_name)
-      metaclass = (class << self; self; end)
-      metaclass.send(:include, Fortitude::DisabledDynamicMethods)
+    def _enforce_staticness!(actual_class, method_name)
+      self.class.send(:include, Fortitude::DisabledDynamicMethods)
 
       self.class.needs_as_hash.keys.each do |need_name|
-        metaclass.send(:define_method, need_name) do
+        self.class.send(:define_method, need_name) do
           _fortitude_dynamic_disabled!(need_name)
         end
       end
 
       self._fortitude_static_method_name = method_name
+      self._fortitude_static_method_class = actual_class
     end
 
     def _one_method_to_html(method_name)

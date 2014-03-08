@@ -60,11 +60,11 @@ module Fortitude
     end
 
     class DynamicAccessFromStaticMethod < Base
-      attr_reader :widget, :static_method_name, :method_called
+      attr_reader :widget_class, :static_method_name, :method_called
 
-      def initialize(widget, static_method_name, method_called)
-        super(%{The widget #{widget} declared method #{static_method_name.inspect} to be static, but, when we went to make it static, we found that it called #{method_called.inspect}, and that accesses dynamic data; this therefore can't possibly be made static safely.})
-        @widget = widget
+      def initialize(widget_class, static_method_name, method_called)
+        super(%{The widget class #{widget_class.name} declared method #{static_method_name.inspect} to be static, but, when we went to make it static, we found that it called #{method_called.inspect}, and that accesses dynamic data; this therefore can't possibly be made static safely.})
+        @widget_class = widget_class
         @static_method_name = static_method_name
         @method_called = method_called
       end
