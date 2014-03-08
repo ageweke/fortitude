@@ -23,4 +23,8 @@ class RenderingContextSystemSpecController < ApplicationController
   def start_end_widget_basic
     @the_rendering_context_class = SimpleRc
   end
+
+  def start_end_widget_through_partials
+    @the_rendering_context_class = SimpleRc
+  end
 end

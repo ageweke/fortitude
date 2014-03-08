@@ -583,7 +583,11 @@ EOS
     helper :form_tag, :transform => :output_return_value
 
     def render(*args, &block)
-      call_through = lambda { rawtext(invoke_helper(:render, *args, &block)) }
+      call_through = lambda do
+        @_fortitude_rendering_context.record_widget(args) do
+          rawtext(invoke_helper(:render, *args, &block))
+        end
+      end
 
       if self.class.enforce_element_nesting_rules && args[0].kind_of?(Hash) && args[0].has_key?(:partial)
         @_fortitude_rendering_context.record_tag(self, Fortitude::PartialTagPlaceholder.instance, &call_through)

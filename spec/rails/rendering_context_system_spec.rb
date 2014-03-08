@@ -21,8 +21,28 @@ describe "Rails RenderingContext support", :type => :rails do
 
   it "should call start_widget! and end_widget! properly on widgets in Rails" do
     text = get_success("start_end_widget_basic")
-    expect(text).to match(%r{0: start Views::RenderingContextSystemSpec::StartEndWidgetBasic.*1: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 1.*2: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 1.*3: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 2.*4: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner.*5: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner.*6: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 2}mi)
+    lines = text.split(/[\r\n]+/)
+    lines = lines.select { |l| l =~ /^\d:/ }.map { |l| l.strip }
+    expect(lines[0]).to eq("0: start Views::RenderingContextSystemSpec::StartEndWidgetBasic")
+    expect(lines[1]).to eq("1: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 1")
+    expect(lines[2]).to eq("2: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 1")
+    expect(lines[3]).to eq("3: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 2")
+    expect(lines[4]).to eq("4: start Views::RenderingContextSystemSpec::StartEndWidgetBasicInner")
+    expect(lines[5]).to eq("5: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner")
+    expect(lines[6]).to eq("6: end Views::RenderingContextSystemSpec::StartEndWidgetBasicInner 2")
+    expect(lines.length).to eq(7)
   end
 
-  it "should call start_widget! and end_widget! through ERb partials, passing them as hashes"
+  it "should call start_widget! and end_widget! through ERb partials, passing them as hashes" do
+    text = get_success("start_end_widget_through_partials")
+    lines = text.split(/[\r\n]+/)
+    lines = lines.select { |l| l =~ /^\d:/ }.map { |l| l.strip }
+
+    expect(lines[0]).to eq("0: start Views::RenderingContextSystemSpec::StartEndWidgetThroughPartials")
+    expect(lines[1]).to eq("1: start [{:partial=>\"start_end_widget_through_partials_partial\"}]")
+    expect(lines[2]).to eq("2: start Views::RenderingContextSystemSpec::StartEndWidgetThroughPartialsPartialWidget 12345")
+    expect(lines[3]).to eq("3: end Views::RenderingContextSystemSpec::StartEndWidgetThroughPartialsPartialWidget 12345")
+    expect(lines[4]).to eq("4: end [{:partial=>\"start_end_widget_through_partials_partial\"}]")
+    expect(lines.length).to eq(5)
+  end
 end
