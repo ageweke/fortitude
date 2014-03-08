@@ -102,4 +102,27 @@ describe "Fortitude staticization behavior", :type => :system do
     expect(e.static_method_name).to eq(:bar)
     expect(e.method_called).to eq(:foo)
   end
+
+  def check_dynamic_raises(base_class, method_called, &block)
+    subclass = Class.new(base_class)
+    subclass.send(:define_method, :bar, &block)
+
+    e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { subclass.static :bar }
+    expect(e.widget.class).to be(subclass)
+    expect(e.static_method_name).to eq(:bar)
+    expect(e.method_called).to eq(method_called)
+  end
+
+  it "should raise an error if you try to access dynamic data in other ways from within a method that's being made static" do
+    base_class = widget_class do
+      needs :foo => 12345
+
+      def content
+        bar
+      end
+    end
+
+    check_dynamic_raises(base_class, :foo) { foo }
+    check_dynamic_raises(base_class, :assigns) { assigns }
+  end
 end

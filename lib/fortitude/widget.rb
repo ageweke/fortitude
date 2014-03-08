@@ -724,16 +724,16 @@ EOS
     end
 
     def _enforce_staticness!(method_name)
-      mod = Fortitude::DisabledDynamicMethods.new
+      metaclass = (class << self; self; end)
+      metaclass.send(:include, Fortitude::DisabledDynamicMethods)
 
       self.class.needs_as_hash.keys.each do |need_name|
-        mod.define_method(need_name) do
-          raise Fortitude::Errors::DynamicAccessFromStaticMethod.new(self, method_name, need_name)
+        metaclass.send(:define_method, need_name) do
+          _fortitude_dynamic_disabled!(need_name)
         end
       end
 
-      metaclass = (class << self; self; end)
-      metaclass.send(:include, mod)
+      self._fortitude_static_method_name = method_name
     end
 
     def _one_method_to_html(method_name)
