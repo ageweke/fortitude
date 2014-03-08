@@ -124,6 +124,11 @@ describe "Fortitude staticization behavior", :type => :system do
 
     check_dynamic_raises(base_class, :foo) { foo }
     check_dynamic_raises(base_class, :assigns) { assigns }
+    check_dynamic_raises(base_class, :rendering_context) { rendering_context }
+    check_dynamic_raises(base_class, :widget) { widget base_class.new }
+    check_dynamic_raises(base_class, :render) { render :widget => base_class.new }
+    check_dynamic_raises(base_class, :output_buffer) { output_buffer }
+    check_dynamic_raises(base_class, :shared_variables) { shared_variables }
   end
 
   it "should allow static-izing a widget that has required needs" do
@@ -144,4 +149,9 @@ describe "Fortitude staticization behavior", :type => :system do
 
     expect(render(wc.new(:foo => 12345))).to eq("foo: 12345bar!")
   end
+
+  it "should allow static methods to still access helpers"
+  it "should not run around_content filters within a static method, even if that method is #content"
+  it "should run around_content filters, even if #content is static"
+  it "should still run the proper localized content methods even if #content, or one of them, is static"
 end
