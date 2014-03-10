@@ -213,12 +213,14 @@ describe "Fortitude staticization behavior", :type => :system do
 
     it "should not run around_content filters around a static method, if that method is not #content" do
       @wc.static :sub
+      expect(render(@wc)).to eq("before 12345this is contentthis is sub 12345after 12345")
       $global_value = 23456
       expect(render(@wc)).to eq("before 23456this is contentthis is sub 12345after 23456")
     end
 
     it "should run around_content filters around a static method, if that method is #content" do
       @wc.static :content
+      expect(render(@wc)).to eq("before 12345this is contentthis is sub 12345after 12345")
       $global_value = 23456
       expect(render(@wc)).to eq("before 23456this is contentthis is sub 12345after 23456")
     end
@@ -252,6 +254,7 @@ describe "Fortitude staticization behavior", :type => :system do
     expect(render(wc.new(:fr))).to eq("bonjour! 12345")
 
     wc.static :localized_content_fr
+    expect(render(wc.new(:fr))).to eq("bonjour! 12345")
     $global_value = 23456
 
     expect(render(wc.new(nil))).to eq("saluton! 23456")
