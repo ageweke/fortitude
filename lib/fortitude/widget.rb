@@ -144,6 +144,9 @@ module Fortitude
       end
 
       def static(*method_names)
+        options = method_names.extract_options!
+        options.assert_valid_keys(:helpers_object)
+
         method_names.each do |method_name|
           method_name = method_name.to_sym
           static_method_name = "_#{method_name}_static".to_sym
@@ -153,7 +156,11 @@ module Fortitude
           subclass.send(:define_method, :initialize) { }
           instance = subclass.new
           instance._enforce_staticness!(self, method_name)
-          results = instance._one_method_to_html(method_name)
+
+          helpers_object = options[:helpers_object]
+          helpers_object = helpers_object.call if helpers_object.respond_to?(:call)
+
+          results = instance._one_method_to_html(method_name, helpers_object)
           results_const_name = "FORTITUDE_STATIC_CONTENTS_#{method_name.upcase}"
           remove_const(results_const_name) if const_defined?(results_const_name)
           const_set(results_const_name, results.freeze)
@@ -738,8 +745,8 @@ EOS
       self._fortitude_static_method_class = actual_class
     end
 
-    def _one_method_to_html(method_name)
-      @_fortitude_rendering_context = Fortitude::RenderingContext.new({ })
+    def _one_method_to_html(method_name, static_helpers_object = nil)
+      @_fortitude_rendering_context = Fortitude::RenderingContext.new({ :helpers_object => static_helpers_object })
       @_fortitude_output_buffer_holder = @_fortitude_rendering_context.output_buffer_holder
 
       before_yield = nil

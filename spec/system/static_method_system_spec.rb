@@ -150,8 +150,123 @@ describe "Fortitude staticization behavior", :type => :system do
     expect(render(wc.new(:foo => 12345))).to eq("foo: 12345bar!")
   end
 
-  it "should allow static methods to still access helpers"
-  it "should not run around_content filters within a static method, even if that method is #content"
-  it "should run around_content filters, even if #content is static"
-  it "should still run the proper localized content methods even if #content, or one of them, is static"
+  describe "helper support" do
+    before :each do
+      @helpers_class = Class.new do
+        def foo(x)
+          "foo #{x} foo!"
+        end
+      end
+      @helpers_object = @helpers_class.new
+
+      @wc = widget_class do
+        def content
+          text "it is: #{foo('bar')}"
+        end
+      end
+    end
+
+    def do_render(widget_or_class, options = { })
+      render(widget_or_class, { :rendering_context => rc(:helpers_object => @helpers_object) }.merge(options))
+    end
+
+    it "should not allow static methods to access helpers by default" do
+      expect(do_render(@wc)).to eq("it is: foo bar foo!")
+      expect { @wc.static :content }.to raise_error(NoMethodError, /foo/i)
+    end
+
+    it "should allow static methods to still access helpers, if such an object is supplied" do
+      expect(do_render(@wc)).to eq("it is: foo bar foo!")
+
+      @wc.static :content, :helpers_object => @helpers_object
+      expect(do_render(@wc)).to eq("it is: foo bar foo!")
+    end
+
+    it "should allow supplying the static-helpers object as a block" do
+      @wc.static :content, :helpers_object => lambda { @helpers_class.new }
+      expect(do_render(@wc)).to eq("it is: foo bar foo!")
+    end
+  end
+
+  describe "around_content support" do
+    before :each do
+      $global_value = 12345
+      @wc = widget_class do
+        around_content :ac
+
+        def ac
+          text "before #{$global_value}"
+          yield
+          text "after #{$global_value}"
+        end
+
+        def content
+          text "this is content"
+          sub
+        end
+
+        def sub
+          text "this is sub #{$global_value}"
+        end
+      end
+    end
+
+    it "should not run around_content filters around a static method, if that method is not #content" do
+      @wc.static :sub
+      $global_value = 23456
+      expect(render(@wc)).to eq("before 23456this is contentthis is sub 12345after 23456")
+    end
+
+    it "should run around_content filters around a static method, if that method is #content" do
+      @wc.static :content
+      $global_value = 23456
+      expect(render(@wc)).to eq("before 23456this is contentthis is sub 12345after 23456")
+    end
+  end
+
+  it "should still run the proper localized content methods even if #content, or one of them, is static" do
+    $global_value = 12345
+    wc = widget_class do
+      def initialize(locale)
+        self.widget_locale = locale
+        super({ })
+      end
+
+      def localized_content_en
+        text "hullo! #{$global_value}"
+      end
+
+      def localized_content_fr
+        text "bonjour! #{$global_value}"
+      end
+
+      def content
+        text "saluton! #{$global_value}"
+      end
+
+      attr_accessor :widget_locale
+    end
+
+    expect(render(wc.new(nil))).to eq("saluton! 12345")
+    expect(render(wc.new(:en))).to eq("hullo! 12345")
+    expect(render(wc.new(:fr))).to eq("bonjour! 12345")
+
+    wc.static :localized_content_fr
+    $global_value = 23456
+
+    expect(render(wc.new(nil))).to eq("saluton! 23456")
+    expect(render(wc.new(:en))).to eq("hullo! 23456")
+    expect(render(wc.new(:fr))).to eq("bonjour! 12345")
+
+    wc.static :content
+    $global_value = 34567
+
+    expect(render(wc.new(nil))).to eq("saluton! 23456")
+    expect(render(wc.new(:en))).to eq("hullo! 34567")
+    expect(render(wc.new(:fr))).to eq("bonjour! 12345")
+  end
+
+  describe "localization support" do
+    it "should allow staticized methods to have different output per-locale"
+  end
 end
