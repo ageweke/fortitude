@@ -270,6 +270,38 @@ describe "Fortitude staticization behavior", :type => :system do
   end
 
   describe "localization support" do
-    it "should allow staticized methods to have different output per-locale"
+    it "should allow staticized methods to have different output per-locale" do
+      $global_value = 12345
+      wc = widget_class do
+        def initialize(locale)
+          @locale = locale
+        end
+
+        def widget_locale
+          @locale
+        end
+
+        def content
+          text "this is content in #{widget_locale} language #{$global_value}!"
+        end
+      end
+
+      expect(render(wc.new(nil))).to eq("this is content in  language 12345!")
+      expect(render(wc.new("en"))).to eq("this is content in en language 12345!")
+      expect(render(wc.new("fr"))).to eq("this is content in fr language 12345!")
+
+      $global_value = 23456
+      wc.static :content
+
+      expect(render(wc.new(nil))).to eq("this is content in  language 23456!")
+      expect(render(wc.new("en"))).to eq("this is content in en language 23456!")
+      expect(render(wc.new("fr"))).to eq("this is content in fr language 23456!")
+
+      $global_value = 34567
+
+      expect(render(wc.new(nil))).to eq("this is content in  language 23456!")
+      expect(render(wc.new("en"))).to eq("this is content in en language 23456!")
+      expect(render(wc.new("fr"))).to eq("this is content in fr language 23456!")
+    end
   end
 end

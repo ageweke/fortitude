@@ -63,7 +63,7 @@ EOS
       ho = helpers_object
       ho = ho.call if ho.respond_to?(:call)
 
-      results = instance._one_method_to_html(dynamic_method_name, ho)
+      results = instance._one_method_to_html(dynamic_method_name, locale, ho)
       @has_yield = results.kind_of?(Array)
       results.freeze
     end

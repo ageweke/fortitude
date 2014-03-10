@@ -6,6 +6,7 @@ require 'fortitude/doctypes'
 require 'fortitude/partial_tag_placeholder'
 require 'fortitude/disabled_dynamic_methods'
 require 'fortitude/staticized_method'
+require 'fortitude/rendering_context'
 require 'active_support/core_ext/hash'
 
 module Fortitude
@@ -700,6 +701,25 @@ EOS
       end
     end
 
+    def _fortitude_override_widget_locale_method!(the_locale)
+      class << self
+        alias_method :_fortitude_original_widget_locale, :widget_locale
+        def widget_locale
+          @_overridden_locale
+        end
+      end
+
+      @_overridden_locale = the_locale
+
+      begin
+        yield
+      ensure
+        class << self
+          alias_method :widget_locale, :_fortitude_original_widget_locale
+        end
+      end
+    end
+
     def _enforce_staticness!(actual_class, method_name)
       self.class.send(:include, Fortitude::DisabledDynamicMethods)
 
@@ -713,7 +733,7 @@ EOS
       self._fortitude_static_method_class = actual_class
     end
 
-    def _one_method_to_html(method_name, static_helpers_object = nil)
+    def _one_method_to_html(method_name, locale, static_helpers_object = nil)
       @_fortitude_rendering_context = Fortitude::RenderingContext.new({ :helpers_object => static_helpers_object })
       @_fortitude_output_buffer_holder = @_fortitude_rendering_context.output_buffer_holder
 
@@ -721,11 +741,13 @@ EOS
       yielded = false
 
       begin
-        send(method_name) do
-          raise "You cannot make a method static if it yields more than once" if yielded
-          before_yield = @_fortitude_rendering_context.output_buffer_holder.output_buffer.dup.freeze
-          @_fortitude_rendering_context.output_buffer_holder.output_buffer.clear
-          yielded = true
+        _fortitude_override_locale!(locale) do
+          send(method_name) do
+            raise "You cannot make a method static if it yields more than once" if yielded
+            before_yield = @_fortitude_rendering_context.output_buffer_holder.output_buffer.dup.freeze
+            @_fortitude_rendering_context.output_buffer_holder.output_buffer.clear
+            yielded = true
+          end
         end
       ensure
         @_fortitude_rendering_context = nil

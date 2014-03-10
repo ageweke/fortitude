@@ -1,3 +1,5 @@
+require 'active_support/core_ext'
+
 module Fortitude
   class AssignsProxy
     def initialize(widget, keys)
