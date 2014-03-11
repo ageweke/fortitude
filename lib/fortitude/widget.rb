@@ -152,7 +152,7 @@ module Fortitude
         method_names.each do |method_name|
           method_name = method_name.to_sym
           helpers_object = options[:helpers_object] || lambda { |widget| widget.class.static_method_helpers_object(widget) }
-          staticized_method = Fortitude::StaticizedMethod.new(self, method_name, helpers_object)
+          staticized_method = Fortitude::StaticizedMethod.new(self, method_name)
           staticized_method.create_method!
         end
       end
@@ -702,21 +702,26 @@ EOS
       end
     end
 
-    def _fortitude_override_widget_locale_method!(the_locale)
-      class << self
-        alias_method :_fortitude_original_widget_locale, :widget_locale
-        def widget_locale
-          @_overridden_locale
+    METHODS_TO_DISABLE_WHEN_STATIC = [ :assigns, :shared_variables ]
+
+    def with_staticness_enforced(static_method_name, &block)
+      methods_to_disable = METHODS_TO_DISABLE_WHEN_STATIC + self.class.needs_as_hash.keys
+      metaclass = (class << self; self; end)
+
+      methods_to_disable.each do |method_name|
+        metaclass.class_eval do
+          alias_method "_static_disabled_#{method_name}", method_name
+          define_method(method_name) { raise Fortitude::Errors::DynamicAccessFromStaticMethod.new(self, static_method_name, method_name) }
         end
       end
 
-      @_overridden_locale = the_locale
-
       begin
-        yield
+        block.call
       ensure
-        class << self
-          alias_method :widget_locale, :_fortitude_original_widget_locale
+        methods_to_disable.each do |method_name|
+          metaclass.class_eval do
+            alias_method method_name, "_static_disabled_#{method_name}"
+          end
         end
       end
     end
@@ -732,34 +737,6 @@ EOS
 
       self._fortitude_static_method_name = method_name
       self._fortitude_static_method_class = actual_class
-    end
-
-    def _one_method_to_html(method_name, locale, static_helpers_object = nil)
-      @_fortitude_rendering_context = Fortitude::RenderingContext.new({ :helpers_object => static_helpers_object })
-      @_fortitude_output_buffer_holder = @_fortitude_rendering_context.output_buffer_holder
-
-      before_yield = nil
-      yielded = false
-
-      begin
-        _fortitude_override_locale!(locale) do
-          send(method_name) do
-            raise "You cannot make a method static if it yields more than once" if yielded
-            before_yield = @_fortitude_rendering_context.output_buffer_holder.output_buffer.dup.freeze
-            @_fortitude_rendering_context.output_buffer_holder.output_buffer.clear
-            yielded = true
-          end
-        end
-      ensure
-        @_fortitude_rendering_context = nil
-      end
-
-      after_yield = @_fortitude_output_buffer_holder.output_buffer.dup.freeze
-      if yielded
-        [ before_yield, after_yield ]
-      else
-        after_yield
-      end
     end
 
     def rendering_context

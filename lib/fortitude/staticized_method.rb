@@ -1,9 +1,8 @@
 module Fortitude
   class StaticizedMethod
-    def initialize(widget_class, method_name, helpers_object)
+    def initialize(widget_class, method_name)
       @widget_class = widget_class
       @method_name = method_name
-      @helpers_object = helpers_object
 
       @output_by_locale = { }
       @has_yield = false
@@ -15,25 +14,51 @@ module Fortitude
       output_by_locale[locale] ||= generate_output_for_locale(locale)
     end
 
-    def create_method!
-      widget_class.send(:alias_method, dynamic_method_name, method_name) unless widget_class.instance_methods.include?(dynamic_method_name)
+    def run!(widget)
+      locale = widget.widget_locale
+      output = (@output_by_locale[locale] ||= generate_content!(widget, locale))
 
-      results_no_locale = output_for(nil)
-
-      method_text = if has_yield
-        "rawtext results[0]; yield; rawtext results[1]"
+      if output.kind_of?(Array)
+        widget.rawtext(output[0])
+        yield
+        widget.rawtext(output[1])
       else
-        "rawtext results"
+        widget.rawtext(output)
+      end
+    end
+
+    def generate_content!(widget, locale)
+      yielded = false
+      pre_yield = nil
+
+      result = widget.capture do
+        widget.with_staticness_enforced(method_name) do
+          widget.send(dynamic_method_name) do
+            raise "This method yields more than once; you can't make it static" if yielded
+            pre_yield = widget.output_buffer.dup
+            yielded = true
+            widget.output_buffer.clear
+          end
+        end
+      end
+
+      if yielded
+        [ pre_yield, result ]
+      else
+        result
+      end
+    end
+
+    def create_method!
+      unless widget_class.instance_methods.include?(dynamic_method_name)
+        widget_class.send(:alias_method, dynamic_method_name, method_name)
       end
 
       widget_class.class_eval <<-EOS
-  def #{static_method_name}
-    results = #{constant_name}.output_for(widget_locale)
-    #{method_text}
+  def #{method_name}
+    #{constant_name}.run!(self) { yield }
   end
 EOS
-
-      widget_class.send(:alias_method, method_name, static_method_name)
     end
 
     private

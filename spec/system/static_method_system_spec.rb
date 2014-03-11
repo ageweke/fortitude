@@ -81,7 +81,7 @@ describe "Fortitude staticization behavior", :type => :system do
       end
     end
 
-    expect { wc.class_eval { static :foo } }.to raise_error(/yields more than once/i)
+    expect { wc.class_eval { static :foo }; render(wc) }.to raise_error(/yields more than once/i)
   end
 
   it "should raise an error if you try to access a variable from within a method that's being made static" do
@@ -97,8 +97,8 @@ describe "Fortitude staticization behavior", :type => :system do
       end
     end
 
-    e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { wc.class_eval { static :bar } }
-    expect(e.widget_class).to be(wc)
+    e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { wc.class_eval { static :bar }; render(wc) }
+    expect(e.widget.class).to be(wc)
     expect(e.static_method_name).to eq(:bar)
     expect(e.method_called).to eq(:foo)
   end
@@ -107,8 +107,8 @@ describe "Fortitude staticization behavior", :type => :system do
     subclass = Class.new(base_class)
     subclass.send(:define_method, :bar, &block)
 
-    e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { subclass.static :bar }
-    expect(e.widget_class).to be(subclass)
+    e = capture_exception(Fortitude::Errors::DynamicAccessFromStaticMethod) { subclass.static :bar; render(subclass) }
+    expect(e.widget.class).to be(subclass)
     expect(e.static_method_name).to eq(:bar)
     expect(e.method_called).to eq(method_called)
   end
@@ -124,10 +124,6 @@ describe "Fortitude staticization behavior", :type => :system do
 
     check_dynamic_raises(base_class, :foo) { foo }
     check_dynamic_raises(base_class, :assigns) { assigns }
-    check_dynamic_raises(base_class, :rendering_context) { rendering_context }
-    check_dynamic_raises(base_class, :widget) { widget base_class.new }
-    check_dynamic_raises(base_class, :render) { render :widget => base_class.new }
-    check_dynamic_raises(base_class, :output_buffer) { output_buffer }
     check_dynamic_raises(base_class, :shared_variables) { shared_variables }
   end
 
@@ -170,15 +166,10 @@ describe "Fortitude staticization behavior", :type => :system do
       render(widget_or_class, { :rendering_context => rc(:helpers_object => @helpers_object) }.merge(options))
     end
 
-    it "should not allow static methods to access helpers by default" do
+    it "should allow static methods to access helpers by default" do
       expect(do_render(@wc)).to eq("it is: foo bar foo!")
-      expect { @wc.static :content }.to raise_error(NoMethodError, /foo/i)
-    end
-
-    it "should allow static methods to still access helpers, if such an object is supplied" do
+      @wc.static :content
       expect(do_render(@wc)).to eq("it is: foo bar foo!")
-
-      @wc.static :content, :helpers_object => @helpers_object
       expect(do_render(@wc)).to eq("it is: foo bar foo!")
     end
 
@@ -265,6 +256,7 @@ describe "Fortitude staticization behavior", :type => :system do
     expect(render(wc.new(:fr))).to eq("bonjour! 12345")
 
     wc.static :content
+    expect(render(wc.new(nil))).to eq("saluton! 23456")
     $global_value = 34567
 
     expect(render(wc.new(nil))).to eq("saluton! 23456")
