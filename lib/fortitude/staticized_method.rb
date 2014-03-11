@@ -58,13 +58,16 @@ EOS
 
     def generate_output_for_locale(locale)
       instance = staticization_subclass.new
-      instance._enforce_staticness!(widget_class, method_name)
 
       ho = helpers_object
-      ho = ho.call if ho.respond_to?(:call)
+      ho = ho.call(instance) if ho.respond_to?(:call)
+
+      instance._enforce_staticness!(widget_class, method_name)
 
       results = instance._one_method_to_html(dynamic_method_name, locale, ho)
       @has_yield = results.kind_of?(Array)
+
+      results = results.map(&:freeze) if results.kind_of?(Array)
       results.freeze
     end
 

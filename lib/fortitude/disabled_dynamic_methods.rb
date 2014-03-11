@@ -6,22 +6,6 @@ module Fortitude
       _fortitude_dynamic_disabled!(:assigns)
     end
 
-    def rendering_context
-      _fortitude_dynamic_disabled!(:rendering_context)
-    end
-
-    def widget(*args)
-      _fortitude_dynamic_disabled!(:widget)
-    end
-
-    def render(*args)
-      _fortitude_dynamic_disabled!(:render)
-    end
-
-    def output_buffer
-      _fortitude_dynamic_disabled!(:output_buffer)
-    end
-
     def shared_variables
       _fortitude_dynamic_disabled!(:shared_variables)
     end
