@@ -151,7 +151,8 @@ module Fortitude
 
         method_names.each do |method_name|
           method_name = method_name.to_sym
-          staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options[:helpers_object])
+          helpers_object = options[:helpers_object] || lambda { |widget| widget.class.static_method_helpers_object(widget) }
+          staticized_method = Fortitude::StaticizedMethod.new(self, method_name, helpers_object)
           staticized_method.create_method!
         end
       end

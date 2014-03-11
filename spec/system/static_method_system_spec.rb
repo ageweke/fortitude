@@ -186,6 +186,9 @@ describe "Fortitude staticization behavior", :type => :system do
       @wc.static :content, :helpers_object => lambda { @helpers_class.new }
       expect(do_render(@wc)).to eq("it is: foo bar foo!")
     end
+
+    it "should allow supplying the static-helpers object as an object via .static_method_helpers_object"
+    it "should allow supplying the static-helpers object as a block via .static_method_helpers_object"
   end
 
   describe "around_content support" do
