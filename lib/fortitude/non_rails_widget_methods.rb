@@ -9,9 +9,7 @@ module Fortitude
     end
 
     module ClassMethods
-      def static_method_helpers_object(widget)
-        nil
-      end
+
     end
   end
 end

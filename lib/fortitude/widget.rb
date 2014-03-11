@@ -4,7 +4,6 @@ require 'fortitude/errors'
 require 'fortitude/assigns_proxy'
 require 'fortitude/doctypes'
 require 'fortitude/partial_tag_placeholder'
-require 'fortitude/disabled_dynamic_methods'
 require 'fortitude/staticized_method'
 require 'fortitude/rendering_context'
 require 'active_support/core_ext/hash'
@@ -147,12 +146,10 @@ module Fortitude
 
       def static(*method_names)
         options = method_names.extract_options!
-        options.assert_valid_keys(:helpers_object)
 
         method_names.each do |method_name|
           method_name = method_name.to_sym
-          helpers_object = options[:helpers_object] || lambda { |widget| widget.class.static_method_helpers_object(widget) }
-          staticized_method = Fortitude::StaticizedMethod.new(self, method_name)
+          staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options)
           staticized_method.create_method!
         end
       end

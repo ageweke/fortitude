@@ -1,22 +1,21 @@
 module Fortitude
   class StaticizedMethod
-    def initialize(widget_class, method_name)
+    def initialize(widget_class, method_name, options = { })
       @widget_class = widget_class
       @method_name = method_name
 
       @output_by_locale = { }
       @has_yield = false
 
+      @options = options
+      @options.assert_valid_keys(:locale_support)
+
       set_constant!
     end
 
-    def output_for(locale)
-      output_by_locale[locale] ||= generate_output_for_locale(locale)
-    end
-
     def run!(widget)
-      locale = widget.widget_locale
-      output = (@output_by_locale[locale] ||= generate_content!(widget, locale))
+      locale = locale_support? ? widget.widget_locale : nil
+      output = (@output_by_locale[locale] ||= generate_content!(widget))
 
       if output.kind_of?(Array)
         widget.rawtext(output[0])
@@ -24,28 +23,6 @@ module Fortitude
         widget.rawtext(output[1])
       else
         widget.rawtext(output)
-      end
-    end
-
-    def generate_content!(widget, locale)
-      yielded = false
-      pre_yield = nil
-
-      result = widget.capture do
-        widget.with_staticness_enforced(method_name) do
-          widget.send(dynamic_method_name) do
-            raise "This method yields more than once; you can't make it static" if yielded
-            pre_yield = widget.output_buffer.dup
-            yielded = true
-            widget.output_buffer.clear
-          end
-        end
-      end
-
-      if yielded
-        [ pre_yield, result ]
-      else
-        result
       end
     end
 
@@ -62,7 +39,35 @@ EOS
     end
 
     private
-    attr_reader :widget_class, :method_name, :helpers_object, :output_by_locale, :has_yield
+    attr_reader :widget_class, :method_name, :output_by_locale, :has_yield, :options
+
+    def locale_support?
+      ! (options.has_key?(:locale_support) && (! options[:locale_support]))
+    end
+
+    def generate_content!(widget)
+      yielded = false
+      pre_yield = nil
+
+      result = widget.capture do
+        widget.with_staticness_enforced(method_name) do
+          widget.send(dynamic_method_name) do
+            raise "This method yields more than once; you can't make it static" if yielded
+            pre_yield = widget.output_buffer.dup
+            yielded = true
+            widget.output_buffer.clear
+          end
+        end
+      end
+
+      @has_yield = yielded
+
+      if yielded
+        [ pre_yield, result ]
+      else
+        result
+      end
+    end
 
     def set_constant!
       widget_class.send(:remove_const, constant_name) if widget_class.const_defined?(constant_name)
@@ -73,35 +78,8 @@ EOS
       "FORTITUDE_STATICIZED_METHOD_#{method_name.to_s.upcase}"
     end
 
-    def static_method_name
-      "_#{method_name}_static".to_sym
-    end
-
     def dynamic_method_name
       "_#{method_name}_dynamic".to_sym
-    end
-
-    def generate_output_for_locale(locale)
-      instance = staticization_subclass.new
-
-      ho = helpers_object
-      ho = ho.call(instance) if ho.respond_to?(:call)
-
-      instance._enforce_staticness!(widget_class, method_name)
-
-      results = instance._one_method_to_html(dynamic_method_name, locale, ho)
-      @has_yield = results.kind_of?(Array)
-
-      results = results.map(&:freeze) if results.kind_of?(Array)
-      results.freeze
-    end
-
-    def staticization_subclass
-      @staticization_subclass ||= begin
-        out = Class.new(@widget_class)
-        out.send(:define_method, :initialize) { }
-        out
-      end
     end
   end
 end

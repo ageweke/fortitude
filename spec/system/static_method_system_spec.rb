@@ -38,6 +38,29 @@ describe "Fortitude staticization behavior", :type => :system do
     expect(render(wc)).to eq('<p class="foo">bar: 12345</p><p>baz</p>')
   end
 
+  it "should update the static definition of a method if static is called again" do
+    $global_value = 12345
+    wc = widget_class do
+      def content
+        p :class => 'foo' do
+          text "bar: #{$global_value}"
+        end
+        p "baz"
+      end
+
+      static :content
+    end
+
+    expect(render(wc)).to eq('<p class="foo">bar: 12345</p><p>baz</p>')
+
+    $global_value = 23456
+    expect(render(wc)).to eq('<p class="foo">bar: 12345</p><p>baz</p>')
+    wc.class_eval { static :content }
+    expect(render(wc)).to eq('<p class="foo">bar: 23456</p><p>baz</p>')
+    $global_value = 34567
+    expect(render(wc)).to eq('<p class="foo">bar: 23456</p><p>baz</p>')
+  end
+
   it "should allow you to yield from a method that's made static" do
     $global_value = 12345
     wc = widget_class do
@@ -62,6 +85,8 @@ describe "Fortitude staticization behavior", :type => :system do
 
     $global_value = 23456
     expect(render(wc)).to eq('content before:23456foo before:12345yield inside:23456foo after:12345content after:23456')
+    $global_value = 34567
+    expect(render(wc)).to eq('content before:34567foo before:12345yield inside:34567foo after:12345content after:34567')
   end
 
   it "should not allow you to yield more than once from a method that's made static" do
@@ -144,6 +169,35 @@ describe "Fortitude staticization behavior", :type => :system do
     end
 
     expect(render(wc.new(:foo => 12345))).to eq("foo: 12345bar!")
+    expect(render(wc.new(:foo => 23456))).to eq("foo: 23456bar!")
+  end
+
+  it "should allow disabling locale support" do
+    $global_value = 12345
+    wc = widget_class do
+      def initialize(locale)
+        @locale = locale
+      end
+
+      def widget_locale
+        @locale
+      end
+
+      def content
+        foo
+      end
+
+      def foo
+        text "locale: #{widget_locale}, #{$global_value}"
+      end
+
+      static :foo, :locale_support => false
+    end
+
+    expect(render(wc.new(:en))).to eq("locale: en, 12345")
+    $global_value = 23456
+    expect(render(wc.new(:fr))).to eq("locale: en, 12345")
+    expect(render(wc.new(:en))).to eq("locale: en, 12345")
   end
 
   describe "helper support" do
@@ -172,14 +226,6 @@ describe "Fortitude staticization behavior", :type => :system do
       expect(do_render(@wc)).to eq("it is: foo bar foo!")
       expect(do_render(@wc)).to eq("it is: foo bar foo!")
     end
-
-    it "should allow supplying the static-helpers object as a block" do
-      @wc.static :content, :helpers_object => lambda { @helpers_class.new }
-      expect(do_render(@wc)).to eq("it is: foo bar foo!")
-    end
-
-    it "should allow supplying the static-helpers object as an object via .static_method_helpers_object"
-    it "should allow supplying the static-helpers object as a block via .static_method_helpers_object"
   end
 
   describe "around_content support" do
