@@ -6,13 +6,29 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - use_instance_variables_for_assigns
   #   - format_output
   #   - enforce_element_nesting_rules
+  #   - enforce_attribute_rules
   #
   # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec.
 
-  it "should inherit enforce_attribute_rules properly"
   it "should inherit start_and_end_comments properly"
   it "should inherit translation_base properly"
   it "should inherit enforce_id_uniqueness properly"
+
+  def enforce_attribute_rules_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.enforce_attribute_rules).to eq(expected_result)
+      send("enforce_attribute_rules_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def enforce_attribute_rules_should_be_true(klass)
+    expect { render(klass) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+  end
+
+  def enforce_attribute_rules_should_be_false(klass)
+    expect(render(klass)).to eq("<p foo=\"bar\"/>")
+  end
+
 
   def enforce_element_nesting_rules_should_be(expected_result, *klasses)
     klasses.each do |klass|
@@ -268,6 +284,32 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.enforce_element_nesting_rules false
     enforce_element_nesting_rules_should_be(false, @grandparent, @parent2, @child21, @child22)
     enforce_element_nesting_rules_should_be(true, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit enforce_attribute_rules" do
+    @grandparent.class_eval do
+      def content
+        p :foo => 'bar'
+      end
+    end
+
+    enforce_attribute_rules_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.enforce_attribute_rules true
+    enforce_attribute_rules_should_be(false, @grandparent, @parent2, @child21, @child22)
+    enforce_attribute_rules_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.enforce_attribute_rules false
+    enforce_attribute_rules_should_be(false, @grandparent, @parent2, @child21, @child22)
+    enforce_attribute_rules_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.enforce_attribute_rules true
+    enforce_attribute_rules_should_be(false, @parent2, @child21, @child22)
+    enforce_attribute_rules_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.enforce_attribute_rules false
+    enforce_attribute_rules_should_be(false, @grandparent, @parent2, @child21, @child22)
+    enforce_attribute_rules_should_be(true, @parent1, @child11, @child12)
   end
 
   it "should properly inherit implicit_shared_variable_access" do
