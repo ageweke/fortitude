@@ -4,15 +4,35 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - automatic_helper_access
   #   - implicit_shared_variable_access
   #   - use_instance_variables_for_assigns
+  #   - format_output
   #
   # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec.
 
-  it "should inherit format_output properly"
   it "should inherit enforce_element_nesting_rules properly"
   it "should inherit enforce_attribute_rules properly"
   it "should inherit start_and_end_comments properly"
   it "should inherit translation_base properly"
   it "should inherit enforce_id_uniqueness properly"
+
+  def format_output_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.format_output).to eq(expected_result)
+      send("format_output_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def format_output_should_be_true(klass)
+    expect(render(klass)).to eq(%{<div>
+  <p>
+    <span class="foo"/>
+  </p>
+</div>})
+  end
+
+  def format_output_should_be_false(klass)
+    expect(render(klass)).to eq('<div><p><span class="foo"/></p></div>')
+  end
+
 
   def extra_assigns_should_be(expected_result, *klasses)
     klasses.each do |klass|
@@ -176,6 +196,36 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.automatic_helper_access true
     automatic_helper_access_should_be(true, @grandparent, @parent2, @child21, @child22)
     automatic_helper_access_should_be(false, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit format_output" do
+    @grandparent.class_eval do
+      def content
+        div do
+          p do
+            span :class => 'foo'
+          end
+        end
+      end
+    end
+
+    format_output_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.format_output true
+    format_output_should_be(false, @grandparent, @parent2, @child21, @child22)
+    format_output_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.format_output false
+    format_output_should_be(false, @grandparent, @parent2, @child21, @child22)
+    format_output_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.format_output true
+    format_output_should_be(false, @parent2, @child21, @child22)
+    format_output_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.format_output false
+    format_output_should_be(false, @grandparent, @parent2, @child21, @child22)
+    format_output_should_be(true, @parent1, @child11, @child12)
   end
 
   it "should properly inherit implicit_shared_variable_access" do
