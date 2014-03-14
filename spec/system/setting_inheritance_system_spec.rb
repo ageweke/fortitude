@@ -7,12 +7,35 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - format_output
   #   - enforce_element_nesting_rules
   #   - enforce_attribute_rules
+  #   - start_and_end_comments
   #
   # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec.
 
-  it "should inherit start_and_end_comments properly"
   it "should inherit translation_base properly"
   it "should inherit enforce_id_uniqueness properly"
+
+  def start_and_end_comments_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.start_and_end_comments).to eq(expected_result)
+      send("start_and_end_comments_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def start_and_end_comments_should_be_true(klass)
+    result = render(klass)
+    if result =~ /^(.*BEGIN?)\s*\S+\s*(depth.*END)\s*\S+\s*(depth.*)$/i
+      expect($1).to eq("<!-- BEGIN")
+      expect($2).to eq("depth 0: :baz => (DEFAULT) \"default_baz\" --><p/><!-- END")
+      expect($3).to eq("depth 0 -->")
+    else
+      raise "result does not match expected pattern: #{result.inspect}"
+    end
+  end
+
+  def start_and_end_comments_should_be_false(klass)
+    expect(render(klass)).to eq("<p/>")
+  end
+
 
   def enforce_attribute_rules_should_be(expected_result, *klasses)
     klasses.each do |klass|
@@ -284,6 +307,32 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.enforce_element_nesting_rules false
     enforce_element_nesting_rules_should_be(false, @grandparent, @parent2, @child21, @child22)
     enforce_element_nesting_rules_should_be(true, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit start_and_end_comments" do
+    @grandparent.class_eval do
+      def content
+        p
+      end
+    end
+
+    start_and_end_comments_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.start_and_end_comments true
+    start_and_end_comments_should_be(false, @grandparent, @parent2, @child21, @child22)
+    start_and_end_comments_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.start_and_end_comments false
+    start_and_end_comments_should_be(false, @grandparent, @parent2, @child21, @child22)
+    start_and_end_comments_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.start_and_end_comments true
+    start_and_end_comments_should_be(false, @parent2, @child21, @child22)
+    start_and_end_comments_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.start_and_end_comments false
+    start_and_end_comments_should_be(false, @grandparent, @parent2, @child21, @child22)
+    start_and_end_comments_should_be(true, @parent1, @child11, @child12)
   end
 
   it "should properly inherit enforce_attribute_rules" do
