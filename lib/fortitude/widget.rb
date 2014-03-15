@@ -7,6 +7,7 @@ require 'fortitude/partial_tag_placeholder'
 require 'fortitude/staticized_method'
 require 'fortitude/rendering_context'
 require 'active_support/core_ext/hash'
+require 'active_support/notifications'
 
 module Fortitude
   # TODO: rename all non-interface methods as _fortitude_*
@@ -86,7 +87,7 @@ module Fortitude
         @_this_class_tags ||= { }
         new_tag = Fortitude::Tag.new(name, options)
         @_this_class_tags[name] = new_tag
-        rebuild_tag_methods!(name)
+        rebuild_tag_methods!(:tag_declared, name)
       end
 
       def doctype(new_doctype = nil)
@@ -121,23 +122,25 @@ module Fortitude
         out
       end
 
-      def rebuild_tag_methods!(which_tags_in = nil)
-        which_tags = which_tags_in
+      def rebuild_tag_methods!(why, which_tags_in = nil, klass = self)
+        rebuilding(:tag_methods, why, klass) do
+          which_tags = which_tags_in
 
-        tags = all_tags
-        which_tags ||= tags.keys
-        which_tags = Array(which_tags)
-        which_tags.each do |name|
-          tag = tags[name]
-          raise "No tag #{name.inspect}? Have: #{tags.keys.inspect}" unless tag
-          tag.define_method_on!(tags_module,
-            :enable_formatting => self.format_output,
-            :enforce_element_nesting_rules => self.enforce_element_nesting_rules,
-            :enforce_attribute_rules => self.enforce_attribute_rules,
-            :enforce_id_uniqueness => self.enforce_id_uniqueness)
+          tags = all_tags
+          which_tags ||= tags.keys
+          which_tags = Array(which_tags)
+          which_tags.each do |name|
+            tag = tags[name]
+            raise "No tag #{name.inspect}? Have: #{tags.keys.inspect}" unless tag
+            tag.define_method_on!(tags_module,
+              :enable_formatting => self.format_output,
+              :enforce_element_nesting_rules => self.enforce_element_nesting_rules,
+              :enforce_attribute_rules => self.enforce_attribute_rules,
+              :enforce_id_uniqueness => self.enforce_id_uniqueness)
+          end
+
+          direct_subclasses.each { |s| s.rebuild_tag_methods!(why, which_tags_in, klass) }
         end
-
-        direct_subclasses.each { |s| s.rebuild_tag_methods!(which_tags_in) }
       end
 
       def is_valid_ruby_method_name?(s)
@@ -184,7 +187,7 @@ module Fortitude
           @this_class_needs[name] = default_value
         end
 
-        rebuild_needs!
+        rebuild_needs!(:need_declared)
 
         needs_as_hash
       end
@@ -198,11 +201,17 @@ module Fortitude
         end
       end
 
+      def rebuilding(what, why, klass, &block)
+        ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
+      end
+
       # EFFECTIVELY PRIVATE
-      def rebuild_needs!
-        @_fortitude_needs_as_hash = nil
-        rebuild_my_needs_methods!
-        direct_subclasses.each { |s| s.rebuild_needs! }
+      def rebuild_needs!(why, klass = self)
+        rebuilding(:needs, why, klass) do
+          @_fortitude_needs_as_hash = nil
+          rebuild_my_needs_methods!
+          direct_subclasses.each { |s| s.rebuild_needs!(why, klass) }
+        end
       end
 
       private
@@ -420,12 +429,12 @@ module Fortitude
       end
 
       def _fortitude_format_output_changed!(new_value)
-        rebuild_text_methods!
-        rebuild_tag_methods!
+        rebuild_text_methods!(:format_output_changed)
+        rebuild_tag_methods!(:format_output_changed)
       end
 
       def _fortitude_extra_assigns_changed!(new_value)
-        rebuild_needs!
+        rebuild_needs!(:extra_assigns_changed)
       end
 
       def _fortitude_implicit_shared_variable_access_changed!(new_value)
@@ -437,19 +446,19 @@ module Fortitude
       end
 
       def _fortitude_enforce_element_nesting_rules_changed!(new_value)
-        rebuild_tag_methods!
+        rebuild_tag_methods!(:enforce_element_nesting_rules_changed)
       end
 
       def _fortitude_enforce_attribute_rules_changed!(new_value)
-        rebuild_tag_methods!
+        rebuild_tag_methods!(:enforce_attribute_rules_changed)
       end
 
       def _fortitude_enforce_id_uniqueness_changed!(new_value)
-        rebuild_tag_methods!
+        rebuild_tag_methods!(:enforce_id_uniqueness_changed)
       end
 
       def _fortitude_use_instance_variables_for_assigns_changed!(new_value)
-        rebuild_needs!
+        rebuild_needs!(:use_instance_variables_for_assigns_changed)
       end
 
       def _fortitude_start_and_end_comments_changed!(new_value)
@@ -475,7 +484,7 @@ module Fortitude
         return if method_names.length == 0
         @_fortitude_around_content_methods ||= [ ]
         @_fortitude_around_content_methods += method_names.map { |x| x.to_s.strip.downcase.to_sym }
-        rebuild_run_content!
+        rebuild_run_content!(:around_content_added)
       end
 
       def remove_around_content(*method_names)
@@ -487,7 +496,7 @@ module Fortitude
           not_found << method_name unless (@_fortitude_around_content_methods || [ ]).delete(method_name)
         end
 
-        rebuild_run_content!
+        rebuild_run_content!(:around_content_removed)
         unless (not_found.length == 0) || (options.has_key?(:fail_if_not_present) && (! options[:fail_if_not_present]))
           raise ArgumentError, "no such methods: #{not_found.inspect}"
         end
@@ -540,13 +549,13 @@ EOS
 
       LOCALIZED_CONTENT_PREFIX = "localized_content_"
 
-      def check_localized_methods!
+      def check_localized_methods!(original_class = self)
         currently_has = instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i }
         if currently_has != @last_localized_methods_check_has
           @last_localized_methods_check_has = currently_has
-          rebuild_run_content!
+          rebuild_run_content!(:localized_methods_presence_changed, original_class)
         end
-        direct_subclasses.each { |s| s.check_localized_methods! }
+        direct_subclasses.each { |s| s.check_localized_methods!(original_class) }
       end
 
       def around_content_methods
@@ -559,40 +568,44 @@ EOS
         (superclass_methods + this_class_around_content_methods).uniq
       end
 
-      def rebuild_run_content!
-        acm = around_content_methods
-        text = "def run_content(*args, &block)\n"
-        text += "  out = nil\n"
-        acm.each_with_index do |method_name, index|
-          text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
+      def rebuild_run_content!(why, klass = self)
+        rebuilding(:run_content, why, klass) do
+          acm = around_content_methods
+          text = "def run_content(*args, &block)\n"
+          text += "  out = nil\n"
+          acm.each_with_index do |method_name, index|
+            text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
+          end
+
+          if has_localized_content_methods?
+            text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
+            text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
+            text += "  " + ("  " * acm.length) + "out = if locale_method_name && respond_to?(locale_method_name)\n"
+            text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
+            text += "  " + ("  " * acm.length) + "else\n"
+            text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
+            text += "  " + ("  " * acm.length) + "end\n"
+          else
+            text += "  " + ("  " * acm.length) + "out = content(*args, &block)\n"
+          end
+
+          (0..(acm.length - 1)).each do |index|
+            text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
+          end
+          text += "  out\n"
+          text += "end"
+
+          class_eval(text)
+
+          direct_subclasses.each { |s| s.rebuild_run_content!(why, klass) }
         end
-
-        if has_localized_content_methods?
-          text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
-          text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
-          text += "  " + ("  " * acm.length) + "out = if locale_method_name && respond_to?(locale_method_name)\n"
-          text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
-          text += "  " + ("  " * acm.length) + "else\n"
-          text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
-          text += "  " + ("  " * acm.length) + "end\n"
-        else
-          text += "  " + ("  " * acm.length) + "out = content(*args, &block)\n"
-        end
-
-        (0..(acm.length - 1)).each do |index|
-          text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
-        end
-        text += "  out\n"
-        text += "end"
-
-        class_eval(text)
-
-        direct_subclasses.each { |s| s.rebuild_run_content! }
       end
 
-      def rebuild_text_methods!
-        class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output))
-        direct_subclasses.each { |s| s.rebuild_text_methods! }
+      def rebuild_text_methods!(why, klass = self)
+        rebuilding(:text_methods, why, klass) do
+          class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output))
+          direct_subclasses.each { |s| s.rebuild_text_methods!(why, klass) }
+        end
       end
 
       private
@@ -605,9 +618,9 @@ EOS
       end
     end
 
-    rebuild_run_content!
-    rebuild_needs!
-    rebuild_text_methods!
+    rebuild_run_content!(:initial_setup)
+    rebuild_needs!(:initial_setup)
+    rebuild_text_methods!(:initial_setup)
 
     helper :capture
     helper :form_tag, :transform => :output_return_value
