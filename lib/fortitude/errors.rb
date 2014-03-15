@@ -89,5 +89,19 @@ module Fortitude
         @need_names = need_names
       end
     end
+
+    class NoReturnValueFromTag < Base
+      attr_reader :method_name
+
+      def initialize(method_name)
+        super(%{You're trying to call a method, #{method_name.inspect}, on the return value of a Fortitude
+tag; tags don't return anything usable. (If you're migrating from Erector, this may
+be a place where you used Erector syntax for classes or IDs -- e.g., p.some_class,
+div.some_id!. Fortitude doesn't support these for important performance reasons;
+you simply need to convert these to "p :class => :some_class" or
+"div :id => :some_id".)})
+        @method_name = method_name
+      end
+    end
   end
 end

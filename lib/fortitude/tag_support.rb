@@ -1,3 +1,4 @@
+require 'fortitude/tag_return_value'
 require 'active_support/concern'
 
 module Fortitude
@@ -27,6 +28,8 @@ module Fortitude
     def _fortitude_raise_no_content_allowed_error(tag_name)
       raise Fortitude::Errors::NoContentAllowed.new(self, tag_name)
     end
+
+    FORTITUDE_NO_RETURN_VALUE_FROM_TAGS = Fortitude::TagReturnValue.new
 
     module ClassMethods
       def fortitude_tag_support_included?

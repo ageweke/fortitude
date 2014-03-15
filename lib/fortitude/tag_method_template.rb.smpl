@@ -59,4 +59,6 @@ def #{name}(content_or_attributes = nil, attributes = nil)
     end
     rc.needs_newline! if format_output                                     # :if needs_formatting && newline_before
   end                                                                      # :if needs_element_rules
+
+  FORTITUDE_NO_RETURN_VALUE_FROM_TAGS
 end
