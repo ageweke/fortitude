@@ -8,11 +8,48 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - enforce_element_nesting_rules
   #   - enforce_attribute_rules
   #   - start_and_end_comments
+  #   - translation_base
+  #   - enforce_id_uniqueness
   #
-  # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec.
+  # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec;
+  # these are not tested here because their semantics are quite a bit more complex than the settings here.
 
-  it "should inherit translation_base properly"
-  it "should inherit enforce_id_uniqueness properly"
+  def translation_base_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.translation_base).to eq(expected_result)
+      send("translation_base_should_be_for_class", expected_result, klass)
+    end
+  end
+
+  def translation_base_should_be_for_class(expected_result, klass)
+    expect(klass.translation_base).to eq(expected_result)
+    ho_class = Class.new do
+      def t(x)
+        "translation_for:#{x}"
+      end
+    end
+    ho = ho_class.new
+
+    rendering_context = rc(:helpers_object => ho)
+    expect(render(klass, :rendering_context => rendering_context)).to eq("translation: translation_for:#{expected_result}.foo.bar.baz")
+  end
+
+
+  def enforce_id_uniqueness_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.enforce_id_uniqueness).to eq(expected_result)
+      send("enforce_id_uniqueness_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def enforce_id_uniqueness_should_be_true(klass)
+    expect { render(klass) }.to raise_error(Fortitude::Errors::DuplicateId)
+  end
+
+  def enforce_id_uniqueness_should_be_false(klass)
+    expect(render(klass)).to eq('<p id="foo"/><p id="foo"/>')
+  end
+
 
   def start_and_end_comments_should_be(expected_result, *klasses)
     klasses.each do |klass|
@@ -307,6 +344,63 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.enforce_element_nesting_rules false
     enforce_element_nesting_rules_should_be(false, @grandparent, @parent2, @child21, @child22)
     enforce_element_nesting_rules_should_be(true, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit translation_base" do
+    @grandparent.class_eval do
+      def content
+        text "translation: #{t(".foo.bar.baz")}"
+      end
+    end
+
+    translation_base_should_be(nil, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.translation_base "aaa.bbb"
+    translation_base_should_be(nil, @grandparent, @parent2, @child21, @child22)
+    translation_base_should_be("aaa.bbb", @parent1, @child11, @child12)
+
+    @child22.translation_base "ccc.ddd"
+    translation_base_should_be(nil, @grandparent, @parent2, @child21)
+    translation_base_should_be("aaa.bbb", @parent1, @child11, @child12)
+    translation_base_should_be("ccc.ddd", @child22)
+
+    @grandparent.translation_base "eee.fff"
+    translation_base_should_be("eee.fff", @grandparent, @parent2, @child21)
+    translation_base_should_be("aaa.bbb", @parent1, @child11, @child12)
+    translation_base_should_be("ccc.ddd", @child22)
+
+    @parent2.translation_base "ggg.hhh"
+    translation_base_should_be("eee.fff", @grandparent)
+    translation_base_should_be("ggg.hhh", @parent2, @child21)
+    translation_base_should_be("aaa.bbb", @parent1, @child11, @child12)
+    translation_base_should_be("ccc.ddd", @child22)
+  end
+
+  it "should properly inherit enforce_id_uniqueness" do
+    @grandparent.class_eval do
+      def content
+        p :id => 'foo'
+        p :id => 'foo'
+      end
+    end
+
+    enforce_id_uniqueness_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.enforce_id_uniqueness true
+    enforce_id_uniqueness_should_be(false, @grandparent, @parent2, @child21, @child22)
+    enforce_id_uniqueness_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.enforce_id_uniqueness false
+    enforce_id_uniqueness_should_be(false, @grandparent, @parent2, @child21, @child22)
+    enforce_id_uniqueness_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.enforce_id_uniqueness true
+    enforce_id_uniqueness_should_be(false, @parent2, @child21, @child22)
+    enforce_id_uniqueness_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.enforce_id_uniqueness false
+    enforce_id_uniqueness_should_be(false, @grandparent, @parent2, @child21, @child22)
+    enforce_id_uniqueness_should_be(true, @parent1, @child11, @child12)
   end
 
   it "should properly inherit start_and_end_comments" do
