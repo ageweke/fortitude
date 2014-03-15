@@ -22,8 +22,20 @@ describe "Fortitude tag return values", :type => :system do
       expect_nrv(:foo) { p { text "whatever" }.foo }
     end
 
-    it "a tag with a block and attributes" do
+    it "a tag with a block and direct content" do
       expect_nrv(:foo) { p("foo") { text "whatever" }.foo }
+    end
+
+    it "a tag with direct content and attributes" do
+      expect_nrv(:foo) { p("foo", :foo => :bar).foo }
+    end
+
+    it "a tag with a block and attributes" do
+      expect_nrv(:foo) { p(:foo => :bar) { text "whatever" }.foo }
+    end
+
+    it "a tag with a block, direct content, and attributes" do
+      expect_nrv(:foo) { p("foo", :foo => :bar) { text "whatever" }.foo }
     end
   end
 end

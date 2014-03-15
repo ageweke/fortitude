@@ -562,6 +562,7 @@ EOS
       def rebuild_run_content!
         acm = around_content_methods
         text = "def run_content(*args, &block)\n"
+        text += "  out = nil\n"
         acm.each_with_index do |method_name, index|
           text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
         end
@@ -569,18 +570,19 @@ EOS
         if has_localized_content_methods?
           text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
           text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
-          text += "  " + ("  " * acm.length) + "if locale_method_name && respond_to?(locale_method_name)\n"
+          text += "  " + ("  " * acm.length) + "out = if locale_method_name && respond_to?(locale_method_name)\n"
           text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
           text += "  " + ("  " * acm.length) + "else\n"
           text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
           text += "  " + ("  " * acm.length) + "end\n"
         else
-          text += "  " + ("  " * acm.length) + "content(*args, &block)\n"
+          text += "  " + ("  " * acm.length) + "out = content(*args, &block)\n"
         end
 
         (0..(acm.length - 1)).each do |index|
           text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
         end
+        text += "  out\n"
         text += "end"
 
         class_eval(text)
