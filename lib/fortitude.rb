@@ -30,7 +30,7 @@ else
 end
 
 require 'fortitude/widget'
-require 'fortitude/html5widget'
+require 'fortitude/widget/html5'
 require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
 
 if defined?(::ActiveSupport::SafeBuffer)
