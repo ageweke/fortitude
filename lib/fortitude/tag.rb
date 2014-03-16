@@ -40,7 +40,7 @@ module Fortitude
     end
 
     def is_valid_attribute?(k, v)
-      @valid_attributes.include?(k.to_sym) || k.to_s =~ /^data-/i || (k.to_s =~ /^data$/i && v.kind_of?(Hash))
+      @valid_attributes.include?(k.to_sym) || k.to_s =~ /^data-\S/i || (k.to_s =~ /^data$/i && v.kind_of?(Hash))
     end
 
     def validate_id_uniqueness(widget, attributes_hash)

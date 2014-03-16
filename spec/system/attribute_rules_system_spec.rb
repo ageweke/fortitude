@@ -25,6 +25,10 @@ describe "Fortitude attribute rules enforcement", :type => :system do
     expect { render(widget_class_with_content { p :data => 'foo' }) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
   end
 
+  it "should not allow a plain 'data-' attribute" do
+    expect { render(widget_class_with_content { p :'data-' => 'foo' }) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+  end
+
   it "should not enforce rules inside a widget with the setting off, even if surrounding widgets have it on" do
     outer = widget_class do
       attr_accessor :inner
