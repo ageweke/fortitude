@@ -24,7 +24,7 @@ module Fortitude
       include Fortitude::NonRailsWidgetMethods
     end
 
-    include Fortitude::TagStore
+    extend Fortitude::TagStore
 
     class << self
       def _fortitude_class_inheritable_attribute(attribute_name, default_value, allowable_values)
@@ -104,7 +104,7 @@ module Fortitude
               raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
             end
           else
-            add_tags_from!(new_doctype.class)
+            add_tags_from!(new_doctype)
           end
 
           @_fortitude_doctype = new_doctype
