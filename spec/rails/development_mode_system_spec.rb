@@ -25,7 +25,7 @@ describe "Rails development-mode support", :type => :rails do
     reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget.rb')
     File.open(reload_file, 'w') do |f|
       f.puts <<-EOS
-class Views::DevelopmentModeSystemSpec::ReloadWidget < Fortitude::Widget
+class Views::DevelopmentModeSystemSpec::ReloadWidget < Fortitude::Widget::Html5
   needs :datum
 
   def content

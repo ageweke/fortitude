@@ -1,4 +1,4 @@
-class Views::ClassLoadingSystemSpec::AutoloadOneWidgetFromAnother < Fortitude::Widget
+class Views::ClassLoadingSystemSpec::AutoloadOneWidgetFromAnother < Fortitude::Widget::Html5
   def content
     p "about to run the sub widget"
     widget Views::SubWidget.new

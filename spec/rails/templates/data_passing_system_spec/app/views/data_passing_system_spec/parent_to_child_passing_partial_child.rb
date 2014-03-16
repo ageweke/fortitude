@@ -1,4 +1,4 @@
-class Views::DataPassingSystemSpec::ParentToChildPassingPartialChild < Fortitude::Widget
+class Views::DataPassingSystemSpec::ParentToChildPassingPartialChild < Fortitude::Widget::Html5
   needs :foo
 
   def content

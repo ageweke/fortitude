@@ -1,4 +1,4 @@
-class Views::RulesSystemSpec::InvalidlyNestedTag < Fortitude::Widget
+class Views::RulesSystemSpec::InvalidlyNestedTag < Fortitude::Widget::Html5
   enforce_element_nesting_rules true
 
   def content

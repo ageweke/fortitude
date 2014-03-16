@@ -1,4 +1,4 @@
-class Views::HelpersIncludeAllOffSystemSpec::IncludeAllOff < Fortitude::Widget
+class Views::HelpersIncludeAllOffSystemSpec::IncludeAllOff < Fortitude::Widget::Html5
   def content
     text "excitedly: "
 

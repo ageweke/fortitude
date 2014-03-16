@@ -1,4 +1,4 @@
-class Views::CaptureSystemSpec::WidgetContentFor < Fortitude::Widget
+class Views::CaptureSystemSpec::WidgetContentFor < Fortitude::Widget::Html5
   def content
     content_for :bar do
       h3 "this is content for bar!"

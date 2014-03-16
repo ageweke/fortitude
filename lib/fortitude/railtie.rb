@@ -192,7 +192,7 @@ module Fortitude
               return render_without_fortitude(*new_args, &block)
             elsif (widget_block = options[:inline]) && (options[:type] == :fortitude)
               rendering_context = fortitude_rendering_context(:delegate_object => self)
-              widget_class = Class.new(Fortitude::Widget)
+              widget_class = Class.new(Fortitude::Widget::Html5)
               widget_class.use_instance_variables_for_assigns(true)
               widget_class.extra_assigns(:use)
               widget_class.send(:define_method, :content, &widget_block)

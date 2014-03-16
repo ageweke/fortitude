@@ -1,4 +1,4 @@
-class Views::Layouts::DataLayout < Fortitude::Widget
+class Views::Layouts::DataLayout < Fortitude::Widget::Html5
   needs :foo, :bar
 
   def content

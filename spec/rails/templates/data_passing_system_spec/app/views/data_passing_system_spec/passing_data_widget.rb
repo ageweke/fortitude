@@ -1,4 +1,4 @@
-class Views::DataPassingSystemSpec::PassingDataWidget < Fortitude::Widget
+class Views::DataPassingSystemSpec::PassingDataWidget < Fortitude::Widget::Html5
   needs :foo, :bar
 
   def content

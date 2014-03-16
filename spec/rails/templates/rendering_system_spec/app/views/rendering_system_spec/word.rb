@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::Word < Fortitude::Widget
+class Views::RenderingSystemSpec::Word < Fortitude::Widget::Html5
   needs :word
 
   def content

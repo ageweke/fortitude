@@ -1,4 +1,4 @@
-class Views::StaticMethodSystemSpec::Localization < Fortitude::Widget
+class Views::StaticMethodSystemSpec::Localization < Fortitude::Widget::Html5
   def content
     text "hello is: #{t('.hello')}"
   end

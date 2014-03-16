@@ -1,4 +1,4 @@
-class Views::DataPassingSystemSpec::ImplicitErbToWidgetHandoffWidget < Fortitude::Widget
+class Views::DataPassingSystemSpec::ImplicitErbToWidgetHandoffWidget < Fortitude::Widget::Html5
   implicit_shared_variable_access true
 
   def content

@@ -1,4 +1,4 @@
-class Views::CaptureSystemSpec::AnotherWidget < Fortitude::Widget
+class Views::CaptureSystemSpec::AnotherWidget < Fortitude::Widget::Html5
   needs :name
 
   def content

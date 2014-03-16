@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::WidgetLayoutForPartial < Fortitude::Widget
+class Views::RenderingSystemSpec::WidgetLayoutForPartial < Fortitude::Widget::Html5
   def content
     text "widget_partial_layout before"
     yield

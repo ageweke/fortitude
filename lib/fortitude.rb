@@ -29,7 +29,7 @@ else
   require 'fortitude/non_rails_widget_methods'
 end
 
-require 'fortitude/widget'
+require 'fortitude/widget/base'
 require 'fortitude/widget/html5'
 require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
 

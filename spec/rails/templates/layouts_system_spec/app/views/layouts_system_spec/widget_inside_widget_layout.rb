@@ -1,4 +1,4 @@
-class Views::LayoutsSystemSpec::WidgetInsideWidgetLayout < Fortitude::Widget
+class Views::LayoutsSystemSpec::WidgetInsideWidgetLayout < Fortitude::Widget::Html5
   def content
     shared_variables[:foo] = "foo_from_widget_inside_widget_layout"
     p "this is widget_inside_widget_layout"

@@ -1,4 +1,4 @@
-class Views::DataPassingSystemSpec::ExtraVariables < Fortitude::Widget
+class Views::DataPassingSystemSpec::ExtraVariables < Fortitude::Widget::Html5
   needs :foo
 
   def content

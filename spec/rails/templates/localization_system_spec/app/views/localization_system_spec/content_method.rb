@@ -1,4 +1,4 @@
-class Views::LocalizationSystemSpec::ContentMethod < Fortitude::Widget
+class Views::LocalizationSystemSpec::ContentMethod < Fortitude::Widget::Html5
   def localized_content_en
     text "wassup? this is english"
   end

@@ -1,6 +1,6 @@
 require 'json'
 
-class Views::DataPassingSystemSpec::WidgetCopiedVariables < Fortitude::Widget
+class Views::DataPassingSystemSpec::WidgetCopiedVariables < Fortitude::Widget::Html5
   implicit_shared_variable_access true
 
   def content

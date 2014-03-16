@@ -1,4 +1,4 @@
-class Views::DataPassingSystemSpec::ExtraVariablesRequested < Fortitude::Widget
+class Views::DataPassingSystemSpec::ExtraVariablesRequested < Fortitude::Widget::Html5
   extra_assigns :use
   needs :foo
 

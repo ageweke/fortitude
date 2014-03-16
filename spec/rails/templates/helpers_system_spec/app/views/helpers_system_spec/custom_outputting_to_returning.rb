@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::CustomOutputtingToReturning < Fortitude::Widget
+class Views::HelpersSystemSpec::CustomOutputtingToReturning < Fortitude::Widget::Html5
   helper :say_how_awesome_it_is, :transform => :return_output
 
   def content

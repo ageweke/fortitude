@@ -1,4 +1,4 @@
-class Views::RenderingContextSystemSpec::StartEndWidgetThroughPartialsPartialWidget < Fortitude::Widget
+class Views::RenderingContextSystemSpec::StartEndWidgetThroughPartialsPartialWidget < Fortitude::Widget::Html5
   needs :value
 
   def content

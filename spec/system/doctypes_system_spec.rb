@@ -1,6 +1,6 @@
 describe "Fortitude doctype support", :type => :system do
   def wc(*args, &block)
-    widget_class({ :superclass => Fortitude::Widget }.merge(args[-1] || { }), &block)
+    widget_class({ :superclass => Fortitude::Widget::Base }.merge(args[-1] || { }), &block)
   end
 
   def wc_with_doctype(dt, *args, &block)

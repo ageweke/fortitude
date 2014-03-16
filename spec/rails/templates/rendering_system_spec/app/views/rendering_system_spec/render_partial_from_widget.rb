@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::RenderPartialFromWidget < Fortitude::Widget
+class Views::RenderingSystemSpec::RenderPartialFromWidget < Fortitude::Widget::Html5
   def content
     p "this is the widget"
     render :partial => 'the_partial'

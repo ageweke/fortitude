@@ -1,4 +1,4 @@
-class Views::DevelopmentModeSystemSpec::ReloadWidget < Fortitude::Widget
+class Views::DevelopmentModeSystemSpec::ReloadWidget < Fortitude::Widget::Html5
   needs :datum
 
   def content

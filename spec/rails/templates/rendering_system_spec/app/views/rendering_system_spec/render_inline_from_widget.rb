@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::RenderInlineFromWidget < Fortitude::Widget
+class Views::RenderingSystemSpec::RenderInlineFromWidget < Fortitude::Widget::Html5
   def content
     p "this is the widget"
 

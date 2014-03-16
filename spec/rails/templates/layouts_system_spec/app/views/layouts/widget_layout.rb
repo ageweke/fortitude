@@ -1,4 +1,4 @@
-class Views::Layouts::WidgetLayout < Fortitude::Widget
+class Views::Layouts::WidgetLayout < Fortitude::Widget::Html5
   def content
     html do
       head do

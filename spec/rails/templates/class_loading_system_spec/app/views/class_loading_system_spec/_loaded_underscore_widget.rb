@@ -1,4 +1,4 @@
-class Views::ClassLoadingSystemSpec::LoadedUnderscoreWidget < Fortitude::Widget
+class Views::ClassLoadingSystemSpec::LoadedUnderscoreWidget < Fortitude::Widget::Html5
   class << self
     def data
       "loaded underscore widget!"
