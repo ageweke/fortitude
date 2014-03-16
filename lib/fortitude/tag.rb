@@ -34,9 +34,13 @@ module Fortitude
       return if widget.rendering_context.attribute_validation_disabled?
       bad = { }
       attributes_hash.each do |k, v|
-        bad[k] = v unless @valid_attributes.include?(k.to_sym)
+        bad[k] = v unless is_valid_attribute?(k, v)
       end
       raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @valid_attributes.keys) if bad.size > 0
+    end
+
+    def is_valid_attribute?(k, v)
+      @valid_attributes.include?(k.to_sym) || k.to_s =~ /^data-/i || (k.to_s =~ /^data$/i && v.kind_of?(Hash))
     end
 
     def validate_id_uniqueness(widget, attributes_hash)

@@ -13,6 +13,18 @@ describe "Fortitude attribute rules enforcement", :type => :system do
     expect(render(widget_class_with_content { p :class => 'bar' })).to eq("<p class=\"bar\"/>")
   end
 
+  it "should allow arbitrary individual data-* attributes" do
+    expect(render(widget_class_with_content { p :'data-foo' => 'bar', 'DATA-BAZ' => 'quux' })).to eq('<p data-foo="bar" DATA-BAZ="quux"/>')
+  end
+
+  it "should allow a data attribute, specificed as a Hash" do
+    expect(render(widget_class_with_content { p :data => { :foo => 'bar', 'baz' => 'quux' }})).to eq('<p data-foo="bar" data-baz="quux"/>')
+  end
+
+  it "should not allow a plain 'data' attribute" do
+    expect { render(widget_class_with_content { p :data => 'foo' }) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+  end
+
   it "should not enforce rules inside a widget with the setting off, even if surrounding widgets have it on" do
     outer = widget_class do
       attr_accessor :inner
