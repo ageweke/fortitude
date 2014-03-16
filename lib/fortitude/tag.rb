@@ -6,7 +6,7 @@ module Fortitude
     attr_reader :name
 
     def initialize(name, options = { })
-      options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose)
+      options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose, :allow_data_attributes, :allow_aria_attributes)
 
       @name = name.to_s.strip.downcase.to_sym
 
@@ -15,6 +15,8 @@ module Fortitude
       @allowable_enclosed_elements[:_fortitude_partial_placeholder] = true if @allowable_enclosed_elements
       @newline_before = !! options[:newline_before]
       @content_allowed = true unless options.has_key?(:content_allowed) && (! options[:content_allowed])
+      @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
+      @allow_aria_attributes = true unless options.has_key?(:allow_aria_attributes) && (! options[:allow_aria_attributes])
     end
 
     CONCAT_METHOD = "original_concat"
@@ -40,7 +42,17 @@ module Fortitude
     end
 
     def is_valid_attribute?(k, v)
-      @valid_attributes.include?(k.to_sym) || k.to_s =~ /^data-\S/i || (k.to_s =~ /^data$/i && v.kind_of?(Hash))
+      return true if @valid_attributes.include?(k.to_sym)
+
+      if @allow_data_attributes
+        return true if k.to_s =~ /^data-\S/i || (k.to_s =~ /^data$/i && v.kind_of?(Hash))
+      end
+
+      if @allow_aria_attributes
+        return true if k.to_s =~ /^aria-\S/i || (k.to_s =~ /^aria$/i && v.kind_of?(Hash))
+      end
+
+      return false
     end
 
     def validate_id_uniqueness(widget, attributes_hash)
