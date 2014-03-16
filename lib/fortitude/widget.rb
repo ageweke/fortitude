@@ -6,6 +6,7 @@ require 'fortitude/doctypes'
 require 'fortitude/partial_tag_placeholder'
 require 'fortitude/staticized_method'
 require 'fortitude/rendering_context'
+require 'fortitude/tag_store'
 require 'active_support/core_ext/hash'
 require 'active_support/notifications'
 
@@ -22,6 +23,8 @@ module Fortitude
     else
       include Fortitude::NonRailsWidgetMethods
     end
+
+    include Fortitude::TagStore
 
     class << self
       def _fortitude_class_inheritable_attribute(attribute_name, default_value, allowable_values)
@@ -83,11 +86,8 @@ module Fortitude
     end
 
     class << self
-      def tag(name, options = { })
-        @_this_class_tags ||= { }
-        new_tag = Fortitude::Tag.new(name, options)
-        @_this_class_tags[name] = new_tag
-        rebuild_tag_methods!(:tag_declared, name)
+      def tags_added!(tags)
+        rebuild_tag_methods!(:tags_declared, tags)
       end
 
       def doctype(new_doctype = nil)
@@ -99,8 +99,12 @@ module Fortitude
           end
 
           current_doctype = doctype
-          if current_doctype && new_doctype != current_doctype
-            raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
+          if current_doctype
+            if new_doctype != current_doctype
+              raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
+            else
+              add_tags_from!(new_doctype)
+            end
           end
 
           @_fortitude_doctype = new_doctype
@@ -115,24 +119,13 @@ module Fortitude
         @_this_class_tags || { }
       end
 
-      def all_tags
-        out = { }
-        out.merge!(superclass.all_tags) if superclass.respond_to?(:all_tags)
-        out.merge!(this_class_tags)
-        out
-      end
-
       def rebuild_tag_methods!(why, which_tags_in = nil, klass = self)
         rebuilding(:tag_methods, why, klass) do
-          which_tags = which_tags_in
+          all_tags = tags.values
 
-          tags = all_tags
-          which_tags ||= tags.keys
-          which_tags = Array(which_tags)
-          which_tags.each do |name|
-            tag = tags[name]
-            raise "No tag #{name.inspect}? Have: #{tags.keys.inspect}" unless tag
-            tag.define_method_on!(tags_module,
+          which_tags = Array(which_tags_in || all_tags)
+          which_tags.each do |tag_object|
+            tag_object.define_method_on!(tags_module,
               :enable_formatting => self.format_output,
               :enforce_element_nesting_rules => self.enforce_element_nesting_rules,
               :enforce_attribute_rules => self.enforce_attribute_rules,
@@ -382,6 +375,10 @@ module Fortitude
       rawtext comment_escape(s)
       rawtext " -->"
       @_fortitude_rendering_context.needs_newline! if fo
+    end
+
+    def doctype(s)
+      rawtext "<!DOCTYPE #{s}>"
     end
 
     CDATA_START = "<![CDATA[".freeze
@@ -639,66 +636,6 @@ EOS
       end
     end
 
-    tag :html, :newline_before => true
-    tag :body, :newline_before => true
-    tag :head, :newline_before => true
-    tag :link, :newline_before => true, :content_allowed => false
-    tag :style, :newline_before => true
-
-    tag :header, :newline_before => true
-    tag :nav, :newline_before => true
-    tag :section, :newline_before => true
-    tag :footer, :newline_before => true
-
-    tag :script, :newline_before => true
-    tag :meta, :newline_before => true, :content_allowed => false
-    tag :title, :newline_before => true
-
-    tag :h1, :newline_before => true
-    tag :h2, :newline_before => true
-    tag :h3, :newline_before => true
-    tag :h4, :newline_before => true
-    tag :h5, :newline_before => true
-    tag :h6, :newline_before => true
-
-    tag :div, :newline_before => true
-    tag :span
-
-    tag :ul, :newline_before => true
-    tag :ol, :newline_before => true
-    tag :li, :newline_before => true
-
-    tag :p, :newline_before => true, :can_enclose => [ :b ], :valid_attributes => %w{class id}
-
-    tag :a
-    tag :img
-
-    tag :form, :newline_before => true
-    tag :input, :newline_before => true
-    tag :submit, :newline_before => true
-    tag :button, :newline_before => true
-    tag :label, :newline_before => true
-    tag :select, :newline_before => true
-    tag :optgroup, :newline_before => true
-    tag :option, :newline_before => true
-    tag :textarea, :newline_before => true
-    tag :fieldset, :newline_before => true
-
-    tag :table, :newline_before => true
-    tag :tr, :newline_before => true
-    tag :th, :newline_before => true
-    tag :td, :newline_before => true
-
-    tag :time
-
-    tag :i
-    tag :b
-    tag :em
-    tag :strong
-
-    tag :br, :content_allowed => false
-    tag :hr, :newline_before => true, :content_allowed => false
-
     def to_html(rendering_context)
       @_fortitude_rendering_context = rendering_context
       @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
@@ -763,10 +700,6 @@ EOS
       dt = self.class.doctype
       raise "You must set a doctype at the class level, using something like 'doctype :html5', before you can use this method." unless dt
       dt.declare!(self)
-    end
-
-    def doctype(string)
-      rawtext "<!DOCTYPE #{string}>"
     end
 
     def invoke_helper(name, *args, &block)
@@ -869,3 +802,69 @@ EOS
     end
   end
 end
+
+class Fortitude::TempTagStore
+  include Fortitude::TagStore
+
+  tag :html, :newline_before => true
+  tag :body, :newline_before => true
+  tag :head, :newline_before => true
+  tag :link, :newline_before => true, :content_allowed => false
+  tag :style, :newline_before => true
+
+  tag :header, :newline_before => true
+  tag :nav, :newline_before => true
+  tag :section, :newline_before => true
+  tag :footer, :newline_before => true
+
+  tag :script, :newline_before => true
+  tag :meta, :newline_before => true, :content_allowed => false
+  tag :title, :newline_before => true
+
+  tag :h1, :newline_before => true
+  tag :h2, :newline_before => true
+  tag :h3, :newline_before => true
+  tag :h4, :newline_before => true
+  tag :h5, :newline_before => true
+  tag :h6, :newline_before => true
+
+  tag :div, :newline_before => true
+  tag :span
+
+  tag :ul, :newline_before => true
+  tag :ol, :newline_before => true
+  tag :li, :newline_before => true
+
+  tag :p, :newline_before => true, :can_enclose => [ :b ], :valid_attributes => %w{class id}
+
+  tag :a
+  tag :img
+
+  tag :form, :newline_before => true
+  tag :input, :newline_before => true
+  tag :submit, :newline_before => true
+  tag :button, :newline_before => true
+  tag :label, :newline_before => true
+  tag :select, :newline_before => true
+  tag :optgroup, :newline_before => true
+  tag :option, :newline_before => true
+  tag :textarea, :newline_before => true
+  tag :fieldset, :newline_before => true
+
+  tag :table, :newline_before => true
+  tag :tr, :newline_before => true
+  tag :th, :newline_before => true
+  tag :td, :newline_before => true
+
+  tag :time
+
+  tag :i
+  tag :b
+  tag :em
+  tag :strong
+
+  tag :br, :content_allowed => false
+  tag :hr, :newline_before => true, :content_allowed => false
+end
+
+Fortitude::Widget.add_tags_from!(Fortitude::TempTagStore)

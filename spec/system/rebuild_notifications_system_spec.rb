@@ -110,7 +110,7 @@ describe "Fortitude rebuilding notifications", :type => :system do
   describe "tag_methods" do
     it "should fire a notification when rebuilding because a tag was added" do
       @wc.tag :foo
-      expect_notification(:what => :tag_methods, :why => :tag_declared)
+      expect_notification(:what => :tag_methods, :why => :tags_declared)
       expect_no_more_notifications!(:tag_methods)
     end
 

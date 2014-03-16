@@ -14,18 +14,19 @@ module Fortitude
       out = { }
 
       [
-        Html5.new,
+        Html5,
 
-        Html4Strict.new,
-        Html4Transitional.new,
-        Html4Frameset.new,
+        Html4Strict,
+        Html4Transitional,
+        Html4Frameset,
 
-        Xhtml10Strict.new,
-        Xhtml10Transitional.new,
-        Xhtml10Frameset.new,
+        Xhtml10Strict,
+        Xhtml10Transitional,
+        Xhtml10Frameset,
 
-        Xhtml11.new
-      ].each do |doctype|
+        Xhtml11
+      ].each do |doctype_class|
+        doctype = doctype_class.new
         out[doctype.name] = doctype
       end
 
