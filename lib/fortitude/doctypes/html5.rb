@@ -164,69 +164,117 @@ module Fortitude
       html5_tag :br, :newline_before => true, :content_allowed => false
       html5_tag :wbr, :content_allowed => false
 
+      # HTML5 spec, section 4.6
+      html5_tag :ins, :valid_attributes => %w{cite datetime}, :spec => 'http://www.w3.org/TR/html5/edits.html#the-ins-element'
+      html5_tag :del, :valid_attributes => %w{cite datetime}, :spec => 'http://www.w3.org/TR/html5/edits.html#the-del-element'
 
+      # HTML5 spec, section 4.7
+      html5_tag :img, :valid_attributes => %w{alt src crossorigin usemap ismap width height}, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-img-element'
+      html5_tag :iframe, :valid_attributes => %w{src srcdoc name sandbox seamless width height},
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-iframe-element'
+      html5_tag :embed, :valid_attributes => %w{src type width height}, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-embed-element'
+      html5_tag :object, :valid_attributes => %w{data type typemustmatch name usemap form width height},
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-object-element'
+      html5_tag :param, :valid_attributes => %w{name value}, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-param-element'
+      html5_tag :video, :valid_attributes => %w{src crossorigin poster preload autoplay mediagroup loop muted controls width height},
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-video-element'
+      html5_tag :audio, :valid_attributes => %w{src crossorigin preload autoplay mediagroup loop muted controls},
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-audio-element'
+      html5_tag :source, :valid_attributes => %w{src type media}, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-source-element'
+      html5_tag :track, :valid_attributes => %w{kind src srclang label default}, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-track-element'
+      html5_tag :map, :valid_attributes => %w{name},
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-map-element'
+      html5_tag :area, :valid_attributes => %w{alt coords shape href target download rel hreflang type},
+        :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-area-element'
 
+      # HTML5 spec, section 4.9
+      html5_tag :table, :can_enclose => %w{caption colgroup thead tfoot tbody tr} + SCRIPT_SUPPORTING_ELEMENTS,
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-table-element'
+      html5_tag :caption, :can_enclose => FLOW_CONTENT - %w{table},
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-caption-element'
+      html5_tag :colgroup, :valid_attributes => %w{span}, :can_enclose => %w{col template},
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-colgroup-element'
+      html5_tag :col, :valid_attributes => %w{span}, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-col-element'
+      html5_tag :tbody, :can_enclose => %w{tr} + SCRIPT_SUPPORTING_ELEMENTS,
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-tbody-element'
+      html5_tag :thead, :can_enclose => %w{tr} + SCRIPT_SUPPORTING_ELEMENTS,
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-thead-element'
+      html5_tag :tfoot, :can_enclose => %w{tr} + SCRIPT_SUPPORTING_ELEMENTS,
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-tfoot-element'
+      html5_tag :tr, :can_enclose => %w{td th} + SCRIPT_SUPPORTING_ELEMENTS,
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-tr-element'
+      html5_tag :td, :can_enclose => FLOW_CONTENT, :valid_attributes => %w{colspan rowspan headers},
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-td-element'
+      html5_tag :th, :can_enclose => FLOW_CONTENT - %w{header footer} - SECTIONING_CONTENT - HEADING_CONTENT,
+        :valid_attributes => %w{colspan rowspan headers scope abbr},
+        :spec => 'http://www.w3.org/TR/html5/tabular-data.html#the-th-element'
 
+      # HTML5 spec, section 4.10
+      html5_tag :form, :can_enclose => FLOW_CONTENT - %w{form},
+        :valid_attributes => %w{accept-charset action autocomplete enctype method name novalidate target},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-form-element'
+      html5_tag :label, :can_enclose => PHRASING_CONTENT - %w{button keygen meter output progress select textarea} - %w{label},
+        :valid_attributes => %w{form for},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-label-element'
+      html5_tag :input, :content_allowed => false,
+        :valid_attributes => %w{accept alt autocomplete autofocus checked dirname disabled form formaction} +
+                             %w{formenctype formmethod formnovalidate formtarget height list max maxlength} +
+                             %w{min minlength multiple name pattern placeholder readonly required size src} +
+                             %w{step type value width},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-input-element'
+      html5_tag :button, :can_enclose => PHRASING_CONTENT - INTERACTIVE_CONTENT,
+        :valid_attributes => %w{autofocus disabled form formaction formenctype formmethod formnovalidate} +
+                             %w{formtarget name type value},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-button-element'
+      html5_tag :select, :can_enclose => %w{option optgroup} + SCRIPT_SUPPORTING_ELEMENTS,
+        :valid_attributes => %w{autofocus disabled form multiple name required size},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-select-element'
+      html5_tag :datalist, :can_enclose => PHRASING_CONTENT + %w{option},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-datalist-element'
+      html5_tag :optgroup, :can_enclose => %w{option} + SCRIPT_SUPPORTING_ELEMENTS,
+        :valid_attributes => %w{disabled label},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-optgroup-element'
+      html5_tag :option, :can_enclose => %w{_text}, :valid_attributes => %w{disabled label selected value},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-option-element'
+      html5_tag :textarea, :can_enclose => %w{_text},
+        :valid_attributes => %w{autocomplete autofocus cols dirname disabled form maxlength minlength name} +
+                             %w{placeholder readonly required rows wrap},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-textarea-element'
+      html5_tag :keygen, :content_allowed => false, :valid_attributes => %w{autofocus challenge disabled form keytype name},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-keygen-element'
+      html5_tag :output, :can_enclose => PHRASING_CONTENT, :valid_attributes => %w{for form name},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-output-element'
+      html5_tag :progress, :can_enclose => PHRASING_CONTENT - %w{progress}, :valid_attributes => %w{value max},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-progress-element'
+      html5_tag :meter, :can_enclose => PHRASING_CONTENT - %w{meter}, :valid_attributes => %w{value min max low high optimum},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-meter-element'
+      html5_tag :fieldset, :can_enclose => FLOW_CONTENT + %w{legend}, :valid_attributes => %w{disabled form name},
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-fieldset-element'
+      html5_tag :legend, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/forms.html#the-legend-element'
 
+      # HTML5 spec, section 4.11
+      html5_tag :details, :can_enclose => %w{summary} + FLOW_CONTENT, :valid_attributes => %w{open},
+        :spec => 'http://www.w3.org/TR/html5/interactive-elements.html#the-details-element'
+      html5_tag :summary, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/interactive-elements.html#the-summary-element'
+      html5_tag :dialog, :can_enclose => FLOW_CONTENT, :valid_attributes => %w{open},
+        :spec => 'http://www.w3.org/TR/html5/interactive-elements.html#the-dialog-element'
 
-      html5_tag :body, :newline_before => true
-      html5_tag :head, :newline_before => true
-      html5_tag :link, :newline_before => true, :content_allowed => false
-      html5_tag :style, :newline_before => true
-
-      html5_tag :header, :newline_before => true
-      html5_tag :nav, :newline_before => true
-      html5_tag :section, :newline_before => true
-      html5_tag :footer, :newline_before => true
-
-      html5_tag :script, :newline_before => true
-      html5_tag :meta, :newline_before => true, :content_allowed => false
-      html5_tag :title, :newline_before => true
-
-      html5_tag :h1, :newline_before => true
-      html5_tag :h2, :newline_before => true
-      html5_tag :h3, :newline_before => true
-      html5_tag :h4, :newline_before => true
-      html5_tag :h5, :newline_before => true
-      html5_tag :h6, :newline_before => true
-
-      html5_tag :div, :newline_before => true
-      html5_tag :span
-
-      html5_tag :ul, :newline_before => true
-      html5_tag :ol, :newline_before => true
-      html5_tag :li, :newline_before => true
-
-      html5_tag :p, :newline_before => true, :can_enclose => [ :b ], :valid_attributes => %w{class id}
-
-      html5_tag :a
-      html5_tag :img
-
-      html5_tag :form, :newline_before => true
-      html5_tag :input, :newline_before => true
-      html5_tag :submit, :newline_before => true
-      html5_tag :button, :newline_before => true
-      html5_tag :label, :newline_before => true
-      html5_tag :select, :newline_before => true
-      html5_tag :optgroup, :newline_before => true
-      html5_tag :option, :newline_before => true
-      html5_tag :textarea, :newline_before => true
-      html5_tag :fieldset, :newline_before => true
-
-      html5_tag :table, :newline_before => true
-      html5_tag :tr, :newline_before => true
-      html5_tag :th, :newline_before => true
-      html5_tag :td, :newline_before => true
-
-      html5_tag :time
-
-      html5_tag :i
-      html5_tag :b
-      html5_tag :em
-      html5_tag :strong
-
-      html5_tag :br, :content_allowed => false
-      html5_tag :hr, :newline_before => true, :content_allowed => false
+      # HTML5 spec, section 4.12
+      html5_tag :script, :can_enclose => %w{_text}, :valid_attributes => %w{src type charset async defer crossorigin},
+        :spec => 'http://www.w3.org/TR/html5/scripting-1.html#the-script-element'
+      html5_tag :noscript, :spec => 'http://www.w3.org/TR/html5/scripting-1.html#the-noscript-element'
+      html5_tag :template, :spec => 'http://www.w3.org/TR/html5/scripting-1.html#the-template-element'
+      html5_tag :canvas, :valid_attributes => %w{width height},
+        :spec => 'http://www.w3.org/TR/html5/scripting-1.html#the-canvas-element'
     end
   end
 end
