@@ -237,7 +237,7 @@ module Fortitude
       html5_tag :del, :valid_attributes => %w{cite datetime}, :spec => 'http://www.w3.org/TR/html5/edits.html#the-del-element'
 
       # HTML5 spec, section 4.7
-      html5_tag :img, :newline_before => true, :valid_attributes => %w{alt src crossorigin usemap ismap width height},
+      html5_tag :img, :valid_attributes => %w{alt src crossorigin usemap ismap width height},
         :content_allowed => false,
         :spec => 'http://www.w3.org/TR/html5/embedded-content-0.html#the-img-element'
       html5_tag :iframe, :newline_before => true, :valid_attributes => %w{src srcdoc name sandbox seamless width height},
