@@ -3,10 +3,11 @@ require 'fortitude/simple_template'
 
 module Fortitude
   class Tag
-    attr_reader :name
+    attr_reader :name, :spec
 
     def initialize(name, options = { })
-      options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose, :allow_data_attributes, :allow_aria_attributes)
+      options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose,
+        :allow_data_attributes, :allow_aria_attributes, :spec)
 
       @name = name.to_s.strip.downcase.to_sym
 
@@ -17,6 +18,7 @@ module Fortitude
       @content_allowed = true unless options.has_key?(:content_allowed) && (! options[:content_allowed])
       @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
       @allow_aria_attributes = true unless options.has_key?(:allow_aria_attributes) && (! options[:allow_aria_attributes])
+      @spec = options[:spec]
     end
 
     CONCAT_METHOD = "original_concat"
