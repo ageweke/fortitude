@@ -83,86 +83,154 @@ module Fortitude
       # ===============================================================================================================
 
       # HTML5 spec, section 4.1.1
-      html5_tag :html, :newline_before => true, :can_enclose => %w{head body}, :valid_attributes => %w{manifest}
+      html5_tag :html, :newline_before => true, :can_enclose => %w{head body}, :valid_attributes => %w{manifest},
+        :spec => 'http://www.w3.org/TR/html5/semantics.html#the-html-element'
 
       # HTML5 spec, section 4.2
-      html5_tag :head, :newline_before => true, :can_enclose => METADATA_CONTENT
-      html5_tag :title, :newline_before => true, :can_enclose => %w{_text}
-      html5_tag :base, :newline_before => true, :content_allowed => false, :valid_attributes => %w{href target}
+      html5_tag :head, :newline_before => true, :can_enclose => METADATA_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-head-element'
+      html5_tag :title, :newline_before => true, :can_enclose => %w{_text},
+        :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-title-element'
+      html5_tag :base, :newline_before => true, :content_allowed => false, :valid_attributes => %w{href target},
+        :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-base-element'
       html5_tag :link, :newline_before => true, :content_allowed => false,
-                       :valid_attributes => %w{href crossorigin rel media hreflang type sizes}
+        :valid_attributes => %w{href crossorigin rel media hreflang type sizes},
+        :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-link-element'
       html5_tag :meta, :newline_before => true, :content_allowed => false,
-                       :valid_attributes => %w{name http-equiv content charset}
-      html5_tag :style, :newline_before => true, :valid_attributes => %w{media type scoped}
+        :valid_attributes => %w{name http-equiv content charset},
+        :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-meta-element'
+      html5_tag :style, :newline_before => true, :valid_attributes => %w{media type scoped},
+        :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-style-element'
 
       # HTML5 spec, section 4.3
       html5_tag :body, :newline_before => true, :can_enclose => FLOW_CONTENT,
-                       :valid_attributes => %w{onafterprint onbeforeprint onbeforeunload onhashchange} +
-                                            %w{onmessage onoffline ononline onpagehide onpageshow onpopstate} +
-                                            %w{onstorage onunload}
-      html5_tag :article, :newline_before => true, :can_enclose => FLOW_CONTENT
-      html5_tag :section, :newline_before => true, :can_enclose => FLOW_CONTENT
-      html5_tag :nav, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{main}
-      html5_tag :aside, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{main}
-      html5_tag :h1, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :h2, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :h3, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :h4, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :h5, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :h6, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :header, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{header footer main}
-      html5_tag :footer, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{header footer main}
-      html5_tag :address, :newline_before => true, :can_enclose => FLOW_CONTENT - HEADING_CONTENT - SECTIONING_CONTENT - %w{header footer address}
+        :valid_attributes => %w{onafterprint onbeforeprint onbeforeunload onhashchange} +
+                             %w{onmessage onoffline ononline onpagehide onpageshow onpopstate} +
+                             %w{onstorage onunload},
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-body-element'
+      html5_tag :article, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-article-element'
+      html5_tag :section, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-section-element'
+      html5_tag :nav, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{main},
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-nav-element'
+      html5_tag :aside, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{main},
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-aside-element'
+      html5_tag :h1, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements'
+      html5_tag :h2, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements'
+      html5_tag :h3, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements'
+      html5_tag :h4, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements'
+      html5_tag :h5, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements'
+      html5_tag :h6, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements'
+      html5_tag :header, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{header footer main},
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-header-element'
+      html5_tag :footer, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{header footer main},
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-footer-element'
+      html5_tag :address, :newline_before => true,
+        :can_enclose => FLOW_CONTENT - HEADING_CONTENT - SECTIONING_CONTENT - %w{header footer address},
+        :spec => 'http://www.w3.org/TR/html5/sections.html#the-address-element'
 
       # HTML5 spec, section 4.4
-      html5_tag :p, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :hr, :newline_before => true, :content_allowed => false
-      html5_tag :pre, :newline_before => true, :can_enclose => PHRASING_CONTENT
-      html5_tag :blockquote, :newline_before => true, :can_enclose => FLOW_CONTENT, :valid_attributes => %w{cite}
+      html5_tag :p, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-p-element'
+      html5_tag :hr, :newline_before => true, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-hr-element'
+      html5_tag :pre, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-pre-element'
+      html5_tag :blockquote, :newline_before => true, :can_enclose => FLOW_CONTENT, :valid_attributes => %w{cite},
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-blockquote-element'
       html5_tag :ol, :newline_before => true, :can_enclose => %w{li} + SCRIPT_SUPPORTING_ELEMENTS,
-                     :valid_attributes => %w{reversed start type}
-      html5_tag :ul, :newline_before => true, :can_enclose => %w{li} + SCRIPT_SUPPORTING_ELEMENTS
-      html5_tag :li, :newline_before => true, :can_enclose => FLOW_CONTENT, :valid_attributes => %w{value}
-      html5_tag :dl, :newline_before => true, :can_enclose => %w{dt dd} + SCRIPT_SUPPORTING_ELEMENTS
-      html5_tag :dt, :newline_before => true, :can_enclose => FLOW_CONTENT - %w{header footer} - SECTIONING_CONTENT - HEADING_CONTENT
-      html5_tag :dd, :newline_before => true, :can_enclose => FLOW_CONTENT
-      html5_tag :figure, :newline_before => true, :can_enclose => %w{figcaption} + FLOW_CONTENT
-      html5_tag :figcaption, :newline_before => true, :can_enclose => FLOW_CONTENT
-      html5_tag :div, :newline_before => true, :can_enclose => FLOW_CONTENT
-      html5_tag :main, :newline_before => true, :can_enclose => FLOW_CONTENT
+        :valid_attributes => %w{reversed start type},
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-ol-element'
+      html5_tag :ul, :newline_before => true, :can_enclose => %w{li} + SCRIPT_SUPPORTING_ELEMENTS,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-ul-element'
+      html5_tag :li, :newline_before => true, :can_enclose => FLOW_CONTENT, :valid_attributes => %w{value},
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-li-element'
+      html5_tag :dl, :newline_before => true, :can_enclose => %w{dt dd} + SCRIPT_SUPPORTING_ELEMENTS,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-dl-element'
+      html5_tag :dt, :newline_before => true,
+        :can_enclose => FLOW_CONTENT - %w{header footer} - SECTIONING_CONTENT - HEADING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-dt-element'
+      html5_tag :dd, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-dd-element'
+      html5_tag :figure, :newline_before => true, :can_enclose => %w{figcaption} + FLOW_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-figure-element'
+      html5_tag :figcaption, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-figcaption-element'
+      html5_tag :div, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-div-element'
+      html5_tag :main, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-main-element'
 
       # HTML5 spec, section 4.5
-      html5_tag :a, :valid_attributes => %w{href target download rel hreflang type}
-      html5_tag :em, :can_enclose => PHRASING_CONTENT
-      html5_tag :strong, :can_enclose => PHRASING_CONTENT
-      html5_tag :small, :can_enclose => PHRASING_CONTENT
-      html5_tag :s, :can_enclose => PHRASING_CONTENT
-      html5_tag :cite, :can_enclose => PHRASING_CONTENT
-      html5_tag :q, :can_enclose => PHRASING_CONTENT, :valid_attributes => %w{cite}
-      html5_tag :dfn, :can_enclose => PHRASING_CONTENT - %w{dfn}
-      html5_tag :abbr, :can_enclose => PHRASING_CONTENT
-      html5_tag :data, :can_enclose => PHRASING_CONTENT, :valid_attributes => %w{value}
-      html5_tag :time, :can_enclose => PHRASING_CONTENT, :valid_attributes => %w{datetime}
-      html5_tag :code, :can_enclose => PHRASING_CONTENT
-      html5_tag :var, :can_enclose => PHRASING_CONTENT
-      html5_tag :samp, :can_enclose => PHRASING_CONTENT
-      html5_tag :kbd, :can_enclose => PHRASING_CONTENT
-      html5_tag :sub, :can_enclose => PHRASING_CONTENT
-      html5_tag :sup, :can_enclose => PHRASING_CONTENT
-      html5_tag :i, :can_enclose => PHRASING_CONTENT
-      html5_tag :b, :can_enclose => PHRASING_CONTENT
-      html5_tag :u, :can_enclose => PHRASING_CONTENT
-      html5_tag :mark, :can_enclose => PHRASING_CONTENT
-      html5_tag :ruby, :can_enclose => PHRASING_CONTENT + %w{rb rt rtc rp}
-      html5_tag :rb, :can_enclose => PHRASING_CONTENT
-      html5_tag :rt, :can_enclose => PHRASING_CONTENT
-      html5_tag :rtc, :can_enclose => PHRASING_CONTENT
-      html5_tag :rp, :can_enclose => PHRASING_CONTENT
-      html5_tag :bdi, :can_enclose => PHRASING_CONTENT
-      html5_tag :bdo, :can_enclose => PHRASING_CONTENT
-      html5_tag :span, :can_enclose => PHRASING_CONTENT
-      html5_tag :br, :newline_before => true, :content_allowed => false
-      html5_tag :wbr, :content_allowed => false
+      html5_tag :a, :valid_attributes => %w{href target download rel hreflang type},
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-a-element'
+      html5_tag :em, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-em-element'
+      html5_tag :strong, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-strong-element'
+      html5_tag :small, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-small-element'
+      html5_tag :s, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-s-element'
+      html5_tag :cite, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-cite-element'
+      html5_tag :q, :can_enclose => PHRASING_CONTENT, :valid_attributes => %w{cite},
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-q-element'
+      html5_tag :dfn, :can_enclose => PHRASING_CONTENT - %w{dfn},
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-dfn-element'
+      html5_tag :abbr, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-abbr-element'
+      html5_tag :data, :can_enclose => PHRASING_CONTENT, :valid_attributes => %w{value},
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-data-element'
+      html5_tag :time, :can_enclose => PHRASING_CONTENT, :valid_attributes => %w{datetime},
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-time-element'
+      html5_tag :code, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-code-element'
+      html5_tag :var, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-var-element'
+      html5_tag :samp, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-samp-element'
+      html5_tag :kbd, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-kbd-element'
+      html5_tag :sub, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-sub-and-sup-elements'
+      html5_tag :sup, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-sub-and-sup-elements'
+      html5_tag :i, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-i-element'
+      html5_tag :b, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-b-element'
+      html5_tag :u, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-b-element'
+      html5_tag :mark, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-mark-element'
+      html5_tag :ruby, :can_enclose => PHRASING_CONTENT + %w{rb rt rtc rp},
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-ruby-element'
+      html5_tag :rb, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-rb-element'
+      html5_tag :rt, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-rt-element'
+      html5_tag :rtc, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-rtc-element'
+      html5_tag :rp, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-rp-element'
+      html5_tag :bdi, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-bdi-element'
+      html5_tag :bdo, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-bdo-element'
+      html5_tag :span, :can_enclose => PHRASING_CONTENT,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-span-element'
+      html5_tag :br, :newline_before => true, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-br-element'
+      html5_tag :wbr, :content_allowed => false,
+        :spec => 'http://www.w3.org/TR/html5/text-level-semantics.html#the-wbr-element'
 
       # HTML5 spec, section 4.6
       html5_tag :ins, :valid_attributes => %w{cite datetime}, :spec => 'http://www.w3.org/TR/html5/edits.html#the-ins-element'
