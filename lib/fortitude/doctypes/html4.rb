@@ -127,6 +127,14 @@ module Fortitude
         :spec => 'http://www.w3.org/TR/html401/struct/lists.html#h-10.3'
       tag :dd, :newline_before => true, :valid_attributes => ATTRS_ATTRIBUTES, :can_enclose => FLOW_CONTENT,
         :spec => 'http://www.w3.org/TR/html401/struct/lists.html#h-10.3'
+      # TODO: DEPRECATED?
+      tag :dir, :newline_before => true, :valid_attributes => ATTRS_ATTRIBUTES + %w{compact},
+        :can_enclose => %w{li},
+        :spec => 'http://www.w3.org/TR/html401/sgml/loosedtd.html#dir'
+      # TODO: DEPRECATED?
+      tag :menu, :newline_before => true, :valid_attributes => ATTRS_ATTRIBUTES + %w{menu},
+        :can_enclose => %w{li},
+        :spec => 'http://www.w3.org/TR/html401/sgml/loosedtd.html#dir'
 
       # HTML4.01 spec, section 11.2
       tag :table, :newline_before => true, :can_enclose => %w{caption col colgroup thead tfoot tbody tr},
@@ -169,7 +177,93 @@ module Fortitude
         :spec => 'http://www.w3.org/TR/html401/struct/links.html#h-12.4'
 
       # HTML4.01 spec, section 13.2
+      tag :img, :content_allowed => false,
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{src alt longdesc name height width usemap ismap},
+        :spec => 'http://www.w3.org/TR/html401/struct/objects.html#h-13.2'
 
+      # HTML4.01 spec, section 13.3
+      tag :object, :newline_before => true, :can_enclose => FLOW_CONTENT + %w{param},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{declare classid codebase data type codetype archive standby height} +
+                             %w{width usemap name tabindex},
+        :spec => 'http://www.w3.org/TR/html401/struct/objects.html#h-13.3'
+      tag :param, :newline_before => true, :content_allowed => false,
+        :valid_attributes => %w{id name value valuetype type},
+        :spec => 'http://www.w3.org/TR/html401/struct/objects.html#h-13.3.2'
+
+      # HTML4.01 spec, section 13.4
+      # TODO: DEPRECATED?
+      tag :applet, :newline_before => true, :can_enclose => %w{param} + FLOW_CONTENT,
+        :valid_attributes => CORE_ATTRIBUTES + %w{codebase archive code object alt name width height align hspace vspace},
+        :spec => 'http://www.w3.org/TR/html401/struct/objects.html#h-13.4'
+
+      # HTML4.01 spec, section 13.6
+      tag :map, :newline_before => true, :can_enclose => BLOCK_CONTENT + %w{area},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{name},
+        :spec => 'http://www.w3.org/TR/html401/struct/objects.html#h-13.6.1'
+      tag :area, :newline_before => true, :content_allowed => false,
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{shape coords href nohref alt tabindex accesskey onfocus onblur},
+        :spec => 'http://www.w3.org/TR/html401/struct/objects.html#h-13.6.1'
+
+      # HTML4.01 spec, section 15.2
+      tag :tt, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :i, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :b, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :big, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :small, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :strike, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :s, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :u, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      tag :font, :can_enclose => INLINE_CONTENT,
+        :valid_attributes => CORE_ATTRIBUTES + I18N_ATTRIBUTES + %w{size color face},
+        :spec => 'http://www.w3.org/TR/html401/sgml/loosedtd.html#basefont'
+      tag :basefont, :content_allowed => false, :valid_attributes => %w{id size color face},
+        :spec => 'http://www.w3.org/TR/html401/sgml/loosedtd.html#basefont'
+
+      # HTML4.01 spec, section 15.3
+      tag :hr, :newline_before => true, :content_allowed => false, :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.3'
+
+      # HTML4.01 spec, section 16.2
+      # TODO: Frameset DTD?
+      tag :frameset, :newline_before => true, :can_enclose => %w{frameset frame noframes},
+        :valid_attributes => CORE_ATTRIBUTES + %w{rows cols onload onunload},
+        :spec => 'http://www.w3.org/TR/html401/present/frames.html#h-16.2.1'
+      tag :frame, :newline_before => true, :content_allowed => false,
+        :valid_attributes => CORE_ATTRIBUTES + %w{longdesc name src frameborder marginwidth marginheight noresize scrolling},
+        :spec => 'http://www.w3.org/TR/html401/present/frames.html#h-16.2.2'
+      tag :noframes, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/present/frames.html#h-16.4.1'
+
+      # HTML4.01 spec, section 16.5
+      tag :iframe, :newline_before => true, :can_enclose => FLOW_CONTENT,
+        :valid_attributes => CORE_ATTRIBUTES + %w{longdesc name src frameborder marginwidth marginheight scrolling} +
+                             %w{align height width},
+        :spec => 'http://www.w3.org/TR/html401/present/frames.html#h-16.5'
+
+      # HTML4.01 spec, section 17.3
+      tag :form, :newline_before => true, :can_enclose => BLOCK_CONTENT + %w{script} - %w{form},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{action method enctype accept name onsubmit onreset accept-charset},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.3'
+
+      # HTML4.01 spec, section 17.4
+      tag :input, :newline_before => true, :content_allowed => false,
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{type name value checked disabled readonly size maxlength src alt} +
+                             %w{usemap ismap tabindex accesskey onfocus onblur onselect onchange accept},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.4'
+
+      # HTML4.01 spec, section 17.5
+      tag :button, :newline_before => true, :can_enclose => FLOW_CONTENT - FORMCTRL_CONTENT - %w{a form fieldset},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{name value type disabled tabindex accesskey onfocus onblur},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.5'
     end
   end
 end
