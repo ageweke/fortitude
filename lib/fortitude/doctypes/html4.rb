@@ -264,6 +264,49 @@ module Fortitude
       tag :button, :newline_before => true, :can_enclose => FLOW_CONTENT - FORMCTRL_CONTENT - %w{a form fieldset},
         :valid_attributes => ATTRS_ATTRIBUTES + %w{name value type disabled tabindex accesskey onfocus onblur},
         :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.5'
+
+      # HTML4.01 spec, section 17.6
+      tag :select, :newline_before => true, :can_enclose => %w{optgroup option},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{name size multiple disabled tabindex onfocus onblur onchange},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.6'
+      tag :optgroup, :newline_before => true, :can_enclose => %w{option},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{disabled label},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.6'
+      tag :option, :newline_before => true, :can_enclose => %w{_text},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{selected disabled label value},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.6'
+
+      # HTML4.01 spec, section 17.7
+      tag :textarea, :newline_before => true, :can_enclose => %w{_text},
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{name rows cols disabled readonly tabindex accesskey} +
+                             %w{onfocus onblur onselect onchange},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.7'
+      # TODO: DEPRECATED?
+      tag :isindex, :newline_before => true, :content_allowed => false,
+        :valid_attributes => CORE_ATTRIBUTES + I18N_ATTRIBUTES + %w{prompt},
+        :spec => 'http://www.w3.org/TR/html401/sgml/loosedtd.html#isindex'
+
+      # HTML4.01 spec, section 17.9
+      tag :label, :newline_before => true, :can_enclose => INLINE_CONTENT,
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{for accesskey onfocus onblur},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.9.1'
+
+      # HTML4.01 spec, section 17.10
+      tag :fieldset, :newline_before => true, :can_enclose => %w{_text legend} + FLOW_CONTENT,
+        :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.10'
+      tag :legend, :newline_before => true, :can_enclose => INLINE_CONTENT,
+        :valid_attributes => ATTRS_ATTRIBUTES + %w{accesskey},
+        :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.10'
+
+      # HTML4.01 spec, section 18.2
+      tag :script, :newline_before => true, :can_enclose => %w{_text},
+        :valid_attributes => %w{charset type src defer},
+        :spec => 'http://www.w3.org/TR/html401/interact/scripts.html#h-18.2.1'
+      # HTML4.01 spec, section 18.3
+      tag :noscript, :newline_before => true, :can_enclose => BLOCK_CONTENT,
+        :valid_attributes => ATTRS_ATTRIBUTES,
+        :spec => 'http://www.w3.org/TR/html401/interact/scripts.html#h-18.3.1'
     end
   end
 end
