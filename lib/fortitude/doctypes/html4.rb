@@ -24,7 +24,7 @@ module Fortitude
       # TRANSITIONAL: + %w{dir menu}
       LIST_CONTENT = %w{ul ol}
       PREFORMATTED_CONTENT = %w{pre}
-      # TRANSITIONAL: + %w{center noframes isindex }
+      # TRANSITIONAL: + %w{center noframes isindex}
       BLOCK_CONTENT = %w{p} + HEADING_CONTENT + LIST_CONTENT + PREFORMATTED_CONTENT + %w{dl div noscript} +
                       %w{blockquote form hr table fieldset address}
       # TRANSITIONAL: + %w{u s strike}
@@ -128,6 +128,7 @@ module Fortitude
       # TRANSITIONAL: :valid_attributes += %w{align}
       tag :p, :newline_before => true, :valid_attributes => ATTRS_ATTRIBUTES, :can_enclose => INLINE_CONTENT,
         :spec => 'http://www.w3.org/TR/html401/struct/text.html#h-9.3.1'
+      # TRANSITIONAL: :valid_attributes += %w{clear}
       tag :br, :newline_before => true, :valid_attributes => CORE_ATTRIBUTES, :content_allowed => false,
         :spec => 'http://www.w3.org/TR/html401/struct/text.html#h-9.3.2.1'
       # TRANSITIONAL: :valid_attributes += %w{width}
@@ -259,15 +260,20 @@ module Fortitude
         :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
       tag :small, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
         :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      # TRANSITIONAL:
       tag :strike, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
         :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      # TRANSITIONAL:
       tag :s, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
         :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      # TRANSITIONAL:
       tag :u, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
         :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
+      # TRANSITIONAL:
       tag :font, :can_enclose => INLINE_CONTENT,
         :valid_attributes => CORE_ATTRIBUTES + I18N_ATTRIBUTES + %w{size color face},
         :spec => 'http://www.w3.org/TR/html401/sgml/loosedtd.html#basefont'
+      # TRANSITIONAL:
       tag :basefont, :content_allowed => false, :valid_attributes => %w{id size color face},
         :spec => 'http://www.w3.org/TR/html401/sgml/loosedtd.html#basefont'
 
