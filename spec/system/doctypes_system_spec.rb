@@ -39,7 +39,7 @@ describe "Fortitude doctype support", :type => :system do
       end
     end
 
-    it "should generate <script type=\"text/javascript\"> with no CDATA for all :xhtml doctypes" do
+    it "should generate <script type=\"text/javascript\"> with CDATA for all :xhtml doctypes" do
       [ :xhtml10_strict, :xhtml10_transitional, :xhtml10_frameset, :xhtml11 ].each do |doctype|
         wc = wc_with_doctype(doctype) { def content; javascript "hello"; end }
         expect(render(wc)).to eq(%{<script type=\"text/javascript\">

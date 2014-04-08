@@ -91,6 +91,10 @@ module Fortitude
           rebuild_tag_methods!(:tags_declared, tags)
         end
 
+        def delegate_tag_stores
+          [ doctype ].compact
+        end
+
         def doctype(new_doctype = nil)
           if new_doctype
             new_doctype = case new_doctype
@@ -104,11 +108,10 @@ module Fortitude
               if new_doctype != current_doctype
                 raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
               end
-            else
-              add_tags_from!(new_doctype)
             end
 
             @_fortitude_doctype = new_doctype
+            tags_added!(new_doctype.tags.values)
           else
             return @_fortitude_doctype if @_fortitude_doctype
             return superclass.doctype if superclass.respond_to?(:doctype)
