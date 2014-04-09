@@ -1,12 +1,26 @@
 module Fortitude
   module TagStore
-    def tag(name, options = { })
-      new_tag = Fortitude::Tag.new(name, options)
+    def tag(name, options = nil)
+      tag_object = nil
+      modified = false
+      name = Fortitude::Tag.normalize_tag_name(name)
 
       @_tags_by_name ||= { }
-      @_tags_by_name[new_tag.name] = new_tag
 
-      tags_added!([ new_tag ])
+      unless options
+        tag_object = @_tags_by_name[name] || tags[name].try(:dup)
+        modified = true if tag_object
+      end
+
+      tag_object ||= Fortitude::Tag.new(name, options || { })
+
+      @_tags_by_name[name] = tag_object
+
+      if modified
+        tags_changed!([ tag_object ])
+      else
+        tags_added!([ tag_object ])
+      end
     end
 
     def tags
@@ -17,6 +31,10 @@ module Fortitude
     end
 
     def tags_added!(tags)
+      # nothing here
+    end
+
+    def tags_changed!(tags)
       # nothing here
     end
 

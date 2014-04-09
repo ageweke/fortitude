@@ -5,11 +5,17 @@ module Fortitude
   class Tag
     attr_reader :name, :spec
 
+    class << self
+      def normalize_tag_name(name)
+        name.to_s.strip.downcase.to_sym
+      end
+    end
+
     def initialize(name, options = { })
       options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose,
         :allow_data_attributes, :allow_aria_attributes, :spec)
 
-      @name = name.to_s.strip.downcase.to_sym
+      @name = self.class.normalize_tag_name(name)
 
       @valid_attributes = to_symbol_hash(options[:valid_attributes])
       @allowable_enclosed_elements = to_symbol_hash(options[:can_enclose])
@@ -19,6 +25,12 @@ module Fortitude
       @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
       @allow_aria_attributes = true unless options.has_key?(:allow_aria_attributes) && (! options[:allow_aria_attributes])
       @spec = options[:spec]
+
+      @options = options.dup
+    end
+
+    def dup
+      new(name, @options.dup)
     end
 
     CONCAT_METHOD = "original_concat"
