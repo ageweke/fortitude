@@ -9,6 +9,129 @@ describe "Fortitude doctype support", :type => :system do
     out
   end
 
+  describe "HTML4 Strict" do
+    it "should not allow <dir>" do
+      widget_class = wc_with_doctype(:html4_strict)
+      widget_class.class_eval do
+        def content
+          dir do
+            li "hi"
+          end
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /dir/i)
+    end
+
+    it "should not allow 'background' on :body" do
+      widget_class = wc_with_doctype(:html4_strict)
+      widget_class.class_eval do
+        enforce_attribute_rules true
+
+        def content
+          body :background => 'red' do
+            p "hi"
+          end
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+    end
+
+    it "should not allow <frame>" do
+      widget_class = wc_with_doctype(:html4_strict)
+      widget_class.class_eval do
+        def content
+          frame :src => 'http://www.google.com/'
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
+    end
+  end
+
+  describe "HTML4 Transitional" do
+    it "should allow <dir>" do
+      widget_class = wc_with_doctype(:html4_transitional)
+      widget_class.class_eval do
+        def content
+          dir do
+            li "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
+    end
+
+    it "should allow 'background' on :body" do
+      widget_class = wc_with_doctype(:html4_transitional)
+      widget_class.class_eval do
+        enforce_attribute_rules true
+
+        def content
+          body :background => 'red' do
+            p "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
+    end
+
+    it "should not allow <frame>" do
+      widget_class = wc_with_doctype(:html4_transitional)
+      widget_class.class_eval do
+        def content
+          frame :src => 'http://www.google.com/'
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
+    end
+  end
+
+  describe "HTML4 Frameset" do
+    it "should allow <dir>" do
+      widget_class = wc_with_doctype(:html4_frameset)
+      widget_class.class_eval do
+        def content
+          dir do
+            li "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
+    end
+
+    it "should allow 'background' on :body" do
+      widget_class = wc_with_doctype(:html4_frameset)
+      widget_class.class_eval do
+        enforce_attribute_rules true
+
+        def content
+          body :background => 'red' do
+            p "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
+    end
+
+    it "should allow <frame>" do
+      widget_class = wc_with_doctype(:html4_frameset)
+      widget_class.class_eval do
+        def content
+          frame :src => 'http://www.google.com/'
+        end
+      end
+
+      expect(render(widget_class)).to eq("<frame src=\"http://www.google.com/\"/>")
+    end
+  end
+
   describe "#doctype! method" do
     {
       :html5 => "<!DOCTYPE html>",
