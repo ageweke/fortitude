@@ -3,7 +3,8 @@ require 'fortitude/simple_template'
 
 module Fortitude
   class Tag
-    attr_reader :name, :spec
+    attr_reader :name
+    attr_accessor :newline_before, :content_allowed, :allow_data_attributes, :allow_aria_attributes
 
     class << self
       def normalize_tag_name(name)
@@ -17,9 +18,8 @@ module Fortitude
 
       @name = self.class.normalize_tag_name(name)
 
-      @valid_attributes = to_symbol_hash(options[:valid_attributes])
-      @allowable_enclosed_elements = to_symbol_hash(options[:can_enclose])
-      @allowable_enclosed_elements[:_fortitude_partial_placeholder] = true if @allowable_enclosed_elements
+      self.valid_attributes = options[:valid_attributes]
+      self.can_enclose = options[:can_enclose]
       @newline_before = !! options[:newline_before]
       @content_allowed = true unless options.has_key?(:content_allowed) && (! options[:content_allowed])
       @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
@@ -29,8 +29,25 @@ module Fortitude
       @options = options.dup
     end
 
+    def valid_attributes
+      @allowable_attributes.keys
+    end
+
+    def valid_attributes=(attributes)
+      @allowable_attributes = to_symbol_hash(attributes)
+    end
+
+    def can_enclose
+      @allowable_enclosed_elements.keys
+    end
+
+    def can_enclose=(tags)
+      @allowable_enclosed_elements = to_symbol_hash(tags)
+      @allowable_enclosed_elements[:_fortitude_partial_placeholder] = true if @allowable_enclosed_elements
+    end
+
     def dup
-      new(name, @options.dup)
+      self.class.new(name, @options.dup)
     end
 
     CONCAT_METHOD = "original_concat"
@@ -43,7 +60,7 @@ module Fortitude
     end
 
     def validate_attributes(widget, attributes_hash)
-      return unless @valid_attributes
+      return unless @allowable_attributes
       disabled_sym = attributes_hash.delete(:_fortitude_skip_attribute_rule_enforcement)
       disabled_string = attributes_hash.delete('_fortitude_skip_attribute_rule_enforcement')
       return if disabled_sym || disabled_string
@@ -52,11 +69,11 @@ module Fortitude
       attributes_hash.each do |k, v|
         bad[k] = v unless is_valid_attribute?(k, v)
       end
-      raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @valid_attributes.keys) if bad.size > 0
+      raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @allowable_attributes.keys) if bad.size > 0
     end
 
     def is_valid_attribute?(k, v)
-      return true if @valid_attributes.include?(k.to_sym)
+      return true if @allowable_attributes.include?(k.to_sym)
 
       if @allow_data_attributes
         return true if k.to_s =~ /^data-\S/i || (k.to_s =~ /^data$/i && v.kind_of?(Hash))

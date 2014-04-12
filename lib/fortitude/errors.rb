@@ -38,7 +38,7 @@ module Fortitude
       attr_reader :widget, :element_name, :invalid_attributes_hash, :allowed_attribute_names
 
       def initialize(widget, element_name, invalid_attributes_hash, allowed_attribute_names)
-        super(%{The widget #{widget} tried to render an element, <#{element_name}>, with attributes that are not allowed: #{invalid_attributes_hash.inspect}. Only these attributes are allowed: #{allowed_attribute_names.inspect}})
+        super(%{The widget #{widget} tried to render an element, <#{element_name}>, with attributes that are not allowed: #{invalid_attributes_hash.inspect}. Only these attributes are allowed: #{allowed_attribute_names.sort_by(&:to_s).inspect}})
         @widget = widget
         @element_name = element_name
         @invalid_attributes_hash = invalid_attributes_hash
@@ -101,6 +101,16 @@ div.some_id!. Fortitude doesn't support these for important performance reasons;
 you simply need to convert these to "p :class => :some_class" or
 "div :id => :some_id".)})
         @method_name = method_name
+      end
+    end
+
+    class TagNotFound < Base
+      attr_reader :tag_store, :tag_name
+
+      def initialize(tag_store, tag_name)
+        super(%{The tag store #{tag_store} has no tag named #{tag_name.inspect}.})
+        @tag_store = tag_store
+        @tag_name = tag_name
       end
     end
   end

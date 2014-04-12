@@ -87,12 +87,17 @@ module Fortitude
       end
 
       class << self
-        def tags_added!(tags)
+        def tags_changed!(tags)
           rebuild_tag_methods!(:tags_declared, tags)
         end
 
         def delegate_tag_stores
-          [ doctype ].compact
+          out = [ doctype ]
+
+          out << superclass if superclass.respond_to?(:tags)
+          out += superclass.delegate_tag_stores if superclass.respond_to?(:delegate_tag_stores)
+
+          out.compact.uniq
         end
 
         def doctype(new_doctype = nil)
