@@ -94,8 +94,10 @@ module Fortitude
         def delegate_tag_stores
           out = [ doctype ]
 
-          out << superclass if superclass.respond_to?(:tags)
           out += superclass.delegate_tag_stores if superclass.respond_to?(:delegate_tag_stores)
+          out << superclass if superclass.respond_to?(:tags)
+
+          $stderr.puts "DELEGATE TAG STORES: #{out.inspect}"
 
           out.compact.uniq
         end
