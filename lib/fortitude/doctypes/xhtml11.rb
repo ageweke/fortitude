@@ -14,6 +14,12 @@ module Fortitude
       def needs_cdata_in_javascript_tag?
         true
       end
+
+      class << self
+        def delegate_tag_stores
+          [ Fortitude::Doctypes::Html4TagsStrict ]
+        end
+      end
     end
   end
 end
