@@ -3,7 +3,7 @@ require 'fortitude/simple_template'
 
 module Fortitude
   class Tag
-    attr_reader :name
+    attr_reader :name, :spec
     attr_accessor :newline_before, :content_allowed, :allow_data_attributes, :allow_aria_attributes
 
     class << self
@@ -25,12 +25,10 @@ module Fortitude
       @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
       @allow_aria_attributes = true unless options.has_key?(:allow_aria_attributes) && (! options[:allow_aria_attributes])
       @spec = options[:spec]
-
-      @options = options.dup
     end
 
     def valid_attributes
-      @allowable_attributes.keys
+      @allowable_attributes.keys if @allowable_attributes
     end
 
     def valid_attributes=(attributes)
@@ -38,7 +36,7 @@ module Fortitude
     end
 
     def can_enclose
-      @allowable_enclosed_elements.keys
+      @allowable_enclosed_elements.keys if @allowable_enclosed_elements
     end
 
     def can_enclose=(tags)
@@ -47,7 +45,14 @@ module Fortitude
     end
 
     def dup
-      self.class.new(name, @options.dup)
+      self.class.new(name, {
+        :valid_attributes => valid_attributes,
+        :can_enclose => can_enclose,
+        :content_allowed => content_allowed,
+        :allow_data_attributes => allow_data_attributes,
+        :allow_aria_attributes => allow_aria_attributes,
+        :spec => spec
+      })
     end
 
     CONCAT_METHOD = "original_concat"
