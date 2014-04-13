@@ -70,6 +70,7 @@ module Fortitude
       _fortitude_class_inheritable_attribute :use_instance_variables_for_assigns, false, [ true, false ]
       _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
       _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
+      _fortitude_class_inheritable_attribute :close_void_tags, true, [ true, false ]
 
       def with_element_nesting_rules(on_or_off)
         raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
@@ -138,7 +139,8 @@ module Fortitude
                 :enable_formatting => self.format_output,
                 :enforce_element_nesting_rules => self.enforce_element_nesting_rules,
                 :enforce_attribute_rules => self.enforce_attribute_rules,
-                :enforce_id_uniqueness => self.enforce_id_uniqueness)
+                :enforce_id_uniqueness => self.enforce_id_uniqueness,
+                :close_void_tags => self.close_void_tags)
             end
 
             direct_subclasses.each { |s| s.rebuild_tag_methods!(why, which_tags_in, klass) }
@@ -437,6 +439,10 @@ module Fortitude
         def _fortitude_format_output_changed!(new_value)
           rebuild_text_methods!(:format_output_changed)
           rebuild_tag_methods!(:format_output_changed)
+        end
+
+        def _fortitude_close_void_tags_changed!(new_value)
+          rebuild_tag_methods!(:close_void_tags)
         end
 
         def _fortitude_extra_assigns_changed!(new_value)

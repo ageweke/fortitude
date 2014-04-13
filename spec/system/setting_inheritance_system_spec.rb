@@ -90,6 +90,22 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
 
+  def close_void_tags_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.close_void_tags).to eq(expected_result)
+      send("close_void_tags_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def close_void_tags_should_be_true(klass)
+    expect(render(klass)).to eq("<br/>")
+  end
+
+  def close_void_tags_should_be_false(klass)
+    expect(render(klass)).to eq("<br>")
+  end
+
+
   def enforce_element_nesting_rules_should_be(expected_result, *klasses)
     klasses.each do |klass|
       expect(klass.enforce_element_nesting_rules).to eq(expected_result)
@@ -288,6 +304,32 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.automatic_helper_access true
     automatic_helper_access_should_be(true, @grandparent, @parent2, @child21, @child22)
     automatic_helper_access_should_be(false, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit close_void_tags" do
+    @grandparent.class_eval do
+      def content
+        br
+      end
+    end
+
+    close_void_tags_should_be(true, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.close_void_tags false
+    close_void_tags_should_be(true, @grandparent, @parent2, @child21, @child22)
+    close_void_tags_should_be(false, @parent1, @child11, @child12)
+
+    @parent2.close_void_tags true
+    close_void_tags_should_be(true, @grandparent, @parent2, @child21, @child22)
+    close_void_tags_should_be(false, @parent1, @child11, @child12)
+
+    @grandparent.close_void_tags false
+    close_void_tags_should_be(true, @parent2, @child21, @child22)
+    close_void_tags_should_be(false, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.close_void_tags true
+    close_void_tags_should_be(true, @grandparent, @parent2, @child21, @child22)
+    close_void_tags_should_be(false, @parent1, @child11, @child12)
   end
 
   it "should properly inherit format_output" do

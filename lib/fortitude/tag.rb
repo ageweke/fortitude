@@ -97,13 +97,15 @@ module Fortitude
     end
 
     def define_method_on!(mod, options = {})
-      options.assert_valid_keys(:enforce_element_nesting_rules, :enforce_attribute_rules, :enable_formatting, :enforce_id_uniqueness)
+      options.assert_valid_keys(:enforce_element_nesting_rules, :enforce_attribute_rules, :enable_formatting, :enforce_id_uniqueness, :close_void_tags)
 
       unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
         mod.send(:include, ::Fortitude::TagSupport)
       end
 
-      ensure_constants(mod, :ALONE => "<#{name}/>", :OPEN => "<#{name}>", :CLOSE => "</#{name}>",
+      alone_tag = if @content_allowed || options[:close_void_tags] then "<#{name}/>" else "<#{name}>" end
+
+      ensure_constants(mod, :ALONE => alone_tag, :OPEN => "<#{name}>", :CLOSE => "</#{name}>",
         :PARTIAL_OPEN => "<#{name}", :TAG_OBJECT => self)
 
       needs_formatting = !! options[:enable_formatting]
@@ -137,7 +139,7 @@ module Fortitude
     end
 
     def ensure_constants(target, map)
-      map.each { |name, value| ensure_constant(target, tag_constant_name(name), value) }
+      map.each { |name, value| ensure_constant(target, tag_constant_name(name), value.freeze) }
     end
 
     def ensure_constant(target, const_name, const_value)
