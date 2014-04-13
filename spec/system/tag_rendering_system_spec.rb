@@ -7,7 +7,7 @@ describe "Fortitude tag rendering", :type => :system do
     expect(r(&block)).to eq(value)
   end
 
-  it "should render an empty tag correctly" do
+  it "should render a void tag correctly" do
     should_render_to("<hr/>") { hr }
   end
 

@@ -29,8 +29,42 @@ module SystemHelpers
     @helpers_class.send(:define_method, name, &block)
   end
 
+  class TestDoctype < Fortitude::Doctypes::Base
+    def initialize
+      super(:test_doctype, "FORTITUDE TEST")
+    end
+
+    def close_void_tags?
+      true
+    end
+
+    def default_javascript_tag_attributes
+      { }
+    end
+
+    def needs_cdata_in_javascript_tag?
+      false
+    end
+
+    tag :p, :newline_before => true, :valid_attributes => %w{class}, :can_enclose => %w{a span br b}
+    tag :div, :newline_before => true, :valid_attributes => %w{aaaaaaaaaaaaaa}, :can_enclose => %w{div p hr}
+    tag :span
+    tag :hr, :content_allowed => false
+    tag :br, :content_allowed => false
+    tag :a
+    tag :b
+    tag :nav, :newline_before => true
+    tag :h1, :newline_before => true
+    tag :img
+    tag :script, :newline_before => true
+  end
+
+  class TestWidgetClass < Fortitude::Widget::Base
+    doctype TestDoctype.new
+  end
+
   def widget_class(options = { }, &block)
-    klass = Class.new(options[:superclass] || ::Fortitude::Widget::Html5, &block)
+    klass = Class.new(options[:superclass] || TestWidgetClass, &block)
     $spec_widget_seq ||= 0
     $spec_widget_seq += 1
     ::Object.const_set("SpecWidget#{$spec_widget_seq}", klass)

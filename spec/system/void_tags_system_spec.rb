@@ -10,7 +10,15 @@ describe "Fortitude void tags", :type => :system do
   end
 
   it "should close void tags by default" do
-    expect(render(void_tag_class)).to eq("<thevoid/>")
+    vtc = widget_class(:superclass => Fortitude::Widget::Base) do
+      tag :thevoid, :content_allowed => false
+
+      def content
+        thevoid
+      end
+    end
+
+    expect(render(vtc)).to eq("<thevoid/>")
   end
 
   it "should not close void tags if asked not to" do
