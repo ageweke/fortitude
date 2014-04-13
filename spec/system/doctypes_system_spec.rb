@@ -132,6 +132,170 @@ describe "Fortitude doctype support", :type => :system do
     end
   end
 
+  describe "XHTML1.0 Strict" do
+    it "should not allow <dir>" do
+      widget_class = wc_with_doctype(:xhtml10_strict)
+      widget_class.class_eval do
+        def content
+          dir do
+            li "hi"
+          end
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /dir/i)
+    end
+
+    it "should not allow 'background' on :body" do
+      widget_class = wc_with_doctype(:xhtml10_strict)
+      widget_class.class_eval do
+        enforce_attribute_rules true
+
+        def content
+          body :background => 'red' do
+            p "hi"
+          end
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+    end
+
+    it "should not allow <frame>" do
+      widget_class = wc_with_doctype(:xhtml10_strict)
+      widget_class.class_eval do
+        def content
+          frame :src => 'http://www.google.com/'
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
+    end
+  end
+
+  describe "XHTML1.0 Transitional" do
+    it "should allow <dir>" do
+      widget_class = wc_with_doctype(:xhtml10_transitional)
+      widget_class.class_eval do
+        def content
+          dir do
+            li "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
+    end
+
+    it "should allow 'background' on :body" do
+      widget_class = wc_with_doctype(:xhtml10_transitional)
+      widget_class.class_eval do
+        enforce_attribute_rules true
+
+        def content
+          body :background => 'red' do
+            p "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
+    end
+
+    it "should not allow <frame>" do
+      widget_class = wc_with_doctype(:xhtml10_transitional)
+      widget_class.class_eval do
+        def content
+          frame :src => 'http://www.google.com/'
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
+    end
+  end
+
+  describe "XHTML1.0 Frameset" do
+    it "should allow <dir>" do
+      widget_class = wc_with_doctype(:xhtml10_frameset)
+      widget_class.class_eval do
+        def content
+          dir do
+            li "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
+    end
+
+    it "should allow 'background' on :body" do
+      widget_class = wc_with_doctype(:xhtml10_frameset)
+      widget_class.class_eval do
+        enforce_attribute_rules true
+
+        def content
+          body :background => 'red' do
+            p "hi"
+          end
+        end
+      end
+
+      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
+    end
+
+    it "should allow <frame>" do
+      widget_class = wc_with_doctype(:xhtml10_frameset)
+      widget_class.class_eval do
+        def content
+          frame :src => 'http://www.google.com/'
+        end
+      end
+
+      expect(render(widget_class)).to eq("<frame src=\"http://www.google.com/\"/>")
+    end
+  end
+
+  describe "XHTML1.1" do
+    it "should not allow <dir>" do
+      widget_class = wc_with_doctype(:xhtml11)
+      widget_class.class_eval do
+        def content
+          dir do
+            li "hi"
+          end
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /dir/i)
+    end
+
+    it "should not allow 'background' on :body" do
+      widget_class = wc_with_doctype(:xhtml11)
+      widget_class.class_eval do
+        enforce_attribute_rules true
+
+        def content
+          body :background => 'red' do
+            p "hi"
+          end
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+    end
+
+    it "should not allow <frame>" do
+      widget_class = wc_with_doctype(:xhtml11)
+      widget_class.class_eval do
+        def content
+          frame :src => 'http://www.google.com/'
+        end
+      end
+
+      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
+    end
+  end
+
   describe "#doctype! method" do
     {
       :html5 => "<!DOCTYPE html>",
