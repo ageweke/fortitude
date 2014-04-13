@@ -15,6 +15,10 @@ module Fortitude
         true
       end
 
+      def close_void_tags?
+        true
+      end
+
       class << self
         def delegate_tag_stores
           [ Fortitude::Doctypes::Html4TagsStrict ]

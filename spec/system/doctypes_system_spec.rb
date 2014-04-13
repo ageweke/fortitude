@@ -9,331 +9,167 @@ describe "Fortitude doctype support", :type => :system do
     out
   end
 
-  describe "HTML4 Strict" do
-    it "should not allow <dir>" do
-      widget_class = wc_with_doctype(:html4_strict)
-      widget_class.class_eval do
-        def content
-          dir do
-            li "hi"
-          end
+  def allows_dir?(doctype)
+    widget_class = wc_with_doctype(doctype)
+    widget_class.class_eval do
+      def content
+        dir do
+          li "hi"
         end
       end
-
-      expect { render(widget_class) }.to raise_error(NoMethodError, /dir/i)
     end
 
-    it "should not allow 'background' on :body" do
-      widget_class = wc_with_doctype(:html4_strict)
-      widget_class.class_eval do
-        enforce_attribute_rules true
-
-        def content
-          body :background => 'red' do
-            p "hi"
-          end
-        end
-      end
-
-      expect { render(widget_class) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
-    end
-
-    it "should not allow <frame>" do
-      widget_class = wc_with_doctype(:html4_strict)
-      widget_class.class_eval do
-        def content
-          frame :src => 'http://www.google.com/'
-        end
-      end
-
-      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
+    begin
+      render(widget_class)
+      true
+    rescue NoMethodError => nme
+      false
     end
   end
 
-  describe "HTML4 Transitional" do
-    it "should allow <dir>" do
-      widget_class = wc_with_doctype(:html4_transitional)
-      widget_class.class_eval do
-        def content
-          dir do
-            li "hi"
+  EXPECTED_RESULTS = {
+    :html5 => {
+      :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
+      :doctype_line => '<!DOCTYPE html>',
+      :javascript => :none
+    },
+
+    :html4_strict => {
+      :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
+      :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">',
+      :javascript => :type
+    },
+
+    :html4_transitional => {
+      :allows_dir  => true, :allows_background => true, :allows_frame => false, :closes_void_tags => false,
+      :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
+      :javascript => :type
+    },
+
+    :html4_frameset => {
+      :allows_dir  => true, :allows_background => true, :allows_frame => true, :closes_void_tags => false,
+      :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">',
+      :javascript => :type
+    },
+
+    :xhtml10_strict => {
+      :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => true,
+      :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+      :javascript => :type_and_cdata
+    },
+
+    :xhtml10_transitional => {
+      :allows_dir  => true, :allows_background => true, :allows_frame => false, :closes_void_tags => true,
+      :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
+      :javascript => :type_and_cdata
+    },
+
+    :xhtml10_frameset => {
+      :allows_dir  => true, :allows_background => true, :allows_frame => true, :closes_void_tags => true,
+      :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">',
+      :javascript => :type_and_cdata
+    },
+
+    :xhtml11 => {
+      :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => true,
+      :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">',
+      :javascript => :type_and_cdata
+    }
+  }.each do |doctype, expected_results|
+    describe doctype do
+      let(:the_widget_class) { wc_with_doctype(doctype) }
+
+      it "should #{expected_results[:allows_dir] ? "" : "not "}allow <dir>" do
+        the_widget_class.class_eval do
+          def content
+            dir do
+              li "hi"
+            end
           end
         end
+
+        if expected_results[:allows_dir]
+          expect(render(the_widget_class)).to eq("<dir><li>hi</li></dir>")
+        else
+          expect { render(the_widget_class) }.to raise_error(NoMethodError, /dir/i)
+        end
       end
 
-      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
-    end
+      it "should #{expected_results[:allows_background ? "" : "not "]}allow <body background=\"...\">" do
+        the_widget_class.class_eval do
+          enforce_attribute_rules true
 
-    it "should allow 'background' on :body" do
-      widget_class = wc_with_doctype(:html4_transitional)
-      widget_class.class_eval do
-        enforce_attribute_rules true
-
-        def content
-          body :background => 'red' do
-            p "hi"
+          def content
+            body :background => 'red' do
+              p "hi"
+            end
           end
         end
-      end
 
-      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
-    end
-
-    it "should not allow <frame>" do
-      widget_class = wc_with_doctype(:html4_transitional)
-      widget_class.class_eval do
-        def content
-          frame :src => 'http://www.google.com/'
+        if expected_results[:allows_background]
+          expect(render(the_widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
+        else
+          expect { render(the_widget_class) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
         end
       end
 
-      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
-    end
-  end
-
-  describe "HTML4 Frameset" do
-    it "should allow <dir>" do
-      widget_class = wc_with_doctype(:html4_frameset)
-      widget_class.class_eval do
-        def content
-          dir do
-            li "hi"
+      it "should #{expected_results[:allows_frame] ? "" : "not "} allow <frame>" do
+        the_widget_class.class_eval do
+          def content
+            frame :src => 'http://www.google.com/'
           end
         end
+
+        if expected_results[:allows_frame]
+          expect(render(the_widget_class)).to match(%r{<frame src="http://www.google.com/"/?>})
+        else
+          expect { render(the_widget_class) }.to raise_error(NoMethodError, /frame/i)
+        end
       end
 
-      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
-    end
-
-    it "should allow 'background' on :body" do
-      widget_class = wc_with_doctype(:html4_frameset)
-      widget_class.class_eval do
-        enforce_attribute_rules true
-
-        def content
-          body :background => 'red' do
-            p "hi"
+      it "should #{expected_results[:closes_void_tags] ? "": "not "}close void tags" do
+        the_widget_class.class_eval do
+          def content
+            br
           end
         end
-      end
 
-      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
-    end
-
-    it "should allow <frame>" do
-      widget_class = wc_with_doctype(:html4_frameset)
-      widget_class.class_eval do
-        def content
-          frame :src => 'http://www.google.com/'
+        if expected_results[:closes_void_tags]
+          expect(render(the_widget_class)).to eq("<br/>")
+        else
+          expect(render(the_widget_class)).to eq("<br>")
         end
       end
 
-      expect(render(widget_class)).to eq("<frame src=\"http://www.google.com/\"/>")
-    end
-  end
-
-  describe "XHTML1.0 Strict" do
-    it "should not allow <dir>" do
-      widget_class = wc_with_doctype(:xhtml10_strict)
-      widget_class.class_eval do
-        def content
-          dir do
-            li "hi"
+      it "should output the correct DOCTYPE line" do
+        the_widget_class.class_eval do
+          def content
+            doctype!
           end
         end
+
+        expect(render(the_widget_class)).to eq(expected_results[:doctype_line])
       end
 
-      expect { render(widget_class) }.to raise_error(NoMethodError, /dir/i)
-    end
-
-    it "should not allow 'background' on :body" do
-      widget_class = wc_with_doctype(:xhtml10_strict)
-      widget_class.class_eval do
-        enforce_attribute_rules true
-
-        def content
-          body :background => 'red' do
-            p "hi"
+      it "should output the correct tags for the #javascript method" do
+        the_widget_class.class_eval do
+          def content
+            javascript "hi"
           end
         end
-      end
 
-      expect { render(widget_class) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
-    end
-
-    it "should not allow <frame>" do
-      widget_class = wc_with_doctype(:xhtml10_strict)
-      widget_class.class_eval do
-        def content
-          frame :src => 'http://www.google.com/'
-        end
-      end
-
-      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
-    end
-  end
-
-  describe "XHTML1.0 Transitional" do
-    it "should allow <dir>" do
-      widget_class = wc_with_doctype(:xhtml10_transitional)
-      widget_class.class_eval do
-        def content
-          dir do
-            li "hi"
-          end
-        end
-      end
-
-      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
-    end
-
-    it "should allow 'background' on :body" do
-      widget_class = wc_with_doctype(:xhtml10_transitional)
-      widget_class.class_eval do
-        enforce_attribute_rules true
-
-        def content
-          body :background => 'red' do
-            p "hi"
-          end
-        end
-      end
-
-      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
-    end
-
-    it "should not allow <frame>" do
-      widget_class = wc_with_doctype(:xhtml10_transitional)
-      widget_class.class_eval do
-        def content
-          frame :src => 'http://www.google.com/'
-        end
-      end
-
-      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
-    end
-  end
-
-  describe "XHTML1.0 Frameset" do
-    it "should allow <dir>" do
-      widget_class = wc_with_doctype(:xhtml10_frameset)
-      widget_class.class_eval do
-        def content
-          dir do
-            li "hi"
-          end
-        end
-      end
-
-      expect(render(widget_class)).to eq("<dir><li>hi</li></dir>")
-    end
-
-    it "should allow 'background' on :body" do
-      widget_class = wc_with_doctype(:xhtml10_frameset)
-      widget_class.class_eval do
-        enforce_attribute_rules true
-
-        def content
-          body :background => 'red' do
-            p "hi"
-          end
-        end
-      end
-
-      expect(render(widget_class)).to eq("<body background=\"red\"><p>hi</p></body>")
-    end
-
-    it "should allow <frame>" do
-      widget_class = wc_with_doctype(:xhtml10_frameset)
-      widget_class.class_eval do
-        def content
-          frame :src => 'http://www.google.com/'
-        end
-      end
-
-      expect(render(widget_class)).to eq("<frame src=\"http://www.google.com/\"/>")
-    end
-  end
-
-  describe "XHTML1.1" do
-    it "should not allow <dir>" do
-      widget_class = wc_with_doctype(:xhtml11)
-      widget_class.class_eval do
-        def content
-          dir do
-            li "hi"
-          end
-        end
-      end
-
-      expect { render(widget_class) }.to raise_error(NoMethodError, /dir/i)
-    end
-
-    it "should not allow 'background' on :body" do
-      widget_class = wc_with_doctype(:xhtml11)
-      widget_class.class_eval do
-        enforce_attribute_rules true
-
-        def content
-          body :background => 'red' do
-            p "hi"
-          end
-        end
-      end
-
-      expect { render(widget_class) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
-    end
-
-    it "should not allow <frame>" do
-      widget_class = wc_with_doctype(:xhtml11)
-      widget_class.class_eval do
-        def content
-          frame :src => 'http://www.google.com/'
-        end
-      end
-
-      expect { render(widget_class) }.to raise_error(NoMethodError, /frame/i)
-    end
-  end
-
-  describe "#doctype! method" do
-    {
-      :html5 => "<!DOCTYPE html>",
-      :html4_strict => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">',
-      :html4_transitional => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
-      :html4_frameset => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">',
-      :xhtml10_strict => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
-      :xhtml10_transitional => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
-      :xhtml10_frameset => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">',
-      :xhtml11 => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
-    }.each do |doctype, expected_declaration|
-      it "should output the correct declaration for #{doctype}" do
-        expect(render(wc_with_doctype(doctype) { def content; doctype!; end })).to eq(expected_declaration)
-      end
-    end
-  end
-
-  describe "javascript tag" do
-    it "should generate <script> with no CDATA for :html5" do
-      wc = wc_with_doctype(:html5) { def content; javascript "hello"; end }
-      expect(render(wc)).to eq("<script>hello</script>")
-    end
-
-    it "should generate <script type=\"text/javascript\"> with no CDATA for all :html4 doctypes" do
-      [ :html4_strict, :html4_transitional, :html4_frameset ].each do |doctype|
-        wc = wc_with_doctype(doctype) { def content; javascript "hello"; end }
-        expect(render(wc)).to eq("<script type=\"text/javascript\">hello</script>")
-      end
-    end
-
-    it "should generate <script type=\"text/javascript\"> with CDATA for all :xhtml doctypes" do
-      [ :xhtml10_strict, :xhtml10_transitional, :xhtml10_frameset, :xhtml11 ].each do |doctype|
-        wc = wc_with_doctype(doctype) { def content; javascript "hello"; end }
-        expect(render(wc)).to eq(%{<script type=\"text/javascript\">
+        expected_output = case expected_results[:javascript]
+        when :type_and_cdata then %{<script type="text/javascript">
 //<![CDATA[
-hello
+hi
 //]]>
-</script>})
+</script>}
+        when :type then %{<script type="text/javascript">hi</script>}
+        when :none then %{<script>hi</script>}
+        else raise "Unknown expected result for :javascript: #{expected_results[:javascript].inspect}"
+        end
+
+        expect(render(the_widget_class)).to eq(expected_output)
       end
     end
   end

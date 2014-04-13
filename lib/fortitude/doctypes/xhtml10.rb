@@ -10,6 +10,10 @@ module Fortitude
       def needs_cdata_in_javascript_tag?
         true
       end
+
+      def close_void_tags?
+        true
+      end
     end
   end
 end

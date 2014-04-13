@@ -15,6 +15,10 @@ module Fortitude
         false
       end
 
+      def close_void_tags?
+        false
+      end
+
       # HTML5 spec, section 3.2.5
       GLOBAL_ATTRIBUTES = %w{accesskey class contenteditable dir draggable dropzone hidden id lang spellcheck style} +
         %w{tabindex title translate}
