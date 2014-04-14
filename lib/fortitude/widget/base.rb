@@ -238,7 +238,7 @@ module Fortitude
           n.each do |need, default_value|
             text = Fortitude::SimpleTemplate.template('need_method_template').result(
               :need => need, :ivar_name => instance_variable_name_for(need))
-            class_eval(text)
+            needs_module.module_eval(text)
           end
         end
 
@@ -251,8 +251,21 @@ module Fortitude
           @direct_subclasses |= [ subclass ]
         end
 
+        def create_modules!
+          raise "We already seem to have created our modules" if @tags_module || @needs_module
+          @tags_module = Fortitude::TagsModule.new(self)
+          @needs_module = Module.new
+          include @needs_module
+        end
+
         def tags_module
-          @tags_module ||= Fortitude::TagsModule.new(self)
+          create_modules! unless @tags_module
+          @tags_module
+        end
+
+        def needs_module
+          create_modules! unless @needs_module
+          @needs_module
         end
       end
 

@@ -16,6 +16,22 @@ describe "Fortitude needs", :type => :system do
     expect(child.needs(:baz => 'def_baz')).to eq(:foo => required, :bar => required, :baz => 'def_baz')
   end
 
+  it "should allow you to override a 'needs' method, and use #super" do
+    klass = widget_class do
+      needs :foo
+
+      def foo
+        "xx" + super + "yy"
+      end
+
+      def content
+        p "foo is: #{foo}"
+      end
+    end
+
+    expect(render(klass.new(:foo => 'aaa'))).to eq("<p>foo is: xxaaayy</p>")
+  end
+
   describe "names" do
     BAD_METHOD_NAMES = [ " ", "0123", "0foo", "?baz", "!yo", "!", "?", "abc??" ]
 
