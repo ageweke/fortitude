@@ -32,6 +32,61 @@ describe "Fortitude needs", :type => :system do
     expect(render(klass.new(:foo => 'aaa'))).to eq("<p>foo is: xxaaayy</p>")
   end
 
+  describe "shadowing" do
+    it "should shadow tags with needs, not the other way around" do
+      klass = widget_class do
+        needs :p, :div => 'whatever'
+
+        def content
+          text "p is: #{p}, div is: #{div}"
+        end
+      end
+
+      expect(render(klass.new(:p => 'aaa'))).to eq("p is: aaa, div is: whatever")
+    end
+
+    it "should still allow access to tags using tag_*" do
+      klass = widget_class do
+        needs :p, :div => 'whatever'
+
+        def content
+          tag_p "this is a p"
+          tag_div "this is a div"
+          text "p is: #{p}, div is: #{div}"
+        end
+      end
+
+      expect(render(klass.new(:p => 'bbb'))).to eq("<p>this is a p</p><div>this is a div</div>p is: bbb, div is: whatever")
+    end
+
+    it "should raise an error if you pass a block to a 'needs' method and debugging is on" do
+      klass = widget_class do
+        debug true
+        needs :p
+
+        def content
+          p { text "this is not run" }
+          text "p is: #{p}"
+        end
+      end
+
+      expect { render(klass.new(:p => 'aaa')) }.to raise_error(Fortitude::Errors::BlockPassedToNeedMethod)
+    end
+
+    it "should not raise an error if you pass a block to a 'needs' method and debugging is off" do
+      klass = widget_class do
+        needs :p
+
+        def content
+          p { text "this is not run" }
+          text "p is: #{p}"
+        end
+      end
+
+      expect(render(klass.new(:p => 'aaa'))).to eq("p is: aaa")
+    end
+  end
+
   describe "names" do
     BAD_METHOD_NAMES = [ " ", "0123", "0foo", "?baz", "!yo", "!", "?", "abc??" ]
 
@@ -90,23 +145,6 @@ describe "Fortitude needs", :type => :system do
 
         expect(render(i)).to eq("<p>value: foo</p>")
       end
-    end
-
-    it "should not allow defining a needs method that conflicts with a built-in method, by default" do
-      expect { widget_class { needs :p } }.to raise_error(Fortitude::Errors::NeedConflictsWithMethod)
-      expect { widget_class { needs :comment} }.to raise_error(Fortitude::Errors::NeedConflictsWithMethod)
-    end
-
-    it "should allow defining a needs method that conflicts with a built-in method, if you tell it to" do
-      wc = widget_class do
-        needs :p, :fortitude_allow_overriding_methods_with_needs => true
-
-        def content
-          text "p is: #{p}"
-        end
-      end
-
-      expect(render(wc.new(:p => 'the_p'))).to eq("p is: the_p")
     end
   end
 

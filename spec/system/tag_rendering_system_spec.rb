@@ -35,6 +35,10 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("<p>12345</p>") { p 12345 }
   end
 
+  it "should render a tag using a specific tag_* method" do
+    should_render_to("<p>foo</p>") { tag_p "foo" }
+  end
+
   def arbitrary_object_with_to_s(value)
     out = Object.new
     class << out

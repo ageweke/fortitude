@@ -74,6 +74,22 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
 
+  def debug_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.debug).to eq(expected_result)
+      send("debug_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def debug_should_be_true(klass)
+    expect { render(klass) }.to raise_error(Fortitude::Errors::BlockPassedToNeedMethod)
+  end
+
+  def debug_should_be_false(klass)
+    expect(render(klass)).to eq("p is: abc")
+  end
+
+
   def enforce_attribute_rules_should_be(expected_result, *klasses)
     klasses.each do |klass|
       expect(klass.enforce_attribute_rules).to eq(expected_result)
@@ -469,6 +485,35 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.start_and_end_comments false
     start_and_end_comments_should_be(false, @grandparent, @parent2, @child21, @child22)
     start_and_end_comments_should_be(true, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit debug" do
+    @grandparent.class_eval do
+      needs :p => 'abc'
+
+      def content
+        p { text "hi" }
+        text "p is: #{p}"
+      end
+    end
+
+    debug_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.debug true
+    debug_should_be(false, @grandparent, @parent2, @child21, @child22)
+    debug_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.debug false
+    debug_should_be(false, @grandparent, @parent2, @child21, @child22)
+    debug_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.debug true
+    debug_should_be(false, @parent2, @child21, @child22)
+    debug_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.debug false
+    debug_should_be(false, @grandparent, @parent2, @child21, @child22)
+    debug_should_be(true, @parent1, @child11, @child12)
   end
 
   it "should properly inherit enforce_attribute_rules" do

@@ -71,6 +71,7 @@ module Fortitude
       _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
       _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
       _fortitude_class_inheritable_attribute :close_void_tags, true, [ true, false ]
+      _fortitude_class_inheritable_attribute :debug, false, [ true, false ]
 
       def with_element_nesting_rules(on_or_off)
         raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
@@ -171,7 +172,6 @@ module Fortitude
 
           with_defaults_raw = { }
           with_defaults_raw = names.pop if names[-1] && names[-1].kind_of?(Hash)
-          allow_overriding = true if with_defaults_raw.delete(:fortitude_allow_overriding_methods_with_needs)
 
           names = names.map { |n| n.to_s.strip.downcase.to_sym }
           with_defaults = { }
@@ -179,11 +179,6 @@ module Fortitude
 
           bad_names = names.select { |n| ! is_valid_ruby_method_name?(n) }
           raise ArgumentError, "Needs in a Fortitude widget class must be valid Ruby method names; these are not: #{bad_names.inspect}" if bad_names.length > 0
-
-          unless allow_overriding
-            has_methods = names.select { |n| instance_methods(true).include?(n.to_sym) && (! previous_needs.has_key?(n)) }
-            raise Fortitude::Errors::NeedConflictsWithMethod.new(self, has_methods) if has_methods.length > 0
-          end
 
           names.each do |name|
             @this_class_needs[name] = REQUIRED_NEED
@@ -237,7 +232,8 @@ module Fortitude
 
           n.each do |need, default_value|
             text = Fortitude::SimpleTemplate.template('need_method_template').result(
-              :need => need, :ivar_name => instance_variable_name_for(need))
+              :need => need, :ivar_name => instance_variable_name_for(need),
+              :debug => self.debug)
             needs_module.module_eval(text)
           end
         end
@@ -458,6 +454,10 @@ module Fortitude
 
         def _fortitude_close_void_tags_changed!(new_value)
           rebuild_tag_methods!(:close_void_tags)
+        end
+
+        def _fortitude_debug_changed!(new_value)
+          rebuild_needs!(:debug_changed)
         end
 
         def _fortitude_extra_assigns_changed!(new_value)

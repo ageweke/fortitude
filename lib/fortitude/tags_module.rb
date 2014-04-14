@@ -8,5 +8,7 @@ module Fortitude
       @widget_class = widget_class
       @widget_class.send(:include, self)
     end
+
+    public :alias_method
   end
 end

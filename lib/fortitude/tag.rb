@@ -119,7 +119,7 @@ module Fortitude
       end
 
       text = Fortitude::SimpleTemplate.template('tag_method_template').result(
-        :name => name.to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
+        :name => name.to_s, :method_name => "tag_#{name}".to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
         :needs_element_rules => !! options[:enforce_element_nesting_rules],
         :needs_attribute_rules => !! options[:enforce_attribute_rules],
         :needs_id_uniqueness => !! options[:enforce_id_uniqueness],
@@ -131,6 +131,7 @@ module Fortitude
         :partial_open_alone_end_const => :FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
 
       mod.module_eval(text)
+      mod.alias_method(name, "tag_#{name}")
     end
 
     private

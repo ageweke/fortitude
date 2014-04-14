@@ -1,4 +1,4 @@
-def #{name}(content_or_attributes = nil, attributes = nil)
+def #{method_name}(content_or_attributes = nil, attributes = nil)
   o = @_fortitude_output_buffer_holder.output_buffer
   rc = @_fortitude_rendering_context                                       # :if needs_element_rules || needs_formatting
 

@@ -13,6 +13,21 @@ module Fortitude
       end
     end
 
+    class BlockPassedToNeedMethod < Base
+      attr_reader :widget, :method_name
+
+      def initialize(widget, method_name)
+        super(%{You passed a block to a method that's a 'needs' method of a Fortitude widget, #{widget}. } +
+          %{This can mean you've declared a 'need' with the same name as a Fortitude tag method (e.g., "needs :#{method_name}"), } +
+          %{and think you're calling the method that will generate that tag, when you're actually calling a method } +
+          %{that will ignore the block you passed and just return the value of that 'need'. If that is the case, try } +
+          %{calling the tag with 'tag_' prefixed to it (e.g., 'tag_#{method_name}'), which does the same thing; if not, remove } +
+          %{the block and try again.})
+        @widget = widget
+        @method_name = method_name
+      end
+    end
+
     class ExtraAssigns < Base
       attr_reader :widget, :extra_assigns
 
@@ -77,16 +92,6 @@ module Fortitude
         super(%{The widget #{widget} tried to render an element, <#{element_name}>, with content inside it, but that element doesn't accept content.})
         @widget = widget
         @element_name = element_name
-      end
-    end
-
-    class NeedConflictsWithMethod < Base
-      attr_reader :widget_class, :need_names
-
-      def initialize(widget_class, need_names)
-        super(%{The widget class #{widget_class.name} tried to declare that it needs #{need_names.inspect}, but that/those are already valid method names on the widget class. Pass :fortitude_allow_overriding_methods_with_needs => true if you want to allow this.})
-        @widget_class = widget_class
-        @need_names = need_names
       end
     end
 

@@ -1,3 +1,4 @@
 def #{need}
+  raise Fortitude::Errors::BlockPassedToNeedMethod.new(self, :#{need}) if block_given? # :if debug
   #{ivar_name}
 end
