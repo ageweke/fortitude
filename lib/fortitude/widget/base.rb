@@ -677,10 +677,11 @@ module Fortitude
       rebuild_needs!(:initial_setup)
       rebuild_text_methods!(:initial_setup)
 
+      # TODO: eliminate these?
       helper :capture
       helper :form_tag, :transform => :output_return_value
 
-      %w{text rawtext comment javascript}.each do |non_tag_method|
+      %w{comment javascript}.each do |non_tag_method|
         alias_method non_tag_method, "tag_#{non_tag_method}"
       end
 
