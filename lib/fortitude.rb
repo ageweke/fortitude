@@ -1,7 +1,9 @@
 require "fortitude/version"
 
 module Fortitude
-  # Your code goes here...
+  module Widget
+    autoload :Html5, 'fortitude/widget/html5'
+  end
 end
 
 # See if we can load Rails -- but don't fail if we can't; we'll just use this to decide whether we should
@@ -30,7 +32,6 @@ else
 end
 
 require 'fortitude/widget/base'
-require 'fortitude/widget/html5'
 require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
 
 if defined?(::ActiveSupport::SafeBuffer)

@@ -27,6 +27,10 @@ describe "Fortitude doctype support", :type => :system do
     end
   end
 
+  it "should autoload specific widgets" do
+    expect(Fortitude::Widget::Html5).to be
+  end
+
   EXPECTED_RESULTS = {
     :html5 => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
