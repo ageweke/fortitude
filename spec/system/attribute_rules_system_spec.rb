@@ -17,7 +17,7 @@ describe "Fortitude attribute rules enforcement", :type => :system do
     expect(render(widget_class_with_content { p :'data-foo' => 'bar', 'DATA-BAZ' => 'quux' })).to eq('<p data-foo="bar" DATA-BAZ="quux"/>')
   end
 
-  it "should allow a data attribute, specificed as a Hash" do
+  it "should allow a data attribute, specified as a Hash" do
     expect(render(widget_class_with_content { p :data => { :foo => 'bar', 'baz' => 'quux' }})).to eq('<p data-foo="bar" data-baz="quux"/>')
   end
 
@@ -27,6 +27,43 @@ describe "Fortitude attribute rules enforcement", :type => :system do
 
   it "should not allow a plain 'data-' attribute" do
     expect { render(widget_class_with_content { p :'data-' => 'foo' }) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+  end
+
+  def class_with_custom_tag(additional_attributes, &block)
+    out = widget_class
+    out.class_eval do
+      tag :mytag, { :valid_attributes => %w{foo bar} }.merge(additional_attributes)
+    end
+    out.class_eval(&block) if block
+    out
+  end
+
+  it "should allow data and ARIA attributes by default" do
+    klass = class_with_custom_tag({ }) do
+      def content
+        mytag :foo => 'bar', :data => { 'aaa' => 'bbb' }, :aria => { 'ccc' => 'ddd' }
+      end
+    end
+
+    expect(render(klass)).to eq("<mytag foo=\"bar\" data-aaa=\"bbb\" aria-ccc=\"ddd\"/>")
+  end
+
+  it "should not allow data attributes if told not to" do
+    klass = class_with_custom_tag(:allow_data_attributes => false) do
+      def content
+        mytag :foo => 'bar', :data => { :aaa => 'bbb' }
+      end
+    end
+    expect { render(klass) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
+  end
+
+  it "should not allow ARIA attributes if told not to" do
+    klass = class_with_custom_tag(:allow_aria_attributes => false) do
+      def content
+        mytag :foo => 'bar', :aria => { :ccc => 'ddd' }
+      end
+    end
+    expect { render(klass) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
   end
 
   it "should not enforce rules inside a widget with the setting off, even if surrounding widgets have it on" do
