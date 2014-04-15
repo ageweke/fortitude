@@ -52,11 +52,20 @@ module Fortitude
       helper :debug, :transform => :output_return_value
 
       # form_helper
-      helper :form_for, :transform => :output_return_value,
-        :output_yielded_methods => %w{check_box color_field date_field datetime_field datetime_local_field email_field} +
-          %w{file_field hidden_field label month_field number_field password_field phone_field radio_button} +
-          %w{range_field search_field telephone_field text_area text_field time_field url_field week_field}
-      helper :fields_for, :transform => :output_return_value
+      FORM_FOR_YIELDED_METHODS_TO_OUTPUT =
+        # Directly from form_helper
+        %w{check_box color_field date_field datetime_field datetime_local_field} +
+        %w{email_field file_field hidden_field label month_field number_field password_field phone_field} +
+        %w{radio_button range_field search_field telephone_field text_area text_field time_field url_field} +
+        %w{week_field} +
+
+        # From form_options_helper
+        %w{select collection_select grouped_collection_select time_zone_select options_for_select} +
+        %w{options_from_collection_for_select option_groups_from_collection_for_select grouped_options_for_select} +
+        %w{time_zone_options_for_select collection_radio_buttons collection_check_boxes}
+
+      helper :form_for, :transform => :output_return_value, :output_yielded_methods => FORM_FOR_YIELDED_METHODS_TO_OUTPUT
+      helper :fields_for, :transform => :output_return_value, :output_yielded_methods => FORM_FOR_YIELDED_METHODS_TO_OUTPUT
 
       # form_options_helper
       # helper :select, :transform => :output_return_value # conflicts with HTML <select> tag
