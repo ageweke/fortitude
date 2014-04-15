@@ -17,6 +17,30 @@ describe "Fortitude tag rules enforcement", :type => :system do
     expect(render(widget_class_with_content { p { b } })).to eq('<p><b/></p>')
   end
 
+  it "should not allow text where it's, well, not allowed, when specified directly" do
+    expect { render(widget_class_with_content { div "hi" }) }.to raise_error(Fortitude::Errors::InvalidElementNesting)
+  end
+
+  it "should not allow text where it's, well, not allowed, when specified directly and with a hash" do
+    expect { render(widget_class_with_content { div "hi", :class => "something" }) }.to raise_error(Fortitude::Errors::InvalidElementNesting)
+  end
+
+  it "should not allow text where it's, well, not allowed, when specified indirectly" do
+    expect { render(widget_class_with_content { div { text "hi" } }) }.to raise_error(Fortitude::Errors::InvalidElementNesting)
+  end
+
+  it "should always allow rawtext" do
+    expect(render(widget_class_with_content { div { rawtext "yo" }})).to eq("<div>yo</div>")
+  end
+
+  it "should always allow html_safe text, when specified indirectly" do
+    expect(render(widget_class_with_content { div { text "yo".html_safe } })).to eq("<div>yo</div>")
+  end
+
+  it "should always allow html_safe text, when specified directly" do
+    expect(render(widget_class_with_content { div "yo".html_safe })).to eq("<div>yo</div>")
+  end
+
   it "should not enforce rules inside a widget with the setting off, even if surrounding widgets have it on" do
     outer = widget_class do
       attr_accessor :inner

@@ -502,6 +502,7 @@ module Fortitude
 
         def _fortitude_enforce_element_nesting_rules_changed!(new_value)
           rebuild_tag_methods!(:enforce_element_nesting_rules_changed)
+          rebuild_text_methods!(:enforce_element_nesting_rules_changed)
         end
 
         def _fortitude_enforce_attribute_rules_changed!(new_value)
@@ -658,7 +659,7 @@ module Fortitude
 
         def rebuild_text_methods!(why, klass = self)
           rebuilding(:text_methods, why, klass) do
-            class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output))
+            class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output, :needs_element_rules => self.enforce_element_nesting_rules))
             direct_subclasses.each { |s| s.rebuild_text_methods!(why, klass) }
           end
         end

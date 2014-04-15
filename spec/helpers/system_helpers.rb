@@ -46,7 +46,7 @@ module SystemHelpers
       false
     end
 
-    tag :p, :newline_before => true, :valid_attributes => %w{class}, :can_enclose => %w{a span br b}, :spec => 'THE_SPEC_FOR_P'
+    tag :p, :newline_before => true, :valid_attributes => %w{class}, :can_enclose => %w{a span br b _text}, :spec => 'THE_SPEC_FOR_P'
     tag :div, :newline_before => true, :valid_attributes => %w{aaaaaaaaaaaaaa}, :can_enclose => %w{div p hr}
     tag :span
     tag :hr, :content_allowed => false
@@ -57,6 +57,7 @@ module SystemHelpers
     tag :h1, :newline_before => true
     tag :img
     tag :script, :newline_before => true
+    tag :head, :newline_before => true
   end
 
   class TestWidgetClass < Fortitude::Widget::Base

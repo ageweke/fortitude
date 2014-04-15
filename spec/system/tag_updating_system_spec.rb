@@ -85,6 +85,7 @@ describe "Fortitude tag updating", :type => :system do
   end
 
   it "should allow modifying a tag's :can_enclose" do
+    @derived_class.modify_tag(:div) { |t| t.can_enclose += %w{_text} }
     @derived_class.modify_tag(:p) { |t| t.can_enclose += %w{div} }
     @derived_class.class_eval do
       def content

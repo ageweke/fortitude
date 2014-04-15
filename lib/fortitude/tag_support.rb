@@ -5,6 +5,14 @@ module Fortitude
   module TagSupport
     extend ActiveSupport::Concern
 
+    class TextPseudotag
+      def name
+        :_text
+      end
+    end
+
+    FORTITUDE_TEXT_PSEUDOTAG = TextPseudotag.new
+
     FORTITUDE_TAG_PARTIAL_OPEN_END = ">".freeze
     FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END = "/>".freeze
 
