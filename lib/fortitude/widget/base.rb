@@ -7,6 +7,7 @@ require 'fortitude/partial_tag_placeholder'
 require 'fortitude/staticized_method'
 require 'fortitude/rendering_context'
 require 'fortitude/tag_store'
+require 'fortitude/rails/yielded_object_outputter'
 require 'active_support/core_ext/hash'
 require 'active_support/notifications'
 
@@ -560,7 +561,7 @@ module Fortitude
 
         def helper(*args)
           options = args.extract_options!
-          options.assert_valid_keys(:transform, :call)
+          options.assert_valid_keys(:transform, :call, :output_yielded_methods)
 
           args.each do |name|
             source_method_name = options[:call] || name
@@ -578,11 +579,23 @@ module Fortitude
             else raise ArgumentError, "Invalid value for :transform: #{transform.inspect}"
             end
 
-            text = <<-EOS
+            yielded_methods = options[:output_yielded_methods]
+            if yielded_methods
+              text = <<-EOS
+      def #{name}(*args, &block)
+        effective_block = lambda do |yielded_object|
+          block.call(Fortitude::Rails::YieldedObjectOutputter.new(self, yielded_object, #{yielded_methods.inspect}))
+        end
+        #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &effective_block))#{suffix}
+      end
+EOS
+            else
+              text = <<-EOS
       def #{name}(*args, &block)
         #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &block))#{suffix}
       end
   EOS
+            end
 
             class_eval text
           end
@@ -681,6 +694,7 @@ module Fortitude
       # TODO: eliminate these?
       helper :capture
       helper :form_tag, :transform => :output_return_value
+      helper :form_for, :transform => :output_return_value, :output_yielded_methods => %w{text_field}
 
       %w{comment javascript}.each do |non_tag_method|
         alias_method non_tag_method, "tag_#{non_tag_method}"

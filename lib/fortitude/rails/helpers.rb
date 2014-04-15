@@ -52,7 +52,7 @@ module Fortitude
       helper :debug, :transform => :output_return_value
 
       # form_helper
-      helper :form_for, :transform => :output_return_value
+      # helper :form_for, :transform => :output_return_value
       helper :fields_for, :transform => :output_return_value
       # helper :label, :transform => :output_return_value # conflicts with HTML <label> tag
       helper :text_field, :transform => :output_return_value
