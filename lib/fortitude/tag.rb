@@ -60,7 +60,7 @@ module Fortitude
     def validate_can_enclose!(widget, tag_object)
       return unless @allowable_enclosed_elements
       unless @allowable_enclosed_elements[tag_object.name]
-        raise Fortitude::Errors::InvalidElementNesting.new(widget, name, tag_object.name)
+        raise Fortitude::Errors::InvalidElementNesting.new(widget, self, tag_object)
       end
     end
 
@@ -74,7 +74,7 @@ module Fortitude
       attributes_hash.each do |k, v|
         bad[k] = v unless is_valid_attribute?(k, v)
       end
-      raise Fortitude::Errors::InvalidElementAttributes.new(self, name, bad, @allowable_attributes.keys) if bad.size > 0
+      raise Fortitude::Errors::InvalidElementAttributes.new(widget, self, bad, @allowable_attributes.keys) if bad.size > 0
     end
 
     def is_valid_attribute?(k, v)

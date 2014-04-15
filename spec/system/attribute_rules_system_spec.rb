@@ -9,6 +9,10 @@ describe "Fortitude attribute rules enforcement", :type => :system do
     expect { render(widget_class_with_content { p :foo => 'bar' })}.to raise_error(Fortitude::Errors::InvalidElementAttributes)
   end
 
+  it "should quote HTML specs at you when you screw up" do
+    expect { render(widget_class_with_content { p :foo => 'bar' })}.to raise_error(Fortitude::Errors::InvalidElementAttributes, /THE_SPEC_FOR_P/)
+  end
+
   it "should allow an attribute 'class' on <p>" do
     expect(render(widget_class_with_content { p :class => 'bar' })).to eq("<p class=\"bar\"/>")
   end

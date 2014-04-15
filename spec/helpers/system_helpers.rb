@@ -46,11 +46,11 @@ module SystemHelpers
       false
     end
 
-    tag :p, :newline_before => true, :valid_attributes => %w{class}, :can_enclose => %w{a span br b}
+    tag :p, :newline_before => true, :valid_attributes => %w{class}, :can_enclose => %w{a span br b}, :spec => 'THE_SPEC_FOR_P'
     tag :div, :newline_before => true, :valid_attributes => %w{aaaaaaaaaaaaaa}, :can_enclose => %w{div p hr}
     tag :span
     tag :hr, :content_allowed => false
-    tag :br, :content_allowed => false
+    tag :br, :content_allowed => false, :spec => 'THE_SPEC_FOR_BR'
     tag :a
     tag :b
     tag :nav, :newline_before => true

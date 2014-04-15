@@ -41,23 +41,45 @@ module Fortitude
     class InvalidElementNesting < Base
       attr_reader :widget, :enclosing_element_name, :enclosed_element_name
 
-      def initialize(widget, enclosing_element_name, enclosed_element_name)
-        super(%{The widget #{widget} tried to render an element that is not allowed by element nesting rules: you can't put a <#{enclosed_element_name}> inside a <#{enclosing_element_name}>.})
+      def initialize(widget, enclosing_tag, enclosed_tag)
+        message = %{The widget #{widget} tried to render an element that is not allowed by element nesting rules: you can't put a <#{enclosed_tag.name}> inside a <#{enclosing_tag.name}>.}
+        if enclosing_tag.spec
+          message << " (See '#{enclosing_tag.spec}' for more details.)"
+        end
+
+        super(message)
         @widget = widget
-        @enclosing_element_name = enclosing_element_name
-        @enclosed_element_name = enclosed_element_name
+        @enclosing_tag = enclosing_tag
+        @enclosed_tag = enclosed_tag
+      end
+
+      def enclosing_tag_name
+        @enclosing_tag.name
+      end
+
+      def enclosed_tag_name
+        @enclosed_tag.name
       end
     end
 
     class InvalidElementAttributes < Base
-      attr_reader :widget, :element_name, :invalid_attributes_hash, :allowed_attribute_names
+      attr_reader :widget, :invalid_attributes_hash, :allowed_attribute_names
 
-      def initialize(widget, element_name, invalid_attributes_hash, allowed_attribute_names)
-        super(%{The widget #{widget} tried to render an element, <#{element_name}>, with attributes that are not allowed: #{invalid_attributes_hash.inspect}. Only these attributes are allowed: #{allowed_attribute_names.sort_by(&:to_s).inspect}})
+      def initialize(widget, tag, invalid_attributes_hash, allowed_attribute_names)
+        message = %{The widget #{widget} tried to render an element, <#{tag.name}>, with attributes that are not allowed: #{invalid_attributes_hash.inspect}. Only these attributes are allowed: #{allowed_attribute_names.sort_by(&:to_s).inspect}}
+        if tag.spec
+          message << " (See '#{tag.spec}' for more details.)"
+        end
+
+        super(message)
         @widget = widget
-        @element_name = element_name
+        @tag = tag
         @invalid_attributes_hash = invalid_attributes_hash
         @allowed_attribute_names = allowed_attribute_names
+      end
+
+      def tag_name
+        @tag.name
       end
     end
 
@@ -86,12 +108,21 @@ module Fortitude
     end
 
     class NoContentAllowed < Base
-      attr_reader :widget, :element_name
+      attr_reader :widget
 
-      def initialize(widget, element_name)
-        super(%{The widget #{widget} tried to render an element, <#{element_name}>, with content inside it, but that element doesn't accept content.})
+      def initialize(widget, tag)
+        message = %{The widget #{widget} tried to render an element, <#{tag.name}>, with content inside it, but that element doesn't accept content.}
+        if tag.spec
+          message << " (See '#{tag.spec}' for more details.)"
+        end
+
+        super(message)
         @widget = widget
-        @element_name = element_name
+        @tag = tag
+      end
+
+      def tag_name
+        @tag
       end
     end
 

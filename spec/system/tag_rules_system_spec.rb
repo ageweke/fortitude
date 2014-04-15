@@ -9,6 +9,10 @@ describe "Fortitude tag rules enforcement", :type => :system do
     expect { render(widget_class_with_content { p { div } })}.to raise_error(Fortitude::Errors::InvalidElementNesting)
   end
 
+  it "should quote HTML specifications at you when you screw up" do
+    expect { render(widget_class_with_content { p { div } })}.to raise_error(Fortitude::Errors::InvalidElementNesting, /THE_SPEC_FOR_P/)
+  end
+
   it "should allow a <b> inside a <p>" do
     expect(render(widget_class_with_content { p { b } })).to eq('<p><b/></p>')
   end

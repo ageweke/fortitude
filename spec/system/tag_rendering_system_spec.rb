@@ -15,6 +15,10 @@ describe "Fortitude tag rendering", :type => :system do
     expect { r { br { text "hi" } } }.to raise_error(Fortitude::Errors::NoContentAllowed)
   end
 
+  it "should quote HTML specs at you when you screw up" do
+    expect { r { br { text "hi" } } }.to raise_error(Fortitude::Errors::NoContentAllowed, /THE_SPEC_FOR_BR/)
+  end
+
   it "should not allow passing element content in a block to a tag that doesn't take content" do
     expect { r { br { p } } }.to raise_error(Fortitude::Errors::NoContentAllowed)
   end
