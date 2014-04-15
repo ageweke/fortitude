@@ -10,6 +10,7 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - start_and_end_comments
   #   - translation_base
   #   - enforce_id_uniqueness
+  #   - debug
   #
   # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec;
   # these are not tested here because their semantics are quite a bit more complex than the settings here.

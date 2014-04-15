@@ -10,11 +10,13 @@ module Fortitude
         end
       end
 
+      EMPTY_RETURN_VALUE = ''.freeze
+
       def method_missing(method_name, *args, &block)
         return_value = @yielded_object.send(method_name, *args, &block)
         if @method_names_hash[method_name.to_sym]
           @widget.rawtext(return_value)
-          ''
+          EMPTY_RETURN_VALUE
         else
           return_value
         end

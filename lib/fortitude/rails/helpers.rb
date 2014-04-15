@@ -52,30 +52,11 @@ module Fortitude
       helper :debug, :transform => :output_return_value
 
       # form_helper
-      # helper :form_for, :transform => :output_return_value
+      helper :form_for, :transform => :output_return_value,
+        :output_yielded_methods => %w{check_box color_field date_field datetime_field datetime_local_field email_field} +
+          %w{file_field hidden_field label month_field number_field password_field phone_field radio_button} +
+          %w{range_field search_field telephone_field text_area text_field time_field url_field week_field}
       helper :fields_for, :transform => :output_return_value
-      # helper :label, :transform => :output_return_value # conflicts with HTML <label> tag
-      helper :text_field, :transform => :output_return_value
-      helper :password_field, :transform => :output_return_value
-      helper :hidden_field, :transform => :output_return_value
-      helper :file_field, :transform => :output_return_value
-      helper :text_area, :transform => :output_return_value
-      helper :check_box, :transform => :output_return_value
-      helper :radio_button, :transform => :output_return_value
-      helper :color_field, :transform => :output_return_value
-      helper :search_field, :transform => :output_return_value
-      helper :telephone_field, :transform => :output_return_value
-      helper :phone_field, :transform => :output_return_value
-      helper :date_field, :transform => :output_return_value
-      helper :time_field, :transform => :output_return_value
-      helper :datetime_field, :transform => :output_return_value
-      helper :datetime_local_field, :transform => :output_return_value
-      helper :month_field, :transform => :output_return_value
-      helper :week_field, :transform => :output_return_value
-      helper :url_field, :transform => :output_return_value
-      helper :email_field, :transform => :output_return_value
-      helper :number_field, :transform => :output_return_value
-      helper :range_field, :transform => :output_return_value
 
       # form_options_helper
       # helper :select, :transform => :output_return_value # conflicts with HTML <select> tag

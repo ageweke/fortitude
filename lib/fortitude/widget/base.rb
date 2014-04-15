@@ -579,23 +579,23 @@ module Fortitude
             else raise ArgumentError, "Invalid value for :transform: #{transform.inspect}"
             end
 
+            block_transform = "effective_block = block"
+
             yielded_methods = options[:output_yielded_methods]
             if yielded_methods
-              text = <<-EOS
-      def #{name}(*args, &block)
+              block_transform = <<-EOS
         effective_block = lambda do |yielded_object|
           block.call(Fortitude::Rails::YieldedObjectOutputter.new(self, yielded_object, #{yielded_methods.inspect}))
         end
+EOS
+            end
+
+            text = <<-EOS
+      def #{name}(*args, &block)
+        #{block_transform}
         #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &effective_block))#{suffix}
       end
-EOS
-            else
-              text = <<-EOS
-      def #{name}(*args, &block)
-        #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &block))#{suffix}
-      end
   EOS
-            end
 
             class_eval text
           end
@@ -694,7 +694,6 @@ EOS
       # TODO: eliminate these?
       helper :capture
       helper :form_tag, :transform => :output_return_value
-      helper :form_for, :transform => :output_return_value, :output_yielded_methods => %w{text_field}
 
       %w{comment javascript}.each do |non_tag_method|
         alias_method non_tag_method, "tag_#{non_tag_method}"
