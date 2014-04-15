@@ -365,9 +365,9 @@ module Fortitude
               comment_text << assign_text.join(", ")
             end
           end
-          comment comment_text
+          tag_comment comment_text
           yield
-          comment "END #{self.class.name} depth #{widget_nesting_depth}"
+          tag_comment "END #{self.class.name} depth #{widget_nesting_depth}"
         else
           yield
         end
@@ -389,18 +389,46 @@ module Fortitude
         string
       end
 
-      def comment(s)
+      def tag_comment(s)
         fo = self.class.format_output
         @_fortitude_rendering_context.needs_newline! if fo
         raise ArgumentError, "You cannot pass a block to a comment" if block_given?
-        rawtext "<!-- "
-        rawtext comment_escape(s)
-        rawtext " -->"
+        tag_rawtext "<!-- "
+        tag_rawtext comment_escape(s)
+        tag_rawtext " -->"
         @_fortitude_rendering_context.needs_newline! if fo
       end
 
+      def tag_javascript(content = nil, &block)
+        args = if content.kind_of?(Hash)
+          [ self.class.doctype.default_javascript_tag_attributes.merge(content) ]
+        elsif content
+          if block
+            raise ArgumentError, "You can't supply JavaScript content both via text and a block"
+          else
+            block = lambda { tag_rawtext content }
+            [ self.class.doctype.default_javascript_tag_attributes ]
+          end
+        else
+          [ self.class.doctype.default_javascript_tag_attributes ]
+        end
+
+        actual_block = block
+        if self.class.doctype.needs_cdata_in_javascript_tag?
+          actual_block = lambda do
+            tag_rawtext "\n//#{CDATA_START}\n"
+            block.call
+            tag_rawtext "\n//#{CDATA_END}\n"
+          end
+        end
+
+        @_fortitude_rendering_context.with_indenting_disabled do
+          script(*args, &actual_block)
+        end
+      end
+
       def doctype(s)
-        rawtext "<!DOCTYPE #{s}>"
+        tag_rawtext "<!DOCTYPE #{s}>"
       end
 
       CDATA_START = "<![CDATA[".freeze
@@ -420,14 +448,14 @@ module Fortitude
               cdata(this_component)
             end
           else
-            rawtext CDATA_START
-            rawtext s
-            rawtext CDATA_END
+            tag_rawtext CDATA_START
+            tag_rawtext s
+            tag_rawtext CDATA_END
           end
         else
-          rawtext CDATA_START
+          tag_rawtext CDATA_START
           yield
-          rawtext CDATA_END
+          tag_rawtext CDATA_END
         end
       end
 
@@ -652,10 +680,14 @@ module Fortitude
       helper :capture
       helper :form_tag, :transform => :output_return_value
 
+      %w{text rawtext comment javascript}.each do |non_tag_method|
+        alias_method non_tag_method, "tag_#{non_tag_method}"
+      end
+
       def render(*args, &block)
         call_through = lambda do
           @_fortitude_rendering_context.record_widget(args) do
-            rawtext(invoke_helper(:render, *args, &block))
+            tag_rawtext(invoke_helper(:render, *args, &block))
           end
         end
 
@@ -736,34 +768,6 @@ module Fortitude
         @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       end
 
-      def javascript(content = nil, &block)
-        args = if content.kind_of?(Hash)
-          [ self.class.doctype.default_javascript_tag_attributes.merge(content) ]
-        elsif content
-          if block
-            raise ArgumentError, "You can't supply JavaScript content both via text and a block"
-          else
-            block = lambda { rawtext content }
-            [ self.class.doctype.default_javascript_tag_attributes ]
-          end
-        else
-          [ self.class.doctype.default_javascript_tag_attributes ]
-        end
-
-        actual_block = block
-        if self.class.doctype.needs_cdata_in_javascript_tag?
-          actual_block = lambda do
-            rawtext "\n//#{CDATA_START}\n"
-            block.call
-            rawtext "\n//#{CDATA_END}\n"
-          end
-        end
-
-        @_fortitude_rendering_context.with_indenting_disabled do
-          script(*args, &actual_block)
-        end
-      end
-
       def t(key, *args)
         base = self.class.translation_base
         if base && key.to_s =~ /^\./
@@ -774,7 +778,7 @@ module Fortitude
       end
 
       def ttext(key, *args)
-        text t(".#{key}", *args)
+        tag_text t(".#{key}", *args)
       end
 
       def output_buffer

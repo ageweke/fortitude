@@ -1,9 +1,9 @@
-def text(s)
+def tag_text(s)
   @_fortitude_rendering_context.about_to_output_non_whitespace!    # :if format_output
   s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)
 end
 
-def rawtext(s)
+def tag_rawtext(s)
   @_fortitude_rendering_context.about_to_output_non_whitespace!    # :if format_output
   @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
 end

@@ -59,6 +59,21 @@ describe "Fortitude needs", :type => :system do
       expect(render(klass.new(:p => 'bbb'))).to eq("<p>this is a p</p><div>this is a div</div>p is: bbb, div is: whatever")
     end
 
+    it "should still allow access to text, comment, rawtext, and javascript using tag_*" do
+      klass = widget_class do
+        needs :text => 'foo', :comment => 'bar', :rawtext => 'baz', :javascript => 'quux'
+
+        def content
+          tag_text "text is: #{text}"
+          tag_comment "comment is: #{comment}"
+          tag_rawtext "rawtext is: #{rawtext}"
+          tag_javascript "javascript is: #{javascript}"
+        end
+      end
+
+      expect(render(klass)).to eq(%{text is: foo<!-- comment is: bar -->rawtext is: baz<script>javascript is: quux</script>})
+    end
+
     it "should raise an error if you pass a block to a 'needs' method and debugging is on" do
       klass = widget_class do
         debug true
