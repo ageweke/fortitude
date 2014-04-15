@@ -9,7 +9,25 @@ if defined?(ActiveSupport)
 end
 
 module Fortitude
+  class << self
+    def refine_rails_helpers(on_or_off = :not_specified)
+      @refine_rails_helpers = !! on_or_off unless on_or_off == :not_specified
+      !! @refine_rails_helpers
+    end
+  end
+
+  refine_rails_helpers true
+end
+
+module Fortitude
   class Railtie < ::Rails::Railtie
+    config.after_initialize do
+      if Fortitude.refine_rails_helpers
+        require 'fortitude/rails/helpers'
+        Fortitude::Rails::Helpers.apply_refined_helpers_to!(Fortitude::Widget::Base)
+      end
+    end
+
     initializer :fortitude, :before => :set_autoload_paths do |app|
       # All of this code is involved in setting up autoload_paths to work with Fortitude.
       # Why so hard?

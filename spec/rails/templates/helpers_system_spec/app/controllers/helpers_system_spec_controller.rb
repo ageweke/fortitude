@@ -76,4 +76,8 @@ class HelpersSystemSpecController < ApplicationController
   def private_helper_fortitude
     # nothing here
   end
+
+  def helpers_that_output_when_refined
+    # nothing here
+  end
 end

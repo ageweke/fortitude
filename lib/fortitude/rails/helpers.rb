@@ -1,6 +1,19 @@
 module Fortitude
   module Rails
     module Helpers
+      class << self
+        def helper(name, options = { })
+          @helpers ||= { }
+          @helpers[name] = options
+        end
+
+        def apply_refined_helpers_to!(o)
+          @helpers.each do |name, options|
+            o.helper(name, options)
+          end
+        end
+      end
+
       # tags/
       # active_model_helper
       # asset_tag_helper

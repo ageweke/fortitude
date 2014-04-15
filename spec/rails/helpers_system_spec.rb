@@ -8,6 +8,11 @@ describe "Rails helper support", :type => :rails do
       %r{Select datetime:\s*<select.*name="date.*>.*<option.*value="2014".*</option>}mi)
   end
 
+  it "should refine the built-in Rails helpers by default" do
+    expect_match("helpers_that_output_when_refined",
+      %r{START.*<img.*/images/foo.*/><a href="mailto:test@example.com">test@example.com</a><link href="/stylesheets/bar.css".*/>END}mi)
+  end
+
   it "should support helpers that use blocks" do
     expect_match("block_helpers",
       %r{<body>\s*<form.*action="/form_dest".*>.*<input.*authenticity_token.*/>.*<p>inside the form</p>.*</form>}mi,
