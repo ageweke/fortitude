@@ -29,6 +29,10 @@ if defined?(::Rails)
   require 'fortitude/railtie'
 else
   require 'fortitude/non_rails_widget_methods'
+
+  ::String.class_eval do
+    alias_method :original_concat, :concat
+  end
 end
 
 require 'fortitude/widget/base'

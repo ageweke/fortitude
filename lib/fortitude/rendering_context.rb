@@ -190,7 +190,7 @@ module Fortitude
         if defined?(::ActionView::OutputBuffer)
           @output_buffer = ::ActionView::OutputBuffer.new
         else
-          @output_buffer = ""
+          @output_buffer = ::ActiveSupport::SafeBuffer.new
         end
 
         @output_buffer.force_encoding(Encoding::UTF_8)
