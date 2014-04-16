@@ -15,6 +15,7 @@ void Init_fortitude_native_ext() {
 
 #define BUF_SIZE 256
 #define MAX_SUBSTITUTION_LENGTH 6
+#define CONST_ID_AVAILABLE
 
 void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
     char buf[BUF_SIZE + 1];
@@ -99,7 +100,11 @@ VALUE method_append_escaped_string(VALUE self, VALUE rb_output) {
 
 void fortitude_append_to(VALUE object, VALUE rb_output) {
     ID to_s;
+#ifdef CONST_ID_AVAILABLE
     CONST_ID(to_s, "to_s");
+#else
+    to_s = rb_intern("to_s");
+#endif
 
     char buf[BUF_SIZE + 1];
     long value;
@@ -158,9 +163,17 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
     if (TYPE(value) == T_HASH) {
         VALUE new_prefix_as_string;
         ID dup;
+#ifdef CONST_ID_AVAILABLE
         CONST_ID(dup, "dup");
+#else
+        dup = rb_intern("dup");
+#endif
         ID to_s;
+#ifdef CONST_ID_AVAILABLE
         CONST_ID(to_s, "to_s");
+#else
+        to_s = rb_intern("to_s");
+#endif
 
         switch (TYPE(prefix)) {
             case T_STRING:

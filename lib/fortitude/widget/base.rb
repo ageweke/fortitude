@@ -178,7 +178,7 @@ module Fortitude
           with_defaults = { }
           with_defaults_raw.each { |k,v| with_defaults[k.to_s.strip.downcase.to_sym] = v }
 
-          bad_names = names.select { |n| ! is_valid_ruby_method_name?(n) }
+          bad_names = names.select { |n| ! is_valid_ruby_method_name?(n.to_s) }
           raise ArgumentError, "Needs in a Fortitude widget class must be valid Ruby method names; these are not: #{bad_names.inspect}" if bad_names.length > 0
 
           names.each do |name|
