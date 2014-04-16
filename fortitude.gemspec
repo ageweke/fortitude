@@ -20,12 +20,12 @@ Gem::Specification.new do |s|
 
   s.extensions << "ext/fortitude_native_ext/extconf.rb"
 
-  s.add_dependency "activesupport", "~> 4.0"
+  s.add_dependency "activesupport", ">= 3.0"
 
   s.add_development_dependency "bundler", "~> 1.5"
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec", "~> 2.14"
   s.add_development_dependency "rake-compiler"
-  s.add_development_dependency 'rails'
+  # s.add_development_dependency 'rails'
   s.add_development_dependency 'json'
 end

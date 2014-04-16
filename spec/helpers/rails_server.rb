@@ -6,6 +6,67 @@ require 'uri'
 module Spec
   module Helpers
     class RailsServer
+      class << self
+        def run_bundle_install!(name)
+          @bundle_installs_run ||= { }
+
+          cmd = "bundle install"
+          description = "running bundle install for #{name.inspect}"
+
+          can_run_locally = @bundle_installs_run[name] || (ENV['FORTITUDE_SPECS_RAILS_GEMS_INSTALLED'] == 'true')
+
+          if can_run_locally
+            cmd << " --local"
+          else
+            description << " (WITHOUT --local flag)"
+            say %{NOTE: We're running 'bundle install' without the --local flag, meaning it will
+go out and access rubygems.org for the lists of the latest gems. This is a slow operation.
+If you run multiple Rails specs at once, this will only happen once.
+
+However, this only actually needs to happen once, ever, for a given Rails version; if you set
+FORTITUDE_SPECS_RAILS_GEMS_INSTALLED=true (e.g.,
+FORTITUDE_SPECS_RAILS_GEMS_INSTALLED=true bundle exec rspec spec/rails/...),
+then we will skip this command and your spec will run much faster.}
+          end
+
+
+          safe_system(cmd, description)
+
+          @bundle_installs_run[name] ||= true
+        end
+
+        def say(s, newline = true)
+          if newline
+            $stdout.puts s
+          else
+            $stdout << s
+          end
+          $stdout.flush
+        end
+
+        def safe_system(cmd, notice = nil, options = { })
+          say("#{notice}...", false) if notice
+
+          total_cmd = if options[:background]
+            "#{cmd} 2>&1 &"
+          else
+            "#{cmd} 2>&1"
+          end
+
+          output = `#{total_cmd}`
+          unless $?.success?
+            raise %{Command failed: in directory '#{Dir.pwd}', we tried to run:
+  % #{total_cmd}
+  but got result: #{$?.inspect}
+  and output:
+  #{output}}
+          end
+          say "OK" if notice
+
+          output
+        end
+      end
+
       attr_reader :rails_root
 
       def initialize(name, template_paths, options = { })
@@ -25,6 +86,8 @@ module Spec
         @options = options
         @server_pid = nil
       end
+
+      delegate :say, :safe_system, :to => :class
 
       def start!
         unless @server_pid
@@ -63,16 +126,17 @@ module Spec
 
       def do_start!
         with_rails_env do
-          setup_directories!
+          Bundler.with_clean_env do
+            setup_directories!
 
-          in_rails_root_parent do
-            rails_new!
-            update_gemfile!
-          end
+            in_rails_root_parent do
+              splat_bootstrap_gemfile!
+              rails_new!
+              update_gemfile!
+            end
 
-          in_rails_root do
-            Bundler.with_clean_env do
-              run_bundle_install!
+            in_rails_root do
+              self.class.run_bundle_install!(:primary)
               splat_template_files!
               start_server!
               verify_server!
@@ -91,36 +155,6 @@ module Spec
         end
       end
 
-      def say(s, newline = true)
-        if newline
-          $stdout.puts s
-        else
-          $stdout << s
-        end
-        $stdout.flush
-      end
-
-      def safe_system(cmd, notice = nil, options = { })
-        say("#{notice}...", false) if notice
-
-        total_cmd = if options[:background]
-          "#{cmd} 2>&1 &"
-        else
-          "#{cmd} 2>&1"
-        end
-
-        output = `#{total_cmd}`
-        unless $?.success?
-          raise %{Command failed: in directory '#{Dir.pwd}', we tried to run:
-% #{total_cmd}
-but got result: #{$?.inspect}
-and output:
-#{output}}
-        end
-        say "OK" if notice
-
-        output
-      end
 
       def setup_directories!
         return if @directories_setup
@@ -142,11 +176,24 @@ and output:
         Dir.chdir(File.dirname(@rails_root), &block)
       end
 
+      def splat_bootstrap_gemfile!
+        File.open("Gemfile", "w") do |f|
+          rails_version_spec = if @rails_version then ", \"= #{@rails_version}\"" else "" end
+          f << <<-EOS
+source 'https://rubygems.org'
+
+gem 'rails'#{rails_version_spec}
+EOS
+        end
+
+        self.class.run_bundle_install!(:bootstrap)
+      end
+
       def rails_new!
         # This is a little trick to specify the exact version of Rails you want to create it with...
         # http://stackoverflow.com/questions/379141/specifying-rails-version-to-use-when-creating-a-new-application
         rails_version_spec = @rails_version ? "_#{@rails_version}_" : ""
-        safe_system("rails #{rails_version_spec} new #{@name} -d sqlite3 -f -B", "creating a new Rails installation for '#{@name}'")
+        safe_system("bundle exec rails #{rails_version_spec} new #{@name} -d sqlite3 -f -B", "creating a new Rails installation for '#{@name}'")
       end
 
       def update_gemfile!
@@ -154,10 +201,6 @@ and output:
         gemfile_contents = File.read(gemfile)
         gemfile_contents << "\ngem 'fortitude', :path => '#{@gem_root}'\n"
         File.open(gemfile, 'w') { |f| f << gemfile_contents }
-      end
-
-      def run_bundle_install!
-        safe_system("bundle install --local", "running 'bundle install'")
       end
 
       def with_env(new_env)
