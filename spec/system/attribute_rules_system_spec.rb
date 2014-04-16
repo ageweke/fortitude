@@ -23,7 +23,8 @@ describe "Fortitude attribute rules enforcement", :type => :system do
   end
 
   it "should allow a data attribute, specified as a Hash" do
-    expect(render(widget_class_with_content { p :data => { :foo => 'bar', 'baz' => 'quux' }})).to eq('<p data-foo="bar" data-baz="quux"/>')
+    result = render(widget_class_with_content { p :data => { :foo => 'bar', 'baz' => 'quux' }})
+    expect([ '<p data-foo="bar" data-baz="quux"/>', '<p data-baz="quux" data-foo="bar"/>' ].include?(result)).to be
   end
 
   it "should not allow a plain 'data' attribute" do
