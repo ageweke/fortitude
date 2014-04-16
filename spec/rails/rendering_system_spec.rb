@@ -102,6 +102,12 @@ describe "Rails rendering support", :type => :rails do
     end
   end
 
+  describe "HTML escaping" do
+    it "should only escape strings that aren't raw() or html_safe(), and do the right thing with h()" do
+      expect_match("render_html_safe_strings", /a: foo&lt;bar, b: bar<baz, c: baz<quux, d: quux&lt;marph, e: marph>foo/)
+    end
+  end
+
   describe "streaming support" do
     # Actually trying to get streaming working completely is a VERY finicky business, and we don't want to fail
     # our tests just because (e.g.) we can't get buffering 100% disabled on this platform. So, we:

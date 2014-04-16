@@ -100,4 +100,12 @@ class RenderingSystemSpecController < ApplicationController
     $order = [ ]
     render :action => 'stream_widget', :stream => true
   end
+
+  def render_html_safe_strings
+    @a = "foo<bar"
+    @b = "bar<baz".html_safe
+    @c = "baz<quux"
+    @d = "quux<marph"
+    @e = "marph>foo".html_safe
+  end
 end
