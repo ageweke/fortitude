@@ -209,6 +209,8 @@ module Fortitude
               new_args = [ options ] + args[1..-1]
               return render_without_fortitude(*new_args, &block)
             elsif (widget_block = options[:inline]) && (options[:type] == :fortitude)
+              options.delete(:inline)
+
               rendering_context = fortitude_rendering_context(:delegate_object => self)
               widget_class = Class.new(Fortitude::Widget::Html5)
               widget_class.use_instance_variables_for_assigns(true)

@@ -73,7 +73,7 @@ then we will skip this command and your spec will run much faster.}
         @name = name || (raise ArgumentError, "Must specify a name")
         @rails_version = ENV['FORTITUDE_SPECS_RAILS_VERSION'] || options[:rails_version]
 
-        @rails_root = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/spec/rails", @rails_version || "default", @name.to_s))
+        @rails_root = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/spec/rails", rails_version.to_s, @name.to_s))
 
         @port = 20_000 + rand(10_000)
 
@@ -83,6 +83,10 @@ then we will skip this command and your spec will run much faster.}
 
         @options = options
         @server_pid = nil
+      end
+
+      def rails_version
+        @rails_version || :default
       end
 
       delegate :say, :safe_system, :to => :class
@@ -198,6 +202,12 @@ EOS
         gemfile = File.join(@rails_root, 'Gemfile')
         gemfile_contents = File.read(gemfile)
         gemfile_contents << "\ngem 'fortitude', :path => '#{@gem_root}'\n"
+
+        # Since Rails 3.0.20 was released, a new version of the I18n gem, 0.5.2, was released that moves a constant
+        # into a different namespace. (See https://github.com/mislav/will_paginate/issues/347 for more details.)
+        # So, if we're running Rails 3.0.x, we lock the 'i18n' gem to an earlier version.
+        gemfile_contents << "\ngem 'i18n', '= 0.5.0'\n" if @rails_version && @rails_version =~ /^3\.0\./
+
         File.open(gemfile, 'w') { |f| f << gemfile_contents }
       end
 

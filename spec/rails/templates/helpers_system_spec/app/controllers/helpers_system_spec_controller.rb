@@ -1,4 +1,7 @@
 class HelpersSystemSpecController < ApplicationController
+  # This works around a bug in Rails 3.0.x for image_tag and other asset_tag methods
+  config.relative_url_root ||= ""
+
   def basic_helpers
     # nothing here
   end
