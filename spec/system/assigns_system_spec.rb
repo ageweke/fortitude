@@ -183,11 +183,11 @@ describe "Fortitude assigns access", :type => :system do
 
     instance = wc.new(params)
 
-    expect(instance.assigns.keys).to eq(needed + not_needed)
+    expect(instance.assigns.keys.sort_by(&:to_s)).to eq((needed + not_needed).sort_by(&:to_s))
 
     each_output = [ ]
     instance.assigns.each { |k,v| each_output << k }
-    expect(each_output).to eq(needed + not_needed)
+    expect(each_output.sort_by(&:to_s)).to eq((needed + not_needed).sort_by(&:to_s))
   end
 
   it "should tell you whether an assign is the default" do
@@ -245,14 +245,14 @@ describe "Fortitude assigns access", :type => :system do
       needs :foo, :bar, :baz => nil
 
       def content
-        text "keys: #{assigns.keys.sort.inspect}\n"
+        text "keys: #{assigns.keys.sort_by(&:to_s).inspect}\n"
         text "has_key?(:baz): #{assigns.has_key?(:baz).inspect}\n"
         text "has_key?(:quux): #{assigns.has_key?(:quux).inspect}\n"
         text "[](:foo): #{assigns[:foo]}\n"
         text "[](:baz): #{assigns[:baz]}\n"
         text "[](:quux): #{assigns[:quux]}\n"
-        text "to_hash: #{assigns.to_hash}\n".html_safe
-        text "to_h: #{assigns.to_hash}\n".html_safe
+        text "to_hash: #{assigns.to_hash.inspect}\n".html_safe
+        text "to_h: #{assigns.to_hash.inspect}\n".html_safe
         text "length: #{assigns.length}\n"
         text "size: #{assigns.size}\n"
         text "to_s: #{assigns.to_s}\n".html_safe
@@ -287,9 +287,15 @@ describe "Fortitude assigns access", :type => :system do
 
     to_s_line = line_matching(text, /^to_s: (.*)/)
     expect(to_s_line).to match(/Assigns for #{widget}/)
-    expect(to_s_line).to match(/:foo\s*\=\>\s*["']the_foo["']/)
-    expect(to_s_line).to match(/:bar\s*\=\>\s*["']the_bar["']/)
-    expect(to_s_line).to match(/:baz\s*\=\>\s*nil/)
+    if RUBY_VERSION =~ /^1\.8\./
+      expect(to_s_line).to match(/foothe_foo/)
+      expect(to_s_line).to match(/barthe_bar/)
+      expect(to_s_line).to match(/baz/)
+    else
+      expect(to_s_line).to match(/:foo\s*\=\>\s*["']the_foo["']/)
+      expect(to_s_line).to match(/:bar\s*\=\>\s*["']the_bar["']/)
+      expect(to_s_line).to match(/:baz\s*\=\>\s*nil/)
+    end
 
     inspect_line = line_matching(text, /^inspect: (.*)/)
     expect(inspect_line).to match(/Assigns for #{widget}/)
