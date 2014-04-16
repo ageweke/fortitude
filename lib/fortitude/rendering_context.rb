@@ -193,7 +193,7 @@ module Fortitude
           @output_buffer = ::ActiveSupport::SafeBuffer.new
         end
 
-        @output_buffer.force_encoding(Encoding::UTF_8)
+        @output_buffer.force_encoding(Encoding::UTF_8) if @output_buffer.respond_to?(:force_encoding)
       end
     end
   end

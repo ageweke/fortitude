@@ -89,7 +89,13 @@ then we will skip this command and your spec will run much faster.}
         @rails_version || :default
       end
 
-      delegate :say, :safe_system, :to => :class
+      def say(*args)
+        self.class.say(*args)
+      end
+
+      def safe_system(*args)
+        self.class.safe_system(*args)
+      end
 
       def start!
         unless @server_pid

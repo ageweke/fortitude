@@ -136,7 +136,7 @@ module Fortitude
 
     private
     def tag_constant_name(key)
-      "FORTITUDE_TAG_#{name.upcase}_#{key}".to_sym
+      "FORTITUDE_TAG_#{name.to_s.upcase}_#{key}".to_sym
     end
 
     def ensure_constants(target, map)

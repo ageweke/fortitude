@@ -1,6 +1,7 @@
 module Fortitude
   module Rails
-    class YieldedObjectOutputter < ::BasicObject
+    YIELDED_OBJECT_OUTPUTTER_SUPERCLASS = if defined?(::BasicObject) then ::BasicObject else ::Object end
+    class YieldedObjectOutputter < YIELDED_OBJECT_OUTPUTTER_SUPERCLASS
       def initialize(widget, yielded_object, method_names)
         @widget = widget
         @yielded_object = yielded_object

@@ -1,7 +1,9 @@
 require 'fortitude/errors'
 
 module Fortitude
-  class TagReturnValue < BasicObject
+  TAG_RETURN_VALUE_SUPERCLASS = if defined?(::BasicObject) then ::BasicObject else ::Object end
+
+  class TagReturnValue < TAG_RETURN_VALUE_SUPERCLASS
     def method_missing(name, *args)
       ::Kernel.raise ::Fortitude::Errors::NoReturnValueFromTag.new(name)
     end
