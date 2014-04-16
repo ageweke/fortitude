@@ -18,7 +18,8 @@ describe "Fortitude attribute rules enforcement", :type => :system do
   end
 
   it "should allow arbitrary individual data-* attributes" do
-    expect(render(widget_class_with_content { p :'data-foo' => 'bar', 'DATA-BAZ' => 'quux' })).to eq('<p data-foo="bar" DATA-BAZ="quux"/>')
+    result = render(widget_class_with_content { p :'data-foo' => 'bar', 'DATA-BAZ' => 'quux' })
+    expect([ '<p data-foo="bar" DATA-BAZ="quux"/>', '<p DATA-BAZ="quux" data-foo="bar"/>' ].include?(result)).to be
   end
 
   it "should allow a data attribute, specified as a Hash" do
@@ -49,7 +50,12 @@ describe "Fortitude attribute rules enforcement", :type => :system do
       end
     end
 
-    expect(render(klass)).to eq("<mytag foo=\"bar\" data-aaa=\"bbb\" aria-ccc=\"ddd\"/>")
+    result = render(klass)
+    expect(result).to match(%r{^<mytag .*\"/>$})
+    expect(result).to match(/foo=\"bar\"/)
+    expect(result).to match(/data-aaa=\"bbb\"/)
+    expect(result).to match(/aria-ccc=\"ddd\"/)
+    # expect(render(klass)).to eq("<mytag foo=\"bar\" data-aaa=\"bbb\" aria-ccc=\"ddd\"/>")
   end
 
   it "should not allow data attributes if told not to" do
