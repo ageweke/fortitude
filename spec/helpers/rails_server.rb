@@ -73,9 +73,7 @@ then we will skip this command and your spec will run much faster.}
         @name = name || (raise ArgumentError, "Must specify a name")
         @rails_version = ENV['FORTITUDE_SPECS_RAILS_VERSION'] || options[:rails_version]
 
-        @rails_install_dirname = @name.to_s
-        @rails_install_dirname << "-#{@rails_version}" if @rails_version
-        @rails_root = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/spec/rails/#{@rails_install_dirname}"))
+        @rails_root = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/spec/rails", @rails_version || "default", @name.to_s))
 
         @port = 20_000 + rand(10_000)
 
@@ -193,7 +191,7 @@ EOS
         # This is a little trick to specify the exact version of Rails you want to create it with...
         # http://stackoverflow.com/questions/379141/specifying-rails-version-to-use-when-creating-a-new-application
         rails_version_spec = @rails_version ? "_#{@rails_version}_" : ""
-        safe_system("bundle exec rails #{rails_version_spec} new #{@name} -d sqlite3 -f -B", "creating a new Rails installation for '#{@name}'")
+        safe_system("bundle exec rails #{rails_version_spec} new #{File.basename(@rails_root)} -d sqlite3 -f -B", "creating a new Rails installation for '#{@name}'")
       end
 
       def update_gemfile!

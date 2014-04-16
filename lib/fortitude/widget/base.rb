@@ -287,7 +287,9 @@ module Fortitude
         raise "Must override in #{self.class.name}"
       end
 
-      delegate :instance_variable_name_for, :to => :class
+      def instance_variable_name_for(*args)
+        self.class.instance_variable_name_for(*args)
+      end
 
       def method_missing(name, *args, &block)
         if self.class.extra_assigns == :use
