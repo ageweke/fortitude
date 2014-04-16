@@ -152,7 +152,7 @@ module Fortitude
         end
 
         def is_valid_ruby_method_name?(s)
-          s =~ /^[A-Za-z_][A-Za-z0-9_]*[\?\!]?$/
+          s.to_s =~ /^[A-Za-z_][A-Za-z0-9_]*[\?\!]?$/
         end
 
         def static(*method_names)
