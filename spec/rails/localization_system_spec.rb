@@ -31,4 +31,8 @@ describe "basic Rails support", :type => :rails do
     expect_match("readjust_base?locale=en", /SUPA-awesome 127!/)
     expect_match("readjust_base?locale=fr", /TOUS formidable, 127!/)
   end
+
+  it "should not escape explicitly-HTML translations" do
+    expect_match("explicit_html", /one: foo<bar>, two: bar<baz>, one again: foo<bar>, two again: bar<baz>/i)
+  end
 end

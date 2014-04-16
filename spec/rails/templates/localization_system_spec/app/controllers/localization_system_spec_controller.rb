@@ -24,4 +24,8 @@ class LocalizationSystemSpecController < ApplicationController
   def readjust_base
     # nothing here
   end
+
+  def explicit_html
+    # nothing here
+  end
 end

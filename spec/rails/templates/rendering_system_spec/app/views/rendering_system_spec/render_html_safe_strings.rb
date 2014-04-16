@@ -1,5 +1,5 @@
 class Views::RenderingSystemSpec::RenderHtmlSafeStrings < Fortitude::Widget::Html5
-  needs :a, :b, :c
+  needs :a, :b, :c, :d, :e
 
   def content
     text "a: "
@@ -8,5 +8,9 @@ class Views::RenderingSystemSpec::RenderHtmlSafeStrings < Fortitude::Widget::Htm
     text b
     text ", c: "
     text raw(c)
+    text ", d: "
+    rawtext h(d)
+    text ", e: "
+    text h(e)
   end
 end
