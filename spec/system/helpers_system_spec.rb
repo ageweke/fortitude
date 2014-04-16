@@ -45,7 +45,7 @@ describe "Fortitude helper support", :type => :system do
   end
 
   def render(widget_or_class, options = { })
-    @output_buffer.clear
+    @output_buffer.replace("")
     super(widget_or_class, { :rendering_context => rc(
       :helpers_object => @helpers_object, :output_buffer_holder => @output_buffer_holder) }.merge(options))
   end
