@@ -94,25 +94,30 @@ describe "Fortitude tag rendering", :type => :system do
   end
 
   it "should separate multiple attributes with spaces" do
-    should_render_to("<hr class=\"foo\" other=\"bar\"/>") { hr 'class' => "foo", 'other' => "bar" }
+    result = r { hr 'class' => "foo", 'other' => "bar" }
+    expect(result).to match(%r{^<hr .*\"/>$})
+    expect(result).to match(%r{ class=\"foo\"})
+    expect(result).to match(%r{ other=\"bar\"})
   end
 
-  it "should render attributes in the order they're present in the Hash" do
-    order = [ ]
-    attributes = { }
-    100.times do |index|
-      name = "attr#{rand(1_000_000_000)}"
-      attributes[name] = "order#{index}"
-      order << name
-    end
+  unless RUBY_VERSION =~ /^1\.8\./
+    it "should render attributes in the order they're present in the Hash" do
+      order = [ ]
+      attributes = { }
+      100.times do |index|
+        name = "attr#{rand(1_000_000_000)}"
+        attributes[name] = "order#{index}"
+        order << name
+      end
 
-    expected_string = "<hr"
-    order.each_with_index do |attrname, index|
-      expected_string << " #{attrname}=\"order#{index}\""
-    end
-    expected_string << "/>"
+      expected_string = "<hr"
+      order.each_with_index do |attrname, index|
+        expected_string << " #{attrname}=\"order#{index}\""
+      end
+      expected_string << "/>"
 
-    should_render_to(expected_string) { hr attributes }
+      should_render_to(expected_string) { hr attributes }
+    end
   end
 
   it "should render a tag given a block" do
@@ -124,11 +129,17 @@ describe "Fortitude tag rendering", :type => :system do
   end
 
   it "should render with both attributes and a block" do
-    should_render_to("<p class=\"foo\" bar=\"baz\">hello, world</p>") { p(:class => 'foo', :bar => 'baz') { text "hello, world" } }
+    result = r { p(:class => 'foo', :bar => 'baz') { text "hello, world" } }
+    expect(result).to match(%r{^<p .*\">hello, world</p>$})
+    expect(result).to match(%r{ class=\"foo\"})
+    expect(result).to match(%r{ bar=\"baz\"})
   end
 
   it "should render with both attributes and direct content" do
-    should_render_to("<p class=\"foo\" bar=\"baz\">hello, world</p>") { p("hello, world", :class => 'foo', :bar => 'baz') }
+    result = r { p("hello, world", :class => 'foo', :bar => 'baz') }
+    expect(result).to match(%r{^<p .*\">hello, world</p>$})
+    expect(result).to match(%r{ class=\"foo\"})
+    expect(result).to match(%r{ bar=\"baz\"})
   end
 
   it "should render with both direct content and a block" do
@@ -136,15 +147,24 @@ describe "Fortitude tag rendering", :type => :system do
   end
 
   it "should render with both attributes and a block" do
-    should_render_to("<p class=\"foo\" bar=\"baz\">hello, world</p>") { p(:class => :foo, :bar => :baz) { text "hello, world" } }
+    result = r { p(:class => :foo, :bar => :baz) { text "hello, world" } }
+    expect(result).to match(%r{^<p .*\">hello, world</p>$})
+    expect(result).to match(%r{ class=\"foo\"})
+    expect(result).to match(%r{ bar=\"baz\"})
   end
 
   it "should render with attributes, direct content, and a block" do
-    should_render_to("<p class=\"foo\" bar=\"baz\">hello, worldbienvenue, le monde</p>") { p("hello, world", :class => :foo, :bar => :baz) { text "bienvenue, le monde" } }
+    result = r { p("hello, world", :class => :foo, :bar => :baz) { text "bienvenue, le monde" } }
+    expect(result).to match(%r{^<p .*\">hello, worldbienvenue, le monde</p>$})
+    expect(result).to match(%r{ class=\"foo\"})
+    expect(result).to match(%r{ bar=\"baz\"})
   end
 
   it "should render attribute values that are hashes as a sequence of prefixed attributes" do
-    should_render_to("<p data-foo=\"bar\" data-bar=\"baz\"/>") { p :data => { :foo => 'bar', :bar => 'baz' } }
+    result = r { p :data => { :foo => 'bar', :bar => 'baz' } }
+    expect(result).to match(%r{^<p .*\"/>$})
+    expect(result).to match(%r{ data-foo=\"bar\"})
+    expect(result).to match(%r{ data-bar=\"baz\"})
   end
 
   it "should render an arbitrary object as an attribute key, escaping it" do
@@ -169,11 +189,19 @@ describe "Fortitude tag rendering", :type => :system do
 
   it "should allow an arbitrary object as an attribute key, mapping to a hash" do
     foo = arbitrary_object_with_to_s("and&<>\"this")
-    should_render_to("<p and&amp;&lt;&gt;&quot;this-foo=\"bar\" and&amp;&lt;&gt;&quot;this-bar=\"baz\"/>") { p foo => { :foo => 'bar', :bar => 'baz' } }
+    result = r { p foo => { :foo => 'bar', :bar => 'baz' } }
+    expect(result).to match(%r{^<p .*\"/>$})
+    expect(result).to match(%r{ and&amp;&lt;&gt;&quot;this-foo=\"bar\"})
+    expect(result).to match(%r{ and&amp;&lt;&gt;&quot;this-bar=\"baz\"})
+    # should_render_to("<p and&amp;&lt;&gt;&quot;this-foo=\"bar\" and&amp;&lt;&gt;&quot;this-bar=\"baz\"/>")
   end
 
   it "should allow multi-level hash nesting" do
-    should_render_to("<p foo-bar=\"bar\" foo-baz-a=\"xxx\" foo-baz-b=\"yyy\"/>") { p :foo => { :bar => 'bar', :baz => { :a => 'xxx', 'b' => :yyy } } }
+    result = r { p :foo => { :bar => 'bar', :baz => { :a => 'xxx', 'b' => :yyy } } }
+    expect(result).to match(%r{^<p .*\"/>})
+    expect(result).to match(%r{ foo-bar=\"bar\"})
+    expect(result).to match(%r{ foo-baz-a=\"xxx\"})
+    expect(result).to match(%r{ foo-baz-b=\"yyy\"})
   end
 
   it "should allow arrays as attribute values, separating elements with spaces" do

@@ -40,10 +40,13 @@ describe "Fortitude start/end comments support", :type => :system do
       end
     end
 
-    expect(render(wc.new(:foo => 'the_foo', :bar => /whatever/i, :quux => 'the_quux'))).to eq(
-      "<!-- #{eb(wc)}: " +
-      ":foo => \"the_foo\", :bar => /whatever/i, :baz => (DEFAULT) \"def_baz\", :quux => \"the_quux\"" +
-      " --><p>hi</p><!-- #{ee(wc)} -->")
+    result = render(wc.new(:foo => 'the_foo', :bar => /whatever/i, :quux => 'the_quux'))
+    expect(result).to match(%r{^<!-- #{eb(wc)}: })
+    expect(result).to match(%r{:foo => \"the_foo\"})
+    expect(result).to match(%r{:bar => /whatever/i})
+    expect(result).to match(%r{:baz => \(DEFAULT\) \"def_baz\"})
+    expect(result).to match(%r{:quux => \"the_quux\"})
+    expect(result).to match(%r{ --><p>hi</p><!-- #{ee(wc)} -->$})
   end
 
   it "should not display extra assigns if we're not using them" do
@@ -71,8 +74,11 @@ describe "Fortitude start/end comments support", :type => :system do
       end
     end
 
-    expect(render(wc.new(:foo => 'bar', :bar => 'baz'))).to eq("<!-- #{eb(wc)}: " +
-      ":foo => \"bar\", :bar => \"baz\" --><p>hi</p><!-- #{ee(wc)} -->")
+    result = render(wc.new(:foo => 'bar', :bar => 'baz'))
+    expect(result).to match(%r{^<!-- #{eb(wc)}: })
+    expect(result).to match(%r{:foo => \"bar\"})
+    expect(result).to match(%r{:bar => \"baz\"})
+    expect(result).to match(%r{--><p>hi</p><!-- #{ee(wc)} -->})
   end
 
   it "should not display all of the text of long assigns" do
@@ -321,16 +327,13 @@ hi
 
     outer.klass = inner
 
-    expect(render(outer)).to eq(%{<div>
-  <div>
-    <!-- #{eb(inner,1 )}:
-         :foo => \"#{"a" * 97}...
-         :bar => \"#{"b" * 97}...
-     -->
-    hi
-    <!-- #{ee(inner, 1)} -->
-  </div>
-</div>})
+    result = render(outer)
+    expect(result).to match(%r{^<div>\n  <div>\n    <!-- #{eb(inner, 1)}:\n         :}m)
+    expect(result).to match(%r{^         :foo => \"a{97}...\n})
+    expect(result).to match(%r{^         :bar => \"b{97}...\n})
+    expect(result).to match(%r{^     -->$})
+    expect(result).to match(%r{^    hi})
+    expect(result).to match(%r{^    <!-- #{ee(inner, 1)} -->\n  </div>\n</div>$}m)
   end
 
   BAD_VALUES = [ ">foo", "fo -- bar", "--", "->bar", "baz-" ]
@@ -348,9 +351,13 @@ hi
 
       instance = wc.new(:foo => bad_value)
       text = render(instance)
-      expect(text).to match(%r{^<!-- #{eb(wc)}: :foo => (.*) --><p>hi</p><!-- #{ee(wc)} -->$})
-      data = $1
-      $stderr.puts data
+      # expect(text).to match(%r{^<!-- #{eb(wc)}: :foo => (.*) --><p>hi</p><!-- #{ee(wc)} -->$})
+      if text =~ %r{^<!-- #{eb(wc)}: :foo => (.*) --><p>hi</p><!-- #{ee(wc)} -->$}
+        data = $1
+        expect(data).not_to match(/\-\-/)
+      else
+        raise "Text does not match: #{text.inspect}"
+      end
     end
   end
 end
