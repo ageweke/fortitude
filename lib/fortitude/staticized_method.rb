@@ -27,7 +27,7 @@ module Fortitude
     end
 
     def create_method!
-      unless widget_class.instance_methods.include?(dynamic_method_name)
+      unless widget_class.instance_methods.map(&:to_s).include?(dynamic_method_name.to_s)
         widget_class.send(:alias_method, dynamic_method_name, method_name)
       end
 
@@ -55,7 +55,7 @@ EOS
             raise "This method yields more than once; you can't make it static" if yielded
             pre_yield = widget.output_buffer.dup
             yielded = true
-            widget.output_buffer.clear
+            widget.output_buffer.replace('')
           end
         end
       end
