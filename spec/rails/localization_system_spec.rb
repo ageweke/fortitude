@@ -4,7 +4,7 @@ describe "basic Rails support", :type => :rails do
   it "should allow you to provide localized content methods" do
     expect_match("content_method?locale=en", /wassup\? this is english/mi)
     expect_match("content_method?locale=fr", /bienvenue, les mecs/mi)
-    expect_match("content_method?locale=pt", /i don&#39;t know that language/mi)
+    expect_match("content_method?locale=pt", /i don&#(39|x27);t know that language/mi)
   end
 
   it "should let you translate strings with I18n.t" do
