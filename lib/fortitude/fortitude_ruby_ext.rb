@@ -16,11 +16,14 @@ end
   FORTITUDE_HYPHEN = "-".html_safe.freeze
   FORTITUDE_EQUALS_QUOTE = "=\"".html_safe.freeze
   FORTITUDE_QUOTE = "\"".html_safe.freeze
+  FORTITUDE_SPACE = " ".html_safe.freeze
+
+  TARGET_BASE = "".html_safe.freeze
 
   def fortitude_append_as_attributes(output, prefix)
     raise ArgumentError, "You can only append to a String" unless output.kind_of?(String)
 
-    target = "".html_safe
+    target = TARGET_BASE.dup
 
     each do |key, value|
       if value.kind_of?(Hash)
@@ -33,7 +36,7 @@ end
         new_prefix << FORTITUDE_HYPHEN
         value.fortitude_append_as_attributes(target, new_prefix)
       else
-        target << " "
+        target << FORTITUDE_SPACE
 
         case prefix
         when String then target << prefix
