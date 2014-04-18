@@ -141,6 +141,37 @@ describe "Fortitude helper support", :type => :system do
     expect(render(wc)).to eq("helper1: this is helper1, helper2: NoMethodError, helper3: this is hi helper3")
   end
 
+  it "should allow overriding a manually-declared helper, and allow use of #super" do
+    wc = widget_class do
+      automatic_helper_access false
+      helper :helper1
+
+      def helper1
+        "xx" + super + "yy"
+      end
+
+      def content
+        text "helper1: #{helper1}"
+      end
+    end
+
+    expect(render(wc)).to eq("helper1: xxthis is helper1yy")
+  end
+
+  it "should allow overriding a helper accessed using automatic_helper_access, and allow use of #super" do
+    wc = widget_class do
+      def helper1
+        "xx" + super + "yy"
+      end
+
+      def content
+        text "helper1: #{helper1}"
+      end
+    end
+
+    expect(render(wc)).to eq("helper1: xxthis is helper1yy")
+  end
+
   it "should allow transforming helpers that return to helpers that output" do
     wc = widget_class do
       helper :helper1, :transform => :output_return_value

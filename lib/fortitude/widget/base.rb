@@ -251,6 +251,8 @@ module Fortitude
         def create_modules!
           raise "We already seem to have created our modules" if @tags_module || @needs_module
           @tags_module = Fortitude::TagsModule.new(self)
+          @helpers_module = Module.new
+          include @helpers_module
           @needs_module = Module.new
           include @needs_module
         end
@@ -263,6 +265,11 @@ module Fortitude
         def needs_module
           create_modules! unless @needs_module
           @needs_module
+        end
+
+        def helpers_module
+          create_modules! unless @helpers_module
+          @helpers_module
         end
       end
 
@@ -535,10 +542,6 @@ module Fortitude
           "@" + (use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX) + effective_name
         end
 
-        # def assign_instance_variable_prefix
-        #   use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX
-        # end
-
         def around_content(*method_names)
           return if method_names.length == 0
           @_fortitude_around_content_methods ||= [ ]
@@ -599,7 +602,7 @@ EOS
       end
   EOS
 
-            class_eval text
+            helpers_module.module_eval(text)
           end
         end
 
