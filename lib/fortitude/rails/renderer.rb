@@ -11,7 +11,7 @@ module Fortitude
       class << self
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
         def render(widget_class, template_handler, local_assigns, &block)
-          total_assigns = template_handler.assigns.merge(local_assigns)
+          total_assigns = template_handler.assigns.symbolize_keys.merge(local_assigns.symbolize_keys)
 
           needed_assigns = if widget_class.extra_assigns == :use
             total_assigns

@@ -50,11 +50,11 @@ describe "Rails class-loading support", :type => :rails do
   end
 
   it "should not let me 'require' files in app/views without a views/ prefix" do
-    expect_exception('require_loaded_underscore_widget_without_views', 'LoadError', /cannot load such file/)
+    expect_exception('require_loaded_underscore_widget_without_views', 'LoadError', /(cannot load such file|no such file to load)/)
   end
 
   it "should not let me 'require' files in app/views with a views/ prefix" do
-    expect_exception('require_loaded_underscore_widget_with_views', 'LoadError', /cannot load such file/)
+    expect_exception('require_loaded_underscore_widget_with_views', 'LoadError', /(cannot load such file|no such file to load)/)
   end
 
   it "should let me render a widget defined outside of app/views/ if I use render :widget" do

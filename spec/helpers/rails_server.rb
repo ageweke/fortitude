@@ -298,7 +298,9 @@ EOS
       end
 
       def stop_server!
-        Process.kill("TERM", @server_pid)
+        # We do this because under 1.8.7 SIGTERM doesn't seem to work, and it's actually fine to slaughter this
+        # process mercilessly -- we don't need anything it has at this point, anyway.
+        Process.kill("KILL", @server_pid)
         @server_pid = nil
       end
     end
