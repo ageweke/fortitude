@@ -1,6 +1,6 @@
 describe "Fortitude escaping behavior", :type => :system do
   it "should escape text by default" do
-    expect(render(widget_class_with_content { text "hi<>&\" there" })).to eq("hi&lt;&gt;&amp;&quot; there")
+    expect(render(widget_class_with_content { text "hi<>&\"' there" })).to eq("hi&lt;&gt;&amp;&quot;&#39; there")
   end
 
   it "should not escape text tagged as .html_safe" do

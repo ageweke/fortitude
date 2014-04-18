@@ -53,6 +53,14 @@ void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
             *buf_pos++ = ';';
 
             buf_offset += 4;
+        } else if (ch == '\'') {
+            *buf_pos++ = '&';
+            *buf_pos++ = '#';
+            *buf_pos++ = '3';
+            *buf_pos++ = '9';
+            *buf_pos++ = ';';
+
+            buf_offset += 5;
         } else if (ch == '"') {
             *buf_pos++ = '&';
             *buf_pos++ = 'q';

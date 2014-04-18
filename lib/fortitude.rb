@@ -44,8 +44,28 @@ end
 
 require 'fortitude/widget/base'
 
-unless %w{false off 0}.include?((ENV['FORTITUDE_NATIVE_EXTENSIONS'] || '').strip.downcase)
-  require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
+native_loaded = false
+
+if %w{false off 0}.include?((ENV['FORTITUDE_NATIVE_EXTENSIONS'] || '').strip.downcase)
+  $stderr.puts <<-EOM
+WARNING: Fortitude native extensions disabled via environment variable FORTITUDE_NATIVE_EXTENSIONS.
+         Performance may be significantly reduced.
+EOM
+else
+  begin
+    require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
+    native_loaded = true
+  rescue LoadError => le
+    $stderr.puts <<-EOM
+WARNING: The Fortitude gem cannot load its native extensions. Performance may be significantly reduced.
+         Error: #{le.message} (#{le.class})
+EOM
+    native_loaded = false
+  end
+end
+
+unless native_loaded
+  require 'fortitude/fortitude_ruby_ext'
 end
 
 if defined?(::ActiveSupport::SafeBuffer)
