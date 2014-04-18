@@ -29,6 +29,13 @@ describe "Fortitude doctype support", :type => :system do
 
   it "should autoload specific widgets" do
     expect(Fortitude::Widget::Html5).to be
+    expect(Fortitude::Widget::Html4Strict).to be
+    expect(Fortitude::Widget::Html4Transitional).to be
+    expect(Fortitude::Widget::Html4Frameset).to be
+    expect(Fortitude::Widget::Xhtml10Strict).to be
+    expect(Fortitude::Widget::Xhtml10Transitional).to be
+    expect(Fortitude::Widget::Xhtml10Frameset).to be
+    expect(Fortitude::Widget::Xhtml11).to be
   end
 
   EXPECTED_RESULTS = {

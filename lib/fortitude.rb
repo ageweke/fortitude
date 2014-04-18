@@ -3,6 +3,13 @@ require "fortitude/version"
 module Fortitude
   module Widget
     autoload :Html5, 'fortitude/widget/html5'
+    autoload :Html4Strict, 'fortitude/widget/html4_strict'
+    autoload :Html4Transitional, 'fortitude/widget/html4_transitional'
+    autoload :Html4Frameset, 'fortitude/widget/html4_frameset'
+    autoload :Xhtml10Strict, 'fortitude/widget/xhtml10_strict'
+    autoload :Xhtml10Transitional, 'fortitude/widget/xhtml10_transitional'
+    autoload :Xhtml10Frameset, 'fortitude/widget/xhtml10_frameset'
+    autoload :Xhtml11, 'fortitude/widget/xhtml11'
   end
 end
 
@@ -36,7 +43,10 @@ else
 end
 
 require 'fortitude/widget/base'
-require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
+
+unless %w{false off 0}.include?((ENV['FORTITUDE_NATIVE_EXTENSIONS'] || '').strip.downcase)
+  require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
+end
 
 if defined?(::ActiveSupport::SafeBuffer)
   ::ActiveSupport::SafeBuffer.class_eval do
