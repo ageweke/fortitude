@@ -43,6 +43,44 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("<p>foo</p>") { tag_p "foo" }
   end
 
+  it "should let you override a tag and use #super" do
+    wc = widget_class do
+      def p(data, options = { })
+        text "before_p"
+        super(data, { :bar => 'baz' }.merge(options))
+        text("after_p")
+      end
+
+      def content
+        text "yo"
+        p "hello"
+        text "bye"
+      end
+    end
+
+    expect(render(wc)).to eq("yobefore_p<p bar=\"baz\">hello</p>after_pbye")
+  end
+
+  it "should let you override a tag and use #super, even if it's defined directly on that widget class" do
+    wc = widget_class do
+      tag :mytag
+
+      def mytag(data, options = { })
+        text "before_mytag"
+        super(data, { :bar => 'baz' }.merge(options))
+        text("after_mytag")
+      end
+
+      def content
+        text "yo"
+        mytag "hello"
+        text "bye"
+      end
+    end
+
+    expect(render(wc)).to eq("yobefore_mytag<mytag bar=\"baz\">hello</mytag>after_mytagbye")
+  end
+
   def arbitrary_object_with_to_s(value)
     out = Object.new
     class << out
