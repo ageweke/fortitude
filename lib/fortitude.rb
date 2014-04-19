@@ -49,15 +49,21 @@ native_loaded = false
 if %w{false off 0}.include?((ENV['FORTITUDE_NATIVE_EXTENSIONS'] || '').strip.downcase)
   $stderr.puts <<-EOM
 WARNING: Fortitude native extensions disabled via environment variable FORTITUDE_NATIVE_EXTENSIONS.
-         Performance may be significantly reduced.
+         Performance may be reduced by a factor of 3-5x!
 EOM
 else
   begin
-    require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
+    if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
+      require File.join(File.dirname(File.dirname(__FILE__)), 'ext', 'fortitude_native.jar')
+    else
+      require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
+    end
+
     native_loaded = true
   rescue LoadError => le
     $stderr.puts <<-EOM
-WARNING: The Fortitude gem cannot load its native extensions. Performance may be significantly reduced.
+WARNING: The Fortitude gem cannot load its native extensions. Performance may be reduced by a factor of 3-5x!
+         Load path: #{$:.inspect}
          Error: #{le.message} (#{le.class})
 EOM
     native_loaded = false
