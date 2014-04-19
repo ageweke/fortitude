@@ -19,14 +19,13 @@ void Init_fortitude_native_ext() {
 void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
     char buf[BUF_SIZE + 1];
     char* buf_pos = buf;
-    int buf_offset = 0;
+    char* max_buf_pos = buf + (BUF_SIZE - MAX_SUBSTITUTION_LENGTH);
 
     while (1) {
-        if (buf_offset >= (BUF_SIZE - MAX_SUBSTITUTION_LENGTH)) {
+        if (buf_pos >= max_buf_pos) {
             *buf_pos = '\0';
             rb_str_cat2(rb_output, buf);
             buf_pos = buf;
-            buf_offset = 0;
         }
 
         char ch = *src;
@@ -37,30 +36,22 @@ void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
             *buf_pos++ = 'm';
             *buf_pos++ = 'p';
             *buf_pos++ = ';';
-
-            buf_offset += 5;
         } else if (ch == '<') {
             *buf_pos++ = '&';
             *buf_pos++ = 'l';
             *buf_pos++ = 't';
             *buf_pos++ = ';';
-
-            buf_offset += 4;
         } else if (ch == '>') {
             *buf_pos++ = '&';
             *buf_pos++ = 'g';
             *buf_pos++ = 't';
             *buf_pos++ = ';';
-
-            buf_offset += 4;
         } else if (ch == '\'') {
             *buf_pos++ = '&';
             *buf_pos++ = '#';
             *buf_pos++ = '3';
             *buf_pos++ = '9';
             *buf_pos++ = ';';
-
-            buf_offset += 5;
         } else if (ch == '"') {
             *buf_pos++ = '&';
             *buf_pos++ = 'q';
@@ -68,21 +59,18 @@ void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
             *buf_pos++ = 'o';
             *buf_pos++ = 't';
             *buf_pos++ = ';';
-
-            buf_offset += 6;
         } else {
             if (ch == '\0') {
                 break;
             }
 
             *buf_pos++ = ch;
-            buf_offset += 1;
         }
 
         src++;
     }
 
-    if (buf_offset > 0) {
+    if (buf_pos > buf) {
         *buf_pos = '\0';
         rb_str_cat2(rb_output, buf);
     }
