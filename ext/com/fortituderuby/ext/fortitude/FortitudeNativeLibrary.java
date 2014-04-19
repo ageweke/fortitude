@@ -7,6 +7,7 @@ import org.jruby.RubyClass;
 import org.jruby.RubyModule;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObject;
+import org.jruby.RubyString;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.runtime.ObjectAllocator;
@@ -15,8 +16,12 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.load.Library;
 
 public class FortitudeNativeLibrary implements Library {
-    public void load(Ruby runtime, boolean wrap) throws IOException {
+    static Ruby runtime;
+
+    public void load(Ruby theRuntime, boolean wrap) throws IOException {
         System.err.println("FortitudeNativeLibrary loaded!");
+
+        runtime = theRuntime;
 
         RubyClass stringClass = runtime.getClass("String");
         stringClass.defineAnnotatedMethod(FortitudeStringExtensions.class, "fortitude_append_escaped_string");
@@ -37,21 +42,35 @@ public class FortitudeNativeLibrary implements Library {
 
         @JRubyMethod(name = "fortitude_append_escaped_string")
         public static IRubyObject fortitude_append_escaped_string(ThreadContext context, IRubyObject self, IRubyObject output) {
+            if (! (output instanceof RubyString)) {
+                throw new RuntimeException("fail");
+            }
+
             RubyString selfString = (RubyString) self;
             RubyString outputString = (RubyString) output;
 
-            byte[] selfBytes = selfString.getBytes();
+            IRubyObject htmlSafe = selfString.getInstanceVariable("@html_safe");
+            if (htmlSafe != null && htmlSafe.isTrue()) {
+                outputString.cat(selfString);
+            } else {
+                byte[] selfBytes = selfString.getBytes();
+                fortitude_escaped_strcpy(outputString, selfBytes);
+            }
 
+            return runtime.getNil();
+        }
+
+        public static void fortitude_escaped_strcpy(RubyString output, byte[] source) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int bufferPos = 0;
 
-            for (int i = 0; i < selfBytes.length; ++i) {
+            for (int i = 0; i < source.length; ++i) {
                 if (bufferPos > (BUFFER_SIZE - MAX_SUBSTITUTION_LENGTH)) {
-                    outputString.cat(buffer, 0, bufferPos);
+                    output.cat(buffer, 0, bufferPos);
                     bufferPos = 0;
                 }
 
-                byte sourceByte = selfBytes[i];
+                byte sourceByte = source[i];
 
                 switch(sourceByte) {
                 case AMPERSAND_BYTE:
@@ -86,17 +105,22 @@ public class FortitudeNativeLibrary implements Library {
 
                 case DOUBLE_QUOTE_BYTE:
                     buffer[bufferPos++] = '&';
-                    buffer[bufferPos++] = '#';
                     buffer[bufferPos++] = 'q';
                     buffer[bufferPos++] = 'u';
                     buffer[bufferPos++] = 'o';
                     buffer[bufferPos++] = 't';
                     buffer[bufferPos++] = ';';
                     break;
+
+                default:
+                    buffer[bufferPos++] = sourceByte;
+                    break;
                 }
             }
 
-            return null;
+            if (bufferPos > 0) {
+                output.cat(buffer, 0, bufferPos);
+            }
         }
     }
 
