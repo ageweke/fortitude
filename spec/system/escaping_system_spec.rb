@@ -34,4 +34,10 @@ describe "Fortitude escaping behavior", :type => :system do
   it "should escape direct arguments to tags and attributes, even if all together" do
     expect(render(widget_class_with_content { p "a<b", 'b>a' => 'a&b' })).to eq("<p b&gt;a=\"a&amp;b\">a&lt;b</p>")
   end
+
+  it "should still correctly escape very long strings" do
+    very_long_string = "&" + ("a" * 300) + "<" + ("b" * 300) + ">" + ("c" * 300) + "&" + ("d" * 300) + "&" + ("e" * 300) + "\"";
+    very_long_string_escaped = "&amp;" + ("a" * 300) + "&lt;" + ("b" * 300) + "&gt;" + ("c" * 300) + "&amp;" + ("d" * 300) + "&amp;" + ("e" * 300) + "&quot;"
+    expect(render(widget_class_with_content { text very_long_string })).to eq(very_long_string_escaped)
+  end
 end
