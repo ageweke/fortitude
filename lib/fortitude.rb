@@ -54,7 +54,7 @@ EOM
 else
   begin
     if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
-      require File.join(File.dirname(File.dirname(__FILE__)), 'ext', 'fortitude_native.jar')
+      require 'fortitude_jruby_native_ext.jar'
     else
       require File.join(File.dirname(__FILE__), 'fortitude_native_ext')
     end

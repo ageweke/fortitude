@@ -26,9 +26,76 @@ public class FortitudeNativeLibrary implements Library {
     }
 
     public static class FortitudeStringExtensions {
+        public static final int BUFFER_SIZE = 256;
+        public static final int MAX_SUBSTITUTION_LENGTH = 6;
+
+        public static final byte AMPERSAND_BYTE = (byte) '&';
+        public static final byte LESS_THAN_BYTE = (byte) '<';
+        public static final byte GREATER_THAN_BYTE = (byte) '>';
+        public static final byte SINGLE_QUOTE_BYTE = (byte) '\'';
+        public static final byte DOUBLE_QUOTE_BYTE = (byte) '\"';
+
         @JRubyMethod(name = "fortitude_append_escaped_string")
         public static IRubyObject fortitude_append_escaped_string(ThreadContext context, IRubyObject self, IRubyObject output) {
-            System.err.println("fortitude_append_escaped_string called!");
+            RubyString selfString = (RubyString) self;
+            RubyString outputString = (RubyString) output;
+
+            byte[] selfBytes = selfString.getBytes();
+
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int bufferPos = 0;
+
+            for (int i = 0; i < selfBytes.length; ++i) {
+                if (bufferPos > (BUFFER_SIZE - MAX_SUBSTITUTION_LENGTH)) {
+                    outputString.cat(buffer, 0, bufferPos);
+                    bufferPos = 0;
+                }
+
+                byte sourceByte = selfBytes[i];
+
+                switch(sourceByte) {
+                case AMPERSAND_BYTE:
+                    buffer[bufferPos++] = '&';
+                    buffer[bufferPos++] = 'a';
+                    buffer[bufferPos++] = 'm';
+                    buffer[bufferPos++] = 'p';
+                    buffer[bufferPos++] = ';';
+                    break;
+
+                case LESS_THAN_BYTE:
+                    buffer[bufferPos++] = '&';
+                    buffer[bufferPos++] = 'l';
+                    buffer[bufferPos++] = 't';
+                    buffer[bufferPos++] = ';';
+                    break;
+
+                case GREATER_THAN_BYTE:
+                    buffer[bufferPos++] = '&';
+                    buffer[bufferPos++] = 'g';
+                    buffer[bufferPos++] = 't';
+                    buffer[bufferPos++] = ';';
+                    break;
+
+                case SINGLE_QUOTE_BYTE:
+                    buffer[bufferPos++] = '&';
+                    buffer[bufferPos++] = '#';
+                    buffer[bufferPos++] = '3';
+                    buffer[bufferPos++] = '9';
+                    buffer[bufferPos++] = ';';
+                    break;
+
+                case DOUBLE_QUOTE_BYTE:
+                    buffer[bufferPos++] = '&';
+                    buffer[bufferPos++] = '#';
+                    buffer[bufferPos++] = 'q';
+                    buffer[bufferPos++] = 'u';
+                    buffer[bufferPos++] = 'o';
+                    buffer[bufferPos++] = 't';
+                    buffer[bufferPos++] = ';';
+                    break;
+                }
+            }
+
             return null;
         }
     }

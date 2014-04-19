@@ -12,7 +12,7 @@ Rake::ExtensionTask.new('fortitude_native_ext', spec)
 
 namespace :jruby do
   base_directory = File.expand_path(File.dirname(__FILE__))
-  jar_path = File.join(base_directory, 'ext', 'fortitude_native.jar')
+  jar_path = File.join(base_directory, 'lib', 'fortitude_jruby_native_ext.jar')
   source_path = File.join(base_directory, 'ext')
   classes_output_path = File.join(base_directory, 'tmp', 'classes')
   jruby_jar_path = File.join(RbConfig::CONFIG['libdir'], 'jruby.jar')
