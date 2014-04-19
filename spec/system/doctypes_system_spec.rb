@@ -38,6 +38,10 @@ describe "Fortitude doctype support", :type => :system do
     expect(Fortitude::Widget::Xhtml11).to be
   end
 
+  before :all do
+    @classes_by_doctype = { }
+  end
+
   EXPECTED_RESULTS = {
     :html5 => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
@@ -88,7 +92,9 @@ describe "Fortitude doctype support", :type => :system do
     }
   }.each do |doctype, expected_results|
     describe doctype do
-      let(:the_widget_class) { wc_with_doctype(doctype) }
+      let(:the_widget_class) {
+        @classes_by_doctype[doctype] ||= wc_with_doctype(doctype)
+      }
 
       it "should #{expected_results[:allows_dir] ? "" : "not "}allow <dir>" do
         the_widget_class.class_eval do

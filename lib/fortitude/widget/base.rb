@@ -417,10 +417,10 @@ module Fortitude
             raise ArgumentError, "You can't supply JavaScript content both via text and a block"
           else
             block = lambda { tag_rawtext content }
-            [ self.class.doctype.default_javascript_tag_attributes ]
+            [ self.class.doctype.default_javascript_tag_attributes.dup ]
           end
         else
-          [ self.class.doctype.default_javascript_tag_attributes ]
+          [ self.class.doctype.default_javascript_tag_attributes.dup ]
         end
 
         actual_block = block
