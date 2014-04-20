@@ -79,3 +79,15 @@ if defined?(::ActiveSupport::SafeBuffer)
     public :original_concat
   end
 end
+
+begin
+  require 'tilt'
+rescue LoadError => le
+  # ok, whatever
+end
+
+if defined?(::Tilt)
+  require 'fortitude/tilt/fortitude_template'
+
+  Tilt.register(Fortitude::Tilt::FortitudeTemplate, 'rb')
+end

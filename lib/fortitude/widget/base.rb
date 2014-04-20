@@ -194,6 +194,12 @@ module Fortitude
           needs_as_hash
         end
 
+        def all_subclasses
+          out = direct_subclasses
+          out += direct_subclasses.map { |sc| sc.all_subclasses }
+          out
+        end
+
         # EFFECTIVELY PRIVATE
         def needs_as_hash
           @_fortitude_needs_as_hash ||= begin
