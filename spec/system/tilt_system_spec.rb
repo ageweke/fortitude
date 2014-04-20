@@ -79,11 +79,12 @@ EOS
     expect(result).to eq("foo: the_foo, bar: the_bar")
   end
 
-  def context_object(variable_mappings = { }, klass = Object.class)
+  def context_object(variable_mappings = { }, klass = Object.class, &block)
     out = klass.new
     variable_mappings.each do |name, value|
       out.instance_variable_set("@#{name}", value)
     end
+    out.instance_eval(&block) if block
     out
   end
 
@@ -130,6 +131,40 @@ EOS
     expect(result).to eq("foo: the_foo, bar: whatever, baz: baz!")
   end
 
+  SHARED_VARIABLE_ACCESS = <<-EOS
+class SharedVariableAccess < Fortitude::Widget::Html5
+  def content
+    data = shared_variables[:foo]
+    text "foo is: \#{data}"
+    shared_variables[:foo] = 'new_foo'
+  end
+end
+EOS
+
+  it "should allow instance variables on the context object to be accessed via #shared_variables" do
+    co = context_object(:foo => 'the_foo')
+    result = render_text_with_tilt("shared_variable_access.rb", SHARED_VARIABLE_ACCESS, co, { })
+    expect(result).to eq("foo is: the_foo")
+    expect(co.instance_variable_get("@foo")).to eq("new_foo")
+  end
+
+  IMPLICIT_SHARED_VARIABLE_ACCESS = <<-EOS
+class ImplicitSharedVariableAccess < Fortitude::Widget::Html5
+  implicit_shared_variable_access true
+  def content
+    text "foo is: \#{@foo}"
+    @foo = "new_foo"
+  end
+end
+EOS
+
+  it "should allow instance variables on the context object to be read and written implicitly if implicit_shared_variable_access is set" do
+    co = context_object(:foo => 'the_foo')
+    result = render_text_with_tilt("implicit_shared_variable_access.rb", IMPLICIT_SHARED_VARIABLE_ACCESS, co, { })
+    expect(result).to eq("foo is: the_foo")
+    expect(co.instance_variable_get("@foo")).to eq("new_foo")
+  end
+
   WIDGET_WITH_BLOCK = <<-EOS
 class WidgetWithBlock < Fortitude::Widget::Html5
   def content
@@ -145,9 +180,47 @@ EOS
     expect(result).to eq("data is: xxfooyy")
   end
 
-  it "should make explicit locals override variables defined on the context object"
-  it "should allow helpers defined on the context object to be invoked via automatic helper support"
-  it "should allow helpers defined on the context object to be invoked via explicit helper support"
+  WIDGET_CALLING_FOO = <<-EOS
+class WidgetCallingFoo < Fortitude::Widget::Html5
+  def content
+    val = foo("xxx")
+    text "val is: \#{val}"
+  end
+end
+EOS
+
+  it "should allow helpers defined on the context object to be invoked via automatic helper support" do
+    co = context_object do
+      def foo(x)
+        "foo#{x}foo"
+      end
+    end
+
+    result = render_text_with_tilt("widget_calling_foo.rb", WIDGET_CALLING_FOO, co, { })
+    expect(result).to eq("val is: fooxxxfoo")
+  end
+
+  WIDGET_CALLING_FOO_AHA_OFF = <<-EOS
+class WidgetCallingFooAhaOff < Fortitude::Widget::Html5
+  automatic_helper_access false
+
+  def content
+    val = invoke_helper(:foo, "yyy")
+    text "val is: \#{val}"
+  end
+end
+EOS
+
+  it "should allow helpers defined on the context object to be invoked via explicit helper support" do
+    co = context_object do
+      def foo(x)
+        "foo#{x}foo"
+      end
+    end
+
+    result = render_text_with_tilt("widget_calling_foo_aha_off.rb", WIDGET_CALLING_FOO_AHA_OFF, co, { })
+    expect(result).to eq("val is: fooyyyfoo")
+  end
 
   it "should not require the class name to match the filename of the widget at all"
 
