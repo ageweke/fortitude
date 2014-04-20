@@ -31,7 +31,7 @@ comment to the source of the template, like so:
 
       def render(scope=Object.new, locals={}, &block)
         rendering_context = Fortitude::RenderingContext.new({ })
-        widget = @fortitude_class.new({ })
+        widget = @fortitude_class.new(locals)
         widget.to_html(rendering_context)
         rendering_context.output_buffer_holder.output_buffer
       end

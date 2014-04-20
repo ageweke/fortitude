@@ -18,9 +18,14 @@ describe "Fortitude Tilt integration", :type => :system do
     full_path
   end
 
-  def render_with_tilt(full_path, evaluation_scope = Object.new, variables = { })
+  def render_with_tilt(full_path, evaluation_scope = Object.new, variables = { }, &block)
     template = Tilt.new(full_path)
-    template.render(evaluation_scope, variables)
+    template.render(evaluation_scope, variables, &block)
+  end
+
+  def render_text_with_tilt(filename, text, evaluation_scope = Object.new, variables = { }, &block)
+    full_path = splat!(filename, text)
+    render_with_tilt(full_path, evaluation_scope, variables, &block)
   end
 
   it "should render a very simple template via Tilt" do
@@ -34,16 +39,30 @@ class SimpleTemplate < Fortitude::Widget::Html5
 end
 EOS
 
-    full_path = splat!("simple_template.rb", text)
-
-    expect(render_with_tilt(full_path)).to eq("this is<p>a simple widget</p>!")
+    expect(render_text_with_tilt("simple_template.rb", text)).to eq("this is<p>a simple widget</p>!")
   end
 
-  it "should pass explicit locals to the template"
+  it "should pass explicit locals to the template" do
+    text = <<-EOS
+class SimpleTemplateWithVariables < Fortitude::Widget::Html5
+  needs :foo, :bar => 'whatever'
+
+  def content
+    text "foo: \#{foo}, bar: \#{bar}"
+  end
+end
+EOS
+
+    result = render_text_with_tilt("simple_template_with_variables.rb", text, Object.new, { :foo => 'the_foo', :bar => 'the_bar' })
+    expect(result).to eq("foo: the_foo, bar: the_bar")
+  end
+
   it "should make variables defined on the context object available to the template"
   it "should make explicit locals override variables defined on the context object"
   it "should allow helpers defined on the context object to be invoked via automatic helper support"
   it "should allow helpers defined on the context object to be invoked via explicit helper support"
+
+  it "should not require the class name to match the filename of the widget at all"
 
   it "should still render a widget that's directly in a module (class Foo::Bar::Baz < Fortitude::Widget::Base)"
   it "should still render a widget that's directly in a module, of a subclass of Widget::Base (class Foo::Bar::Baz < MyWidget)"
