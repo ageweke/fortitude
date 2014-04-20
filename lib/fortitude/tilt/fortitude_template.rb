@@ -41,6 +41,7 @@ comment to the source of the template, like so:
         end
 
         widget_assigns = widget_assigns.merge(locals)
+        widget_assigns = @fortitude_class.extract_needed_assigns_from(widget_assigns) unless @fortitude_class.extra_assigns == :use
 
         widget = @fortitude_class.new(widget_assigns)
         widget.to_html(rendering_context)
