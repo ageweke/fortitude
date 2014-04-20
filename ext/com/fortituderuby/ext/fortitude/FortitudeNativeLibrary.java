@@ -138,7 +138,7 @@ public class FortitudeNativeLibrary implements Library {
                 RubyArray array = (RubyArray) object;
 
                 for (int i = 0; i < array.getLength(); ++i) {
-                    IRubyObject element = (IRubyObject) array.get(i);
+                    IRubyObject element = (IRubyObject) array.entry(i);
                     if (i > 0) {
                         rbOutput.cat(SPACE);
                     }
@@ -150,7 +150,7 @@ public class FortitudeNativeLibrary implements Library {
                 RubyString asString = ((RubyFixnum) object).to_s();
                 FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes());
             } else {
-                RubyString asString = (RubyString) ((RubyBasicObject) object).to_s();
+                RubyString asString = (RubyString) ((RubyBasicObject) object).callMethod("to_s");
                 FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes());
             }
         }
