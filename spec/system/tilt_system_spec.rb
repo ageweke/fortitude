@@ -42,8 +42,7 @@ EOS
     expect(render_text_with_tilt("simple_template.rb", text)).to eq("this is<p>a simple widget</p>!")
   end
 
-  it "should pass explicit locals to the template" do
-    text = <<-EOS
+  SIMPLE_TEMPLATE_WITH_VARIABLES = <<-EOS
 class SimpleTemplateWithVariables < Fortitude::Widget::Html5
   needs :foo, :bar => 'whatever'
 
@@ -53,11 +52,26 @@ class SimpleTemplateWithVariables < Fortitude::Widget::Html5
 end
 EOS
 
-    result = render_text_with_tilt("simple_template_with_variables.rb", text, Object.new, { :foo => 'the_foo', :bar => 'the_bar' })
+  it "should pass explicit locals to the template" do
+    result = render_text_with_tilt("simple_template_with_variables.rb", SIMPLE_TEMPLATE_WITH_VARIABLES, Object.new, { :foo => 'the_foo', :bar => 'the_bar' })
     expect(result).to eq("foo: the_foo, bar: the_bar")
   end
 
-  it "should make variables defined on the context object available to the template"
+  it "should make variables defined on the context object available to the template as needs" do
+    context_object = Object.new
+    context_object.instance_variable_set("@foo", "the_foo")
+    context_object.instance_variable_set("@bar", "the_bar")
+
+    result = render_text_with_tilt("simple_template_with_variables.rb", SIMPLE_TEMPLATE_WITH_VARIABLES, context_object, { })
+    expect(result).to eq("foo: the_foo, bar: the_bar")
+  end
+
+  it "should allow passing locals as strings, and overriding context-object variables"
+  it "should allow passing locals as symbols, and overriding context-object variables"
+
+  it "should ignore passed locals that the template doesn't actually need"
+  it "should ignore context-object instance variables that the template doesn't actually need"
+
   it "should make explicit locals override variables defined on the context object"
   it "should allow helpers defined on the context object to be invoked via automatic helper support"
   it "should allow helpers defined on the context object to be invoked via explicit helper support"

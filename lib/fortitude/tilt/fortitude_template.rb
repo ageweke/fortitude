@@ -31,7 +31,18 @@ comment to the source of the template, like so:
 
       def render(scope=Object.new, locals={}, &block)
         rendering_context = Fortitude::RenderingContext.new({ })
-        widget = @fortitude_class.new(locals)
+
+        widget_assigns = { }.with_indifferent_access
+
+        scope.instance_variables.each do |instance_variable_name|
+          if instance_variable_name.to_s =~ /^\@(.*)$/
+            widget_assigns[$1] = scope.instance_variable_get(instance_variable_name)
+          end
+        end
+
+        widget_assigns = widget_assigns.merge(locals)
+
+        widget = @fortitude_class.new(widget_assigns)
         widget.to_html(rendering_context)
         rendering_context.output_buffer_holder.output_buffer
       end
