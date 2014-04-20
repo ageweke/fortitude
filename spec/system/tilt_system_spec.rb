@@ -118,10 +118,32 @@ EOS
     expect(result).to eq("foo: the_foo, bar: whatever, baz: baz!")
   end
 
-  it "should ignore context-object instance variables that the template doesn't actually need"
-  it "should pass extra context-object instance variables if the template wants extra assigns"
+  it "should ignore context-object instance variables that the template doesn't actually need" do
+    result = render_text_with_tilt("simple_template_with_variables_no_extra_assigns.rb", SIMPLE_TEMPLATE_WITH_VARIABLES_NO_EXTRA_ASSIGNS,
+      context_object(:foo => 'the_foo', :baz => 'baz!'), { })
+    expect(result).to eq("foo: the_foo, bar: whatever")
+  end
 
-  it "should forward the passed block to the widget"
+  it "should pass extra context-object instance variables if the template wants extra assigns" do
+    result = render_text_with_tilt("simple_template_with_variables_wants_extra_assigns.rb", SIMPLE_TEMPLATE_WITH_VARIABLES_WANTS_EXTRA_ASSIGNS,
+      context_object(:foo => 'the_foo', :baz => 'baz!'), { })
+    expect(result).to eq("foo: the_foo, bar: whatever, baz: baz!")
+  end
+
+  WIDGET_WITH_BLOCK = <<-EOS
+class WidgetWithBlock < Fortitude::Widget::Html5
+  def content
+    data = yield("foo")
+    text "data is: \#{data}"
+  end
+end
+EOS
+
+  it "should forward the passed block to the widget" do
+    result = render_text_with_tilt("widget_with_block.rb", WIDGET_WITH_BLOCK,
+      context_object, { }) { |a| "xx#{a}yy" }
+    expect(result).to eq("data is: xxfooyy")
+  end
 
   it "should make explicit locals override variables defined on the context object"
   it "should allow helpers defined on the context object to be invoked via automatic helper support"
