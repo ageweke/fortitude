@@ -53,8 +53,8 @@ describe "Rails layout support", :type => :rails do
   end
 
   it "should let you explicitly yield to the view" do
-    data = get("yield_to_view_explicitly")
+    data = get("yield_from_widget_explicitly")
     data.should match(/explicit_yield_layout/i)
-    data.should match(/this is yield_to_view_explicitly/i)
+    data.should match(/this is yield_from_widget_explicitly/i)
   end
 end

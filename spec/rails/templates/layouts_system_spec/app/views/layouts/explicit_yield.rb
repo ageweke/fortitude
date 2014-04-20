@@ -5,7 +5,7 @@ class Views::Layouts::ExplicitYield < Fortitude::Widget::Html5
         title "explicit_yield_layout"
       end
       body do
-        yield_to_view
+        yield_from_widget
       end
     end
   end

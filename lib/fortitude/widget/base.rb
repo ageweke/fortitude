@@ -321,8 +321,8 @@ module Fortitude
         (@_fortitude_extra_assigns || { })
       end
 
-      def yield_to_view(*args)
-        @_fortitude_rendering_context.yield_to_view(*args)
+      def yield_from_widget(*args)
+        @_fortitude_rendering_context.yield_from_widget(*args)
       end
 
       def transfer_shared_variables(*args, &block)
@@ -724,7 +724,7 @@ EOS
         @_fortitude_rendering_context = rendering_context
         @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
 
-        block = lambda { |*args| @_fortitude_rendering_context.yield_to_view(*args) }
+        block = lambda { |*args| @_fortitude_rendering_context.yield_from_widget(*args) }
 
         rendering_context.record_widget(self) do
           begin
