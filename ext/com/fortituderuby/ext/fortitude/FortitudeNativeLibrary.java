@@ -1,16 +1,12 @@
 package com.fortituderuby.ext.fortitude;
 
-import java.lang.reflect.Field;
 import java.io.IOException;
 import org.jruby.Ruby;
 import org.jruby.RubyClass;
-import org.jruby.RubyModule;
-import org.jruby.RubyNumeric;
-import org.jruby.RubyObject;
 import org.jruby.RubyString;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
-import org.jruby.runtime.ObjectAllocator;
+import org.jruby.exceptions.RaiseException;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.load.Library;
@@ -19,8 +15,6 @@ public class FortitudeNativeLibrary implements Library {
     static Ruby runtime;
 
     public void load(Ruby theRuntime, boolean wrap) throws IOException {
-        System.err.println("FortitudeNativeLibrary loaded!");
-
         runtime = theRuntime;
 
         RubyClass stringClass = runtime.getClass("String");
@@ -43,7 +37,8 @@ public class FortitudeNativeLibrary implements Library {
         @JRubyMethod(name = "fortitude_append_escaped_string")
         public static IRubyObject fortitude_append_escaped_string(ThreadContext context, IRubyObject self, IRubyObject output) {
             if (! (output instanceof RubyString)) {
-                throw new RuntimeException("fail");
+                RaiseException exception = runtime.newArgumentError("You can only append to a String (this is a native (Java) method)");
+                throw exception;
             }
 
             RubyString selfString = (RubyString) self;
