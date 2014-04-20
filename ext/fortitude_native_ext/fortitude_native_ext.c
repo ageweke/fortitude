@@ -101,7 +101,7 @@ void fortitude_append_to(VALUE object, VALUE rb_output) {
     to_s = rb_intern("to_s");
 #endif
 
-    char buf[BUF_SIZE + 1];
+    char buf[25];
     long value;
     int i;
     VALUE new_string, array_element;
