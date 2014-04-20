@@ -2,8 +2,14 @@ package com.fortituderuby.ext.fortitude;
 
 import java.io.IOException;
 import org.jruby.Ruby;
+import org.jruby.RubyBasicObject;
+import org.jruby.RubyArray;
 import org.jruby.RubyClass;
+import org.jruby.RubyFixnum;
+import org.jruby.RubyHash;
+import org.jruby.RubyNil;
 import org.jruby.RubyString;
+import org.jruby.RubySymbol;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.exceptions.RaiseException;
@@ -12,6 +18,8 @@ import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.load.Library;
 
 public class FortitudeNativeLibrary implements Library {
+    public static final int BUFFER_SIZE = 256;
+
     static Ruby runtime;
 
     public void load(Ruby theRuntime, boolean wrap) throws IOException {
@@ -25,7 +33,6 @@ public class FortitudeNativeLibrary implements Library {
     }
 
     public static class FortitudeStringExtensions {
-        public static final int BUFFER_SIZE = 256;
         public static final int MAX_SUBSTITUTION_LENGTH = 6;
 
         public static final byte AMPERSAND_BYTE = (byte) '&';
@@ -120,10 +127,97 @@ public class FortitudeNativeLibrary implements Library {
     }
 
     public static class FortitudeHashExtensions {
+        public static final byte SPACE = (byte) ' ';
+
+        public static void fortitude_append_to(IRubyObject object, RubyString rbOutput) {
+            if (object instanceof RubyString) {
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, ((RubyString) object).getBytes());
+            } else if (object instanceof RubySymbol) {
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, ((RubyString) ((RubySymbol) object).to_s()).getBytes());
+            } else if (object instanceof RubyArray) {
+                RubyArray array = (RubyArray) object;
+
+                for (int i = 0; i < array.getLength(); ++i) {
+                    IRubyObject element = (IRubyObject) array.get(i);
+                    if (i > 0) {
+                        rbOutput.cat(SPACE);
+                    }
+                    fortitude_append_to(element, rbOutput);
+                }
+            } else if (object instanceof RubyNil) {
+                // nothing here
+            } else if (object instanceof RubyFixnum) {
+                RubyString asString = ((RubyFixnum) object).to_s();
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes());
+            } else {
+                RubyString asString = (RubyString) ((RubyBasicObject) object).to_s();
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes());
+            }
+        }
+
+        public static class AppendKeyAndValueVisitor extends RubyHash.Visitor {
+            public final ThreadContext threadContext;
+            public final RubyString prefix;
+            public final RubyString output;
+
+            public static final byte[] EQUALS_QUOTE = new byte[] { (byte) '=', (byte) '"' };
+
+            public AppendKeyAndValueVisitor(ThreadContext threadContext, RubyString prefix, RubyString output) {
+                this.threadContext = threadContext;
+                this.prefix = prefix;
+                this.output = output;
+            }
+
+            public void visit(IRubyObject key, IRubyObject value) {
+                if (value instanceof RubyHash) {
+                    RubyString newPrefix;
+
+                    if (prefix != null) {
+                        newPrefix = (RubyString) prefix.dup();
+                        fortitude_append_to(key, newPrefix);
+                    } else {
+                        newPrefix = RubyString.newEmptyString(runtime);
+                        fortitude_append_to(key, newPrefix);
+                    }
+
+                    newPrefix.cat('-');
+                    fortitude_append_as_attributes(threadContext, value, output, newPrefix);
+                } else {
+                    output.cat(' ');
+
+                    if (prefix != null) {
+                        output.cat(prefix);
+                    } else {
+                        // nothing here
+                    }
+
+                    fortitude_append_to(key, output);
+                    output.cat(EQUALS_QUOTE);
+                    fortitude_append_to(value, output);
+                    output.cat('"');
+                }
+            }
+        }
+
         @JRubyMethod(name = "fortitude_append_as_attributes")
         public static IRubyObject fortitude_append_as_attributes(ThreadContext context, IRubyObject self, IRubyObject output, IRubyObject prefix) {
-            System.err.println("fortitude_append_as_attributes called!");
-            return null;
+            if (! (output instanceof RubyString)) {
+                RaiseException exception = runtime.newArgumentError("You can only append to a String (this is a native (Java) method)");
+                throw exception;
+            }
+            if (prefix instanceof RubyNil) {
+                prefix = null;
+            }
+            if (prefix != null && (! (prefix instanceof RubyString))) {
+                RaiseException exception = runtime.newArgumentError("You can only use a prefix that is a String (this is a native (Java) method)");
+                throw exception;
+            }
+
+            AppendKeyAndValueVisitor visitor = new AppendKeyAndValueVisitor(context, (RubyString) prefix, (RubyString) output);
+
+            ((RubyHash) self).visitAll(visitor);
+
+            return runtime.getNil();
         }
     }
 }
