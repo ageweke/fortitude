@@ -5,7 +5,8 @@ module Fortitude
     attr_reader :output_buffer_holder, :instance_variable_set, :helpers_object
 
     def initialize(options)
-      options.assert_valid_keys(:delegate_object, :output_buffer_holder, :helpers_object, :instance_variables_object, :yield_block)
+      options.assert_valid_keys(:delegate_object, :output_buffer_holder, :helpers_object, :instance_variables_object,
+        :yield_block, :render_yield_result)
 
       @output_buffer_holder = options[:output_buffer_holder]
       if (! @output_buffer_holder) && options[:delegate_object] && options[:delegate_object].respond_to?(:output_buffer)
@@ -16,6 +17,8 @@ module Fortitude
 
       instance_variables_object = options[:instance_variables_object] || options[:delegate_object] || Object.new
       @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
+
+      @render_yield_result = true unless options.has_key?(:render_yield_result) && (! options[:render_yield_result])
 
       @indent = 0
       @newline_needed = false
@@ -160,7 +163,9 @@ module Fortitude
 
     def yield_from_widget(*args)
       raise "No layout to yield to!" unless @yield_block
-      @output_buffer_holder.output_buffer << @yield_block.call(*args)
+      result = @yield_block.call(*args)
+      @output_buffer_holder.output_buffer << result if @render_yield_result
+      result
     end
 
     def flush!

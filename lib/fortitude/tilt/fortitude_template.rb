@@ -30,7 +30,7 @@ comment to the source of the template, like so:
       end
 
       def render(scope=Object.new, locals={}, &block)
-        rendering_context = Fortitude::RenderingContext.new({ :yield_block => block })
+        rendering_context = Fortitude::RenderingContext.new({ :yield_block => block, :render_yield_result => false })
 
         widget_assigns = { }.with_indifferent_access
 
