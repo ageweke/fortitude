@@ -18,14 +18,14 @@ describe "Fortitude Tilt integration", :type => :system do
     full_path
   end
 
-  def render_with_tilt(full_path, evaluation_scope = context_object, variables = { }, &block)
-    template = Tilt.new(full_path)
+  def render_with_tilt(full_path, evaluation_scope = context_object, variables = { }, options = { }, &block)
+    template = Tilt.new(full_path, options)
     template.render(evaluation_scope, variables, &block)
   end
 
-  def render_text_with_tilt(filename, text, evaluation_scope = context_object, variables = { }, &block)
+  def render_text_with_tilt(filename, text, evaluation_scope = context_object, variables = { }, options = { }, &block)
     full_path = splat!(filename, text)
-    render_with_tilt(full_path, evaluation_scope, variables, &block)
+    render_with_tilt(full_path, evaluation_scope, variables, options, &block)
   end
 
   it "should render a very simple template via Tilt" do
@@ -222,13 +222,157 @@ EOS
     expect(result).to eq("val is: fooyyyfoo")
   end
 
-  it "should not require the class name to match the filename of the widget at all"
+  it "should not require the class name to match the filename of the widget at all" do
+    result = render_text_with_tilt("foo_bar.rb", SIMPLE_TEMPLATE_WITH_VARIABLES, context_object, { :foo => 'the_foo', :bar => 'the_bar' })
+    expect(result).to eq("foo: the_foo, bar: the_bar")
+  end
 
-  it "should still render a widget that's directly in a module (class Foo::Bar::Baz < Fortitude::Widget::Base)"
-  it "should still render a widget that's directly in a module, of a subclass of Widget::Base (class Foo::Bar::Baz < MyWidget)"
-  it "should still render a widget that's in a module via namespace nesting (module Foo; module Bar; Baz < Fortitude::Widget::Base)"
-  it "should still render a widget that's in a module via namespace nesting, of a subclass of Widget::Base (module Foo; module Bar; Baz < MyWidget)"
+  it "should still render a widget that's directly in a module (class Foo::Bar::Baz < Fortitude::Widget::Base)" do
+    eval("module Spec1; module Bar; end; end")
 
-  it "should allow overriding the class that's defined in the module explicitly with an option"
-  it "should allow overriding the class that's defined in the module explicitly with a comment in the template"
+    text = <<-EOS
+class Spec1::Bar::Baz < Fortitude::Widget::Html5
+  def content
+    text "hello from spec1"
+  end
+end
+EOS
+
+    expect(render_text_with_tilt("random_#{rand(1_000_000)}.rb", text, context_object, { })).to eq("hello from spec1")
+  end
+
+  it "should still render a widget that's directly in a module, of a subclass of Widget::Base (class Foo::Bar::Baz < MyWidget)" do
+    eval("module Spec2; module Bar; end; end")
+    eval("class Spec2::Spec2Superclass < Fortitude::Widget::Html5; end")
+
+    text = <<-EOS
+class Spec2::Bar::Baz < Spec2::Spec2Superclass
+  def content
+    text "hello from spec2"
+  end
+end
+EOS
+
+    expect(render_text_with_tilt("random_#{rand(1_000_000)}.rb", text, context_object, { })).to eq("hello from spec2")
+  end
+
+  it "should still render a widget that's in a module via namespace nesting (module Foo; module Bar; Baz < Fortitude::Widget::Base)" do
+    text = <<-EOS
+module Spec3
+  module Bar
+    class Baz < Fortitude::Widget::Html5
+      def content
+        text "hello from spec3"
+      end
+    end
+  end
+end
+EOS
+
+    expect(render_text_with_tilt("random_#{rand(1_000_000)}.rb", text, context_object, { })).to eq("hello from spec3")
+  end
+
+  it "should still render a widget that's in a module via namespace nesting, of a subclass of Widget::Base (module Foo; module Bar; Baz < MyWidget)" do
+    eval("module Spec4; class Spec4Superclass < Fortitude::Widget::Html5; end; end")
+
+    text = <<-EOS
+module Spec4
+  module Bar
+    class Baz < Fortitude::Widget::Html5
+      def content
+        text "hello from spec4"
+      end
+    end
+  end
+end
+EOS
+
+    expect(render_text_with_tilt("random_#{rand(1_000_000)}.rb", text, context_object, { })).to eq("hello from spec4")
+  end
+
+  def impossible_to_find_class_name_text(num, insert="")
+    text = <<-EOS
+klass_name = "Spec#{num}" + "TheClass"
+c = Class.new(Fortitude::Widget::Html5) do
+#{insert}
+  def content
+    text "hello from spec#{num}"
+  end
+end
+::Object.const_set(klass_name, c)
+EOS
+  end
+
+  it "should fail with a nice message if it can't figure out which class to render" do
+    e = capture_exception(Fortitude::Tilt::CannotDetermineTemplateClassError) do
+      render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(5), context_object, { })
+    end
+
+    expect(e).to be
+    expect(e.tried_class_names).to eq([ ])
+    expect(e.message).to match(/\#\!fortitude_tilt_class/)
+    expect(e.message).to match(/:fortitude_class/)
+  end
+
+  it "should allow overriding the class that's defined in the module explicitly with an option" do
+    result = render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(6), context_object, { },
+      { :fortitude_class => "Spec6TheClass" })
+    expect(result).to eq("hello from spec6")
+  end
+
+  it "should fail with a nice message if you tell it to use something that doesn't exist, using an option" do
+    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+      render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(7), context_object, { },
+        { :fortitude_class => "NonExistent" })
+    end
+    expect(e.class_name).to eq("NonExistent")
+    expect(e.actual_object).to be_nil
+    expect(e.message).to match(/NonExistent/)
+  end
+
+  it "should fail with a nice message if you tell it to use something that isn't a class, using an option" do
+    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+      render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(8), context_object, { },
+        { :fortitude_class => 12345 })
+    end
+    expect(e.class_name).to eq(12345)
+    expect(e.actual_object).to eq(12345)
+    expect(e.message).to match(/12345/)
+  end
+
+  it "should fail with a nice message if you tell it to use something that isn't a widget class, using an option" do
+    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+      render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(9), context_object, { },
+        { :fortitude_class => "String" })
+    end
+    expect(e.class_name).to eq("String")
+    expect(e.actual_object).to eq(String)
+    expect(e.message).to match(/String/)
+  end
+
+  it "should allow overriding the class that's defined in the module explicitly with a comment in the template" do
+    result = render_text_with_tilt("random_#{rand(1_000_000)}.rb",
+      impossible_to_find_class_name_text(10, "#!fortitude_tilt_class: Spec10TheClass"), context_object, { })
+    expect(result).to eq("hello from spec10")
+  end
+
+  it "should fail with a nice message if you tell it to use something that isn't a class, using a comment in the template" do
+    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+      render_text_with_tilt("random_#{rand(1_000_000)}.rb",
+        impossible_to_find_class_name_text(11, "#!fortitude_tilt_class: 12345"), context_object, { })
+    end
+    expect(e.class_name).to eq("12345")
+    expect(e.actual_object).to be_nil
+    expect(e.message).to match(/12345/)
+  end
+
+  it "should fail with a nice message if you tell it to use something that isn't a widget class, using a comment in the template" do
+    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+      render_text_with_tilt("random_#{rand(1_000_000)}.rb",
+        impossible_to_find_class_name_text(12, "#!fortitude_tilt_class: String"), context_object, { })
+    end
+    expect(e.class_name).to eq("String")
+    expect(e.actual_object).to eq(String)
+    expect(e.message).to match(/String/)
+  end
 end
