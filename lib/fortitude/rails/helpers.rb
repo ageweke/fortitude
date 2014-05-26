@@ -7,6 +7,10 @@ module Fortitude
           @helpers[name] = options
         end
 
+        def helper_options(name)
+          @helpers[name.to_s.strip.downcase.to_sym]
+        end
+
         def apply_refined_helpers_to!(o)
           @helpers.each do |name, options|
             o.helper(name, options)
@@ -32,6 +36,7 @@ module Fortitude
       # controller_helper
       # csrf_helper
       helper :csrf_meta_tags, :transform => :output_return_value
+      helper :csrf_meta_tag, :transform => :output_return_value
 
       # date_helper
       helper :date_select, :transform => :output_return_value

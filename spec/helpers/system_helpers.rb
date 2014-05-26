@@ -58,6 +58,7 @@ module SystemHelpers
     tag :img
     tag :script, :newline_before => true
     tag :head, :newline_before => true
+    tag :style, :newline_before => true
   end
 
   class TestWidgetClass < Fortitude::Widget::Base
