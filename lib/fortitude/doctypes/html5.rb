@@ -104,6 +104,7 @@ module Fortitude
         :valid_attributes => %w{name http-equiv content charset},
         :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-meta-element'
       html5_tag :style, :newline_before => true, :valid_attributes => %w{media type scoped},
+        :escape_direct_content => false,
         :spec => 'http://www.w3.org/TR/html5/document-metadata.html#the-style-element'
 
       # HTML5 spec, section 4.3
@@ -358,7 +359,7 @@ module Fortitude
 
       # HTML5 spec, section 4.12
       html5_tag :script, :newline_before => true, :can_enclose => %w{_text},
-        :valid_attributes => %w{src type charset async defer crossorigin},
+        :valid_attributes => %w{src type charset async defer crossorigin}, :escape_direct_content => false,
         :spec => 'http://www.w3.org/TR/html5/scripting-1.html#the-script-element'
       html5_tag :noscript, :newline_before => true,
         :spec => 'http://www.w3.org/TR/html5/scripting-1.html#the-noscript-element'

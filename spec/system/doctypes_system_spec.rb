@@ -168,6 +168,26 @@ describe "Fortitude doctype support", :type => :system do
         expect(render(the_widget_class)).to eq(expected_results[:doctype_line])
       end
 
+      it "should not escape content inside <script>" do
+        the_widget_class.class_eval do
+          def content
+            script "foo < bar > baz & quux"
+          end
+        end
+
+        expect(render(the_widget_class)).to eq("<script>foo < bar > baz & quux</script>")
+      end
+
+      it "should not escape content inside <style>" do
+        the_widget_class.class_eval do
+          def content
+            style "foo < bar > baz & quux"
+          end
+        end
+
+        expect(render(the_widget_class)).to eq("<style>foo < bar > baz & quux</style>")
+      end
+
       it "should output the correct tags for the #javascript method" do
         the_widget_class.class_eval do
           def content

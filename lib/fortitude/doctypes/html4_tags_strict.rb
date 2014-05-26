@@ -193,6 +193,11 @@ module Fortitude
         :valid_attributes => ATTRS_ATTRIBUTES + %w{shape coords href nohref alt tabindex accesskey onfocus onblur},
         :spec => 'http://www.w3.org/TR/html401/struct/objects.html#h-13.6.1'
 
+      # HTML4.01 spec, section 14.2
+      tag :style, :newline_before => true, :valid_attributes => I18N_ATTRIBUTES + %w{type media title},
+        :escape_direct_content => false,
+        :spec => 'http://www.w3.org/TR/html401/present/styles.html#h-14.2.3'
+
       # HTML4.01 spec, section 15.2
       tag :tt, :can_enclose => INLINE_CONTENT, :valid_attributes => ATTRS_ATTRIBUTES,
         :spec => 'http://www.w3.org/TR/html401/present/graphics.html#h-15.2.1'
@@ -257,7 +262,7 @@ module Fortitude
 
       # HTML4.01 spec, section 18.2
       tag :script, :newline_before => true, :can_enclose => %w{_text},
-        :valid_attributes => %w{charset type src defer},
+        :valid_attributes => %w{charset type src defer}, :escape_direct_content => false,
         :spec => 'http://www.w3.org/TR/html401/interact/scripts.html#h-18.2.1'
       # HTML4.01 spec, section 18.3
       tag :noscript, :newline_before => true, :can_enclose => BLOCK_CONTENT,
