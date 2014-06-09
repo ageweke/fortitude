@@ -449,21 +449,20 @@ module Fortitude
       VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }
       STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
-      _fortitude_on_class_inheritable_attribute_change(:format_output) do |attribute_name, old_value, new_value|
-        rebuild_text_methods!(:format_output_changed)
-        rebuild_tag_methods!(:format_output_changed)
+      _fortitude_on_class_inheritable_attribute_change(
+        :format_output, :enforce_element_nesting_rules) do |attribute_name, old_value, new_value|
+        rebuild_text_methods!(:"#{attribute_name}_changed")
       end
 
-      _fortitude_on_class_inheritable_attribute_change(:close_void_tags) do |attribute_name, old_value, new_value|
-        rebuild_tag_methods!(:close_void_tags_changed)
+      _fortitude_on_class_inheritable_attribute_change(
+        :format_output, :close_void_tags, :enforce_element_nesting_rules,
+        :enforce_attribute_rules, :enforce_id_uniqueness) do |attribute_name, old_value, new_value|
+        rebuild_tag_methods!(:"#{attribute_name}_changed")
       end
 
-      _fortitude_on_class_inheritable_attribute_change(:debug) do |attribute_name, old_value, new_value|
-        rebuild_needs!(:debug_changed)
-      end
-
-      _fortitude_on_class_inheritable_attribute_change(:extra_assigns) do |attribute_name, old_value, new_value|
-        rebuild_needs!(:extra_assigns_changed)
+      _fortitude_on_class_inheritable_attribute_change(
+        :debug, :extra_assigns, :use_instance_variables_for_assigns) do |attribute_name, old_value, new_value|
+        rebuild_needs!(:"#{attribute_name}_changed")
       end
 
       _fortitude_on_class_inheritable_attribute_change(:implicit_shared_variable_access) do |attribute_name, old_value, new_value|
@@ -472,23 +471,6 @@ module Fortitude
         else
           remove_around_content :transfer_shared_variables, :fail_if_not_present => false
         end
-      end
-
-      _fortitude_on_class_inheritable_attribute_change(:enforce_element_nesting_rules) do |attribute_name, old_value, new_value|
-        rebuild_tag_methods!(:enforce_element_nesting_rules_changed)
-        rebuild_text_methods!(:enforce_element_nesting_rules_changed)
-      end
-
-      _fortitude_on_class_inheritable_attribute_change(:enforce_attribute_rules) do |attribute_name, old_value, new_value|
-        rebuild_tag_methods!(:enforce_attribute_rules_changed)
-      end
-
-      _fortitude_on_class_inheritable_attribute_change(:enforce_id_uniqueness) do |attribute_name, old_value, new_value|
-        rebuild_tag_methods!(:enforce_id_uniqueness_changed)
-      end
-
-      _fortitude_on_class_inheritable_attribute_change(:use_instance_variables_for_assigns) do |attribute_name, old_value, new_value|
-        rebuild_needs!(:use_instance_variables_for_assigns_changed)
       end
 
       _fortitude_on_class_inheritable_attribute_change(:start_and_end_comments) do |attribute_name, old_value, new_value|
