@@ -15,7 +15,7 @@ def assign_locals_from(assigns)
   end                                                         # :if extra_assigns == :error
 
   @_fortitude_extra_assigns.each do |key, value|              # :if extra_assigns == :use
-    instance_variable_set(instance_variable_name_for(key), value) # :if extra_assigns == :use
+    instance_variable_set(instance_variable_name_for_need(key), value) # :if extra_assigns == :use
   end                                                         # :if extra_assigns == :use
 
   raise Fortitude::Errors::MissingNeed.new(self, missing, assigns) if have_missing

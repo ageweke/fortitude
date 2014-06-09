@@ -18,16 +18,7 @@ module Fortitude
   # TODO: Make naming consistent across enforcement/validation/rules (tag nesting, attributes, ID uniqueness)
   module Widget
     class Base
-      REQUIRED_NEED = Object.new
-      NOT_PRESENT_NEED = Object.new
-
-      if defined?(::Rails)
-        include Fortitude::Rails::WidgetMethods
-      else
-        include Fortitude::NonRailsWidgetMethods
-      end
-
-      extend Fortitude::TagStore
+      # CLASS INHERITABLE ATTRIBUTES =================================================================================
       include Fortitude::ClassInheritableAttributes
 
       _fortitude_class_inheritable_attribute :format_output, false, [ true, false ]
@@ -43,20 +34,9 @@ module Fortitude
       _fortitude_class_inheritable_attribute :close_void_tags, true, [ true, false ]
       _fortitude_class_inheritable_attribute :debug, false, [ true, false ]
 
-      def with_element_nesting_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
-        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
-      end
 
-      def with_attribute_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
-        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
-      end
-
-      def with_id_uniqueness(on_or_off)
-        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
-        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
-      end
+      # TAGS ==========================================================================================================
+      extend Fortitude::TagStore
 
       class << self
         def tags_changed!(tags)
@@ -70,32 +50,6 @@ module Fortitude
           out << superclass if superclass.respond_to?(:tags)
 
           out.compact.uniq
-        end
-
-        def doctype(new_doctype = nil)
-          if new_doctype
-            new_doctype = case new_doctype
-            when Fortitude::Doctypes::Base then new_doctype
-            when Symbol then Fortitude::Doctypes.standard_doctype(new_doctype)
-            else raise ArgumentError, "You must supply a Symbol or an instance of Fortitude::Doctypes::Base, not: #{new_doctype.inspect}"
-            end
-
-            current_doctype = doctype
-            if current_doctype
-              if new_doctype != current_doctype
-                raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
-              end
-            end
-
-            self.close_void_tags(new_doctype.close_void_tags?)
-
-            @_fortitude_doctype = new_doctype
-            tags_added!(new_doctype.tags.values)
-          else
-            return @_fortitude_doctype if @_fortitude_doctype
-            return superclass.doctype if superclass.respond_to?(:doctype)
-            nil
-          end
         end
 
         def this_class_tags
@@ -119,21 +73,13 @@ module Fortitude
             direct_subclasses.each { |s| s.rebuild_tag_methods!(why, which_tags_in, klass) }
           end
         end
+      end
 
-        def is_valid_ruby_method_name?(s)
-          s.to_s =~ /^[A-Za-z_][A-Za-z0-9_]*[\?\!]?$/
-        end
+      # NEEDS =========================================================================================================
+      REQUIRED_NEED = Object.new
+      NOT_PRESENT_NEED = Object.new
 
-        def static(*method_names)
-          options = method_names.extract_options!
-
-          method_names.each do |method_name|
-            method_name = method_name.to_sym
-            staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options)
-            staticized_method.create_method!
-          end
-        end
-
+      class << self
         def needs(*names)
           previous_needs = needs_as_hash
           return previous_needs if names.length == 0
@@ -163,10 +109,8 @@ module Fortitude
           needs_as_hash
         end
 
-        def all_subclasses
-          out = direct_subclasses
-          out += direct_subclasses.map { |sc| sc.all_subclasses }
-          out
+        def is_valid_ruby_method_name?(s)
+          s.to_s =~ /^[A-Za-z_][A-Za-z0-9_]*[\?\!]?$/
         end
 
         # EFFECTIVELY PRIVATE
@@ -176,10 +120,6 @@ module Fortitude
             out = superclass.needs_as_hash if superclass.respond_to?(:needs_as_hash)
             out.merge(@this_class_needs || { })
           end
-        end
-
-        def rebuilding(what, why, klass, &block)
-          ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
         end
 
         # EFFECTIVELY PRIVATE
@@ -198,7 +138,7 @@ module Fortitude
           needs_text = n.map do |need, default_value|
             Fortitude::SimpleTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
               :need => need, :has_default => (default_value != REQUIRED_NEED),
-              :ivar_name => instance_variable_name_for(need)
+              :ivar_name => instance_variable_name_for_need(need)
             )
           end.join("\n\n")
 
@@ -208,12 +148,36 @@ module Fortitude
 
           n.each do |need, default_value|
             text = Fortitude::SimpleTemplate.template('need_method_template').result(
-              :need => need, :ivar_name => instance_variable_name_for(need),
+              :need => need, :ivar_name => instance_variable_name_for_need(need),
               :debug => self.debug)
             needs_module.module_eval(text)
           end
         end
+      end
 
+      def needs_as_hash
+        @_fortitude_needs_as_hash ||= self.class.needs_as_hash
+      end
+
+      def assigns
+        @_fortitude_assigns_proxy ||= begin
+          keys = needs_as_hash.keys
+          keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if self.class.extra_assigns == :use
+
+          Fortitude::AssignsProxy.new(self, keys)
+        end
+      end
+
+      # RAILS =========================================================================================================
+      if defined?(::Rails)
+        include Fortitude::Rails::WidgetMethods
+      else
+        include Fortitude::NonRailsWidgetMethods
+      end
+
+
+      # MODULES AND SUBCLASSES ========================================================================================
+      class << self
         def direct_subclasses
           @direct_subclasses || [ ]
         end
@@ -248,34 +212,79 @@ module Fortitude
         end
       end
 
+      def with_element_nesting_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
+        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
+      end
+
+      def with_attribute_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
+        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
+      end
+
+      def with_id_uniqueness(on_or_off)
+        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
+        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
+      end
+
+      class << self
+        def doctype(new_doctype = nil)
+          if new_doctype
+            new_doctype = case new_doctype
+            when Fortitude::Doctypes::Base then new_doctype
+            when Symbol then Fortitude::Doctypes.standard_doctype(new_doctype)
+            else raise ArgumentError, "You must supply a Symbol or an instance of Fortitude::Doctypes::Base, not: #{new_doctype.inspect}"
+            end
+
+            current_doctype = doctype
+            if current_doctype
+              if new_doctype != current_doctype
+                raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
+              end
+            end
+
+            self.close_void_tags(new_doctype.close_void_tags?)
+
+            @_fortitude_doctype = new_doctype
+            tags_added!(new_doctype.tags.values)
+          else
+            return @_fortitude_doctype if @_fortitude_doctype
+            return superclass.doctype if superclass.respond_to?(:doctype)
+            nil
+          end
+        end
+
+        def static(*method_names)
+          options = method_names.extract_options!
+
+          method_names.each do |method_name|
+            method_name = method_name.to_sym
+            staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options)
+            staticized_method.create_method!
+          end
+        end
+
+        def rebuilding(what, why, klass, &block)
+          ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
+        end
+      end
+
       def initialize(assigns = { })
         assign_locals_from(assigns)
       end
 
-      def needs_as_hash
-        @_fortitude_needs_as_hash ||= self.class.needs_as_hash
-      end
-
-      def assigns
-        @_fortitude_assigns_proxy ||= begin
-          keys = needs_as_hash.keys
-          keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if self.class.extra_assigns == :use
-
-          Fortitude::AssignsProxy.new(self, keys)
-        end
-      end
 
       def content
         raise "Must override in #{self.class.name}"
       end
 
-      def instance_variable_name_for(*args)
-        self.class.instance_variable_name_for(*args)
+      def instance_variable_name_for_need(need)
+        self.class.instance_variable_name_for_need(need)
       end
 
       def method_missing(name, *args, &block)
         if self.class.extra_assigns == :use
-          ivar_name = self.class.instance_variable_name_for(name)
+          ivar_name = self.class.instance_variable_name_for_need(name)
           return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
         end
 
@@ -492,8 +501,8 @@ module Fortitude
           out
         end
 
-        def instance_variable_name_for(assign_name)
-          effective_name = assign_name.to_s
+        def instance_variable_name_for_need(need_name)
+          effective_name = need_name.to_s
           effective_name.gsub!("!", "_fortitude_bang")
           effective_name.gsub!("?", "_fortitude_question")
           "@" + (use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX) + effective_name

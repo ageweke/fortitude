@@ -22,14 +22,14 @@ module Fortitude
 
     def [](x)
       if has_key?(x)
-        ivar_name = @widget.class.instance_variable_name_for(x)
+        ivar_name = @widget.class.instance_variable_name_for_need(x)
         @widget.instance_variable_get(ivar_name)
       end
     end
 
     def []=(x, y)
       if has_key?(x)
-        ivar_name = @widget.class.instance_variable_name_for(x)
+        ivar_name = @widget.class.instance_variable_name_for_need(x)
         @widget.instance_variable_set(ivar_name, y)
       end
     end
