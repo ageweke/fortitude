@@ -449,6 +449,11 @@ module Fortitude
       VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }
       STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
+      _fortitude_on_class_inheritable_attribute_change(:close_void_tags) do |attribute_name, old_value, new_value|
+        $stderr.puts "BLOCK: Change in #{attribute_name.inspect} FROM #{old_value.inspect} TO #{new_value.inspect}"
+        rebuild_tag_methods!(:close_void_tags)
+      end
+
       class << self
         def extract_needed_assigns_from(input)
           input = input.with_indifferent_access
@@ -465,9 +470,10 @@ module Fortitude
           rebuild_tag_methods!(:format_output_changed)
         end
 
-        def _fortitude_close_void_tags_changed!(new_value)
-          rebuild_tag_methods!(:close_void_tags)
-        end
+
+        # def _fortitude_close_void_tags_changed!(new_value)
+        #   rebuild_tag_methods!(:close_void_tags)
+        # end
 
         def _fortitude_debug_changed!(new_value)
           rebuild_needs!(:debug_changed)
