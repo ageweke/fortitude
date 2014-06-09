@@ -131,6 +131,23 @@ module Fortitude
           end
         end
 
+        def extract_needed_assigns_from(input)
+          input = input.with_indifferent_access
+
+          out = { }
+          needs_as_hash.keys.each do |name|
+            out[name] = input[name] if input.has_key?(name)
+          end
+          out
+        end
+
+        def instance_variable_name_for_need(need_name)
+          effective_name = need_name.to_s
+          effective_name.gsub!("!", "_fortitude_bang")
+          effective_name.gsub!("?", "_fortitude_question")
+          "@" + (use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX) + effective_name
+        end
+
         private
         def rebuild_my_needs_methods!
           n = needs_as_hash
@@ -155,6 +172,10 @@ module Fortitude
         end
       end
 
+      def instance_variable_name_for_need(need)
+        self.class.instance_variable_name_for_need(need)
+      end
+
       def needs_as_hash
         @_fortitude_needs_as_hash ||= self.class.needs_as_hash
       end
@@ -168,13 +189,24 @@ module Fortitude
         end
       end
 
+      def widget_extra_assigns
+        (@_fortitude_extra_assigns || { })
+      end
+
+      def transfer_shared_variables(*args, &block)
+        if self.class.implicit_shared_variable_access
+          @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, *args, &block)
+        else
+          block.call(*args)
+        end
+      end
+
       # RAILS =========================================================================================================
       if defined?(::Rails)
         include Fortitude::Rails::WidgetMethods
       else
         include Fortitude::NonRailsWidgetMethods
       end
-
 
       # MODULES AND SUBCLASSES ========================================================================================
       class << self
@@ -212,21 +244,7 @@ module Fortitude
         end
       end
 
-      def with_element_nesting_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
-        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
-      end
-
-      def with_attribute_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
-        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
-      end
-
-      def with_id_uniqueness(on_or_off)
-        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
-        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
-      end
-
+      # DOCTYPES ======================================================================================================
       class << self
         def doctype(new_doctype = nil)
           if new_doctype
@@ -253,64 +271,13 @@ module Fortitude
             nil
           end
         end
-
-        def static(*method_names)
-          options = method_names.extract_options!
-
-          method_names.each do |method_name|
-            method_name = method_name.to_sym
-            staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options)
-            staticized_method.create_method!
-          end
-        end
-
-        def rebuilding(what, why, klass, &block)
-          ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
-        end
       end
 
-      def initialize(assigns = { })
-        assign_locals_from(assigns)
+      def doctype(s)
+        tag_rawtext "<!DOCTYPE #{s}>"
       end
 
-
-      def content
-        raise "Must override in #{self.class.name}"
-      end
-
-      def instance_variable_name_for_need(need)
-        self.class.instance_variable_name_for_need(need)
-      end
-
-      def method_missing(name, *args, &block)
-        if self.class.extra_assigns == :use
-          ivar_name = self.class.instance_variable_name_for_need(name)
-          return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
-        end
-
-        if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name, true)
-          @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
-        else
-          super(name, *args, &block)
-        end
-      end
-
-      def widget_extra_assigns
-        (@_fortitude_extra_assigns || { })
-      end
-
-      def yield_from_widget(*args)
-        @_fortitude_rendering_context.yield_from_widget(*args)
-      end
-
-      def transfer_shared_variables(*args, &block)
-        if self.class.implicit_shared_variable_access
-          @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, *args, &block)
-        else
-          block.call(*args)
-        end
-      end
-
+      # START AND END COMMENTS ========================================================================================
       MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
       START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze
 
@@ -367,6 +334,7 @@ module Fortitude
         end
       end
 
+      # OTHER TAG-LIKE METHODS ========================================================================================
       # From http://www.w3.org/TR/html5/syntax.html#comments:
       #
       # Comments must start with the four character sequence U+003C LESS-THAN SIGN, U+0021 EXCLAMATION MARK,
@@ -421,10 +389,6 @@ module Fortitude
         end
       end
 
-      def doctype(s)
-        tag_rawtext "<!DOCTYPE #{s}>"
-      end
-
       CDATA_START = "<![CDATA[".freeze
       CDATA_END = "]]>".freeze
 
@@ -452,6 +416,66 @@ module Fortitude
           tag_rawtext CDATA_END
         end
       end
+
+
+      # UNORGANIZED (YET) =============================================================================================
+      def with_element_nesting_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
+        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
+      end
+
+      def with_attribute_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
+        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
+      end
+
+      def with_id_uniqueness(on_or_off)
+        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
+        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
+      end
+
+      class << self
+        def static(*method_names)
+          options = method_names.extract_options!
+
+          method_names.each do |method_name|
+            method_name = method_name.to_sym
+            staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options)
+            staticized_method.create_method!
+          end
+        end
+
+        def rebuilding(what, why, klass, &block)
+          ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
+        end
+      end
+
+      def initialize(assigns = { })
+        assign_locals_from(assigns)
+      end
+
+      def content
+        raise "Must override in #{self.class.name}"
+      end
+
+      def method_missing(name, *args, &block)
+        if self.class.extra_assigns == :use
+          ivar_name = self.class.instance_variable_name_for_need(name)
+          return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
+        end
+
+        if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name, true)
+          @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
+        else
+          super(name, *args, &block)
+        end
+      end
+
+      def yield_from_widget(*args)
+        @_fortitude_rendering_context.yield_from_widget(*args)
+      end
+
+
 
       attr_reader :_fortitude_default_assigns
 
@@ -491,23 +515,6 @@ module Fortitude
       end
 
       class << self
-        def extract_needed_assigns_from(input)
-          input = input.with_indifferent_access
-
-          out = { }
-          needs_as_hash.keys.each do |name|
-            out[name] = input[name] if input.has_key?(name)
-          end
-          out
-        end
-
-        def instance_variable_name_for_need(need_name)
-          effective_name = need_name.to_s
-          effective_name.gsub!("!", "_fortitude_bang")
-          effective_name.gsub!("?", "_fortitude_question")
-          "@" + (use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX) + effective_name
-        end
-
         def around_content(*method_names)
           return if method_names.length == 0
           @_fortitude_around_content_methods ||= [ ]
