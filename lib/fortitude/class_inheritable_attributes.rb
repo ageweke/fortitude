@@ -48,9 +48,6 @@ module Fortitude
           _fortitude_class_inheritable_attribute_changed!(attribute_name, old_value, new_value)
         end
 
-        changed_method = "_fortitude_#{attribute_name}_changed!"
-        send(changed_method, new_value) if respond_to?(changed_method)
-
         new_value
       end
 
