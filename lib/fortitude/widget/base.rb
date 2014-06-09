@@ -449,9 +449,54 @@ module Fortitude
       VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }
       STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
+      _fortitude_on_class_inheritable_attribute_change(:format_output) do |attribute_name, old_value, new_value|
+        rebuild_text_methods!(:format_output_changed)
+        rebuild_tag_methods!(:format_output_changed)
+      end
+
       _fortitude_on_class_inheritable_attribute_change(:close_void_tags) do |attribute_name, old_value, new_value|
-        $stderr.puts "BLOCK: Change in #{attribute_name.inspect} FROM #{old_value.inspect} TO #{new_value.inspect}"
-        rebuild_tag_methods!(:close_void_tags)
+        rebuild_tag_methods!(:close_void_tags_changed)
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:debug) do |attribute_name, old_value, new_value|
+        rebuild_needs!(:debug_changed)
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:extra_assigns) do |attribute_name, old_value, new_value|
+        rebuild_needs!(:extra_assigns_changed)
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:implicit_shared_variable_access) do |attribute_name, old_value, new_value|
+        if new_value
+          around_content :transfer_shared_variables
+        else
+          remove_around_content :transfer_shared_variables, :fail_if_not_present => false
+        end
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:enforce_element_nesting_rules) do |attribute_name, old_value, new_value|
+        rebuild_tag_methods!(:enforce_element_nesting_rules_changed)
+        rebuild_text_methods!(:enforce_element_nesting_rules_changed)
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:enforce_attribute_rules) do |attribute_name, old_value, new_value|
+        rebuild_tag_methods!(:enforce_attribute_rules_changed)
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:enforce_id_uniqueness) do |attribute_name, old_value, new_value|
+        rebuild_tag_methods!(:enforce_id_uniqueness_changed)
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:use_instance_variables_for_assigns) do |attribute_name, old_value, new_value|
+        rebuild_needs!(:use_instance_variables_for_assigns_changed)
+      end
+
+      _fortitude_on_class_inheritable_attribute_change(:start_and_end_comments) do |attribute_name, old_value, new_value|
+        if new_value
+          around_content :start_and_end_comments
+        else
+          remove_around_content :start_and_end_comments, :fail_if_not_present => false
+        end
       end
 
       class << self
@@ -463,57 +508,6 @@ module Fortitude
             out[name] = input[name] if input.has_key?(name)
           end
           out
-        end
-
-        def _fortitude_format_output_changed!(new_value)
-          rebuild_text_methods!(:format_output_changed)
-          rebuild_tag_methods!(:format_output_changed)
-        end
-
-
-        # def _fortitude_close_void_tags_changed!(new_value)
-        #   rebuild_tag_methods!(:close_void_tags)
-        # end
-
-        def _fortitude_debug_changed!(new_value)
-          rebuild_needs!(:debug_changed)
-        end
-
-        def _fortitude_extra_assigns_changed!(new_value)
-          rebuild_needs!(:extra_assigns_changed)
-        end
-
-        def _fortitude_implicit_shared_variable_access_changed!(new_value)
-          if new_value
-            around_content :transfer_shared_variables
-          else
-            remove_around_content :transfer_shared_variables, :fail_if_not_present => false
-          end
-        end
-
-        def _fortitude_enforce_element_nesting_rules_changed!(new_value)
-          rebuild_tag_methods!(:enforce_element_nesting_rules_changed)
-          rebuild_text_methods!(:enforce_element_nesting_rules_changed)
-        end
-
-        def _fortitude_enforce_attribute_rules_changed!(new_value)
-          rebuild_tag_methods!(:enforce_attribute_rules_changed)
-        end
-
-        def _fortitude_enforce_id_uniqueness_changed!(new_value)
-          rebuild_tag_methods!(:enforce_id_uniqueness_changed)
-        end
-
-        def _fortitude_use_instance_variables_for_assigns_changed!(new_value)
-          rebuild_needs!(:use_instance_variables_for_assigns_changed)
-        end
-
-        def _fortitude_start_and_end_comments_changed!(new_value)
-          if new_value
-            around_content :start_and_end_comments
-          else
-            remove_around_content :start_and_end_comments, :fail_if_not_present => false
-          end
         end
 
         def instance_variable_name_for(assign_name)

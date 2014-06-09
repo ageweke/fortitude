@@ -49,10 +49,8 @@ module Fortitude
         end
 
         changed_method = "_fortitude_#{attribute_name}_changed!"
-        if respond_to?(changed_method)
-          # $stderr.puts "CALLING #{changed_method} ON #{self.name}"
-          send(changed_method, new_value)
-        end
+        send(changed_method, new_value) if respond_to?(changed_method)
+
         new_value
       end
 
