@@ -4,7 +4,7 @@ require "fileutils"
 describe "Fortitude Tilt integration", :type => :system do
   def tempdir
     @tempdir ||= begin
-      out = File.join(File.dirname(File.dirname(__FILE__)), 'tmp', 'spec', 'tilt_system_spec')
+      out = File.join(File.dirname(File.dirname(File.dirname(__FILE__))), 'tmp', 'spec', 'tilt_system_spec')
       FileUtils.rm_rf(out)
       FileUtils.mkdir_p(out)
       out
