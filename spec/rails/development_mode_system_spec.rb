@@ -20,6 +20,18 @@ describe "Rails development-mode support", :type => :rails do
     expect_match("reload_widget", /datum\s+two\s+datum/)
   end
 
+  it "should, by default, format output" do
+    expect_match("sample_output", %r{<section class="one">
+  <p>hello, Jessica</p>
+</section>}mi)
+  end
+
+  it "should, by default, output BEGIN/END debugging tags" do
+    expect_match("sample_output", %r{<!-- BEGIN Views::DevelopmentModeSystemSpec::SampleOutput depth 0: :name => "Jessica" -->
+.*
+<!-- END Views::DevelopmentModeSystemSpec::SampleOutput depth 0 -->}mi)
+  end
+
   private
   def splat_new_widget!
     reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget.rb')
@@ -43,6 +55,10 @@ EOS
 class DevelopmentModeSystemSpecController < ApplicationController
   def reload_widget
     @datum = "two"
+  end
+
+  def sample_output
+    @name = "Jessica"
   end
 end
 EOS

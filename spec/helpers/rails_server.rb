@@ -133,8 +133,8 @@ then we will skip this command and your spec will run much faster.}
       end
 
       def do_start!
-        with_rails_env do
-          Bundler.with_clean_env do
+        Bundler.with_clean_env do
+          with_rails_env do
             setup_directories!
 
             in_rails_root_parent do
@@ -259,7 +259,8 @@ EOS
 
       def start_server!
         output = File.join(@rails_root, 'log', 'rails-server.out')
-        safe_system("rails server -p #{@port} > '#{output}'", "starting 'rails server' on port #{@port}", :background => true)
+        cmd = "rails server -p #{@port} > '#{output}'"
+        safe_system(cmd, "starting 'rails server' on port #{@port}", :background => true)
 
         server_pid_file = File.join(@rails_root, 'tmp', 'pids', 'server.pid')
 

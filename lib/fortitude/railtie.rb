@@ -26,6 +26,14 @@ module Fortitude
         require 'fortitude/rails/helpers'
         Fortitude::Rails::Helpers.apply_refined_helpers_to!(Fortitude::Widget::Base)
       end
+
+      if ::Rails.env.development?
+        ::Fortitude::Widget::Base.class_eval do
+          format_output true
+          start_and_end_comments true
+          debug true
+        end
+      end
     end
 
     initializer :fortitude, :before => :set_autoload_paths do |app|
