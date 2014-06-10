@@ -39,10 +39,13 @@ module Fortitude
       extend Fortitude::TagStore
 
       class << self
+        # INTERNAL USE ONLY
         def tags_changed!(tags)
           rebuild_tag_methods!(:tags_declared, tags)
         end
+        private :tags_changed!
 
+        # INTERNAL USE ONLY
         def delegate_tag_stores
           out = [ doctype ]
 
@@ -52,10 +55,7 @@ module Fortitude
           out.compact.uniq
         end
 
-        def this_class_tags
-          @_this_class_tags || { }
-        end
-
+        # INTERNAL USE ONLY
         def rebuild_tag_methods!(why, which_tags_in = nil, klass = self)
           rebuilding(:tag_methods, why, klass) do
             all_tags = tags.values
@@ -76,12 +76,16 @@ module Fortitude
       end
 
       # NEEDS =========================================================================================================
+      # INTERNAL USE ONLY
       REQUIRED_NEED = Object.new
+      # INTERNAL USE ONLY
       NOT_PRESENT_NEED = Object.new
 
+      # INTERNAL USE ONLY
       attr_reader :_fortitude_default_assigns
 
       class << self
+        # PUBLIC API
         def needs(*names)
           previous_needs = needs_as_hash
           return previous_needs if names.length == 0
@@ -111,11 +115,12 @@ module Fortitude
           needs_as_hash
         end
 
+        # INTERNAL USE ONLY
         def is_valid_ruby_method_name?(s)
           s.to_s =~ /^[A-Za-z_][A-Za-z0-9_]*[\?\!]?$/
         end
 
-        # EFFECTIVELY PRIVATE
+        # INTERNAL USE ONLY
         def needs_as_hash
           @_fortitude_needs_as_hash ||= begin
             out = { }
@@ -124,7 +129,7 @@ module Fortitude
           end
         end
 
-        # EFFECTIVELY PRIVATE
+        # INTERNAL USE ONLY
         def rebuild_needs!(why, klass = self)
           rebuilding(:needs, why, klass) do
             @_fortitude_needs_as_hash = nil
@@ -133,6 +138,7 @@ module Fortitude
           end
         end
 
+        # PUBLIC API
         def extract_needed_assigns_from(input)
           input = input.with_indifferent_access
 
@@ -143,8 +149,10 @@ module Fortitude
           out
         end
 
+        # INTERNAL USE ONLY
         STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
+        # INTERNAL USE ONLY
         def instance_variable_name_for_need(need_name)
           effective_name = need_name.to_s
           effective_name.gsub!("!", "_fortitude_bang")
@@ -152,6 +160,7 @@ module Fortitude
           "@" + (use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX) + effective_name
         end
 
+        # INTERNAL USE ONLY
         def rebuild_my_needs_methods!
           n = needs_as_hash
 
@@ -173,20 +182,25 @@ module Fortitude
             needs_module.module_eval(text)
           end
         end
+        private :rebuild_my_needs_methods!
       end
 
+      # PUBLIC API
       def shared_variables
         @_fortitude_rendering_context.instance_variable_set
       end
 
+      # INTERNAL USE ONLY
       def instance_variable_name_for_need(need)
         self.class.instance_variable_name_for_need(need)
       end
 
+      # INTERNAL USE ONLY
       def needs_as_hash
         @_fortitude_needs_as_hash ||= self.class.needs_as_hash
       end
 
+      # PUBLIC API
       def assigns
         @_fortitude_assigns_proxy ||= begin
           keys = needs_as_hash.keys
@@ -196,10 +210,12 @@ module Fortitude
         end
       end
 
+      # INTERNAL USE ONLY
       def widget_extra_assigns
         (@_fortitude_extra_assigns || { })
       end
 
+      # INTERNAL USE ONLY
       def transfer_shared_variables(*args, &block)
         if self.class.implicit_shared_variable_access
           @_fortitude_rendering_context.instance_variable_set.with_instance_variable_copying(self, *args, &block)
@@ -207,6 +223,7 @@ module Fortitude
           block.call(*args)
         end
       end
+      private :transfer_shared_variables
 
       # RAILS =========================================================================================================
       if defined?(::Rails)
@@ -217,42 +234,54 @@ module Fortitude
 
       # MODULES AND SUBCLASSES ========================================================================================
       class << self
+        # INTERNAL USE ONLY
         def direct_subclasses
           @direct_subclasses || [ ]
         end
+        private :direct_subclasses
 
+        # INTERNAL USE ONLY -- RUBY CALLBACK
         def inherited(subclass)
           @direct_subclasses ||= [ ]
           @direct_subclasses |= [ subclass ]
         end
 
+        # INTERNAL USE ONLY
         def create_modules!
-          raise "We already seem to have created our modules" if @tags_module || @needs_module
+          raise "We already seem to have created our modules" if @tags_module || @needs_module || @helpers_module
           @tags_module = Fortitude::TagsModule.new(self)
           @helpers_module = Module.new
           include @helpers_module
           @needs_module = Module.new
           include @needs_module
         end
+        private :create_modules!
 
+        # INTERNAL USE ONLY
         def tags_module
           create_modules! unless @tags_module
           @tags_module
         end
+        private :tags_module
 
+        # INTERNAL USE ONLY
         def needs_module
           create_modules! unless @needs_module
           @needs_module
         end
+        private :needs_module
 
+        # INTERNAL USE ONLY
         def helpers_module
           create_modules! unless @helpers_module
           @helpers_module
         end
+        private :helpers_module
       end
 
       # DOCTYPES ======================================================================================================
       class << self
+        # PUBLIC API
         def doctype(new_doctype = nil)
           if new_doctype
             new_doctype = case new_doctype
@@ -280,10 +309,12 @@ module Fortitude
         end
       end
 
+      # PUBLIC API
       def doctype(s)
         tag_rawtext "<!DOCTYPE #{s}>"
       end
 
+      # PUBLIC API
       def doctype!
         dt = self.class.doctype
         raise "You must set a doctype at the class level, using something like 'doctype :html5', before you can use this method." unless dt
@@ -291,16 +322,19 @@ module Fortitude
       end
 
       # START AND END COMMENTS ========================================================================================
-      MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
-      START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze
 
+      # INTERNAL USE ONLY
       def widget_nesting_depth
         @_fortitude_widget_nesting_depth ||= @_fortitude_rendering_context.current_widget_depth
       end
+      private :widget_nesting_depth
 
+      MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
+      START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze
       MAX_ASSIGNS_LENGTH_BEFORE_MULTIPLE_LINES = 200
       START_COMMENT_EXTRA_INDENT_FOR_NEXT_LINE = " " * 5
 
+      # INTERNAL USE ONLY
       def start_and_end_comments
         if self.class.start_and_end_comments
           fo = self.class.format_output
@@ -346,6 +380,7 @@ module Fortitude
           yield
         end
       end
+      private :start_and_end_comments
 
       # OTHER TAG-LIKE METHODS ========================================================================================
       # From http://www.w3.org/TR/html5/syntax.html#comments:
@@ -357,13 +392,17 @@ module Fortitude
       # two consecutive U+002D HYPHEN-MINUS characters (--), nor end with a U+002D HYPHEN-MINUS character (-).
       # Finally, the comment must be ended by the three character sequence U+002D HYPHEN-MINUS, U+002D HYPHEN-MINUS,
       # U+003E GREATER-THAN SIGN (-->).
+
+      # INTERNAL USE ONLY
       def comment_escape(string)
         string = "_#{string}" if string =~ /^\s*(>|->)/
         string = string.gsub("--", "- - ") if string =~ /\-\-/ # don't gsub if it doesn't match to avoid generating garbage
         string = "#{string}_" if string =~ /\-\s*$/i
         string
       end
+      private :comment_escape
 
+      # PUBLIC API
       def tag_comment(s)
         fo = self.class.format_output
         @_fortitude_rendering_context.needs_newline! if fo
@@ -374,6 +413,7 @@ module Fortitude
         @_fortitude_rendering_context.needs_newline! if fo
       end
 
+      # PUBLIC API
       def tag_javascript(content = nil, &block)
         args = if content.kind_of?(Hash)
           [ self.class.doctype.default_javascript_tag_attributes.merge(content) ]
@@ -409,6 +449,7 @@ module Fortitude
       CDATA_START = "<![CDATA[".freeze
       CDATA_END = "]]>".freeze
 
+      # PUBLIC API
       def cdata(s = nil, &block)
         if s
           raise ArgumentError, "You can only pass literal text or a block, not both" if block
@@ -436,6 +477,7 @@ module Fortitude
 
       # STATICIZATION =================================================================================================
       class << self
+        # PUBLIC API
         def static(*method_names)
           options = method_names.extract_options!
 
@@ -449,6 +491,7 @@ module Fortitude
 
       METHODS_TO_DISABLE_WHEN_STATIC = [ :assigns, :shared_variables ]
 
+      # INTERNAL USE ONLY
       def with_staticness_enforced(static_method_name, &block)
         methods_to_disable = METHODS_TO_DISABLE_WHEN_STATIC + self.class.needs_as_hash.keys
         metaclass = (class << self; self; end)
@@ -471,25 +514,15 @@ module Fortitude
         end
       end
 
-      def _enforce_staticness!(actual_class, method_name)
-        self.class.send(:include, Fortitude::DisabledDynamicMethods)
-
-        self.class.needs_as_hash.keys.each do |need_name|
-          self.class.send(:define_method, need_name) do
-            _fortitude_dynamic_disabled!(need_name)
-          end
-        end
-
-        self._fortitude_static_method_name = method_name
-        self._fortitude_static_method_class = actual_class
-      end
-
       # INTEGRATION ===================================================================================================
       class << self
+        # INTERNAL USE ONLY
         def rebuilding(what, why, klass, &block)
           ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
         end
+        private :rebuilding
 
+        # INTERNAL USE ONLY
         def rebuild_text_methods!(why, klass = self)
           rebuilding(:text_methods, why, klass) do
             class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output, :needs_element_rules => self.enforce_element_nesting_rules))
@@ -498,6 +531,7 @@ module Fortitude
         end
       end
 
+      # RUBY CALLBACK
       def method_missing(name, *args, &block)
         if self.class.extra_assigns == :use
           ivar_name = self.class.instance_variable_name_for_need(name)
@@ -544,11 +578,13 @@ module Fortitude
       end
 
       # CONTENT ======================================================================================================
+      # PUBLIC API
       def content
         raise "Must override in #{self.class.name}"
       end
 
       class << self
+        # INTERNAL USE ONLY
         def rebuild_run_content!(why, klass = self)
           rebuilding(:run_content, why, klass) do
             acm = around_content_methods
@@ -585,6 +621,7 @@ module Fortitude
 
       # AROUND_CONTENT ================================================================================================
       class << self
+        # PUBLIC API
         def around_content(*method_names)
           return if method_names.length == 0
           @_fortitude_around_content_methods ||= [ ]
@@ -592,6 +629,7 @@ module Fortitude
           rebuild_run_content!(:around_content_added)
         end
 
+        # PUBLIC API
         def remove_around_content(*method_names)
           options = method_names.extract_options!
           options.assert_valid_keys(:fail_if_not_present)
@@ -607,6 +645,7 @@ module Fortitude
           end
         end
 
+        # INTERNAL USE ONLY
         def around_content_methods
           superclass_methods = if superclass.respond_to?(:around_content_methods)
             superclass.around_content_methods
@@ -617,23 +656,28 @@ module Fortitude
           (superclass_methods + this_class_around_content_methods).uniq
         end
 
+        # INTERNAL USE ONLY
         def this_class_around_content_methods
           @_fortitude_around_content_methods ||= [ ]
         end
+        private :this_class_around_content_methods
       end
 
       # LOCALIZATION ==================================================================================================
       class << self
+        # RUBY CALLBACK
         def method_added(method_name)
           super(method_name)
           check_localized_methods!
         end
 
+        # RUBY CALLBACK
         def method_removed(method_name)
           super(method_name)
           check_localized_methods!
         end
 
+        # RUBY CALL
         def include(*args)
           super(*args)
           check_localized_methods!
@@ -641,6 +685,7 @@ module Fortitude
 
         LOCALIZED_CONTENT_PREFIX = "localized_content_"
 
+        # INTERNAL USE ONLY
         def check_localized_methods!(original_class = self)
           currently_has = instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i }
           if currently_has != @last_localized_methods_check_has
@@ -650,11 +695,14 @@ module Fortitude
           direct_subclasses.each { |s| s.check_localized_methods!(original_class) }
         end
 
+        # INTERNAL USE ONLY
         def has_localized_content_methods?
           !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
         end
+        private :has_localized_content_methods?
       end
 
+      # PUBLIC API
       def t(key, *args)
         base = self.class.translation_base
         if base && key.to_s =~ /^\./
@@ -664,12 +712,14 @@ module Fortitude
         end
       end
 
+      # PUBLIC API
       def ttext(key, *args)
         tag_text t(".#{key}", *args)
       end
 
       # HELPERS =======================================================================================================
       class << self
+        # PUBLIC API
         def helper(*args)
           options = args.extract_options!
           options.assert_valid_keys(:transform, :call, :output_yielded_methods)
@@ -713,11 +763,13 @@ EOS
         end
       end
 
+      # PUBLIC API
       def invoke_helper(name, *args, &block)
         @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       end
 
       # CAPTURING =====================================================================================================
+      # PUBLIC API
       def capture(&block)
         helpers = @_fortitude_rendering_context.helpers_object
         if helpers && helpers.respond_to?(:capture, true) &&
@@ -728,6 +780,7 @@ EOS
         end
       end
 
+      # INTERNAL USE ONLY
       def _fortitude_builtin_capture(&block)
         old_buffer = nil
         new_buffer = nil
@@ -741,8 +794,10 @@ EOS
           @_fortitude_output_buffer_holder.output_buffer = old_buffer
         end
       end
+      private :_fortitude_builtin_capture
 
       # RENDERING =============================================================================================
+      # PUBLIC API
       def render(*args, &block)
         call_through = lambda do
           @_fortitude_rendering_context.record_widget(args) do
@@ -757,6 +812,7 @@ EOS
         end
       end
 
+      # PUBLIC API
       def to_html(rendering_context)
         @_fortitude_rendering_context = rendering_context
         @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
@@ -772,28 +828,35 @@ EOS
         end
       end
 
+      # PUBLIC API
       def rendering_context
         @_fortitude_rendering_context
       end
 
+      # PUBLIC API
       def widget(w)
         w.to_html(@_fortitude_rendering_context)
       end
 
+      # PUBLIC API
       def output_buffer
         @_fortitude_output_buffer_holder.output_buffer
       end
 
+      # PUBLIC API
       def initialize(assigns = { })
         assign_locals_from(assigns)
       end
 
+      # INTERNAL USE ONLY
       def _fortitude_new_buffer
         _fortitude_class_for_new_buffer.new
       end
+      private :_fortitude_new_buffer
 
       POTENTIAL_NEW_BUFFER_CLASSES = %w{ActionView::OutputBuffer ActiveSupport::SafeBuffer String}
 
+      # INTERNAL USE ONLY
       def _fortitude_class_for_new_buffer
         @_fortitude_class_for_new_buffer ||= begin
           out = nil
@@ -808,22 +871,27 @@ EOS
           out
         end
       end
+      private :_fortitude_class_for_new_buffer
 
+      # PUBLIC API
       def yield_from_widget(*args)
         @_fortitude_rendering_context.yield_from_widget(*args)
       end
 
       # TEMPORARY OVERRIDES ===========================================================================================
+      # PUBLIC API
       def with_element_nesting_rules(on_or_off)
         raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
         @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
       end
 
+      # PUBLIC API
       def with_attribute_rules(on_or_off)
         raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
         @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
       end
 
+      # PUBLIC API
       def with_id_uniqueness(on_or_off)
         raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
         @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
