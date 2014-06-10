@@ -79,6 +79,8 @@ module Fortitude
       REQUIRED_NEED = Object.new
       NOT_PRESENT_NEED = Object.new
 
+      attr_reader :_fortitude_default_assigns
+
       class << self
         def needs(*names)
           previous_needs = needs_as_hash
@@ -140,6 +142,8 @@ module Fortitude
           end
           out
         end
+
+        STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
         def instance_variable_name_for_need(need_name)
           effective_name = need_name.to_s
@@ -417,23 +421,7 @@ module Fortitude
         end
       end
 
-
-      # UNORGANIZED (YET) =============================================================================================
-      def with_element_nesting_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
-        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
-      end
-
-      def with_attribute_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
-        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
-      end
-
-      def with_id_uniqueness(on_or_off)
-        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
-        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
-      end
-
+      # STATICIZATION =================================================================================================
       class << self
         def static(*method_names)
           options = method_names.extract_options!
@@ -444,18 +432,13 @@ module Fortitude
             staticized_method.create_method!
           end
         end
+      end
 
+      # INTEGRATION ===================================================================================================
+      class << self
         def rebuilding(what, why, klass, &block)
           ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
         end
-      end
-
-      def initialize(assigns = { })
-        assign_locals_from(assigns)
-      end
-
-      def content
-        raise "Must override in #{self.class.name}"
       end
 
       def method_missing(name, *args, &block)
@@ -470,17 +453,6 @@ module Fortitude
           super(name, *args, &block)
         end
       end
-
-      def yield_from_widget(*args)
-        @_fortitude_rendering_context.yield_from_widget(*args)
-      end
-
-
-
-      attr_reader :_fortitude_default_assigns
-
-      VALID_EXTRA_ASSIGNS_VALUES = %w{error ignore use}.map { |x| x.to_sym }
-      STANDARD_INSTANCE_VARIABLE_PREFIX = "_fortitude_assign_"
 
       _fortitude_on_class_inheritable_attribute_change(
         :format_output, :enforce_element_nesting_rules) do |attribute_name, old_value, new_value|
@@ -514,6 +486,7 @@ module Fortitude
         end
       end
 
+      # AROUND_CONTENT ================================================================================================
       class << self
         def around_content(*method_names)
           return if method_names.length == 0
@@ -537,6 +510,87 @@ module Fortitude
           end
         end
 
+        def around_content_methods
+          superclass_methods = if superclass.respond_to?(:around_content_methods)
+            superclass.around_content_methods
+          else
+            [ ]
+          end
+
+          (superclass_methods + this_class_around_content_methods).uniq
+        end
+
+        def this_class_around_content_methods
+          @_fortitude_around_content_methods ||= [ ]
+        end
+      end
+
+      # LOCALIZATION ==================================================================================================
+      class << self
+        def method_added(method_name)
+          super(method_name)
+          check_localized_methods!
+        end
+
+        def method_removed(method_name)
+          super(method_name)
+          check_localized_methods!
+        end
+
+        def include(*args)
+          super(*args)
+          check_localized_methods!
+        end
+
+        LOCALIZED_CONTENT_PREFIX = "localized_content_"
+
+        def check_localized_methods!(original_class = self)
+          currently_has = instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i }
+          if currently_has != @last_localized_methods_check_has
+            @last_localized_methods_check_has = currently_has
+            rebuild_run_content!(:localized_methods_presence_changed, original_class)
+          end
+          direct_subclasses.each { |s| s.check_localized_methods!(original_class) }
+        end
+
+        def has_localized_content_methods?
+          !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
+        end
+      end
+
+
+
+      # UNORGANIZED (YET) =============================================================================================
+      def with_element_nesting_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
+        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
+      end
+
+      def with_attribute_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
+        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
+      end
+
+      def with_id_uniqueness(on_or_off)
+        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
+        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
+      end
+
+
+      def initialize(assigns = { })
+        assign_locals_from(assigns)
+      end
+
+      def content
+        raise "Must override in #{self.class.name}"
+      end
+
+
+      def yield_from_widget(*args)
+        @_fortitude_rendering_context.yield_from_widget(*args)
+      end
+
+      class << self
         def helper(*args)
           options = args.extract_options!
           options.assert_valid_keys(:transform, :call, :output_yielded_methods)
@@ -577,42 +631,6 @@ EOS
 
             helpers_module.module_eval(text)
           end
-        end
-
-        def method_added(method_name)
-          super(method_name)
-          check_localized_methods!
-        end
-
-        def method_removed(method_name)
-          super(method_name)
-          check_localized_methods!
-        end
-
-        def include(*args)
-          super(*args)
-          check_localized_methods!
-        end
-
-        LOCALIZED_CONTENT_PREFIX = "localized_content_"
-
-        def check_localized_methods!(original_class = self)
-          currently_has = instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i }
-          if currently_has != @last_localized_methods_check_has
-            @last_localized_methods_check_has = currently_has
-            rebuild_run_content!(:localized_methods_presence_changed, original_class)
-          end
-          direct_subclasses.each { |s| s.check_localized_methods!(original_class) }
-        end
-
-        def around_content_methods
-          superclass_methods = if superclass.respond_to?(:around_content_methods)
-            superclass.around_content_methods
-          else
-            [ ]
-          end
-
-          (superclass_methods + this_class_around_content_methods).uniq
         end
 
         def rebuild_run_content!(why, klass = self)
@@ -656,13 +674,6 @@ EOS
         end
 
         private
-        def this_class_around_content_methods
-          @_fortitude_around_content_methods ||= [ ]
-        end
-
-        def has_localized_content_methods?
-          !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
-        end
       end
 
       rebuild_run_content!(:initial_setup)
