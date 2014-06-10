@@ -152,7 +152,6 @@ module Fortitude
           "@" + (use_instance_variables_for_assigns ? "" : STANDARD_INSTANCE_VARIABLE_PREFIX) + effective_name
         end
 
-        private
         def rebuild_my_needs_methods!
           n = needs_as_hash
 
@@ -174,6 +173,10 @@ module Fortitude
             needs_module.module_eval(text)
           end
         end
+      end
+
+      def shared_variables
+        @_fortitude_rendering_context.instance_variable_set
       end
 
       def instance_variable_name_for_need(need)
@@ -279,6 +282,12 @@ module Fortitude
 
       def doctype(s)
         tag_rawtext "<!DOCTYPE #{s}>"
+      end
+
+      def doctype!
+        dt = self.class.doctype
+        raise "You must set a doctype at the class level, using something like 'doctype :html5', before you can use this method." unless dt
+        dt.declare!(self)
       end
 
       # START AND END COMMENTS ========================================================================================
@@ -393,6 +402,10 @@ module Fortitude
         end
       end
 
+      %w{comment javascript}.each do |non_tag_method|
+        alias_method non_tag_method, "tag_#{non_tag_method}"
+      end
+
       CDATA_START = "<![CDATA[".freeze
       CDATA_END = "]]>".freeze
 
@@ -434,10 +447,54 @@ module Fortitude
         end
       end
 
+      METHODS_TO_DISABLE_WHEN_STATIC = [ :assigns, :shared_variables ]
+
+      def with_staticness_enforced(static_method_name, &block)
+        methods_to_disable = METHODS_TO_DISABLE_WHEN_STATIC + self.class.needs_as_hash.keys
+        metaclass = (class << self; self; end)
+
+        methods_to_disable.each do |method_name|
+          metaclass.class_eval do
+            alias_method "_static_disabled_#{method_name}", method_name
+            define_method(method_name) { raise Fortitude::Errors::DynamicAccessFromStaticMethod.new(self, static_method_name, method_name) }
+          end
+        end
+
+        begin
+          block.call
+        ensure
+          methods_to_disable.each do |method_name|
+            metaclass.class_eval do
+              alias_method method_name, "_static_disabled_#{method_name}"
+            end
+          end
+        end
+      end
+
+      def _enforce_staticness!(actual_class, method_name)
+        self.class.send(:include, Fortitude::DisabledDynamicMethods)
+
+        self.class.needs_as_hash.keys.each do |need_name|
+          self.class.send(:define_method, need_name) do
+            _fortitude_dynamic_disabled!(need_name)
+          end
+        end
+
+        self._fortitude_static_method_name = method_name
+        self._fortitude_static_method_class = actual_class
+      end
+
       # INTEGRATION ===================================================================================================
       class << self
         def rebuilding(what, why, klass, &block)
           ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
+        end
+
+        def rebuild_text_methods!(why, klass = self)
+          rebuilding(:text_methods, why, klass) do
+            class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output, :needs_element_rules => self.enforce_element_nesting_rules))
+            direct_subclasses.each { |s| s.rebuild_text_methods!(why, klass) }
+          end
         end
       end
 
@@ -483,6 +540,46 @@ module Fortitude
           around_content :start_and_end_comments
         else
           remove_around_content :start_and_end_comments, :fail_if_not_present => false
+        end
+      end
+
+      # CONTENT ======================================================================================================
+      def content
+        raise "Must override in #{self.class.name}"
+      end
+
+      class << self
+        def rebuild_run_content!(why, klass = self)
+          rebuilding(:run_content, why, klass) do
+            acm = around_content_methods
+            text = "def run_content(*args, &block)\n"
+            text += "  out = nil\n"
+            acm.each_with_index do |method_name, index|
+              text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
+            end
+
+            if has_localized_content_methods?
+              text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
+              text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
+              text += "  " + ("  " * acm.length) + "out = if locale_method_name && respond_to?(locale_method_name)\n"
+              text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
+              text += "  " + ("  " * acm.length) + "else\n"
+              text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
+              text += "  " + ("  " * acm.length) + "end\n"
+            else
+              text += "  " + ("  " * acm.length) + "out = content(*args, &block)\n"
+            end
+
+            (0..(acm.length - 1)).each do |index|
+              text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
+            end
+            text += "  out\n"
+            text += "end"
+
+            class_eval(text)
+
+            direct_subclasses.each { |s| s.rebuild_run_content!(why, klass) }
+          end
         end
       end
 
@@ -558,38 +655,20 @@ module Fortitude
         end
       end
 
-
-
-      # UNORGANIZED (YET) =============================================================================================
-      def with_element_nesting_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
-        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
+      def t(key, *args)
+        base = self.class.translation_base
+        if base && key.to_s =~ /^\./
+          super("#{base}#{key}", *args)
+        else
+          super(key, *args)
+        end
       end
 
-      def with_attribute_rules(on_or_off)
-        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
-        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
+      def ttext(key, *args)
+        tag_text t(".#{key}", *args)
       end
 
-      def with_id_uniqueness(on_or_off)
-        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
-        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
-      end
-
-
-      def initialize(assigns = { })
-        assign_locals_from(assigns)
-      end
-
-      def content
-        raise "Must override in #{self.class.name}"
-      end
-
-
-      def yield_from_widget(*args)
-        @_fortitude_rendering_context.yield_from_widget(*args)
-      end
-
+      # HELPERS =======================================================================================================
       class << self
         def helper(*args)
           options = args.extract_options!
@@ -632,58 +711,38 @@ EOS
             helpers_module.module_eval(text)
           end
         end
-
-        def rebuild_run_content!(why, klass = self)
-          rebuilding(:run_content, why, klass) do
-            acm = around_content_methods
-            text = "def run_content(*args, &block)\n"
-            text += "  out = nil\n"
-            acm.each_with_index do |method_name, index|
-              text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
-            end
-
-            if has_localized_content_methods?
-              text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
-              text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
-              text += "  " + ("  " * acm.length) + "out = if locale_method_name && respond_to?(locale_method_name)\n"
-              text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
-              text += "  " + ("  " * acm.length) + "else\n"
-              text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
-              text += "  " + ("  " * acm.length) + "end\n"
-            else
-              text += "  " + ("  " * acm.length) + "out = content(*args, &block)\n"
-            end
-
-            (0..(acm.length - 1)).each do |index|
-              text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
-            end
-            text += "  out\n"
-            text += "end"
-
-            class_eval(text)
-
-            direct_subclasses.each { |s| s.rebuild_run_content!(why, klass) }
-          end
-        end
-
-        def rebuild_text_methods!(why, klass = self)
-          rebuilding(:text_methods, why, klass) do
-            class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output, :needs_element_rules => self.enforce_element_nesting_rules))
-            direct_subclasses.each { |s| s.rebuild_text_methods!(why, klass) }
-          end
-        end
-
-        private
       end
 
-      rebuild_run_content!(:initial_setup)
-      rebuild_needs!(:initial_setup)
-      rebuild_text_methods!(:initial_setup)
-
-      %w{comment javascript}.each do |non_tag_method|
-        alias_method non_tag_method, "tag_#{non_tag_method}"
+      def invoke_helper(name, *args, &block)
+        @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
       end
 
+      # CAPTURING =====================================================================================================
+      def capture(&block)
+        helpers = @_fortitude_rendering_context.helpers_object
+        if helpers && helpers.respond_to?(:capture, true) &&
+          [ 0, -1].include?(helpers.method(:capture).arity)
+          helpers.capture(&block)
+        else
+          _fortitude_builtin_capture(&block)
+        end
+      end
+
+      def _fortitude_builtin_capture(&block)
+        old_buffer = nil
+        new_buffer = nil
+        begin
+          new_buffer = _fortitude_new_buffer
+          old_buffer, @_fortitude_output_buffer_holder.output_buffer = @_fortitude_output_buffer_holder.output_buffer, new_buffer
+          _fortitude_new_buffer.force_encoding(old_buffer.encoding) if old_buffer && old_buffer.respond_to?(:encoding)
+          block.call
+          new_buffer
+        ensure
+          @_fortitude_output_buffer_holder.output_buffer = old_buffer
+        end
+      end
+
+      # RENDERING =============================================================================================
       def render(*args, &block)
         call_through = lambda do
           @_fortitude_rendering_context.record_widget(args) do
@@ -713,43 +772,6 @@ EOS
         end
       end
 
-      METHODS_TO_DISABLE_WHEN_STATIC = [ :assigns, :shared_variables ]
-
-      def with_staticness_enforced(static_method_name, &block)
-        methods_to_disable = METHODS_TO_DISABLE_WHEN_STATIC + self.class.needs_as_hash.keys
-        metaclass = (class << self; self; end)
-
-        methods_to_disable.each do |method_name|
-          metaclass.class_eval do
-            alias_method "_static_disabled_#{method_name}", method_name
-            define_method(method_name) { raise Fortitude::Errors::DynamicAccessFromStaticMethod.new(self, static_method_name, method_name) }
-          end
-        end
-
-        begin
-          block.call
-        ensure
-          methods_to_disable.each do |method_name|
-            metaclass.class_eval do
-              alias_method method_name, "_static_disabled_#{method_name}"
-            end
-          end
-        end
-      end
-
-      def _enforce_staticness!(actual_class, method_name)
-        self.class.send(:include, Fortitude::DisabledDynamicMethods)
-
-        self.class.needs_as_hash.keys.each do |need_name|
-          self.class.send(:define_method, need_name) do
-            _fortitude_dynamic_disabled!(need_name)
-          end
-        end
-
-        self._fortitude_static_method_name = method_name
-        self._fortitude_static_method_class = actual_class
-      end
-
       def rendering_context
         @_fortitude_rendering_context
       end
@@ -758,60 +780,12 @@ EOS
         w.to_html(@_fortitude_rendering_context)
       end
 
-      def doctype!
-        dt = self.class.doctype
-        raise "You must set a doctype at the class level, using something like 'doctype :html5', before you can use this method." unless dt
-        dt.declare!(self)
-      end
-
-      def invoke_helper(name, *args, &block)
-        @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
-      end
-
-      def t(key, *args)
-        base = self.class.translation_base
-        if base && key.to_s =~ /^\./
-          super("#{base}#{key}", *args)
-        else
-          super(key, *args)
-        end
-      end
-
-      def ttext(key, *args)
-        tag_text t(".#{key}", *args)
-      end
-
       def output_buffer
         @_fortitude_output_buffer_holder.output_buffer
       end
 
-      def shared_variables
-        @_fortitude_rendering_context.instance_variable_set
-      end
-
-      def capture(&block)
-        helpers = @_fortitude_rendering_context.helpers_object
-        if helpers && helpers.respond_to?(:capture, true) &&
-          [ 0, -1].include?(helpers.method(:capture).arity)
-          helpers.capture(&block)
-        else
-          _fortitude_builtin_capture(&block)
-        end
-      end
-
-      private
-      def _fortitude_builtin_capture(&block)
-        old_buffer = nil
-        new_buffer = nil
-        begin
-          new_buffer = _fortitude_new_buffer
-          old_buffer, @_fortitude_output_buffer_holder.output_buffer = @_fortitude_output_buffer_holder.output_buffer, new_buffer
-          _fortitude_new_buffer.force_encoding(old_buffer.encoding) if old_buffer && old_buffer.respond_to?(:encoding)
-          block.call
-          new_buffer
-        ensure
-          @_fortitude_output_buffer_holder.output_buffer = old_buffer
-        end
+      def initialize(assigns = { })
+        assign_locals_from(assigns)
       end
 
       def _fortitude_new_buffer
@@ -834,6 +808,31 @@ EOS
           out
         end
       end
+
+      def yield_from_widget(*args)
+        @_fortitude_rendering_context.yield_from_widget(*args)
+      end
+
+      # TEMPORARY OVERRIDES ===========================================================================================
+      def with_element_nesting_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing nesting rules in the first place" if on_or_off && (! self.class.enforce_element_nesting_rules)
+        @_fortitude_rendering_context.with_element_nesting_validation(on_or_off) { yield }
+      end
+
+      def with_attribute_rules(on_or_off)
+        raise ArgumentError, "We aren't even enforcing attribute rules in the first place" if on_or_off && (! self.class.enforce_attribute_rules)
+        @_fortitude_rendering_context.with_attribute_validation(on_or_off) { yield }
+      end
+
+      def with_id_uniqueness(on_or_off)
+        raise ArgumentError, "We aren't even enforcing ID uniqueness in the first place" if on_or_off && (! self.class.enforce_id_uniqueness)
+        @_fortitude_rendering_context.with_id_uniqueness(on_or_off) { yield }
+      end
+
+      # CODA ==========================================================================================================
+      rebuild_run_content!(:initial_setup)
+      rebuild_needs!(:initial_setup)
+      rebuild_text_methods!(:initial_setup)
     end
   end
 end
