@@ -1,4 +1,4 @@
-class Views::Layouts::WidgetLayoutNeedingContentContentFor < Fortitude::Widget::Html5
+class Views::Layouts::WidgetLayoutNeedingContentContentFor < Fortitude::Widgets::Html5
   def content
     html {
       head {

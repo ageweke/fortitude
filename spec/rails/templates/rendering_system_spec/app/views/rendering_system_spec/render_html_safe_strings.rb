@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::RenderHtmlSafeStrings < Fortitude::Widget::Html5
+class Views::RenderingSystemSpec::RenderHtmlSafeStrings < Fortitude::Widgets::Html5
   needs :a, :b, :c, :d, :e
 
   def content

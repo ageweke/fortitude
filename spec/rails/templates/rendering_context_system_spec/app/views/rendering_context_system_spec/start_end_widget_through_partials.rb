@@ -1,4 +1,4 @@
-class Views::RenderingContextSystemSpec::StartEndWidgetThroughPartials < Fortitude::Widget::Html5
+class Views::RenderingContextSystemSpec::StartEndWidgetThroughPartials < Fortitude::Widgets::Html5
   def content
     render :partial => 'start_end_widget_through_partials_partial'
 

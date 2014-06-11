@@ -1,4 +1,4 @@
-class Views::ModelsWidget < Fortitude::Widget::Html5
+class Views::ModelsWidget < Fortitude::Widgets::Html5
   def content
     p "this is the models widget"
   end

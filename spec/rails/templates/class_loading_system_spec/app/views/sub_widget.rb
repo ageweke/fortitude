@@ -1,4 +1,4 @@
-class Views::SubWidget < Fortitude::Widget::Html5
+class Views::SubWidget < Fortitude::Widgets::Html5
   def content
     p "this is the sub widget"
   end

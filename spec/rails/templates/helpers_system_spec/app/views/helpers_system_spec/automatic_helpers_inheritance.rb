@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::AutomaticHelpersInheritance < Fortitude::Widget::Html5
+class Views::HelpersSystemSpec::AutomaticHelpersInheritance < Fortitude::Widgets::Html5
   def content
     widget Views::HelpersSystemSpec::AutomaticHelpersInheritanceChildOne.new
     widget Views::HelpersSystemSpec::AutomaticHelpersInheritanceChildTwo.new

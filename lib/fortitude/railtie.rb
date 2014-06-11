@@ -24,11 +24,11 @@ module Fortitude
     config.after_initialize do
       if Fortitude.refine_rails_helpers
         require 'fortitude/rails/helpers'
-        Fortitude::Rails::Helpers.apply_refined_helpers_to!(Fortitude::Widget::Base)
+        Fortitude::Rails::Helpers.apply_refined_helpers_to!(Fortitude::Widget)
       end
 
       if ::Rails.env.development?
-        ::Fortitude::Widget::Base.class_eval do
+        ::Fortitude::Widget.class_eval do
           format_output true
           start_and_end_comments true
           debug true
@@ -220,7 +220,7 @@ module Fortitude
               options.delete(:inline)
 
               rendering_context = fortitude_rendering_context(:delegate_object => self)
-              widget_class = Class.new(Fortitude::Widget::Html5)
+              widget_class = Class.new(Fortitude::Widgets::Html5)
               widget_class.use_instance_variables_for_assigns(true)
               widget_class.extra_assigns(:use)
               widget_class.send(:define_method, :content, &widget_block)

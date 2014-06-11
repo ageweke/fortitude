@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::AutomaticHelpersDisabled < Fortitude::Widget::Html5
+class Views::HelpersSystemSpec::AutomaticHelpersDisabled < Fortitude::Widgets::Html5
   automatic_helper_access false
   helper :number_to_currency
 

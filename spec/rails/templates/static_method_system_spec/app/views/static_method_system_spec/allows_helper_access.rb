@@ -1,4 +1,4 @@
-class Views::StaticMethodSystemSpec::AllowsHelperAccess < Fortitude::Widget::Html5
+class Views::StaticMethodSystemSpec::AllowsHelperAccess < Fortitude::Widgets::Html5
   def content
     text "foo is: #{foo('aaa')}"
     bar('bbb')

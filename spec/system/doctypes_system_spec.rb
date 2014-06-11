@@ -1,6 +1,6 @@
 describe "Fortitude doctype support", :type => :system do
   def wc(*args, &block)
-    widget_class({ :superclass => Fortitude::Widget::Base }.merge(args[-1] || { }), &block)
+    widget_class({ :superclass => Fortitude::Widget }.merge(args[-1] || { }), &block)
   end
 
   def wc_with_doctype(dt, *args, &block)
@@ -28,7 +28,7 @@ describe "Fortitude doctype support", :type => :system do
   end
 
   it "should autoload specific widgets" do
-    expect(Fortitude::Widget::Html5).to be
+    expect(Fortitude::Widgets::Html5).to be
     expect(Fortitude::Widget::Html4Strict).to be
     expect(Fortitude::Widget::Html4Transitional).to be
     expect(Fortitude::Widget::Html4Frameset).to be

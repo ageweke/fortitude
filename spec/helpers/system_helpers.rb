@@ -61,7 +61,7 @@ module SystemHelpers
     tag :style, :newline_before => true, :escape_direct_content => false
   end
 
-  class TestWidgetClass < Fortitude::Widget::Base
+  class TestWidgetClass < Fortitude::Widget
     doctype TestDoctype.new
   end
 

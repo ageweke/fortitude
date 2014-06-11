@@ -1,6 +1,6 @@
 describe "Fortitude needs", :type => :system do
   def required
-    Fortitude::Widget::Base::REQUIRED_NEED
+    Fortitude::Widget::REQUIRED_NEED
   end
 
   it "should return the current needs from .needs, with or without arguments" do

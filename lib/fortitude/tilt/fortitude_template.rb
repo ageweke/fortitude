@@ -34,7 +34,7 @@ comment to the source of the template, like so:
         super %{You explicitly told Fortitude's Tilt support (either with a comment in your template, or
 with a :fortitude_class option) that the class we should render for this template is
 #{class_name.inspect}, but that turns out to be #{actual_object.inspect},
-which is not a Class that inherits from Fortitude::Widget::Base.}
+which is not a Class that inherits from Fortitude::Widget.}
       end
     end
 
@@ -156,7 +156,7 @@ which is not a Class that inherits from Fortitude::Widget::Base.}
           false
         elsif klass == ::BasicObject
           false
-        elsif klass == ::Fortitude::Widget::Base
+        elsif klass == ::Fortitude::Widget
           true
         else
           is_widget_class?(klass.superclass)

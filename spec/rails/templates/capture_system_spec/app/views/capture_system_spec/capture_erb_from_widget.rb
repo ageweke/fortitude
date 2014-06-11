@@ -1,4 +1,4 @@
-class Views::CaptureSystemSpec::CaptureErbFromWidget < Fortitude::Widget::Html5
+class Views::CaptureSystemSpec::CaptureErbFromWidget < Fortitude::Widgets::Html5
   def content
     widget_text = capture do
       render :partial => 'some_erb_partial'

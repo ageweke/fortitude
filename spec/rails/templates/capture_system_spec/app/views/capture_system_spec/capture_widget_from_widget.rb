@@ -1,4 +1,4 @@
-class Views::CaptureSystemSpec::CaptureWidgetFromWidget < Fortitude::Widget::Html5
+class Views::CaptureSystemSpec::CaptureWidgetFromWidget < Fortitude::Widgets::Html5
   def content
     widget_text_1 = capture do
       widget Views::CaptureSystemSpec::AnotherWidget.new(:name => "rendered_with_widget")

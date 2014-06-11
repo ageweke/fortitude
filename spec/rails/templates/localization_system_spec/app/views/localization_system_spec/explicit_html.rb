@@ -1,4 +1,4 @@
-class Views::LocalizationSystemSpec::ExplicitHtml < Fortitude::Widget::Html5
+class Views::LocalizationSystemSpec::ExplicitHtml < Fortitude::Widgets::Html5
   def content
     text "one: "
     text t(:one_html)

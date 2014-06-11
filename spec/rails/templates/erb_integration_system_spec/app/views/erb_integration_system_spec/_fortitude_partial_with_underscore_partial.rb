@@ -1,4 +1,4 @@
-class Views::ErbIntegrationSystemSpec::FortitudePartialWithUnderscorePartial < Fortitude::Widget::Html5
+class Views::ErbIntegrationSystemSpec::FortitudePartialWithUnderscorePartial < Fortitude::Widgets::Html5
   def content
     p "fortitude partial with underscore partial"
   end

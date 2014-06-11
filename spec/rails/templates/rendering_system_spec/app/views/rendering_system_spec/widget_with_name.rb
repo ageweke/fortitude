@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::WidgetWithName < Fortitude::Widget::Html5
+class Views::RenderingSystemSpec::WidgetWithName < Fortitude::Widgets::Html5
   needs :name
 
   def content

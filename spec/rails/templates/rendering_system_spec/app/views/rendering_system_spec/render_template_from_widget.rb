@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::RenderTemplateFromWidget < Fortitude::Widget::Html5
+class Views::RenderingSystemSpec::RenderTemplateFromWidget < Fortitude::Widgets::Html5
   def content
     p "this is the widget"
     render :template => "rendering_system_spec/widget_with_name", :locals => { :name => "Fred" }

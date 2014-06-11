@@ -1,4 +1,4 @@
-class Views::LocalizationSystemSpec::NativeSupport < Fortitude::Widget::Html5
+class Views::LocalizationSystemSpec::NativeSupport < Fortitude::Widgets::Html5
   def content
     text "not translated; "
     ttext :awesome, :number => 127

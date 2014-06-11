@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::BasicHelpers < Fortitude::Widget::Html5
+class Views::HelpersSystemSpec::BasicHelpers < Fortitude::Widgets::Html5
   def content
     three_months_ago = 3.months.ago
     p "Three months ago: #{distance_of_time_in_words_to_now(three_months_ago)}"

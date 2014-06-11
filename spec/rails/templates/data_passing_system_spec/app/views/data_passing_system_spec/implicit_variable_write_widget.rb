@@ -1,4 +1,4 @@
-class Views::DataPassingSystemSpec::ImplicitVariableWriteWidget < Fortitude::Widget::Html5
+class Views::DataPassingSystemSpec::ImplicitVariableWriteWidget < Fortitude::Widgets::Html5
   implicit_shared_variable_access true
 
   def content

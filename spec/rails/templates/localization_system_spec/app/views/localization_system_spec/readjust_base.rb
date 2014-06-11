@@ -1,4 +1,4 @@
-class Views::LocalizationSystemSpec::ReadjustBase < Fortitude::Widget::Html5
+class Views::LocalizationSystemSpec::ReadjustBase < Fortitude::Widgets::Html5
   translation_base 'some.other.base'
 
   def content

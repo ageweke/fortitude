@@ -1,4 +1,4 @@
-class Views::Layouts::FortitudeLayoutWithP < Fortitude::Widget::Html5
+class Views::Layouts::FortitudeLayoutWithP < Fortitude::Widgets::Html5
   doctype :html5
   enforce_element_nesting_rules true
 

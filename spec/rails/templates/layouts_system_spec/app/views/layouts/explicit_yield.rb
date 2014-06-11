@@ -1,4 +1,4 @@
-class Views::Layouts::ExplicitYield < Fortitude::Widget::Html5
+class Views::Layouts::ExplicitYield < Fortitude::Widgets::Html5
   def content
     html do
       head do

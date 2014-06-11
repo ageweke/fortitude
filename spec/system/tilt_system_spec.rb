@@ -30,7 +30,7 @@ describe "Fortitude Tilt integration", :type => :system do
 
   it "should render a very simple template via Tilt" do
     text = <<-EOS
-class SimpleTemplate < Fortitude::Widget::Html5
+class SimpleTemplate < Fortitude::Widgets::Html5
   def content
     text "this is"
     p "a simple widget"
@@ -43,7 +43,7 @@ EOS
   end
 
   SIMPLE_TEMPLATE_WITH_VARIABLES = <<-EOS
-class SimpleTemplateWithVariables < Fortitude::Widget::Html5
+class SimpleTemplateWithVariables < Fortitude::Widgets::Html5
   needs :foo, :bar => 'whatever'
 
   def content
@@ -53,7 +53,7 @@ end
 EOS
 
   SIMPLE_TEMPLATE_WITH_VARIABLES_NO_EXTRA_ASSIGNS = <<-EOS
-class SimpleTemplateWithVariablesNoExtraAssigns < Fortitude::Widget::Html5
+class SimpleTemplateWithVariablesNoExtraAssigns < Fortitude::Widgets::Html5
   extra_assigns :error
   needs :foo, :bar => 'whatever'
 
@@ -64,7 +64,7 @@ end
 EOS
 
   SIMPLE_TEMPLATE_WITH_VARIABLES_WANTS_EXTRA_ASSIGNS = <<-EOS
-class SimpleTemplateWithVariablesWantsExtraAssigns < Fortitude::Widget::Html5
+class SimpleTemplateWithVariablesWantsExtraAssigns < Fortitude::Widgets::Html5
   extra_assigns :use
   needs :foo, :bar => 'whatever'
 
@@ -132,7 +132,7 @@ EOS
   end
 
   SHARED_VARIABLE_ACCESS = <<-EOS
-class SharedVariableAccess < Fortitude::Widget::Html5
+class SharedVariableAccess < Fortitude::Widgets::Html5
   def content
     data = shared_variables[:foo]
     text "foo is: \#{data}"
@@ -149,7 +149,7 @@ EOS
   end
 
   IMPLICIT_SHARED_VARIABLE_ACCESS = <<-EOS
-class ImplicitSharedVariableAccess < Fortitude::Widget::Html5
+class ImplicitSharedVariableAccess < Fortitude::Widgets::Html5
   implicit_shared_variable_access true
   def content
     text "foo is: \#{@foo}"
@@ -166,7 +166,7 @@ EOS
   end
 
   WIDGET_WITH_BLOCK = <<-EOS
-class WidgetWithBlock < Fortitude::Widget::Html5
+class WidgetWithBlock < Fortitude::Widgets::Html5
   def content
     data = yield("foo")
     text "data is: \#{data}"
@@ -181,7 +181,7 @@ EOS
   end
 
   WIDGET_CALLING_FOO = <<-EOS
-class WidgetCallingFoo < Fortitude::Widget::Html5
+class WidgetCallingFoo < Fortitude::Widgets::Html5
   def content
     val = foo("xxx")
     text "val is: \#{val}"
@@ -201,7 +201,7 @@ EOS
   end
 
   WIDGET_CALLING_FOO_AHA_OFF = <<-EOS
-class WidgetCallingFooAhaOff < Fortitude::Widget::Html5
+class WidgetCallingFooAhaOff < Fortitude::Widgets::Html5
   automatic_helper_access false
 
   def content
@@ -227,11 +227,11 @@ EOS
     expect(result).to eq("foo: the_foo, bar: the_bar")
   end
 
-  it "should still render a widget that's directly in a module (class Foo::Bar::Baz < Fortitude::Widget::Base)" do
+  it "should still render a widget that's directly in a module (class Foo::Bar::Baz < Fortitude::Widget)" do
     eval("module Spec1; module Bar; end; end")
 
     text = <<-EOS
-class Spec1::Bar::Baz < Fortitude::Widget::Html5
+class Spec1::Bar::Baz < Fortitude::Widgets::Html5
   def content
     text "hello from spec1"
   end
@@ -241,9 +241,9 @@ EOS
     expect(render_text_with_tilt("random_#{rand(1_000_000)}.rb", text, context_object, { })).to eq("hello from spec1")
   end
 
-  it "should still render a widget that's directly in a module, of a subclass of Widget::Base (class Foo::Bar::Baz < MyWidget)" do
+  it "should still render a widget that's directly in a module, of a subclass of Widget (class Foo::Bar::Baz < MyWidget)" do
     eval("module Spec2; module Bar; end; end")
-    eval("class Spec2::Spec2Superclass < Fortitude::Widget::Html5; end")
+    eval("class Spec2::Spec2Superclass < Fortitude::Widgets::Html5; end")
 
     text = <<-EOS
 class Spec2::Bar::Baz < Spec2::Spec2Superclass
@@ -256,11 +256,11 @@ EOS
     expect(render_text_with_tilt("random_#{rand(1_000_000)}.rb", text, context_object, { })).to eq("hello from spec2")
   end
 
-  it "should still render a widget that's in a module via namespace nesting (module Foo; module Bar; Baz < Fortitude::Widget::Base)" do
+  it "should still render a widget that's in a module via namespace nesting (module Foo; module Bar; Baz < Fortitude::Widget)" do
     text = <<-EOS
 module Spec3
   module Bar
-    class Baz < Fortitude::Widget::Html5
+    class Baz < Fortitude::Widgets::Html5
       def content
         text "hello from spec3"
       end
@@ -272,13 +272,13 @@ EOS
     expect(render_text_with_tilt("random_#{rand(1_000_000)}.rb", text, context_object, { })).to eq("hello from spec3")
   end
 
-  it "should still render a widget that's in a module via namespace nesting, of a subclass of Widget::Base (module Foo; module Bar; Baz < MyWidget)" do
-    eval("module Spec4; class Spec4Superclass < Fortitude::Widget::Html5; end; end")
+  it "should still render a widget that's in a module via namespace nesting, of a subclass of Widget (module Foo; module Bar; Baz < MyWidget)" do
+    eval("module Spec4; class Spec4Superclass < Fortitude::Widgets::Html5; end; end")
 
     text = <<-EOS
 module Spec4
   module Bar
-    class Baz < Fortitude::Widget::Html5
+    class Baz < Fortitude::Widgets::Html5
       def content
         text "hello from spec4"
       end
@@ -293,7 +293,7 @@ EOS
   def impossible_to_find_class_name_text(num, insert="")
     text = <<-EOS
 klass_name = "Spec#{num}" + "TheClass"
-c = Class.new(Fortitude::Widget::Html5) do
+c = Class.new(Fortitude::Widgets::Html5) do
 #{insert}
   def content
     text "hello from spec#{num}"

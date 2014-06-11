@@ -1,4 +1,4 @@
-class Views::DevelopmentModeSystemSpec::SampleOutput < Fortitude::Widget::Html5
+class Views::DevelopmentModeSystemSpec::SampleOutput < Fortitude::Widgets::Html5
   needs :name
 
   def content

@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::HelpersThatOutputWhenRefined < Fortitude::Widget::Html5
+class Views::HelpersSystemSpec::HelpersThatOutputWhenRefined < Fortitude::Widgets::Html5
   def content
     text "START"
     image_tag 'foo'

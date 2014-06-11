@@ -1,4 +1,4 @@
-class Views::ComplexHelpersSystemSpec::FormForTest < Fortitude::Widget::Html5
+class Views::ComplexHelpersSystemSpec::FormForTest < Fortitude::Widgets::Html5
   def content
     text "OUTSIDE_BEFORE"
     form_for :person do |f|

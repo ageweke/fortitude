@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::BuiltInOutputtingHelpers < Fortitude::Widget::Html5
+class Views::HelpersSystemSpec::BuiltInOutputtingHelpers < Fortitude::Widgets::Html5
   def content
     # ActionView::Helpers::TextHelpers actually contains the only set of outputting helpers that
     # are built in to Rails...

@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::StreamWidget < Fortitude::Widget::Html5
+class Views::RenderingSystemSpec::StreamWidget < Fortitude::Widgets::Html5
   def content
     $order << :widget if $order
 

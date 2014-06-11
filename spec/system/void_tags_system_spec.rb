@@ -10,7 +10,7 @@ describe "Fortitude void tags", :type => :system do
   end
 
   it "should close void tags by default" do
-    vtc = widget_class(:superclass => Fortitude::Widget::Base) do
+    vtc = widget_class(:superclass => Fortitude::Widget) do
       tag :thevoid, :content_allowed => false
 
       def content

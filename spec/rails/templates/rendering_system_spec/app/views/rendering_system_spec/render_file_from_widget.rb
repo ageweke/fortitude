@@ -1,4 +1,4 @@
-class Views::RenderingSystemSpec::RenderFileFromWidget < Fortitude::Widget::Html5
+class Views::RenderingSystemSpec::RenderFileFromWidget < Fortitude::Widgets::Html5
   def content
     p "this is the widget"
     render :file => File.join(File.dirname(__FILE__), "widget_with_name"), :locals => { :name => "Fred" }

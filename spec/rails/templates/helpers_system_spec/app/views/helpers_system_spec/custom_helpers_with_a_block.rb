@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::CustomHelpersWithABlock < Fortitude::Widget::Html5
+class Views::HelpersSystemSpec::CustomHelpersWithABlock < Fortitude::Widgets::Html5
   def content
     result = (reverse_it { |v| "abc#{v}def" })
     text result

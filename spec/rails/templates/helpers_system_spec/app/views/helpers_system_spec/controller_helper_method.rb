@@ -1,4 +1,4 @@
-class Views::HelpersSystemSpec::ControllerHelperMethod < Fortitude::Widget::Html5
+class Views::HelpersSystemSpec::ControllerHelperMethod < Fortitude::Widgets::Html5
   def content
     text "it is #{decorate('Fred')}!"
   end

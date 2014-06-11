@@ -1,4 +1,4 @@
-class Views::RenderingContextSystemSpec::StartEndWidgetBasicInner < Fortitude::Widget::Html5
+class Views::RenderingContextSystemSpec::StartEndWidgetBasicInner < Fortitude::Widgets::Html5
   needs :inner => nil, :value => nil
 
   def content

@@ -1,4 +1,4 @@
-class Views::ComplexHelpersSystemSpec::CacheTest < Fortitude::Widget::Html5
+class Views::ComplexHelpersSystemSpec::CacheTest < Fortitude::Widgets::Html5
   needs :a, :b
 
   def content
