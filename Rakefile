@@ -4,7 +4,7 @@ require "fileutils"
 
 RSpec::Core::RakeTask.new(:spec)
 
-task :default => :spec
+task :default => [ :clobber, :compile, :spec ]
 
 require 'rake/extensiontask'
 spec = Gem::Specification.load('fortitude.gemspec')
@@ -16,6 +16,7 @@ namespace :jruby do
   source_path = File.join(base_directory, 'ext')
   classes_output_path = File.join(base_directory, 'tmp', 'classes')
   jruby_jar_path = File.join(RbConfig::CONFIG['libdir'], 'jruby.jar')
+
 
   def safe_system(cmd)
     output = `#{cmd} 2>&1`
@@ -30,11 +31,13 @@ namespace :jruby do
     end
   end
 
+  desc "Cleans all temporary files and the JAR from the JRuby extension"
   task :clean do
     FileUtils.rm_rf(classes_output_path)
     FileUtils.rm_rf(jar_path)
   end
 
+  desc "Compiles the JRuby extension"
   task :compile do
     require 'find'
 
