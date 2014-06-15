@@ -1,29 +1,15 @@
 # Fortitude
 
-TODO: Write a gem description
+Fortitude is a new rendering engine for Ruby (with or without Rails), based on the same principles as
+[Erector](https://github.com/erector/erector). It expresses HTML using a Ruby DSL. By doing this, it allows you to
+factor your view layer far more (and much more naturally) than any other templating engine, allowing dramatically
+better maintainability and code quality &mdash; in what is often one of your application's largest layers.
 
-## Installation
+Currently, Fortitude is in beta release: while there are no known bugs, and it has extensive tests (548 examples and
+counting), it is as-of-yet largely undocumented and has not received much use outside of its author's environment.
+As a result, it is largely intended for people who are already familiar with Erector, and for use in environments
+where occasional bugs (that will be fixed quickly) are not an issue.
 
-Add this line to your application's Gemfile:
+Fortitude should be production-ready in a short while, including very extensive documentation.
 
-    gem 'fortitude'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install fortitude
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it ( http://github.com/<my-github-username>/fortitude/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+If you're familiar with Erector and want to use Fortitude, see [README-erector.md](README-erector.md).

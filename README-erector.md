@@ -36,12 +36,16 @@ like Fortitude or Erector. But the rest of the bullet points above are pretty ni
 
 ## Current Status
 
-Currently, Fortitude is feature-complete and extremely well-tested. However, it is largely yet-undocumented, which
-is why current users of Erector are the best candidates for its very first beta users.
+Currently, Fortitude is feature-complete and extremely well-tested (548 examples and counting!). However, it is
+largely yet-undocumented, which is why current users of Erector are the best candidates for its very first beta users.
 
 Further, Fortitude has not yet been used "in anger" in the real world yet. As such, bugs are likely to crop up,
 including perhaps some obvious ones, but they will be fixed extremely quickly. You can help Fortitude get ready for
 prime time as quickly as possible by using it, and reporting any issues that crop up!
+
+Fortitude _is_ API-stable, however: at this point, backwards-incompatible changes to its API are heavily discouraged,
+and, ideally, will not be made. You should feel confident starting to build a codebase of Fortitude code without worry
+that you'll have to make big changes later.
 
 ## Getting Help
 
@@ -85,9 +89,15 @@ them, and they'll be implemented (or a decision made not to implement them) on a
 
 Getting started with Fortitude is very simple:
 
+1. Remove Erector from your application and add Fortitude;
 1. Create a base widget class for your application and declare the doctype you are using;
 1. Make sure your view classes are named properly and located in the right files so they can be loaded;
 1. If needed, set various options for backwards compatibility with Erector.
+
+### Remove Erector from Your Application and Add Fortitude
+
+Because both Fortitude and Erector use Ruby class files (`*.rb`) as views, they cannot co-exist at the same time.
+Remove `erector` from your `Gemfile` (or whatever mechanism you're using for loading gems), and add `fortitude`.
 
 ### Create a Base Widget Class
 
