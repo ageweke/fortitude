@@ -84,8 +84,8 @@ which is not a Class that inherits from Fortitude::Widget.}
 
       def explicit_fortitude_class_from_comment
         out = nil
-        data.scan(/^\s*\#\s*\!\s*fortitude_tilt_class\s*:\s*(\S+)\s*$/) do |(match)|
-          out = match
+        data.scan(/^\s*\#\s*\!\s*fortitude_tilt_class\s*:\s*(\S+)\s*$/) do |*args|
+          out = args.first.first
         end
         string_or_class_to_widget_class(out)
       end
@@ -115,8 +115,8 @@ which is not a Class that inherits from Fortitude::Widget.}
           module_nesting << module_name
         end
 
-        data.scan(/\bclass\s+(\S+)/) do |(class_name)|
-          out << class_name
+        data.scan(/\bclass\s+(\S+)/) do |*args|
+          out << args.first.first
         end
 
         out.uniq!
