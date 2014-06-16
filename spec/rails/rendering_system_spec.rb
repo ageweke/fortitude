@@ -136,15 +136,15 @@ describe "Rails rendering support", :type => :rails do
     end
 
     it "should let you stream a pure widget" do
-      pending "currently, we can't figure out a way to test this for certain -- we get just one chunk no matter what we do"
+      skip "currently, we can't figure out a way to test this for certain -- we get just one chunk no matter what we do"
 
       chunks = collect_chunks("stream_widget")
       expect(chunks.length).to be > 1
     end
 
     it "should let you stream from a widget that's in an ERb layout" do
-      pending("Fortitude streaming test is not supported under Rails 3.0.x") if @rails_server.rails_version =~ /^3\.0\./
-      pending("Fortitude streaming test is not supported under Ruby 1.8") if RUBY_VERSION =~ /^1\.8\./
+      skip("Fortitude streaming test is not supported under Rails 3.0.x") if @rails_server.rails_version =~ /^3\.0\./
+      skip("Fortitude streaming test is not supported under Ruby 1.8") if RUBY_VERSION =~ /^1\.8\./
 
       chunks = collect_chunks("stream_widget_with_layout")
       expect(chunks.length).to be > 1

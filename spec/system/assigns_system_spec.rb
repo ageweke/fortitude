@@ -201,15 +201,15 @@ describe "Fortitude assigns access", :type => :system do
 
     instance = wc.new(:foo => 'the_foo', :bar => nil, :baz => 'def_baz', :marph => 'nope')
     expect(instance.assigns[:foo]).to eq('the_foo')
-    expect(instance.assigns.is_default?(:foo)).to be_false
+    expect(instance.assigns.is_default?(:foo)).to be_falsey
     expect(instance.assigns[:bar]).to eq(nil)
-    expect(instance.assigns.is_default?(:bar)).to be_false
+    expect(instance.assigns.is_default?(:bar)).to be_falsey
     expect(instance.assigns[:baz]).to eq('def_baz')
-    expect(instance.assigns.is_default?(:baz)).to be_false
+    expect(instance.assigns.is_default?(:baz)).to be_falsey
     expect(instance.assigns[:quux]).to eq('whatever')
-    expect(instance.assigns.is_default?(:quux)).to be_true
+    expect(instance.assigns.is_default?(:quux)).to be_truthy
     expect(instance.assigns[:marph]).to eq('nope')
-    expect(instance.assigns.is_default?(:marph)).to be_false
+    expect(instance.assigns.is_default?(:marph)).to be_falsey
   end
 
   it "should return the same assigns proxy every time" do
