@@ -284,7 +284,19 @@ EOS
       def verify_server!
         server_verify_url = "http://localhost:#{@port}/working/rails_is_working"
         uri = URI.parse(server_verify_url)
-        data = Net::HTTP.get_response(uri)
+
+        data = nil
+        start_time = Time.now
+        while (! data)
+          begin
+            data = Net::HTTP.get_response(uri)
+          rescue Errno::ECONNREFUSED => ecre
+            raise if Time.now > (start_time + 20)
+            # keep waiting
+            sleep 0.1
+          end
+        end
+
         unless data.code.to_s == '200'
           raise "'#{server_verify_url}' returned #{data.code.inspect}, not 200"
         end
