@@ -6,10 +6,12 @@ VALUE method_append_escaped_string(VALUE self, VALUE rb_output);
 VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix);
 
 void Init_fortitude_native_ext() {
-    VALUE string_class = rb_const_get(rb_cObject, rb_intern("String"));
+    VALUE string_class, hash_class;
+
+    string_class = rb_const_get(rb_cObject, rb_intern("String"));
     rb_define_method(string_class, "fortitude_append_escaped_string", method_append_escaped_string, 1);
 
-    VALUE hash_class = rb_const_get(rb_cObject, rb_intern("Hash"));
+    hash_class = rb_const_get(rb_cObject, rb_intern("Hash"));
     rb_define_method(hash_class, "fortitude_append_as_attributes", method_append_as_attributes, 2);
 }
 
@@ -20,6 +22,7 @@ void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
     char buf[BUF_SIZE + 1];
     char* buf_pos = buf;
     char* max_buf_pos = buf + (BUF_SIZE - MAX_SUBSTITUTION_LENGTH);
+    char ch;
 
     while (1) {
         if (buf_pos >= max_buf_pos) {
@@ -28,7 +31,7 @@ void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
             buf_pos = buf;
         }
 
-        char ch = *src;
+        ch = *src;
 
         if (ch == '&') {
             *buf_pos++ = '&';
@@ -95,16 +98,16 @@ VALUE method_append_escaped_string(VALUE self, VALUE rb_output) {
 
 void fortitude_append_to(VALUE object, VALUE rb_output) {
     ID to_s;
+    char buf[25];
+    long value;
+    int i;
+    VALUE new_string, array_element;
+
 #ifdef CONST_ID
     CONST_ID(to_s, "to_s");
 #else
     to_s = rb_intern("to_s");
 #endif
-
-    char buf[25];
-    long value;
-    int i;
-    VALUE new_string, array_element;
 
     switch (TYPE(object)) {
         case T_STRING:
@@ -153,20 +156,16 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
     VALUE prefix = prefix_and_output->prefix;
     VALUE rb_output = prefix_and_output->rb_output;
 
-    char buf[BUF_SIZE + 1];
-
     if (TYPE(value) == T_HASH) {
         VALUE new_prefix_as_string;
         ID dup;
+        ID to_s;
+
 #ifdef CONST_ID
         CONST_ID(dup, "dup");
-#else
-        dup = rb_intern("dup");
-#endif
-        ID to_s;
-#ifdef CONST_ID
         CONST_ID(to_s, "to_s");
 #else
+        dup = rb_intern("dup");
         to_s = rb_intern("to_s");
 #endif
 
@@ -215,11 +214,11 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
 
 
 VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix) {
+    struct fortitude_prefix_and_output prefix_and_output;
+
     if (TYPE(rb_output) != T_STRING) {
         rb_raise(rb_eArgError, "You can only append to a String (this is a native (C) method)");
     }
-
-    struct fortitude_prefix_and_output prefix_and_output;
 
     prefix_and_output.prefix = prefix;
     prefix_and_output.rb_output = rb_output;
