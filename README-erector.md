@@ -47,6 +47,15 @@ Fortitude _is_ API-stable, however: at this point, backwards-incompatible change
 and, ideally, will not be made. You should feel confident starting to build a codebase of Fortitude code without worry
 that you'll have to make big changes later.
 
+Fortitude supports and is tested against:
+
+* Ruby 1.8.7, 1.9.3, 2.0.0, and 2.1.2;
+* JRuby 1.7.11;
+* Rails 3.0.20, 3.1.12, 3.2.18, 4.0.5, and 4.1.1.
+
+Other Rails and Ruby versions not on this list will most likely work just fine, too; this is simply the testing
+matrix we've chose
+
 ## Getting Help
 
 * For general information and discussion, join the [`fortitude-ruby`](https://groups.google.com/forum/#!forum/fortitude-ruby) Google group.
