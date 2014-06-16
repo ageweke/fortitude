@@ -154,7 +154,9 @@ which is not a Class that inherits from Fortitude::Widget.}
           false
         elsif (! klass.kind_of?(Class))
           false
-        elsif klass == ::BasicObject
+        elsif defined?(::BasicObject) && (klass == ::BasicObject)
+          false
+        elsif klass == Object
           false
         elsif klass == ::Fortitude::Widget
           true
