@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email         = ["andrew@geweke.org"]
   s.summary       = %q{Views Are Code: use all the power of Ruby to build views in your own language.}
   s.description   = %q{Views Are Code: use all the power of Ruby to build views in your own language.}
-  s.homepage      = ""
+  s.homepage      = "https://github.com/ageweke/fortitude"
   s.license       = "MIT"
 
   s.files         = `git ls-files`.split($/)
