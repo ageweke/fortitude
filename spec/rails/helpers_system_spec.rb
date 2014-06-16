@@ -10,7 +10,7 @@ describe "Rails helper support", :type => :rails do
 
   it "should refine the built-in Rails helpers by default" do
     expect_match("helpers_that_output_when_refined",
-      %r{START.*<img.*/(images|assets)/foo.*/><a href="mailto:test@example.com">test@example.com</a><link href="/(stylesheets|assets)/bar.css".*/>END}mi)
+      %r{START.*<img.*src="http://example.com/foo".*/><a href="mailto:test@example.com">test@example.com</a><link.*href="http://example.com/bar".*/>END}mi)
   end
 
   it "should support helpers that use blocks" do

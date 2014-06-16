@@ -214,6 +214,10 @@ EOS
         # So, if we're running Rails 3.0.x, we lock the 'i18n' gem to an earlier version.
         gemfile_contents << "\ngem 'i18n', '= 0.5.0'\n" if @rails_version && @rails_version =~ /^3\.0\./
 
+        # Apparently execjs released a version 2.2.0 that will happily install on Ruby 1.8.7, but which contains some
+        # new-style hash syntax. As a result, we pin the version backwards in this one specific case.
+        gemfile_contents << "\ngem 'execjs', '~> 2.0.0'\n" if RUBY_VERSION =~ /^1\.8\./
+
         File.open(gemfile, 'w') { |f| f << gemfile_contents }
       end
 
