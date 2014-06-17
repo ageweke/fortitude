@@ -11,8 +11,8 @@ similar. However, Fortitude is a complete, ground-up reimagining and reimplement
 advantages:
 
 * Dramatically faster: 40-60x faster (no, that's not a typo) than Erector at rendering real-world Web pages (in fact,
-Fortitude appears to be the fastest general-purpose Rails rendering engine, running 10%-40% faster than even ERb/
-Erubis);
+Fortitude appears to be the fastest general-purpose Rails rendering engine, running 10%-40% faster than even
+ERb/Erubis);
 * Dramatically less garbage generation: produces ≤10% as much garbage when rendering a page (and about 50% as much
 garbage as ERb/Erubis);
 * Full, complete native HTML5 support (with selectable X/HTML4.01 Strict/Transitional/Frameset doctypes);
@@ -23,7 +23,7 @@ garbage as ERb/Erubis);
 * Much more thorough Rails support &mdash; all known Rails integration points have been resolved, and it should work
 as smoothly with Rails as does (_e.g._) ERb/Erubis;
 * Much cleaner, totally transparent support for helpers (both inside and outside of Rails);
-* Great internationalization support, iincluding Rails' translation mechanism and per-widget language variants;
+* Great internationalization support, including Rails' translation mechanism and per-widget language variants;
 * "Staticization" support for incredibly fast rendering of HTML that doesn't depend on input variables;
 * Customizable tags (define your own, modify behavior of existing tags, like whether they start a newline in formatted-output mode);
 * Configure all options on a per-class basis with inheritance (zero "across-the-board" global settings);
@@ -54,7 +54,7 @@ Fortitude supports and is tested against:
 * Rails 3.0.20, 3.1.12, 3.2.18, 4.0.5, and 4.1.1.
 
 Other Rails and Ruby versions not on this list will most likely work just fine, too; this is simply the testing
-matrix we've chose
+matrix we've chosen.
 
 ## Getting Help
 
