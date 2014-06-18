@@ -6,6 +6,23 @@ require 'uri'
 module Spec
   module Helpers
     class RailsServer
+      class CommandFailedError < StandardError
+        attr_reader :directory, :command, :result, :output
+
+        def initialize(directory, command, result, output)
+          @directory = directory
+          @command = command
+          @result = result
+          @output = output
+
+          super(%{Command failed: in directory '#{directory}', we tried to run:
+  % #{command}
+  but got result: #{result.inspect}
+  and output:
+  #{output}})
+        end
+      end
+
       class << self
         def run_bundle_install!(name)
           @bundle_installs_run ||= { }
@@ -29,8 +46,24 @@ FORTITUDE_SPECS_RAILS_GEMS_INSTALLED=true bundle exec rspec spec/rails/...),
 then we will skip this command and your spec will run much faster.}
           end
 
+          # Sigh. Travis CI sometimes fails this with the following exception:
+          #
+          # Gem::RemoteFetcher::FetchError: Errno::ETIMEDOUT: Connection timed out - connect(2)
+          #
+          # So, we catch the command failure, look to see if this is the problem, and, if so, retry
+          iterations = 0
+          while true
+            begin
+              safe_system(cmd, description)
+              break
+            rescue CommandFailedError => cfe
+              raise if (cfe.output !~ /Gem::RemoteFetcher::FetchError.*connect/i) || (iterations >= 5)
+              # keep going
+            end
 
-          safe_system(cmd, description)
+            sleep 1
+            iterations += 1
+          end
 
           @bundle_installs_run[name] ||= true
         end
@@ -54,13 +87,7 @@ then we will skip this command and your spec will run much faster.}
           end
 
           output = `#{total_cmd}`
-          unless $?.success?
-            raise %{Command failed: in directory '#{Dir.pwd}', we tried to run:
-  % #{total_cmd}
-  but got result: #{$?.inspect}
-  and output:
-  #{output}}
-          end
+          raise CommandFailedError.new(Dir.pwd, total_cmd, $?, output) unless $?.success?
           say "OK" if notice
 
           output
