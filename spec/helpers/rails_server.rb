@@ -320,7 +320,7 @@ EOS
         while (! data)
           begin
             data = Net::HTTP.get_response(uri)
-          rescue Errno::ECONNREFUSED => ecre
+          rescue Errno::ECONNREFUSED, EOFError
             raise if Time.now > (start_time + 20)
             # keep waiting
             sleep 0.1
