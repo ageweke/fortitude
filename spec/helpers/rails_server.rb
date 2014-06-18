@@ -58,6 +58,9 @@ then we will skip this command and your spec will run much faster.}
               break
             rescue CommandFailedError => cfe
               raise if (cfe.output !~ /Gem::RemoteFetcher::FetchError.*connect/i) || (iterations >= 5)
+              say %{Got an exception trying to run 'bundle install'; sleeping and trying again (iteration #{iterations}):
+
+#{cfe.output}}
               # keep going
             end
 
