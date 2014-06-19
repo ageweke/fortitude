@@ -39,7 +39,7 @@ module Fortitude
           end
 
           with_defaults.each do |name, default_value|
-            @this_class_needs[name] = default_value
+            @this_class_needs[name] = default_value.freeze
           end
 
           rebuild_needs!(:need_declared)

@@ -35,8 +35,6 @@ if defined?(::Rails)
   require 'fortitude/rails/template_handler'
   require 'fortitude/railtie'
 else
-  require 'fortitude/non_rails_widget_methods'
-
   ::String.class_eval do
     alias_method :original_concat, :concat
   end
@@ -78,6 +76,12 @@ if defined?(::ActiveSupport::SafeBuffer)
   ::ActiveSupport::SafeBuffer.class_eval do
     public :original_concat
   end
+end
+
+begin
+  gem 'tilt'
+rescue Gem::LoadError => le
+  # ok
 end
 
 begin
