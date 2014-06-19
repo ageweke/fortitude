@@ -1,6 +1,9 @@
 require 'active_support'
 require 'active_support/concern'
 
+require 'fortitude/simple_template'
+require 'fortitude/assigns_proxy'
+
 module Fortitude
   class Widget
     module Needs

@@ -1,6 +1,8 @@
 require 'active_support'
 require 'active_support/concern'
 
+require 'fortitude/simple_template'
+
 module Fortitude
   class Widget
     module Integration

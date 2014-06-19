@@ -1,6 +1,8 @@
 require 'active_support'
 require 'active_support/concern'
 
+require 'fortitude/tags_module'
+
 module Fortitude
   class Widget
     module ModulesAndSubclasses

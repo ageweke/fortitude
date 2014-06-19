@@ -1,3 +1,4 @@
+require 'fortitude/doctypes'
 require 'fortitude/tag_store'
 
 module Fortitude

@@ -1,3 +1,6 @@
+require 'fortitude/tag'
+require 'fortitude/errors'
+
 module Fortitude
   module TagStore
     def tag(name, options = nil)

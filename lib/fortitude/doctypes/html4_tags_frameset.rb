@@ -1,3 +1,4 @@
+require 'fortitude/doctypes'
 require 'fortitude/tag_store'
 require 'fortitude/doctypes/html4_tags_transitional'
 

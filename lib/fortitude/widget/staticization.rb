@@ -1,6 +1,8 @@
 require 'active_support'
 require 'active_support/concern'
 
+require 'fortitude/staticized_method'
+
 module Fortitude
   class Widget
     module Staticization

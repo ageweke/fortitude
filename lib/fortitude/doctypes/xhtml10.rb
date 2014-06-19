@@ -1,3 +1,4 @@
+require 'fortitude/doctypes'
 require 'fortitude/doctypes/base'
 
 module Fortitude

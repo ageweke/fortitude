@@ -1,12 +1,4 @@
-require 'fortitude/doctypes/html5'
-require 'fortitude/doctypes/html4_strict'
-require 'fortitude/doctypes/html4_transitional'
-require 'fortitude/doctypes/html4_frameset'
-require 'fortitude/doctypes/unknown_doctype'
-require 'fortitude/doctypes/xhtml10_strict'
-require 'fortitude/doctypes/xhtml10_transitional'
-require 'fortitude/doctypes/xhtml10_frameset'
-require 'fortitude/doctypes/xhtml11'
+require 'fortitude/doctypes/base'
 
 module Fortitude
   module Doctypes
