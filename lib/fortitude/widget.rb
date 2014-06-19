@@ -6,6 +6,10 @@ require 'fortitude/widget/doctypes'
 require 'fortitude/widget/start_and_end_comments'
 require 'fortitude/widget/tag_like_methods'
 require 'fortitude/widget/staticization'
+require 'fortitude/widget/integration'
+require 'fortitude/widget/content'
+require 'fortitude/widget/around_content'
+require 'fortitude/widget/localization'
 
 require 'fortitude/tag'
 require 'fortitude/tags_module'
@@ -33,6 +37,10 @@ module Fortitude
     include Fortitude::Widget::StartAndEndComments
     include Fortitude::Widget::TagLikeMethods
     include Fortitude::Widget::Staticization
+    include Fortitude::Widget::Integration
+    include Fortitude::Widget::Content
+    include Fortitude::Widget::AroundContent
+    include Fortitude::Widget::Localization
 
     if defined?(::Rails)
       require 'fortitude/rails/widget_methods'
@@ -42,208 +50,7 @@ module Fortitude
       include Fortitude::Widget::NonRailsWidgetMethods
     end
 
-    # INTEGRATION ===================================================================================================
-    class << self
-      # INTERNAL USE ONLY
-      def rebuilding(what, why, klass, &block)
-        ActiveSupport::Notifications.instrument("fortitude.rebuilding", :what => what, :why => why, :originating_class => klass, :class => self, &block)
-      end
-      private :rebuilding
-
-      # INTERNAL USE ONLY
-      def rebuild_text_methods!(why, klass = self)
-        rebuilding(:text_methods, why, klass) do
-          class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output, :needs_element_rules => self.enforce_element_nesting_rules))
-          direct_subclasses.each { |s| s.rebuild_text_methods!(why, klass) }
-        end
-      end
-    end
-
-    # RUBY CALLBACK
-    def method_missing(name, *args, &block)
-      if self.class.extra_assigns == :use
-        ivar_name = self.class.instance_variable_name_for_need(name)
-        return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
-      end
-
-      if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name, true)
-        @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
-      else
-        super(name, *args, &block)
-      end
-    end
-
-    _fortitude_on_class_inheritable_attribute_change(
-      :format_output, :enforce_element_nesting_rules) do |attribute_name, old_value, new_value|
-      rebuild_text_methods!(:"#{attribute_name}_changed")
-    end
-
-    _fortitude_on_class_inheritable_attribute_change(
-      :format_output, :close_void_tags, :enforce_element_nesting_rules,
-      :enforce_attribute_rules, :enforce_id_uniqueness) do |attribute_name, old_value, new_value|
-      rebuild_tag_methods!(:"#{attribute_name}_changed")
-    end
-
-    _fortitude_on_class_inheritable_attribute_change(
-      :debug, :extra_assigns, :use_instance_variables_for_assigns) do |attribute_name, old_value, new_value|
-      rebuild_needs!(:"#{attribute_name}_changed")
-    end
-
-    _fortitude_on_class_inheritable_attribute_change(:implicit_shared_variable_access) do |attribute_name, old_value, new_value|
-      if new_value
-        around_content :transfer_shared_variables
-      else
-        remove_around_content :transfer_shared_variables, :fail_if_not_present => false
-      end
-    end
-
-    _fortitude_on_class_inheritable_attribute_change(:start_and_end_comments) do |attribute_name, old_value, new_value|
-      if new_value
-        around_content :start_and_end_comments
-      else
-        remove_around_content :start_and_end_comments, :fail_if_not_present => false
-      end
-    end
-
-    # CONTENT ======================================================================================================
-    # PUBLIC API
-    def content
-      raise "Must override in #{self.class.name}"
-    end
-
-    class << self
-      # INTERNAL USE ONLY
-      def rebuild_run_content!(why, klass = self)
-        rebuilding(:run_content, why, klass) do
-          acm = around_content_methods
-          text = "def run_content(*args, &block)\n"
-          text += "  out = nil\n"
-          acm.each_with_index do |method_name, index|
-            text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
-          end
-
-          if has_localized_content_methods?
-            text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
-            text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
-            text += "  " + ("  " * acm.length) + "out = if locale_method_name && respond_to?(locale_method_name)\n"
-            text += "  " + ("  " * acm.length) + "  send(locale_method_name, *args, &block)\n"
-            text += "  " + ("  " * acm.length) + "else\n"
-            text += "  " + ("  " * acm.length) + "  content(*args, &block)\n"
-            text += "  " + ("  " * acm.length) + "end\n"
-          else
-            text += "  " + ("  " * acm.length) + "out = content(*args, &block)\n"
-          end
-
-          (0..(acm.length - 1)).each do |index|
-            text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
-          end
-          text += "  out\n"
-          text += "end"
-
-          class_eval(text)
-
-          direct_subclasses.each { |s| s.rebuild_run_content!(why, klass) }
-        end
-      end
-    end
-
-    # AROUND_CONTENT ================================================================================================
-    class << self
-      # PUBLIC API
-      def around_content(*method_names)
-        return if method_names.length == 0
-        @_fortitude_around_content_methods ||= [ ]
-        @_fortitude_around_content_methods += method_names.map { |x| x.to_s.strip.downcase.to_sym }
-        rebuild_run_content!(:around_content_added)
-      end
-
-      # PUBLIC API
-      def remove_around_content(*method_names)
-        options = method_names.extract_options!
-        options.assert_valid_keys(:fail_if_not_present)
-
-        not_found = [ ]
-        method_names.each do |method_name|
-          not_found << method_name unless (@_fortitude_around_content_methods || [ ]).delete(method_name)
-        end
-
-        rebuild_run_content!(:around_content_removed)
-        unless (not_found.length == 0) || (options.has_key?(:fail_if_not_present) && (! options[:fail_if_not_present]))
-          raise ArgumentError, "no such methods: #{not_found.inspect}"
-        end
-      end
-
-      # INTERNAL USE ONLY
-      def around_content_methods
-        superclass_methods = if superclass.respond_to?(:around_content_methods)
-          superclass.around_content_methods
-        else
-          [ ]
-        end
-
-        (superclass_methods + this_class_around_content_methods).uniq
-      end
-
-      # INTERNAL USE ONLY
-      def this_class_around_content_methods
-        @_fortitude_around_content_methods ||= [ ]
-      end
-      private :this_class_around_content_methods
-    end
-
     # LOCALIZATION ==================================================================================================
-    class << self
-      # RUBY CALLBACK
-      def method_added(method_name)
-        super(method_name)
-        check_localized_methods!
-      end
-
-      # RUBY CALLBACK
-      def method_removed(method_name)
-        super(method_name)
-        check_localized_methods!
-      end
-
-      # RUBY CALL
-      def include(*args)
-        super(*args)
-        check_localized_methods!
-      end
-
-      LOCALIZED_CONTENT_PREFIX = "localized_content_"
-
-      # INTERNAL USE ONLY
-      def check_localized_methods!(original_class = self)
-        currently_has = instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i }
-        if currently_has != @last_localized_methods_check_has
-          @last_localized_methods_check_has = currently_has
-          rebuild_run_content!(:localized_methods_presence_changed, original_class)
-        end
-        direct_subclasses.each { |s| s.check_localized_methods!(original_class) }
-      end
-
-      # INTERNAL USE ONLY
-      def has_localized_content_methods?
-        !! (instance_methods(true).detect { |i| i =~ /^#{LOCALIZED_CONTENT_PREFIX}/i })
-      end
-      private :has_localized_content_methods?
-    end
-
-    # PUBLIC API
-    def t(key, *args)
-      base = self.class.translation_base
-      if base && key.to_s =~ /^\./
-        super("#{base}#{key}", *args)
-      else
-        super(key, *args)
-      end
-    end
-
-    # PUBLIC API
-    def ttext(key, *args)
-      tag_text t(".#{key}", *args)
-    end
 
     # HELPERS =======================================================================================================
     class << self
