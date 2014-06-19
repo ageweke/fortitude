@@ -2,6 +2,10 @@ require 'fortitude/widget/widget_class_inheritable_attributes'
 require 'fortitude/widget/tags'
 require 'fortitude/widget/needs'
 require 'fortitude/widget/modules_and_subclasses'
+require 'fortitude/widget/doctypes'
+require 'fortitude/widget/start_and_end_comments'
+require 'fortitude/widget/tag_like_methods'
+require 'fortitude/widget/staticization'
 
 require 'fortitude/tag'
 require 'fortitude/tags_module'
@@ -25,6 +29,10 @@ module Fortitude
     include Fortitude::Widget::Tags
     include Fortitude::Widget::Needs
     include Fortitude::Widget::ModulesAndSubclasses
+    include Fortitude::Widget::Doctypes
+    include Fortitude::Widget::StartAndEndComments
+    include Fortitude::Widget::TagLikeMethods
+    include Fortitude::Widget::Staticization
 
     if defined?(::Rails)
       require 'fortitude/rails/widget_methods'
@@ -32,241 +40,6 @@ module Fortitude
     else
       require 'fortitude/widget/non_rails_widget_methods'
       include Fortitude::Widget::NonRailsWidgetMethods
-    end
-
-    # DOCTYPES ======================================================================================================
-    class << self
-      # PUBLIC API
-      def doctype(new_doctype = nil)
-        if new_doctype
-          new_doctype = case new_doctype
-          when Fortitude::Doctypes::Base then new_doctype
-          when Symbol then Fortitude::Doctypes.standard_doctype(new_doctype)
-          else raise ArgumentError, "You must supply a Symbol or an instance of Fortitude::Doctypes::Base, not: #{new_doctype.inspect}"
-          end
-
-          current_doctype = doctype
-          if current_doctype
-            if new_doctype != current_doctype
-              raise ArgumentError, "The doctype has already been set to #{current_doctype} on this widget class or a superclass. You can't set it to #{new_doctype}; if you want to use a different doctype, you will need to make a new subclass that has no doctype set yet."
-            end
-          end
-
-          self.close_void_tags(new_doctype.close_void_tags?)
-
-          @_fortitude_doctype = new_doctype
-          tags_added!(new_doctype.tags.values)
-        else
-          return @_fortitude_doctype if @_fortitude_doctype
-          return superclass.doctype if superclass.respond_to?(:doctype)
-          nil
-        end
-      end
-    end
-
-    # PUBLIC API
-    def doctype(s)
-      tag_rawtext "<!DOCTYPE #{s}>"
-    end
-
-    # PUBLIC API
-    def doctype!
-      dt = self.class.doctype
-      raise "You must set a doctype at the class level, using something like 'doctype :html5', before you can use this method." unless dt
-      dt.declare!(self)
-    end
-
-    # START AND END COMMENTS ========================================================================================
-
-    # INTERNAL USE ONLY
-    def widget_nesting_depth
-      @_fortitude_widget_nesting_depth ||= @_fortitude_rendering_context.current_widget_depth
-    end
-    private :widget_nesting_depth
-
-    MAX_START_COMMENT_VALUE_STRING_LENGTH = 100
-    START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS = "...".freeze
-    MAX_ASSIGNS_LENGTH_BEFORE_MULTIPLE_LINES = 200
-    START_COMMENT_EXTRA_INDENT_FOR_NEXT_LINE = " " * 5
-
-    # INTERNAL USE ONLY
-    def start_and_end_comments
-      if self.class.start_and_end_comments
-        fo = self.class.format_output
-
-        comment_text = "BEGIN #{self.class.name} depth #{widget_nesting_depth}"
-
-        assign_keys = assigns.keys
-        if assign_keys.length > 0
-
-          assign_text = assign_keys.map do |assign|
-            value = assigns[assign]
-            out = ":#{assign} => "
-            out << "(DEFAULT) " if assigns.is_default?(assign)
-
-            value_string = if value.respond_to?(:to_fortitude_comment_string) then value.to_fortitude_comment_string else value.inspect end
-            if value_string.length > MAX_START_COMMENT_VALUE_STRING_LENGTH
-              value_string = value_string[0..(MAX_START_COMMENT_VALUE_STRING_LENGTH - START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS.length)] + START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS
-            end
-            out << value_string
-            out
-          end
-
-          total_length = assign_text.map(&:length).inject(0, &:+)
-          if total_length > MAX_ASSIGNS_LENGTH_BEFORE_MULTIPLE_LINES
-            newline_and_indent = "\n#{@_fortitude_rendering_context.current_indent}"
-            newline_and_extra_indent = newline_and_indent + START_COMMENT_EXTRA_INDENT_FOR_NEXT_LINE
-
-            comment_text << ":"
-            assign_text.each do |at|
-              comment_text << newline_and_extra_indent
-              comment_text << at
-            end
-            comment_text << newline_and_indent
-          else
-            comment_text << ": "
-            comment_text << assign_text.join(", ")
-          end
-        end
-        tag_comment comment_text
-        yield
-        tag_comment "END #{self.class.name} depth #{widget_nesting_depth}"
-      else
-        yield
-      end
-    end
-    private :start_and_end_comments
-
-    # OTHER TAG-LIKE METHODS ========================================================================================
-    # From http://www.w3.org/TR/html5/syntax.html#comments:
-    #
-    # Comments must start with the four character sequence U+003C LESS-THAN SIGN, U+0021 EXCLAMATION MARK,
-    # U+002D HYPHEN-MINUS, U+002D HYPHEN-MINUS (<!--). Following this sequence, the comment may have text,
-    # with the additional restriction that the text must not start with a single ">" (U+003E) character,
-    # nor start with a U+002D HYPHEN-MINUS character (-) followed by a ">" (U+003E) character, nor contain
-    # two consecutive U+002D HYPHEN-MINUS characters (--), nor end with a U+002D HYPHEN-MINUS character (-).
-    # Finally, the comment must be ended by the three character sequence U+002D HYPHEN-MINUS, U+002D HYPHEN-MINUS,
-    # U+003E GREATER-THAN SIGN (-->).
-
-    # INTERNAL USE ONLY
-    def comment_escape(string)
-      string = "_#{string}" if string =~ /^\s*(>|->)/
-      string = string.gsub("--", "- - ") if string =~ /\-\-/ # don't gsub if it doesn't match to avoid generating garbage
-      string = "#{string}_" if string =~ /\-\s*$/i
-      string
-    end
-    private :comment_escape
-
-    # PUBLIC API
-    def tag_comment(s)
-      fo = self.class.format_output
-      @_fortitude_rendering_context.needs_newline! if fo
-      raise ArgumentError, "You cannot pass a block to a comment" if block_given?
-      tag_rawtext "<!-- "
-      tag_rawtext comment_escape(s)
-      tag_rawtext " -->"
-      @_fortitude_rendering_context.needs_newline! if fo
-    end
-
-    # PUBLIC API
-    def tag_javascript(content = nil, &block)
-      args = if content.kind_of?(Hash)
-        [ self.class.doctype.default_javascript_tag_attributes.merge(content) ]
-      elsif content
-        if block
-          raise ArgumentError, "You can't supply JavaScript content both via text and a block"
-        else
-          block = lambda { tag_rawtext content }
-          [ self.class.doctype.default_javascript_tag_attributes.dup ]
-        end
-      else
-        [ self.class.doctype.default_javascript_tag_attributes.dup ]
-      end
-
-      actual_block = block
-      if self.class.doctype.needs_cdata_in_javascript_tag?
-        actual_block = lambda do
-          tag_rawtext "\n//#{CDATA_START}\n"
-          block.call
-          tag_rawtext "\n//#{CDATA_END}\n"
-        end
-      end
-
-      @_fortitude_rendering_context.with_indenting_disabled do
-        script(*args, &actual_block)
-      end
-    end
-
-    %w{comment javascript}.each do |non_tag_method|
-      alias_method non_tag_method, "tag_#{non_tag_method}"
-    end
-
-    CDATA_START = "<![CDATA[".freeze
-    CDATA_END = "]]>".freeze
-
-    # PUBLIC API
-    def cdata(s = nil, &block)
-      if s
-        raise ArgumentError, "You can only pass literal text or a block, not both" if block
-
-        components = s.split("]]>")
-
-        if components.length > 1
-          components.each_with_index do |s, i|
-            this_component = s
-            this_component = ">#{this_component}" if i > 0
-            this_component = "#{this_component}]]" if i < (components.length - 1)
-            cdata(this_component)
-          end
-        else
-          tag_rawtext CDATA_START
-          tag_rawtext s
-          tag_rawtext CDATA_END
-        end
-      else
-        tag_rawtext CDATA_START
-        yield
-        tag_rawtext CDATA_END
-      end
-    end
-
-    # STATICIZATION =================================================================================================
-    class << self
-      # PUBLIC API
-      def static(*method_names)
-        options = method_names.extract_options!
-
-        method_names.each do |method_name|
-          method_name = method_name.to_sym
-          staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options)
-          staticized_method.create_method!
-        end
-      end
-    end
-
-    METHODS_TO_DISABLE_WHEN_STATIC = [ :assigns, :shared_variables ]
-
-    # INTERNAL USE ONLY
-    def with_staticness_enforced(static_method_name, &block)
-      methods_to_disable = METHODS_TO_DISABLE_WHEN_STATIC + self.class.needs_as_hash.keys
-      metaclass = (class << self; self; end)
-
-      methods_to_disable.each do |method_name|
-        metaclass.class_eval do
-          alias_method "_static_disabled_#{method_name}", method_name
-          define_method(method_name) { raise Fortitude::Errors::DynamicAccessFromStaticMethod.new(self, static_method_name, method_name) }
-        end
-      end
-
-      begin
-        block.call
-      ensure
-        methods_to_disable.each do |method_name|
-          metaclass.class_eval do
-            alias_method method_name, "_static_disabled_#{method_name}"
-          end
-        end
-      end
     end
 
     # INTEGRATION ===================================================================================================
