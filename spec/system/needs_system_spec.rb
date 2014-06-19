@@ -26,7 +26,7 @@ describe "Fortitude needs", :type => :system do
       end
     end
 
-    expect { render(wc.new(:foo => 'c')) }.to raise_error(RuntimeError)
+    expect { render(wc.new(:foo => 'c')) }.to raise_error
   end
 
   it "should allow you to override a 'needs' method, and use #super" do
