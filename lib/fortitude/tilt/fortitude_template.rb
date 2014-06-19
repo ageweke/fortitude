@@ -39,20 +39,13 @@ which is not a Class that inherits from Fortitude::Widget.}
     end
 
     class FortitudeTemplate < ::Tilt::Template
-      def initialize(*args)
-        super(*args)
-      end
-
       def prepare
-        evaluate_template!
-
-        @fortitude_class = explicit_fortitude_class || first_class_that_is_a_widget_class(all_possible_class_names)
-        unless @fortitude_class
-          raise CannotDetermineTemplateClassError.new(all_possible_class_names)
-        end
+        # nothing here
       end
 
       def render(scope=Object.new, locals={}, &block)
+        ensure_template_is_evaluated!
+
         rendering_context = Fortitude::RenderingContext.new({
           :yield_block => block, :render_yield_result => false,
           :helpers_object => scope, :instance_variables_object => scope })
@@ -66,14 +59,31 @@ which is not a Class that inherits from Fortitude::Widget.}
         end
 
         widget_assigns = widget_assigns.merge(locals)
-        widget_assigns = @fortitude_class.extract_needed_assigns_from(widget_assigns) unless @fortitude_class.extra_assigns == :use
+        widget_assigns = fortitude_class.extract_needed_assigns_from(widget_assigns) unless fortitude_class.extra_assigns == :use
 
-        widget = @fortitude_class.new(widget_assigns)
+        widget = fortitude_class.new(widget_assigns)
         widget.to_html(rendering_context)
         rendering_context.output_buffer_holder.output_buffer
       end
 
       private
+      def ensure_template_is_evaluated!
+        @template_evaluated ||= begin
+          ::Object.class_eval(data)
+          true
+        end
+      end
+
+      def fortitude_class
+        @fortitude_class ||= begin
+          out = explicit_fortitude_class || first_class_that_is_a_widget_class(all_possible_class_names)
+          unless out
+            raise CannotDetermineTemplateClassError.new(all_possible_class_names)
+          end
+          out
+        end
+      end
+
       def explicit_fortitude_class
         explicit_fortitude_class_from_option || explicit_fortitude_class_from_comment
       end
@@ -143,10 +153,6 @@ which is not a Class that inherits from Fortitude::Widget.}
         end
 
         nil
-      end
-
-      def evaluate_template!
-        ::Object.class_eval(data)
       end
 
       def is_widget_class?(klass)
