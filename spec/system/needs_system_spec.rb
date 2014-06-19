@@ -16,6 +16,19 @@ describe "Fortitude needs", :type => :system do
     expect(child.needs(:baz => 'def_baz')).to eq(:foo => required, :bar => required, :baz => 'def_baz')
   end
 
+  it "should raise an exception if you try to modify a 'needs' default value" do
+    wc = widget_class do
+      needs :foo, :bar => [ 'a', 'b' ]
+
+      def content
+        bar << foo
+        text "bar: #{bar.join(",")}"
+      end
+    end
+
+    expect { render(wc.new(:foo => 'c')) }.to raise_error
+  end
+
   it "should allow you to override a 'needs' method, and use #super" do
     klass = widget_class do
       needs :foo

@@ -344,10 +344,41 @@ EOS
         say "Successfully spawned a server running Rails #{actual_version} on port #{@port}."
       end
 
+      def is_alive?(pid)
+        cmd = "ps -o pid #{pid}"
+        results = `#{cmd}`
+        results.split(/[\r\n]+/).each do |line|
+          line = line.strip.downcase
+          next if line == 'pid'
+          if line =~ /^\d+$/i
+            return true if Integer(line) == pid
+          else
+            raise "Unexpected output from '#{cmd}': #{results}"
+          end
+        end
+
+        false
+      end
+
       def stop_server!
         # We do this because under 1.8.7 SIGTERM doesn't seem to work, and it's actually fine to slaughter this
         # process mercilessly -- we don't need anything it has at this point, anyway.
         Process.kill("KILL", @server_pid)
+
+        start_time = Time.now
+
+        while true
+          if is_alive?(@server_pid)
+            raise "Unable to kill server at PID #{@server_pid}!" if (Time.now - start_time) > 20
+            say "Waiting for server at PID #{@server_pid} to die."
+            sleep 0.1
+          else
+            break
+          end
+        end
+
+        say "Successfully terminated Rails server at PID #{@server_pid}."
+
         @server_pid = nil
       end
     end

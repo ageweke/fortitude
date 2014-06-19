@@ -24,8 +24,6 @@ module Fortitude
     include Fortitude::Widget::Tags
     include Fortitude::Widget::Needs
 
-    # NEEDS =========================================================================================================
-
     # RAILS =========================================================================================================
     if defined?(::Rails)
       include Fortitude::Rails::WidgetMethods
