@@ -1,3 +1,4 @@
+require 'fortitude/doctypes'
 require 'fortitude/doctypes/html4'
 require 'fortitude/doctypes/html4_tags_frameset'
 

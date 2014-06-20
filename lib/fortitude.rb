@@ -11,6 +11,20 @@ module Fortitude
     autoload :Xhtml10Frameset, 'fortitude/widgets/xhtml10_frameset'
     autoload :Xhtml11, 'fortitude/widgets/xhtml11'
   end
+
+  module Doctypes
+    autoload :Base, 'fortitude/doctypes/base'
+    autoload :Html4, 'fortitude/doctypes/html4'
+    autoload :Html4Frameset, 'fortitude/doctypes/html4_frameset'
+    autoload :Html4Strict, 'fortitude/doctypes/html4_strict'
+    autoload :Html4Transitional, 'fortitude/doctypes/html4_transitional'
+    autoload :Html5, 'fortitude/doctypes/html5'
+    autoload :Xhtml10, 'fortitude/doctypes/xhtml10'
+    autoload :Xhtml10Frameset, 'fortitude/doctypes/xhtml10_frameset'
+    autoload :Xhtml10Strict, 'fortitude/doctypes/xhtml10_strict'
+    autoload :Xhtml10Transitional, 'fortitude/doctypes/xhtml10_transitional'
+    autoload :Xhtml11, 'fortitude/doctypes/xhtml11'
+  end
 end
 
 # See if we can load Rails -- but don't fail if we can't; we'll just use this to decide whether we should
@@ -33,10 +47,8 @@ if defined?(::Rails)
   require 'fortitude/rails/widget_methods'
   require 'fortitude/rails/renderer'
   require 'fortitude/rails/template_handler'
-  require 'fortitude/railtie'
+  require 'fortitude/rails/railtie'
 else
-  require 'fortitude/non_rails_widget_methods'
-
   ::String.class_eval do
     alias_method :original_concat, :concat
   end
@@ -81,6 +93,12 @@ if defined?(::ActiveSupport::SafeBuffer)
 end
 
 begin
+  gem 'tilt'
+rescue Gem::LoadError => le
+  # ok
+end
+
+begin
   require 'tilt'
 rescue LoadError => le
   # ok, whatever
@@ -91,3 +109,5 @@ if defined?(::Tilt)
 
   Tilt.register(Fortitude::Tilt::FortitudeTemplate, 'rb')
 end
+
+require 'fortitude/rendering_context'

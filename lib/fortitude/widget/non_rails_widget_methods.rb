@@ -1,12 +1,12 @@
 require 'active_support'
 
 module Fortitude
-  module Rails
-    module WidgetMethods
+  class Widget
+    module NonRailsWidgetMethods
       extend ActiveSupport::Concern
 
       def widget_locale
-        I18n.locale || I18n.default_locale
+        nil
       end
     end
   end

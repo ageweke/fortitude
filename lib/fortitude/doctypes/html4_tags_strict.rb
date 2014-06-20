@@ -1,9 +1,10 @@
-require 'fortitude/tag_store'
+require 'fortitude/doctypes'
+require 'fortitude/tags/tag_store'
 
 module Fortitude
   module Doctypes
     module Html4TagsStrict
-      extend Fortitude::TagStore
+      extend Fortitude::Tags::TagStore
 
       # HTML4.01 DTD
       I18N_ATTRIBUTES = %w{lang dir}

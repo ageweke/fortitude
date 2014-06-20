@@ -1,5 +1,7 @@
 require 'tilt'
 require 'active_support/inflector'
+require 'fortitude/rendering_context'
+require 'fortitude/doctypes'
 
 module Fortitude
   module Tilt

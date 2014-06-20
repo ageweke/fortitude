@@ -1,3 +1,4 @@
+require 'fortitude/doctypes'
 require 'fortitude/doctypes/html4'
 
 module Fortitude

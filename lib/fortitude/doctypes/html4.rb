@@ -1,3 +1,4 @@
+require 'fortitude/doctypes'
 require 'fortitude/doctypes/base'
 require 'fortitude/doctypes/html4_tags_strict'
 
