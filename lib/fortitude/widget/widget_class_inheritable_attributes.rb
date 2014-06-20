@@ -1,14 +1,14 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/class_inheritable_attributes'
+require 'fortitude/support/class_inheritable_attributes'
 
 module Fortitude
   class Widget
     module WidgetClassInheritableAttributes
       extend ActiveSupport::Concern
 
-      include Fortitude::ClassInheritableAttributes
+      include Fortitude::Support::ClassInheritableAttributes
 
       included do
         _fortitude_class_inheritable_attribute :format_output, false, [ true, false ]

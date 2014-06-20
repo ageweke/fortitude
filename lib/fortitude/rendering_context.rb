@@ -1,4 +1,4 @@
-require 'fortitude/instance_variable_set'
+require 'fortitude/support/instance_variable_set'
 
 module Fortitude
   class RenderingContext
@@ -16,7 +16,7 @@ module Fortitude
       @helpers_object = options[:helpers_object] || options[:delegate_object] || Object.new
 
       instance_variables_object = options[:instance_variables_object] || options[:delegate_object] || Object.new
-      @instance_variable_set = Fortitude::InstanceVariableSet.new(instance_variables_object)
+      @instance_variable_set = Fortitude::Support::InstanceVariableSet.new(instance_variables_object)
 
       @render_yield_result = true unless options.has_key?(:render_yield_result) && (! options[:render_yield_result])
 

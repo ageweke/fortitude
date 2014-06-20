@@ -1,7 +1,7 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/staticized_method'
+require 'fortitude/support/staticized_method'
 
 module Fortitude
   class Widget
@@ -15,7 +15,7 @@ module Fortitude
 
           method_names.each do |method_name|
             method_name = method_name.to_sym
-            staticized_method = Fortitude::StaticizedMethod.new(self, method_name, options)
+            staticized_method = Fortitude::Support::StaticizedMethod.new(self, method_name, options)
             staticized_method.create_method!
           end
         end

@@ -2,7 +2,7 @@ require 'active_support'
 require 'active_support/concern'
 
 require 'fortitude/method_templates/simple_template'
-require 'fortitude/assigns_proxy'
+require 'fortitude/support/assigns_proxy'
 
 module Fortitude
   class Widget
@@ -141,7 +141,7 @@ module Fortitude
           keys = needs_as_hash.keys
           keys |= (@_fortitude_raw_assigns.keys.map(&:to_sym)) if self.class.extra_assigns == :use
 
-          Fortitude::AssignsProxy.new(self, keys)
+          Fortitude::Support::AssignsProxy.new(self, keys)
         end
       end
 
