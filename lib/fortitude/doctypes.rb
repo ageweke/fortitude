@@ -1,4 +1,15 @@
 require 'fortitude/doctypes/base'
+require 'fortitude/doctypes/html4'
+require 'fortitude/doctypes/html4_frameset'
+require 'fortitude/doctypes/html4_strict'
+require 'fortitude/doctypes/html4_transitional'
+require 'fortitude/doctypes/html5'
+require 'fortitude/doctypes/xhtml10'
+require 'fortitude/doctypes/xhtml10_frameset'
+require 'fortitude/doctypes/xhtml10_strict'
+require 'fortitude/doctypes/xhtml10_transitional'
+require 'fortitude/doctypes/xhtml11'
+
 
 module Fortitude
   module Doctypes

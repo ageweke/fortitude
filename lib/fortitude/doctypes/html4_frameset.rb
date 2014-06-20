@@ -1,6 +1,7 @@
 require 'fortitude/doctypes'
 require 'fortitude/doctypes/html4'
 require 'fortitude/doctypes/html4_tags_frameset'
+require 'fortitude/doctypes/html4_transitional'
 
 module Fortitude
   module Doctypes

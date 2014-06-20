@@ -15,6 +15,8 @@ require 'fortitude/widget/capturing'
 require 'fortitude/widget/rendering'
 require 'fortitude/widget/temporary_overrides'
 
+require 'fortitude/doctypes'
+
 module Fortitude
   # TODO: rename all non-interface methods as _fortitude_*
   # TODO: Make 'element' vs. 'tag' naming consistent
