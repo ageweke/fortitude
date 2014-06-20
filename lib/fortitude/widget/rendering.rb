@@ -1,6 +1,8 @@
 require 'active_support'
 require 'active_support/concern'
 
+require 'fortitude/partial_tag_placeholder'
+
 module Fortitude
   class Widget
     module Rendering

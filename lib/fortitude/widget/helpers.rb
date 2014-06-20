@@ -1,6 +1,8 @@
 require 'active_support'
 require 'active_support/concern'
 
+require 'fortitude/rails/yielded_object_outputter'
+
 module Fortitude
   class Widget
     module Helpers
