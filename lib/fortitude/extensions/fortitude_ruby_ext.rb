@@ -13,12 +13,17 @@ require 'erb'
 end
 
 ::Hash.class_eval do
-  FORTITUDE_HYPHEN = "-".html_safe.freeze
-  FORTITUDE_EQUALS_QUOTE = "=\"".html_safe.freeze
-  FORTITUDE_QUOTE = "\"".html_safe.freeze
-  FORTITUDE_SPACE = " ".html_safe.freeze
-
-  TARGET_BASE = "".html_safe.freeze
+  {
+    'FORTITUDE_HYPHEN' => '-',
+    'FORTITUDE_EQUALS_QUOTE' => '="',
+    'FORTITUDE_QUOTE' => '"',
+    'FORTITUDE_SPACE' => ' ',
+    'TARGET_BASE' => ""
+  }.each do |constant_name, value|
+    value = value.html_safe if value.respond_to?(:html_safe)
+    value = value.freeze
+    const_set(constant_name, value)
+  end
 
   def fortitude_append_as_attributes(output, prefix)
     raise ArgumentError, "You can only append to a String" unless output.kind_of?(String)
