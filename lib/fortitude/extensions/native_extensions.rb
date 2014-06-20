@@ -10,7 +10,7 @@ else
     if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
       require 'fortitude_jruby_native_ext.jar'
     else
-      require File.expand_path(File.join(File.dirname(__FILE__), '..', 'fortitude_native_ext'))
+      require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'fortitude_native_ext'))
     end
 
     native_loaded = true
@@ -25,7 +25,7 @@ EOM
 end
 
 unless native_loaded
-  require 'fortitude/fortitude_ruby_ext'
+  require 'fortitude/extensions/fortitude_ruby_ext'
 end
 
 require 'active_support'
