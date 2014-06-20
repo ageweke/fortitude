@@ -6,7 +6,7 @@ module Fortitude
     class << self
       def template(name)
         @templates ||= { }
-        @templates[name] ||= new(File.join(File.dirname(__FILE__), "#{name}.rb.smpl"))
+        @templates[name] ||= new(File.join(File.dirname(__FILE__), "method_templates", "#{name}.rb.smpl"))
       end
     end
 
