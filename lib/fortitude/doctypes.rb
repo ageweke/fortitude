@@ -10,7 +10,6 @@ require 'fortitude/doctypes/xhtml10_strict'
 require 'fortitude/doctypes/xhtml10_transitional'
 require 'fortitude/doctypes/xhtml11'
 
-
 module Fortitude
   module Doctypes
     KNOWN_DOCTYPES = begin
