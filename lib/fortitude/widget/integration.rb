@@ -1,7 +1,7 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/simple_template'
+require 'fortitude/method_templates/simple_template'
 
 module Fortitude
   class Widget
@@ -18,7 +18,7 @@ module Fortitude
         # INTERNAL USE ONLY
         def rebuild_text_methods!(why, klass = self)
           rebuilding(:text_methods, why, klass) do
-            class_eval(Fortitude::SimpleTemplate.template('text_method_template').result(:format_output => format_output, :needs_element_rules => self.enforce_element_nesting_rules))
+            class_eval(Fortitude::MethodTemplates::SimpleTemplate.template('text_method_template').result(:format_output => format_output, :needs_element_rules => self.enforce_element_nesting_rules))
             direct_subclasses.each { |s| s.rebuild_text_methods!(why, klass) }
           end
         end

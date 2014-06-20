@@ -1,7 +1,7 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/simple_template'
+require 'fortitude/method_templates/simple_template'
 require 'fortitude/assigns_proxy'
 
 module Fortitude
@@ -100,18 +100,18 @@ module Fortitude
           n = needs_as_hash
 
           needs_text = n.map do |need, default_value|
-            Fortitude::SimpleTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
+            Fortitude::MethodTemplates::SimpleTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
               :need => need, :has_default => (default_value != REQUIRED_NEED),
               :ivar_name => instance_variable_name_for_need(need)
             )
           end.join("\n\n")
 
-          assign_locals_from_text = Fortitude::SimpleTemplate.template('assign_locals_from_template').result(
+          assign_locals_from_text = Fortitude::MethodTemplates::SimpleTemplate.template('assign_locals_from_template').result(
             :extra_assigns => extra_assigns, :needs_text => needs_text)
           class_eval(assign_locals_from_text)
 
           n.each do |need, default_value|
-            text = Fortitude::SimpleTemplate.template('need_method_template').result(
+            text = Fortitude::MethodTemplates::SimpleTemplate.template('need_method_template').result(
               :need => need, :ivar_name => instance_variable_name_for_need(need),
               :debug => self.debug)
             needs_module.module_eval(text)

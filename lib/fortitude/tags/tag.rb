@@ -1,5 +1,5 @@
 require 'fortitude/tags/tag_support'
-require 'fortitude/simple_template'
+require 'fortitude/method_templates/simple_template'
 
 module Fortitude
   module Tags
@@ -121,7 +121,7 @@ module Fortitude
           yield_call = "yield"
         end
 
-        text = Fortitude::SimpleTemplate.template('tag_method_template').result(
+        text = Fortitude::MethodTemplates::SimpleTemplate.template('tag_method_template').result(
           :name => name.to_s, :method_name => "tag_#{name}".to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
           :needs_element_rules => !! options[:enforce_element_nesting_rules],
           :needs_attribute_rules => !! options[:enforce_attribute_rules],
