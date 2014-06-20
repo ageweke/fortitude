@@ -1,7 +1,7 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/partial_tag_placeholder'
+require 'fortitude/tags/partial_tag_placeholder'
 
 module Fortitude
   class Widget
@@ -17,7 +17,7 @@ module Fortitude
         end
 
         if self.class.enforce_element_nesting_rules && args[0].kind_of?(Hash) && args[0].has_key?(:partial)
-          @_fortitude_rendering_context.record_tag(self, Fortitude::PartialTagPlaceholder.instance, &call_through)
+          @_fortitude_rendering_context.record_tag(self, Fortitude::Tags::PartialTagPlaceholder.instance, &call_through)
         else
           call_through.call
         end

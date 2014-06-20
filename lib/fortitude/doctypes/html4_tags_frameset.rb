@@ -1,11 +1,11 @@
 require 'fortitude/doctypes'
-require 'fortitude/tag_store'
+require 'fortitude/tags/tag_store'
 require 'fortitude/doctypes/html4_tags_transitional'
 
 module Fortitude
   module Doctypes
     module Html4TagsFrameset
-      extend Fortitude::TagStore
+      extend Fortitude::Tags::TagStore
 
       class << self
         def delegate_tag_stores

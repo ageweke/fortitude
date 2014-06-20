@@ -1,7 +1,7 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/tags_module'
+require 'fortitude/tags/tags_module'
 
 module Fortitude
   class Widget
@@ -24,7 +24,7 @@ module Fortitude
         # INTERNAL USE ONLY
         def create_modules!
           raise "We already seem to have created our modules" if @tags_module || @needs_module || @helpers_module
-          @tags_module = Fortitude::TagsModule.new(self)
+          @tags_module = Fortitude::Tags::TagsModule.new(self)
           @helpers_module = Module.new
           include @helpers_module
           @needs_module = Module.new

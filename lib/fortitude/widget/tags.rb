@@ -1,7 +1,7 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/tag_store'
+require 'fortitude/tags/tag_store'
 
 module Fortitude
   class Widget
@@ -9,7 +9,7 @@ module Fortitude
       extend ActiveSupport::Concern
 
       included do
-        extend Fortitude::TagStore
+        extend Fortitude::Tags::TagStore
 
         class << self
           # INTERNAL USE ONLY
