@@ -47,7 +47,7 @@ if defined?(::Rails)
   require 'fortitude/rails/widget_methods'
   require 'fortitude/rails/renderer'
   require 'fortitude/rails/template_handler'
-  require 'fortitude/railtie'
+  require 'fortitude/rails/railtie'
 else
   ::String.class_eval do
     alias_method :original_concat, :concat

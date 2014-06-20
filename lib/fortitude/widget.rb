@@ -15,19 +15,6 @@ require 'fortitude/widget/capturing'
 require 'fortitude/widget/rendering'
 require 'fortitude/widget/temporary_overrides'
 
-# require 'fortitude/tag'
-# require 'fortitude/tags_module'
-# require 'fortitude/errors'
-# require 'fortitude/assigns_proxy'
-# require 'fortitude/doctypes'
-# require 'fortitude/partial_tag_placeholder'
-# require 'fortitude/staticized_method'
-# require 'fortitude/rendering_context'
-# require 'fortitude/tag_store'
-# require 'fortitude/rails/yielded_object_outputter'
-# require 'active_support/core_ext/hash'
-# require 'active_support/notifications'
-
 module Fortitude
   # TODO: rename all non-interface methods as _fortitude_*
   # TODO: Make 'element' vs. 'tag' naming consistent
@@ -58,7 +45,6 @@ module Fortitude
       include Fortitude::Widget::NonRailsWidgetMethods
     end
 
-    # CODA ==========================================================================================================
     rebuild_run_content!(:initial_setup)
     rebuild_needs!(:initial_setup)
     rebuild_text_methods!(:initial_setup)
