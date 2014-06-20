@@ -42,12 +42,17 @@ which is not a Class that inherits from Fortitude::Widget.}
 
     class FortitudeTemplate < ::Tilt::Template
       def prepare
-        # nothing here
+        ::Object.class_eval(data)
+        @fortitude_class = explicit_fortitude_class || first_class_that_is_a_widget_class(all_possible_class_names)
+
+        # 2014-06-19 ageweke -- Earlier versions of Tilt try to instantiate the engine with an empty tempate as a way
+        # of making sure it can be created, so we have to support this case.
+        if (! @fortitude_class) && (data != "")
+          raise CannotDetermineTemplateClassError.new(all_possible_class_names)
+        end
       end
 
       def render(scope=Object.new, locals={}, &block)
-        ensure_template_is_evaluated!
-
         rendering_context = Fortitude::RenderingContext.new({
           :yield_block => block, :render_yield_result => false,
           :helpers_object => scope, :instance_variables_object => scope })
@@ -69,21 +74,8 @@ which is not a Class that inherits from Fortitude::Widget.}
       end
 
       private
-      def ensure_template_is_evaluated!
-        @template_evaluated ||= begin
-          ::Object.class_eval(data)
-          true
-        end
-      end
-
       def fortitude_class
-        @fortitude_class ||= begin
-          out = explicit_fortitude_class || first_class_that_is_a_widget_class(all_possible_class_names)
-          unless out
-            raise CannotDetermineTemplateClassError.new(all_possible_class_names)
-          end
-          out
-        end
+        @fortitude_class
       end
 
       def explicit_fortitude_class
