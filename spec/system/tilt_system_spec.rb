@@ -42,6 +42,10 @@ EOS
     expect(render_text_with_tilt("simple_template.rb", text)).to eq("this is<p>a simple widget</p>!")
   end
 
+  it "should allow the Tilt template to be created with an empty string, since earlier versions of Tilt do that" do
+    expect { Fortitude::Tilt::FortitudeTemplate.new { "" } }.not_to raise_error
+  end
+
   SIMPLE_TEMPLATE_WITH_VARIABLES = <<-EOS
 class SimpleTemplateWithVariables < Fortitude::Widgets::Html5
   needs :foo, :bar => 'whatever'
