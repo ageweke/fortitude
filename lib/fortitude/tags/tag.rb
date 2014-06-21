@@ -1,12 +1,27 @@
 require 'fortitude/tags/tag_support'
 require 'fortitude/method_templates/simple_template'
 
+# Note on handling tags that have no content inside them:
+#
+# - If the tag cannot ever have content inside it -- a "void tag" as denoted by HTML, specified here by
+#   :content_allowed => false -- then we can either render it as "<tag>" (if :close_void_tags is set to false,
+#   the default, on the widget class), or "<tag/>" (if :close_void_tags is set to true on the widget class).
+# - If the tag can have content inside it, but this instance of it does not, then we always render it as
+#   <tag></tag> (or <tag attr="value"...></tag>).
+#
+# Further, doctypes restrict the values you can set close_void_tags to on a widget: HTML5 allows either, HTML4
+# requires it to be false, and XHTML requires it to be true.
+#
+# This is all per the information at:
+#
+# http://stackoverflow.com/questions/3558119/are-self-closing-tags-valid-in-html5
+# http://www.w3.org/TR/xhtml-media-types/#C_2
+# http://www.colorglare.com/2014/02/03/to-close-or-not-to-close.html
 module Fortitude
   module Tags
     class Tag
       attr_reader :name, :spec
       attr_accessor :newline_before, :content_allowed, :allow_data_attributes, :allow_aria_attributes, :escape_direct_content
-      attr_accessor :allow_self_closing
 
       class << self
         def normalize_tag_name(name)
@@ -16,7 +31,7 @@ module Fortitude
 
       def initialize(name, options = { })
         options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose,
-          :allow_data_attributes, :allow_aria_attributes, :spec, :escape_direct_content, :allow_self_closing)
+          :allow_data_attributes, :allow_aria_attributes, :spec, :escape_direct_content)
 
         @name = self.class.normalize_tag_name(name)
 
@@ -27,7 +42,6 @@ module Fortitude
         @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
         @allow_aria_attributes = true unless options.has_key?(:allow_aria_attributes) && (! options[:allow_aria_attributes])
         @escape_direct_content = true unless options.has_key?(:escape_direct_content) && (! options[:escape_direct_content])
-        @allow_self_closing = true unless options.has_key?(:allow_self_closing) && (! options[:allow_self_closing])
         @spec = options[:spec]
       end
 
@@ -56,7 +70,6 @@ module Fortitude
           :allow_data_attributes => allow_data_attributes,
           :allow_aria_attributes => allow_aria_attributes,
           :escape_direct_content => escape_direct_content,
-          :allow_self_closing => allow_self_closing,
           :spec => spec
         })
       end
@@ -141,7 +154,6 @@ module Fortitude
           :needs_formatting => needs_formatting, :content_allowed => @content_allowed,
           :newline_before => @newline_before,
           :escape_direct_content => @escape_direct_content,
-          :allow_self_closing => @allow_self_closing,
           :alone_const => tag_constant_name(:ALONE), :open_const => tag_constant_name(:OPEN),
           :close_const => tag_constant_name(:CLOSE), :partial_open_const => tag_constant_name(:PARTIAL_OPEN),
           :tag_object_const => tag_constant_name(:TAG_OBJECT), :partial_open_end_const => :FORTITUDE_TAG_PARTIAL_OPEN_END,

@@ -359,7 +359,7 @@ module Fortitude
         :spec => 'http://www.w3.org/TR/html5/interactive-elements.html#the-dialog-element'
 
       # HTML5 spec, section 4.12
-      html5_tag :script, :newline_before => true, :can_enclose => %w{_text}, :allow_self_closing => false,
+      html5_tag :script, :newline_before => true, :can_enclose => %w{_text},
         :valid_attributes => %w{src type charset async defer crossorigin}, :escape_direct_content => false,
         :spec => 'http://www.w3.org/TR/html5/scripting-1.html#the-script-element'
       html5_tag :noscript, :newline_before => true,
