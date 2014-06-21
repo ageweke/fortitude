@@ -6,6 +6,7 @@ module Fortitude
     class Tag
       attr_reader :name, :spec
       attr_accessor :newline_before, :content_allowed, :allow_data_attributes, :allow_aria_attributes, :escape_direct_content
+      attr_accessor :allow_self_closing
 
       class << self
         def normalize_tag_name(name)
@@ -15,7 +16,7 @@ module Fortitude
 
       def initialize(name, options = { })
         options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose,
-          :allow_data_attributes, :allow_aria_attributes, :spec, :escape_direct_content)
+          :allow_data_attributes, :allow_aria_attributes, :spec, :escape_direct_content, :allow_self_closing)
 
         @name = self.class.normalize_tag_name(name)
 
@@ -26,6 +27,7 @@ module Fortitude
         @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
         @allow_aria_attributes = true unless options.has_key?(:allow_aria_attributes) && (! options[:allow_aria_attributes])
         @escape_direct_content = true unless options.has_key?(:escape_direct_content) && (! options[:escape_direct_content])
+        @allow_self_closing = true unless options.has_key?(:allow_self_closing) && (! options[:allow_self_closing])
         @spec = options[:spec]
       end
 
@@ -54,6 +56,7 @@ module Fortitude
           :allow_data_attributes => allow_data_attributes,
           :allow_aria_attributes => allow_aria_attributes,
           :escape_direct_content => escape_direct_content,
+          :allow_self_closing => allow_self_closing,
           :spec => spec
         })
       end
@@ -129,6 +132,7 @@ module Fortitude
           :needs_formatting => needs_formatting, :content_allowed => @content_allowed,
           :newline_before => @newline_before,
           :escape_direct_content => @escape_direct_content,
+          :allow_self_closing => @allow_self_closing,
           :alone_const => tag_constant_name(:ALONE), :open_const => tag_constant_name(:OPEN),
           :close_const => tag_constant_name(:CLOSE), :partial_open_const => tag_constant_name(:PARTIAL_OPEN),
           :tag_object_const => tag_constant_name(:TAG_OBJECT), :partial_open_end_const => :FORTITUDE_TAG_PARTIAL_OPEN_END,

@@ -262,7 +262,7 @@ module Fortitude
         :spec => 'http://www.w3.org/TR/html401/interact/forms.html#h-17.10'
 
       # HTML4.01 spec, section 18.2
-      tag :script, :newline_before => true, :can_enclose => %w{_text},
+      tag :script, :newline_before => true, :can_enclose => %w{_text}, :allow_self_closing => false,
         :valid_attributes => %w{charset type src defer}, :escape_direct_content => false,
         :spec => 'http://www.w3.org/TR/html401/interact/scripts.html#h-18.2.1'
       # HTML4.01 spec, section 18.3

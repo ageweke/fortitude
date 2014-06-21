@@ -15,6 +15,14 @@ describe "Fortitude tag rendering", :type => :system do
     expect { r { br { text "hi" } } }.to raise_error(Fortitude::Errors::NoContentAllowed)
   end
 
+  it "should render a non-self-closing tag correctly" do
+    should_render_to("<script></script>") { script }
+    should_render_to("<script></script>") { script { } }
+    should_render_to("<script></script>") { script('') }
+    should_render_to("<script></script>") { script('') { } }
+    should_render_to("<script src=\"foo\"></script>") { script(:src => "foo") }
+  end
+
   it "should quote HTML specs at you when you screw up" do
     expect { r { br { text "hi" } } }.to raise_error(Fortitude::Errors::NoContentAllowed, /THE_SPEC_FOR_BR/)
   end
