@@ -43,6 +43,6 @@ describe "Fortitude method precedence", :type => :system do
     end
 
     expect(render(wc, :rendering_context => rc(
-      :helpers_object => helpers_object))).to eq("foo: method foo, bar: need_bar, baz: helper_baz, <quux/>")
+      :helpers_object => helpers_object))).to eq("foo: method foo, bar: need_bar, baz: helper_baz, <quux></quux>")
   end
 end

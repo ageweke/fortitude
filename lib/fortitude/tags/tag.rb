@@ -109,7 +109,7 @@ module Fortitude
           mod.send(:include, ::Fortitude::Tags::TagSupport)
         end
 
-        alone_tag = if @content_allowed || options[:close_void_tags] then "<#{name}/>" else "<#{name}>" end
+        alone_tag = if @content_allowed || options[:close_void_tags] then "<#{name}></#{name}>" else "<#{name}>" end
 
         ensure_constants(mod, :ALONE => alone_tag, :OPEN => "<#{name}>", :CLOSE => "</#{name}>",
           :PARTIAL_OPEN => "<#{name}", :TAG_OBJECT => self)

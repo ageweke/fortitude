@@ -21,7 +21,7 @@ describe "Fortitude formatting support", :type => :system do
   end
 
   it "should still close tags directly if it can" do
-    should_format_to(%{<div/>}) { div }
+    should_format_to(%{<div></div>}) { div }
   end
 
   it "should put a non-newlined element inside a newlined element properly" do

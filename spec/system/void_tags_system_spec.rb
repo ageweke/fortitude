@@ -18,7 +18,7 @@ describe "Fortitude void tags", :type => :system do
       end
     end
 
-    expect(render(vtc)).to eq("<thevoid/>")
+    expect(render(vtc)).to eq("<thevoid></thevoid>")
   end
 
   it "should not close void tags if asked not to" do
@@ -32,7 +32,7 @@ describe "Fortitude void tags", :type => :system do
     klass = void_tag_class
     klass.close_void_tags true
 
-    expect(render(klass)).to eq("<thevoid/>")
+    expect(render(klass)).to eq("<thevoid></thevoid>")
   end
 
   it "should not affect non-void tags with no content" do
@@ -46,6 +46,6 @@ describe "Fortitude void tags", :type => :system do
     end
     klass.close_void_tags false
 
-    expect(render(klass)).to eq("<p/><div></div><span></span>")
+    expect(render(klass)).to eq("<p></p><div></div><span></span>")
   end
 end

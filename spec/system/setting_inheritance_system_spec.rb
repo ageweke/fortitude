@@ -63,7 +63,7 @@ describe "Fortitude setting inheritance", :type => :system do
     result = render(klass)
     if result =~ /^(.*BEGIN?)\s*\S+\s*(depth.*END)\s*\S+\s*(depth.*)$/i
       expect($1).to eq("<!-- BEGIN")
-      expect($2).to eq("depth 0: :baz => (DEFAULT) \"default_baz\" --><p/><!-- END")
+      expect($2).to eq("depth 0: :baz => (DEFAULT) \"default_baz\" --><p></p><!-- END")
       expect($3).to eq("depth 0 -->")
     else
       raise "result does not match expected pattern: #{result.inspect}"
@@ -71,7 +71,7 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
   def start_and_end_comments_should_be_false(klass)
-    expect(render(klass)).to eq("<p/>")
+    expect(render(klass)).to eq("<p></p>")
   end
 
 
@@ -115,7 +115,7 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
   def close_void_tags_should_be_true(klass)
-    expect(render(klass)).to eq("<br/>")
+    expect(render(klass)).to eq("<br></br>")
   end
 
   def close_void_tags_should_be_false(klass)
@@ -135,7 +135,7 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
   def enforce_element_nesting_rules_should_be_false(klass)
-    expect(render(klass)).to eq("<p><div/></p>")
+    expect(render(klass)).to eq("<p><div></div></p>")
   end
 
 

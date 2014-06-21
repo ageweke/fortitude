@@ -152,7 +152,7 @@ describe "Fortitude doctype support", :type => :system do
         end
 
         if expected_results[:closes_void_tags]
-          expect(render(the_widget_class)).to eq("<br/>")
+          expect(render(the_widget_class)).to eq("<br></br>")
         else
           expect(render(the_widget_class)).to eq("<br>")
         end

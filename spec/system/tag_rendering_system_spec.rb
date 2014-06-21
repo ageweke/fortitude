@@ -8,7 +8,7 @@ describe "Fortitude tag rendering", :type => :system do
   end
 
   it "should render a void tag correctly" do
-    should_render_to("<hr/>") { hr }
+    should_render_to("<hr></hr>") { hr }
   end
 
   it "should not allow passing text content in a block to a tag that doesn't take content" do

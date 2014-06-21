@@ -14,7 +14,7 @@ describe "Fortitude tag rules enforcement", :type => :system do
   end
 
   it "should allow a <b> inside a <p>" do
-    expect(render(widget_class_with_content { p { b } })).to eq('<p><b/></p>')
+    expect(render(widget_class_with_content { p { b } })).to eq('<p><b></b></p>')
   end
 
   it "should not allow text where it's, well, not allowed, when specified directly" do
