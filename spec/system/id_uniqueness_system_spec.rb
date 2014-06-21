@@ -12,7 +12,7 @@ describe "Fortitude ID uniqueness", :type => :system do
       p :id => "foo"
     end
 
-    expect(render(wc)).to eq("<p id=\"foo\"/><p id=\"foo\"/>")
+    expect(render(wc)).to eq("<p id=\"foo\"></p><p id=\"foo\"></p>")
   end
 
   it "should enforce ID uniqueness if asked to" do
@@ -103,7 +103,7 @@ describe "Fortitude ID uniqueness", :type => :system do
     inner_instance = inner.new
     outer_instance.inner = inner_instance
 
-    expect(render(outer_instance)).to eq("<p id=\"foo\"/><p id=\"foo\"/><p id=\"bar\"/>")
+    expect(render(outer_instance)).to eq("<p id=\"foo\"></p><p id=\"foo\"></p><p id=\"bar\"></p>")
   end
 
   it "should allow you to disable enforcement with a block" do
@@ -119,7 +119,7 @@ describe "Fortitude ID uniqueness", :type => :system do
       end
     end
 
-    expect(render(wc)).to eq('<p id="foo"/><p id="foo"/>Fortitude::Errors::DuplicateId')
+    expect(render(wc)).to eq('<p id="foo"></p><p id="foo"></p>Fortitude::Errors::DuplicateId')
   end
 
   it "should allow you to disable enforcement with a block, even across widget boundaries" do
@@ -142,7 +142,7 @@ describe "Fortitude ID uniqueness", :type => :system do
     inner_instance = inner.new
     outer_instance.inner = inner_instance
 
-    expect(render(outer_instance)).to eq("<p id=\"foo\"/><p id=\"foo\"/><p id=\"bar\"/>")
+    expect(render(outer_instance)).to eq("<p id=\"foo\"></p><p id=\"foo\"></p><p id=\"bar\"></p>")
   end
 
   it "should allow you to re-enable enforcement with a block" do
@@ -200,6 +200,6 @@ describe "Fortitude ID uniqueness", :type => :system do
       end
     end
 
-    expect(render(wc)).to eq('<p id="foo"/><p id="foo"/>')
+    expect(render(wc)).to eq('<p id="foo"></p><p id="foo"></p>')
   end
 end

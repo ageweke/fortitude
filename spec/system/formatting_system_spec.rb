@@ -41,7 +41,7 @@ describe "Fortitude formatting support", :type => :system do
   it "should format a nested combination properly" do
     should_format_to(%{<nav id="main-menu">
   <h1 id="brand">
-    <a href="somewhere"><img src="an_img"/></a>
+    <a href="somewhere"><img src="an_img"></a>
   </h1>
 </nav>}) do
       nav(:id => 'main-menu') do

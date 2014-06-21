@@ -48,7 +48,7 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
   def enforce_id_uniqueness_should_be_false(klass)
-    expect(render(klass)).to eq('<p id="foo"/><p id="foo"/>')
+    expect(render(klass)).to eq('<p id="foo"></p><p id="foo"></p>')
   end
 
 
@@ -103,7 +103,7 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
   def enforce_attribute_rules_should_be_false(klass)
-    expect(render(klass)).to eq("<p foo=\"bar\"/>")
+    expect(render(klass)).to eq("<p foo=\"bar\"></p>")
   end
 
 
@@ -115,7 +115,7 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
   def close_void_tags_should_be_true(klass)
-    expect(render(klass)).to eq("<br></br>")
+    expect(render(klass)).to eq("<br/>")
   end
 
   def close_void_tags_should_be_false(klass)
@@ -149,13 +149,13 @@ describe "Fortitude setting inheritance", :type => :system do
   def format_output_should_be_true(klass)
     expect(render(klass)).to eq(%{<div>
   <p>
-    <span class="foo"/>
+    <span class="foo"></span>
   </p>
 </div>})
   end
 
   def format_output_should_be_false(klass)
-    expect(render(klass)).to eq('<div><p><span class="foo"/></p></div>')
+    expect(render(klass)).to eq('<div><p><span class="foo"></span></p></div>')
   end
 
 
@@ -330,23 +330,23 @@ describe "Fortitude setting inheritance", :type => :system do
       end
     end
 
-    close_void_tags_should_be(true, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+    close_void_tags_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
 
-    @parent1.close_void_tags false
-    close_void_tags_should_be(true, @grandparent, @parent2, @child21, @child22)
-    close_void_tags_should_be(false, @parent1, @child11, @child12)
+    @parent1.close_void_tags true
+    close_void_tags_should_be(false, @grandparent, @parent2, @child21, @child22)
+    close_void_tags_should_be(true, @parent1, @child11, @child12)
 
-    @parent2.close_void_tags true
-    close_void_tags_should_be(true, @grandparent, @parent2, @child21, @child22)
-    close_void_tags_should_be(false, @parent1, @child11, @child12)
-
-    @grandparent.close_void_tags false
-    close_void_tags_should_be(true, @parent2, @child21, @child22)
-    close_void_tags_should_be(false, @grandparent, @parent1, @child11, @child12)
+    @parent2.close_void_tags false
+    close_void_tags_should_be(false, @grandparent, @parent2, @child21, @child22)
+    close_void_tags_should_be(true, @parent1, @child11, @child12)
 
     @grandparent.close_void_tags true
-    close_void_tags_should_be(true, @grandparent, @parent2, @child21, @child22)
-    close_void_tags_should_be(false, @parent1, @child11, @child12)
+    close_void_tags_should_be(false, @parent2, @child21, @child22)
+    close_void_tags_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.close_void_tags false
+    close_void_tags_should_be(false, @grandparent, @parent2, @child21, @child22)
+    close_void_tags_should_be(true, @parent1, @child11, @child12)
   end
 
   it "should properly inherit format_output" do

@@ -8,7 +8,7 @@ describe "Fortitude tag rendering", :type => :system do
   end
 
   it "should render a void tag correctly" do
-    should_render_to("<hr></hr>") { hr }
+    should_render_to("<hr>") { hr }
   end
 
   it "should not allow passing text content in a block to a tag that doesn't take content" do
@@ -112,36 +112,36 @@ describe "Fortitude tag rendering", :type => :system do
   end
 
   it "should render a tag with an attribute correctly" do
-    should_render_to("<hr class=\"foo\"/>") { hr 'class' => 'foo' }
+    should_render_to("<hr class=\"foo\">") { hr 'class' => 'foo' }
   end
 
   it "should convert symbol attribute names to strings" do
-    should_render_to("<hr class=\"foo\"/>") { hr :class => 'foo' }
+    should_render_to("<hr class=\"foo\">") { hr :class => 'foo' }
   end
 
   it "should convert symbol attribute values to strings" do
-    should_render_to("<hr class=\"foo\"/>") { hr 'class' => :foo }
+    should_render_to("<hr class=\"foo\">") { hr 'class' => :foo }
   end
 
   it "should allow numbers for attribute names" do
-    should_render_to("<hr 12345=\"foo\"/>") { hr 12345 => 'foo' }
+    should_render_to("<hr 12345=\"foo\">") { hr 12345 => 'foo' }
   end
 
   it "should allow numbers for attribute values, and still quote them" do
-    should_render_to("<hr class=\"12345\"/>") { hr 'class' => 12345 }
+    should_render_to("<hr class=\"12345\">") { hr 'class' => 12345 }
   end
 
   it "should escape attribute names" do
-    should_render_to("<hr &lt;&amp;&quot;&gt;=\"foo\"/>") { hr '<&">' => "foo" }
+    should_render_to("<hr &lt;&amp;&quot;&gt;=\"foo\">") { hr '<&">' => "foo" }
   end
 
   it "should escape attribute values" do
-    should_render_to("<hr class=\"&lt;&amp;&quot;&gt;\"/>") { hr :class => "<&\">" }
+    should_render_to("<hr class=\"&lt;&amp;&quot;&gt;\">") { hr :class => "<&\">" }
   end
 
   it "should separate multiple attributes with spaces" do
     result = r { hr 'class' => "foo", 'other' => "bar" }
-    expect(result).to match(%r{^<hr .*\"/>$})
+    expect(result).to match(%r{^<hr .*\">$})
     expect(result).to match(%r{ class=\"foo\"})
     expect(result).to match(%r{ other=\"bar\"})
   end
@@ -160,7 +160,7 @@ describe "Fortitude tag rendering", :type => :system do
       order.each_with_index do |attrname, index|
         expected_string << " #{attrname}=\"order#{index}\""
       end
-      expected_string << "/>"
+      expected_string << ">"
 
       should_render_to(expected_string) { hr attributes }
     end
@@ -208,54 +208,53 @@ describe "Fortitude tag rendering", :type => :system do
 
   it "should render attribute values that are hashes as a sequence of prefixed attributes" do
     result = r { p :data => { :foo => 'bar', :bar => 'baz' } }
-    expect(result).to match(%r{^<p .*\"/>$})
+    expect(result).to match(%r{^<p .*\"></p>$})
     expect(result).to match(%r{ data-foo=\"bar\"})
     expect(result).to match(%r{ data-bar=\"baz\"})
   end
 
   it "should render an arbitrary object as an attribute key, escaping it" do
     foo = arbitrary_object_with_to_s("and&<>\"this")
-    should_render_to("<p and&amp;&lt;&gt;&quot;this=\"bar\"/>") { p foo => "bar" }
+    should_render_to("<p and&amp;&lt;&gt;&quot;this=\"bar\"></p>") { p foo => "bar" }
   end
 
   it "should render an arbitrary object as an attribute value, escaping it" do
     foo = arbitrary_object_with_to_s("and&<>\"this")
-    should_render_to("<p foo=\"and&amp;&lt;&gt;&quot;this\"/>") { p :foo => foo }
+    should_render_to("<p foo=\"and&amp;&lt;&gt;&quot;this\"></p>") { p :foo => foo }
   end
 
   it "should render an arbitrary object as an attribute key nested in a hash, escaping it" do
     foo = arbitrary_object_with_to_s("and&<>\"this")
-    should_render_to("<p data-and&amp;&lt;&gt;&quot;this=\"bar\"/>") { p :data => { foo => "bar" } }
+    should_render_to("<p data-and&amp;&lt;&gt;&quot;this=\"bar\"></p>") { p :data => { foo => "bar" } }
   end
 
   it "should render an arbitrary object as an attribute value nested in a hash, escaping it" do
     foo = arbitrary_object_with_to_s("and&<>\"this")
-    should_render_to("<p data-and&amp;&lt;&gt;&quot;this=\"bar\"/>") { p :data => { foo => "bar" } }
+    should_render_to("<p data-and&amp;&lt;&gt;&quot;this=\"bar\"></p>") { p :data => { foo => "bar" } }
   end
 
   it "should allow an arbitrary object as an attribute key, mapping to a hash" do
     foo = arbitrary_object_with_to_s("and&<>\"this")
     result = r { p foo => { :foo => 'bar', :bar => 'baz' } }
-    expect(result).to match(%r{^<p .*\"/>$})
+    expect(result).to match(%r{^<p .*\"></p>$})
     expect(result).to match(%r{ and&amp;&lt;&gt;&quot;this-foo=\"bar\"})
     expect(result).to match(%r{ and&amp;&lt;&gt;&quot;this-bar=\"baz\"})
-    # should_render_to("<p and&amp;&lt;&gt;&quot;this-foo=\"bar\" and&amp;&lt;&gt;&quot;this-bar=\"baz\"/>")
   end
 
   it "should allow multi-level hash nesting" do
     result = r { p :foo => { :bar => 'bar', :baz => { :a => 'xxx', 'b' => :yyy } } }
-    expect(result).to match(%r{^<p .*\"/>})
+    expect(result).to match(%r{^<p .*\"></p>})
     expect(result).to match(%r{ foo-bar=\"bar\"})
     expect(result).to match(%r{ foo-baz-a=\"xxx\"})
     expect(result).to match(%r{ foo-baz-b=\"yyy\"})
   end
 
   it "should allow arrays as attribute values, separating elements with spaces" do
-    should_render_to("<p foo=\"bar baz quux\"/>") { p :foo => [ 'bar', 'baz', 'quux' ]}
+    should_render_to("<p foo=\"bar baz quux\"></p>") { p :foo => [ 'bar', 'baz', 'quux' ]}
   end
 
   it "should allow arrays as attribute values, calling #to_s on values in them" do
     quux = arbitrary_object_with_to_s("quux")
-    should_render_to("<p foo=\"bar baz quux\"/>") { p :foo => [ 'bar', :baz, quux ]}
+    should_render_to("<p foo=\"bar baz quux\"></p>") { p :foo => [ 'bar', :baz, quux ]}
   end
 end

@@ -14,17 +14,17 @@ describe "Fortitude attribute rules enforcement", :type => :system do
   end
 
   it "should allow an attribute 'class' on <p>" do
-    expect(render(widget_class_with_content { p :class => 'bar' })).to eq("<p class=\"bar\"/>")
+    expect(render(widget_class_with_content { p :class => 'bar' })).to eq("<p class=\"bar\"></p>")
   end
 
   it "should allow arbitrary individual data-* attributes" do
     result = render(widget_class_with_content { p :'data-foo' => 'bar', 'DATA-BAZ' => 'quux' })
-    expect([ '<p data-foo="bar" DATA-BAZ="quux"/>', '<p DATA-BAZ="quux" data-foo="bar"/>' ].include?(result)).to be
+    expect([ '<p data-foo="bar" DATA-BAZ="quux"></p>', '<p DATA-BAZ="quux" data-foo="bar"></p>' ].include?(result)).to be
   end
 
   it "should allow a data attribute, specified as a Hash" do
     result = render(widget_class_with_content { p :data => { :foo => 'bar', 'baz' => 'quux' }})
-    expect([ '<p data-foo="bar" data-baz="quux"/>', '<p data-baz="quux" data-foo="bar"/>' ].include?(result)).to be
+    expect([ '<p data-foo="bar" data-baz="quux"></p>', '<p data-baz="quux" data-foo="bar"></p>' ].include?(result)).to be
   end
 
   it "should not allow a plain 'data' attribute" do
@@ -52,7 +52,7 @@ describe "Fortitude attribute rules enforcement", :type => :system do
     end
 
     result = render(klass)
-    expect(result).to match(%r{^<mytag .*\"/>$})
+    expect(result).to match(%r{^<mytag .*\"></mytag>$})
     expect(result).to match(/foo=\"bar\"/)
     expect(result).to match(/data-aaa=\"bbb\"/)
     expect(result).to match(/aria-ccc=\"ddd\"/)
@@ -104,7 +104,7 @@ describe "Fortitude attribute rules enforcement", :type => :system do
     outer_instance.inner = middle_instance
     middle_instance.inner = inner_instance
 
-    expect(render(outer_instance)).to eq("<p foo=\"bar\"/>yo")
+    expect(render(outer_instance)).to eq("<p foo=\"bar\"></p>yo")
   end
 
   it "should allow you to disable attribute rules with a block" do
@@ -130,7 +130,7 @@ describe "Fortitude attribute rules enforcement", :type => :system do
       end
     end
 
-    expect(render(wc)).to eq("Fortitude::Errors::InvalidElementAttributes<p foo=\"bar\"/>Fortitude::Errors::InvalidElementAttributes")
+    expect(render(wc)).to eq("Fortitude::Errors::InvalidElementAttributes<p foo=\"bar\"></p>Fortitude::Errors::InvalidElementAttributes")
   end
 
   it "should allow you to disable enforcement with a block, even across widget boundaries" do
@@ -152,7 +152,7 @@ describe "Fortitude attribute rules enforcement", :type => :system do
     outer_instance.inner = inner_instance
 
     expect { render(inner_instance) }.to raise_error(Fortitude::Errors::InvalidElementAttributes)
-    expect(render(outer_instance)).to eq("<p foo=\"bar\"/>")
+    expect(render(outer_instance)).to eq("<p foo=\"bar\"></p>")
   end
 
   it "should allow you to re-enable enforcement with a block" do
@@ -218,10 +218,10 @@ describe "Fortitude attribute rules enforcement", :type => :system do
       end
     end
 
-    expect(render(wc)).to eq("<p bar=\"baz\"/><p foo=\"bar\"/>")
+    expect(render(wc)).to eq("<p bar=\"baz\"></p><p foo=\"bar\"></p>")
   end
 
   it "should allow disabling attribute rules on a single element with an option" do
-    expect(render(widget_class_with_content { p :foo => 'bar', :_fortitude_skip_attribute_rule_enforcement => true })).to eq("<p foo=\"bar\"/>")
+    expect(render(widget_class_with_content { p :foo => 'bar', :_fortitude_skip_attribute_rule_enforcement => true })).to eq("<p foo=\"bar\"></p>")
   end
 end

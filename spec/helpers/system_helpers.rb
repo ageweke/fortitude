@@ -55,7 +55,7 @@ module SystemHelpers
     tag :b
     tag :nav, :newline_before => true
     tag :h1, :newline_before => true
-    tag :img
+    tag :img, :content_allowed => false
     tag :script, :newline_before => true, :escape_direct_content => false, :allow_self_closing => false
     tag :head, :newline_before => true
     tag :style, :newline_before => true, :escape_direct_content => false

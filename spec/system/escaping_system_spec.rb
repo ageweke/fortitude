@@ -20,11 +20,11 @@ describe "Fortitude escaping behavior", :type => :system do
   end
 
   it "should escape attribute names" do
-    expect(render(widget_class_with_content { p 'a<b' => 123 })).to eq("<p a&lt;b=\"123\"/>")
+    expect(render(widget_class_with_content { p 'a<b' => 123 })).to eq("<p a&lt;b=\"123\"></p>")
   end
 
   it "should escape attribute values" do
-    expect(render(widget_class_with_content { p :foo => 'a<b' })).to eq("<p foo=\"a&lt;b\"/>")
+    expect(render(widget_class_with_content { p :foo => 'a<b' })).to eq("<p foo=\"a&lt;b\"></p>")
   end
 
   it "should escape direct arguments to tags" do

@@ -62,7 +62,7 @@ describe "Fortitude tag updating", :type => :system do
       end
     end
 
-    expect(render(@derived_class)).to eq("<foo quux=\"baz\"/>")
+    expect(render(@derived_class)).to eq("<foo quux=\"baz\"></foo>")
 
     @base_class.class_eval do
       def content
@@ -81,7 +81,7 @@ describe "Fortitude tag updating", :type => :system do
       end
     end
 
-    expect(render(@derived_class)).to eq("<foo quux=\"baz\"/>")
+    expect(render(@derived_class)).to eq("<foo quux=\"baz\"></foo>")
   end
 
   it "should allow modifying a tag's :can_enclose" do
@@ -156,7 +156,7 @@ describe "Fortitude tag updating", :type => :system do
       end
     end
 
-    expect(render(@base_class)).to eq("<p bonk=\"whatever\"/>")
+    expect(render(@base_class)).to eq("<p bonk=\"whatever\"></p>")
 
     other_widget = widget_class do
       enforce_attribute_rules true
