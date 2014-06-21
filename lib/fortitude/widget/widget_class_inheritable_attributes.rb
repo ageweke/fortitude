@@ -21,7 +21,7 @@ module Fortitude
         _fortitude_class_inheritable_attribute :use_instance_variables_for_assigns, false, [ true, false ]
         _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
         _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
-        _fortitude_class_inheritable_attribute :close_void_tags, true, [ true, false ]
+        _fortitude_class_inheritable_attribute :close_void_tags, false, [ true, false ]
         _fortitude_class_inheritable_attribute :debug, false, [ true, false ]
       end
     end
