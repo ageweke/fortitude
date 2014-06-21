@@ -16,8 +16,8 @@ module Fortitude
         false
       end
 
-      def close_void_tags?
-        false
+      def close_void_tags_must_be
+        nil
       end
 
       # HTML5 spec, section 3.2.5

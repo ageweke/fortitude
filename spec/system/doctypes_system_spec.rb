@@ -45,48 +45,56 @@ describe "Fortitude doctype support", :type => :system do
   EXPECTED_RESULTS = {
     :html5 => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
+      :requires_close_void_tags_to_be => nil,
       :doctype_line => '<!DOCTYPE html>',
       :javascript => :none
     },
 
     :html4_strict => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
+      :requires_close_void_tags_to_be => false,
       :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">',
       :javascript => :type
     },
 
     :html4_transitional => {
       :allows_dir  => true, :allows_background => true, :allows_frame => false, :closes_void_tags => false,
+      :requires_close_void_tags_to_be => false,
       :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
       :javascript => :type
     },
 
     :html4_frameset => {
       :allows_dir  => true, :allows_background => true, :allows_frame => true, :closes_void_tags => false,
+      :requires_close_void_tags_to_be => false,
       :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">',
       :javascript => :type
     },
 
     :xhtml10_strict => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => true,
+      :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
       :javascript => :type_and_cdata
     },
 
     :xhtml10_transitional => {
       :allows_dir  => true, :allows_background => true, :allows_frame => false, :closes_void_tags => true,
+      :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
       :javascript => :type_and_cdata
     },
 
     :xhtml10_frameset => {
       :allows_dir  => true, :allows_background => true, :allows_frame => true, :closes_void_tags => true,
+      :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">',
       :javascript => :type_and_cdata
     },
 
     :xhtml11 => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => true,
+      :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">',
       :javascript => :type_and_cdata
     }
@@ -152,9 +160,16 @@ describe "Fortitude doctype support", :type => :system do
         end
 
         if expected_results[:closes_void_tags]
-          expect(render(the_widget_class)).to eq("<br></br>")
+          expect(render(the_widget_class)).to eq("<br/>")
         else
           expect(render(the_widget_class)).to eq("<br>")
+        end
+      end
+
+      unless expected_results[:requires_close_void_tags_to_be] == nil
+        it "should require close_void_tags to be #{expected_results[:requires_close_void_tags_to_be]}" do
+          expect { the_widget_class.close_void_tags expected_results[:requires_close_void_tags_to_be] }.not_to raise_error
+          expect { the_widget_class.close_void_tags (! expected_results[:requires_close_void_tags_to_be]) }.to raise_error(ArgumentError, /doctype/i)
         end
       end
 

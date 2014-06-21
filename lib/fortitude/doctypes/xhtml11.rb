@@ -16,7 +16,7 @@ module Fortitude
         true
       end
 
-      def close_void_tags?
+      def close_void_tags_must_be
         true
       end
 

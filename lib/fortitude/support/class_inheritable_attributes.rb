@@ -30,7 +30,7 @@ module Fortitude
 
         def _fortitude_write_class_inheritable_attribute(attribute_name, instance_variable_name, allowable_values, new_value)
           allowed = if allowable_values.respond_to?(:call)
-            allowable_values.call(new_value)
+            allowable_values.call(new_value, self)
           else
             allowable_values.include?(new_value)
           end

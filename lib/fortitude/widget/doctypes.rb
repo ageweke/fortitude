@@ -35,7 +35,9 @@ module Fortitude
               end
             end
 
-            self.close_void_tags(new_doctype.close_void_tags?)
+            if new_doctype.close_void_tags_must_be != nil
+              self.close_void_tags(new_doctype.close_void_tags_must_be)
+            end
 
             @_fortitude_doctype = new_doctype
             tags_added!(new_doctype.tags.values)

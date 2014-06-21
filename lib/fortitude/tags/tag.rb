@@ -109,10 +109,19 @@ module Fortitude
           mod.send(:include, ::Fortitude::Tags::TagSupport)
         end
 
-        alone_tag = if @content_allowed || options[:close_void_tags] then "<#{name}></#{name}>" else "<#{name}>" end
+        if @content_allowed
+          alone_tag = "<#{name}></#{name}>"
+          partial_open_alone_end = "></#{name}>"
+        elsif options[:close_void_tags]
+          alone_tag = "<#{name}/>"
+          partial_open_alone_end = "/>"
+        else
+          alone_tag = "<#{name}>"
+          partial_open_alone_end = ">"
+        end
 
         ensure_constants(mod, :ALONE => alone_tag, :OPEN => "<#{name}>", :CLOSE => "</#{name}>",
-          :PARTIAL_OPEN => "<#{name}", :TAG_OBJECT => self)
+          :PARTIAL_OPEN => "<#{name}", :TAG_OBJECT => self, :PARTIAL_OPEN_ALONE_END => partial_open_alone_end)
 
         needs_formatting = !! options[:enable_formatting]
 
@@ -136,7 +145,7 @@ module Fortitude
           :alone_const => tag_constant_name(:ALONE), :open_const => tag_constant_name(:OPEN),
           :close_const => tag_constant_name(:CLOSE), :partial_open_const => tag_constant_name(:PARTIAL_OPEN),
           :tag_object_const => tag_constant_name(:TAG_OBJECT), :partial_open_end_const => :FORTITUDE_TAG_PARTIAL_OPEN_END,
-          :partial_open_alone_end_const => :FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END)
+          :partial_open_alone_end_const => tag_constant_name(:PARTIAL_OPEN_ALONE_END))
 
         mod.module_eval(text)
         mod.alias_method(name, "tag_#{name}")

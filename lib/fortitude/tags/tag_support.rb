@@ -17,7 +17,6 @@ module Fortitude
       FORTITUDE_TEXT_PSEUDOTAG = TextPseudotag.new
 
       FORTITUDE_TAG_PARTIAL_OPEN_END = ">".freeze
-      FORTITUDE_TAG_PARTIAL_OPEN_ALONE_END = "/>".freeze
 
       def _fortitude_formatted_output_tag_yield(tag_name)
         rc = @_fortitude_rendering_context

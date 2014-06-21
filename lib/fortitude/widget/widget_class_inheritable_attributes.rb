@@ -20,8 +20,14 @@ module Fortitude
         _fortitude_class_inheritable_attribute :enforce_id_uniqueness, false, [ true, false ]
         _fortitude_class_inheritable_attribute :use_instance_variables_for_assigns, false, [ true, false ]
         _fortitude_class_inheritable_attribute :start_and_end_comments, false, [ true, false ]
-        _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
-        _fortitude_class_inheritable_attribute :close_void_tags, false, [ true, false ]
+        _fortitude_class_inheritable_attribute :translation_base, nil, lambda { |s, klass| s.kind_of?(String) || s.kind_of?(Symbol) || s == nil }
+        _fortitude_class_inheritable_attribute :close_void_tags, false, (lambda do |new_value, klass|
+          if klass.respond_to?(:doctype) && klass.doctype && klass.doctype.close_void_tags_must_be != nil && new_value != klass.doctype.close_void_tags_must_be
+            raise ArgumentError, "Doctype #{klass.doctype} requires that close_void_tags is #{klass.doctype.close_void_tags_must_be.inspect}; you cannot set it to #{new_value.inspect}."
+          else
+            [ true, false ].include?(new_value)
+          end
+        end)
         _fortitude_class_inheritable_attribute :debug, false, [ true, false ]
       end
     end

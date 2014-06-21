@@ -34,8 +34,8 @@ module SystemHelpers
       super(:test_doctype, "FORTITUDE TEST")
     end
 
-    def close_void_tags?
-      true
+    def close_void_tags_must_be
+      nil
     end
 
     def default_javascript_tag_attributes

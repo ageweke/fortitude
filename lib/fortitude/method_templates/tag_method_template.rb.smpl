@@ -17,9 +17,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
         #{yield_call}
         o.#{concat_method}(#{close_const})
       else
-        o.#{concat_method}(#{alone_const})                                 # :if allow_self_closing
-        o.#{concat_method}(#{open_const})                                  # :if ! allow_self_closing
-        o.#{concat_method}(#{close_const})                                 # :if ! allow_self_closing
+        o.#{concat_method}(#{alone_const})
       end
     elsif content_or_attributes.kind_of?(Hash)
       this_tag.validate_attributes(self, content_or_attributes)            # :if needs_attribute_rules
@@ -33,9 +31,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
         #{yield_call}
         o.#{concat_method}(#{close_const})
       else
-        o.#{concat_method}(#{partial_open_alone_end_const})                # :if allow_self_closing
-        o.#{concat_method}(#{partial_open_end_const})                      # :if ! allow_self_closing
-        o.#{concat_method}(#{close_const})                                 # :if ! allow_self_closing
+        o.#{concat_method}(#{partial_open_alone_end_const})
       end
     elsif (! attributes)
       _fortitude_raise_no_content_allowed_error(#{tag_object_const})       # :if ! content_allowed

@@ -30,6 +30,10 @@ module Fortitude
         w.doctype(@doctype_line)
       end
 
+      def close_void_tags_must_be
+        nil
+      end
+
       def to_s
         "<Doctype #{name.inspect}>"
       end
