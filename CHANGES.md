@@ -1,5 +1,11 @@
 # Fortitude Releases
 
+## 0.0.3, 23 June 2014
+
+* Changed `Fortitude::Widget#to_html` to return the generated HTML. If you pass a `Fortitude::RenderingContext` into
+  this method that has previously been used to render other HTML, you'll get all HTML (old and new) both, because
+  we always append to a single output buffer &mdash; but that should be a corner case at most.
+
 ## 0.0.2, 21 June 2014
 
 * Void tags (those that can't take content, ever, like `<hr>` or `<br>`) are now never closed in HTML4 doctypes

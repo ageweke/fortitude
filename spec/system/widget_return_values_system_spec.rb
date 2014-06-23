@@ -1,4 +1,22 @@
 describe "Fortitude widget return values", :type => :system do
+  describe "#to_html" do
+    it "should return the rendered text" do
+      wc = widget_class do
+        needs :name
+
+        def content
+          h1 "hello, #{name}"
+          div {
+            p "you are awesome, #{name}"
+          }
+        end
+      end
+
+      expect(wc.new(:name => 'wendy').to_html).to eq(
+        %{<h1>hello, wendy</h1><div><p>you are awesome, wendy</p></div>})
+    end
+  end
+
   describe "#widget" do
     it "should return whatever the widget returns" do
       inner = widget_class_with_content do
@@ -52,7 +70,7 @@ describe "Fortitude widget return values", :type => :system do
     end
   end
 
-  describe "#to_html" do
+  describe "#render_to" do
     it "should return whatever #content returns" do
       wc = widget_class_with_content do
         text "foo"
@@ -61,7 +79,7 @@ describe "Fortitude widget return values", :type => :system do
 
       widget = wc.new
       rendering_context = rc
-      actual_rv = widget.to_html(rendering_context)
+      actual_rv = widget.render_to(rendering_context)
       expect(actual_rv).to eq(:widget_rv)
     end
 
@@ -82,7 +100,7 @@ describe "Fortitude widget return values", :type => :system do
 
       widget = wc.new
       rendering_context = rc
-      actual_rv = widget.to_html(rendering_context)
+      actual_rv = widget.render_to(rendering_context)
       expect(actual_rv).to eq(:widget_rv)
     end
   end

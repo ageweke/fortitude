@@ -32,7 +32,7 @@ module Fortitude
             # RC for both the initial view rendering and for the partial layout, but they need different yield blocks.
             # Yuck, but this does the job.
             rendering_context.with_yield_block(block) do
-              widget.to_html(rendering_context)
+              widget.render_to(rendering_context)
             end
             rendering_context.flush!
           end

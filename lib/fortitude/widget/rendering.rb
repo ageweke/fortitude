@@ -23,8 +23,7 @@ module Fortitude
         end
       end
 
-      # PUBLIC API
-      def to_html(rendering_context)
+      def render_to(rendering_context)
         @_fortitude_rendering_context = rendering_context
         @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
 
@@ -40,13 +39,19 @@ module Fortitude
       end
 
       # PUBLIC API
+      def to_html(rendering_context = ::Fortitude::RenderingContext.new({ }))
+        render_to(rendering_context)
+        rendering_context.output_buffer_holder.output_buffer
+      end
+
+      # PUBLIC API
       def rendering_context
         @_fortitude_rendering_context
       end
 
       # PUBLIC API
       def widget(w)
-        w.to_html(@_fortitude_rendering_context)
+        w.render_to(@_fortitude_rendering_context)
       end
 
       # PUBLIC API

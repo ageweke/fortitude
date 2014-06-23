@@ -209,7 +209,7 @@ module Fortitude
             if (options = args[0]).kind_of?(Hash)
               if (widget = options[:widget])
                 rendering_context = fortitude_rendering_context(:delegate_object => self)
-                widget.to_html(rendering_context)
+                widget.render_to(rendering_context)
 
                 options = options.dup
                 options[:text] = rendering_context.output_buffer_holder.output_buffer.html_safe
@@ -234,7 +234,7 @@ module Fortitude
                 assigns = assigns.merge(options[:locals] || { })
 
                 widget = widget_class.new(assigns)
-                widget.to_html(rendering_context)
+                widget.render_to(rendering_context)
 
                 options = options.dup
                 options[:text] = rendering_context.output_buffer_holder.output_buffer.html_safe

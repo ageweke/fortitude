@@ -69,7 +69,7 @@ which is not a Class that inherits from Fortitude::Widget.}
         widget_assigns = fortitude_class.extract_needed_assigns_from(widget_assigns) unless fortitude_class.extra_assigns == :use
 
         widget = fortitude_class.new(widget_assigns)
-        widget.to_html(rendering_context)
+        widget.render_to(rendering_context)
         rendering_context.output_buffer_holder.output_buffer
       end
 

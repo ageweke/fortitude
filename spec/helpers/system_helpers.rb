@@ -86,7 +86,7 @@ module SystemHelpers
       widget_or_class
     end
     rendering_context = options[:rendering_context] || rc
-    widget.to_html(rendering_context)
+    widget.render_to(rendering_context)
     html_from(rendering_context)
   end
 
