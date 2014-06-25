@@ -25,7 +25,7 @@ describe "Fortitude inline-code support", :type => :system do
 <div>
   <p>hello, julia</p>
 </div>
-<!-- END  depth 0 -->})
+<!-- END (anonymous widget class) depth 0 -->})
   end
 
   it "should let you get rendered content back with .inline_html" do
@@ -53,6 +53,6 @@ describe "Fortitude inline-code support", :type => :system do
 <div>
   <p>hello, julia</p>
 </div>
-<!-- END  depth 0 -->})
+<!-- END (anonymous widget class) depth 0 -->})
   end
 end

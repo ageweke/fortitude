@@ -22,7 +22,9 @@ module Fortitude
         if self.class.start_and_end_comments
           fo = self.class.format_output
 
-          comment_text = "BEGIN #{self.class.name || '(anonymous widget class)'} depth #{widget_nesting_depth}"
+          class_name = self.class.name
+          class_name = "(anonymous widget class)" if (class_name || "") == ""
+          comment_text = "BEGIN #{class_name} depth #{widget_nesting_depth}"
 
           assign_keys = assigns.keys
           if assign_keys.length > 0
@@ -58,7 +60,7 @@ module Fortitude
           end
           tag_comment comment_text
           yield
-          tag_comment "END #{self.class.name} depth #{widget_nesting_depth}"
+          tag_comment "END #{class_name} depth #{widget_nesting_depth}"
         else
           yield
         end
