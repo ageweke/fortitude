@@ -7,6 +7,16 @@ module Fortitude
       extend ActiveSupport::Concern
 
       module ClassMethods
+        def inline_subclass(&block)
+          out = Class.new(self)
+          out.send(:define_method, :content, &block)
+          out
+        end
+
+        def inline_html(assigns = { }, &block)
+          inline_subclass(&block).new(assigns).to_html
+        end
+
         # INTERNAL USE ONLY
         def rebuild_run_content!(why, klass = self)
           rebuilding(:run_content, why, klass) do

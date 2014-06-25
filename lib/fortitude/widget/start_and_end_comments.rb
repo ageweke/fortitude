@@ -22,7 +22,7 @@ module Fortitude
         if self.class.start_and_end_comments
           fo = self.class.format_output
 
-          comment_text = "BEGIN #{self.class.name} depth #{widget_nesting_depth}"
+          comment_text = "BEGIN #{self.class.name || '(anonymous widget class)'} depth #{widget_nesting_depth}"
 
           assign_keys = assigns.keys
           if assign_keys.length > 0
