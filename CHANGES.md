@@ -8,18 +8,19 @@
   `Fortitude::Widget` and pass a block, you'll get back a new subclass of whatever class you called it on, with a
   `content` method defined as per the block you passed. For example:
 
-    my_widget_class = Fortitude::Widgets::Html5.inline_subclass do
-      p "hello, world!"
-    end
-    my_widget_class.new.to_html # => '<p>hello, world!</p>'
+      my_widget_class = Fortitude::Widgets::Html5.inline_subclass do
+        p "hello, world!"
+      end
+      my_widget_class.new.to_html # => '<p>hello, world!</p>'
 
 * And, similarly, if you call `.inline_html` on any subclass of `Fortitude::Widget` and pass a block, you'll get back
   the HTML rendered by the new subclass of that class. For example:
 
-    html = Fortitude::Widgets::Html5.inline_html do
-      p "hello, world!"
-    end
-    html # => '<p>hello, world!</p>'
+      html = Fortitude::Widgets::Html5.inline_html do
+        p "hello, world!"
+      end
+      html # => '<p>hello, world!</p>'
+
 * Note that this will not work on `Fortitude::Widget`, because `Fortitude::Widget` has no `doctype` declared, and
   therefore has no HTML tags available. You can either use one of the pre-made classes in `Fortitude::Widgets`, or,
   better yet, declare your own base widget class and then use `.inline_subclass` and `.inline_html` on that. (Using
