@@ -18,7 +18,12 @@ Gem::Specification.new do |s|
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = ["lib"]
 
-  s.extensions << "ext/fortitude_native_ext/extconf.rb"
+  if RUBY_PLATFORM =~ /java/
+    s.platform = 'java'
+  else
+    s.platform = Gem::Platform::RUBY
+    s.extensions << "ext/fortitude_native_ext/extconf.rb"
+  end
 
   activesupport_spec = if RUBY_VERSION =~ /^1\.8\./
     [ ">= 3.0", "< 4.0" ]
