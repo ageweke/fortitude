@@ -92,7 +92,7 @@ module Fortitude
       @current_widget_nesting.length - 1
     end
 
-    def emitting_tag!(widget, tag_object)
+    def emitting_tag!(widget, tag_object, content_or_attributes, attributes)
       validate_element_for_rules(widget, tag_object) if widget.class.enforce_element_nesting_rules
       @current_element_nesting << tag_object
 
@@ -104,6 +104,10 @@ module Fortitude
           raise "Something horrible happened -- the last tag we started was #{last}, but now we're ending #{tag_object}?!?"
         end
       end
+    end
+
+    def current_element_nesting
+      @current_element_nesting
     end
 
     def format_output?

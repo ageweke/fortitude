@@ -139,6 +139,26 @@ describe "Fortitude setting inheritance", :type => :system do
   end
 
 
+  def record_tag_emission_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.record_tag_emission).to eq(expected_result)
+      send("record_tag_emission_should_be_#{expected_result}", klass)
+    end
+  end
+
+  def record_tag_emission_should_be_true(klass)
+    instance = klass.new
+    expect(render(instance)).to eq("<p><div></div></p>")
+    expect(instance.inner_element_nesting.map(&:name)).to eq([ :p, :div ])
+  end
+
+  def record_tag_emission_should_be_false(klass)
+    instance = klass.new
+    expect(render(instance)).to eq("<p><div></div></p>")
+    expect(instance.inner_element_nesting).to eq([ ])
+  end
+
+
   def format_output_should_be(expected_result, *klasses)
     klasses.each do |klass|
       expect(klass.format_output).to eq(expected_result)
@@ -403,6 +423,34 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.enforce_element_nesting_rules false
     enforce_element_nesting_rules_should_be(false, @grandparent, @parent2, @child21, @child22)
     enforce_element_nesting_rules_should_be(true, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit record_tag_emission" do
+    @grandparent.class_eval do
+      attr_reader :inner_element_nesting
+
+      def content
+        p { div { @inner_element_nesting = rendering_context.current_element_nesting.dup } }
+      end
+    end
+
+    record_tag_emission_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.record_tag_emission true
+    record_tag_emission_should_be(false, @grandparent, @parent2, @child21, @child22)
+    record_tag_emission_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.record_tag_emission false
+    record_tag_emission_should_be(false, @grandparent, @parent2, @child21, @child22)
+    record_tag_emission_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.record_tag_emission true
+    record_tag_emission_should_be(false, @parent2, @child21, @child22)
+    record_tag_emission_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.record_tag_emission false
+    record_tag_emission_should_be(false, @grandparent, @parent2, @child21, @child22)
+    record_tag_emission_should_be(true, @parent1, @child11, @child12)
   end
 
   it "should properly inherit translation_base" do
