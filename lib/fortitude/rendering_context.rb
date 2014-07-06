@@ -1,4 +1,5 @@
 require 'fortitude/support/instance_variable_set'
+require 'fortitude/tags/render_widget_placeholder'
 
 module Fortitude
   class RenderingContext
@@ -64,6 +65,10 @@ module Fortitude
 
     def attribute_validation_disabled?
       !! @attribute_validation_disabled
+    end
+
+    def record_render(args, &block)
+      record_widget(::Fortitude::Tags::RenderWidgetPlaceholder.new(args), &block)
     end
 
     def record_widget(widget)

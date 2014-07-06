@@ -5,8 +5,8 @@ class Views::RenderingContextSystemSpec::StartEndWidgetThroughPartials < Fortitu
     rendering_context.start_end_calls.each_with_index do |data, index|
       start_or_end = data[0]
       widget = data[1]
-      widget_data = if widget.kind_of?(Array)
-        widget.inspect
+      widget_data = if widget.respond_to?(:render_args)
+        "#{widget.class.name} #{widget.render_args.inspect}"
       else
         widget.class.name
       end

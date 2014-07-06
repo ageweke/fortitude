@@ -11,13 +11,13 @@ module Fortitude
       # PUBLIC API
       def render(*args, &block)
         call_through = lambda do
-          @_fortitude_rendering_context.record_widget(args) do
+          @_fortitude_rendering_context.record_render(args) do
             tag_rawtext(invoke_helper(:render, *args, &block))
           end
         end
 
         if self.class._fortitude_record_emitting_tag? && args[0].kind_of?(Hash) && args[0].has_key?(:partial)
-          @_fortitude_rendering_context.emitting_tag!(self, Fortitude::Tags::PartialTagPlaceholder.instance, &call_through)
+          @_fortitude_rendering_context.emitting_tag!(self, Fortitude::Tags::PartialTagPlaceholder.instance, nil, nil, &call_through)
         else
           call_through.call
         end
