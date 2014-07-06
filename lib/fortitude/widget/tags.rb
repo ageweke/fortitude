@@ -30,6 +30,10 @@ module Fortitude
         end
       end
 
+      def validate_can_enclose!(widget, tag_object)
+        # ok, nothing here
+      end
+
       module ClassMethods
         # INTERNAL USE ONLY
         def rebuild_tag_methods!(why, which_tags_in = nil, klass = self)

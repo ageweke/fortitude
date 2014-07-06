@@ -24,6 +24,8 @@ describe "Fortitude record_tag_emission behavior", :type => :system do
 
   def recorded_tags_from(instance)
     expect(render(instance)).to eq("<div><p></p></div>")
-    instance.recorded_tags
+    rt = instance.recorded_tags
+    expect(rt.shift).to be(instance)
+    rt
   end
 end

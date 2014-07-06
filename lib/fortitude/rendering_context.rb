@@ -69,12 +69,17 @@ module Fortitude
     def record_widget(widget)
       start_widget!(widget)
       @current_widget_nesting << widget
+      @current_element_nesting << widget
       begin
         yield
       ensure
         last = @current_widget_nesting.pop
         unless last.equal?(widget)
           raise "Something horrible happened -- the last widget we started was #{last}, but now we're ending #{widget}?!?"
+        end
+        last = @current_element_nesting.pop
+        unless last.equal?(widget)
+          raise "Something horrible happened -- the last element we started was #{last}, but now we're ending #{widget}?!?"
         end
         end_widget!(widget)
       end

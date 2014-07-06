@@ -149,13 +149,17 @@ describe "Fortitude setting inheritance", :type => :system do
   def record_tag_emission_should_be_true(klass)
     instance = klass.new
     expect(render(instance)).to eq("<p><div></div></p>")
-    expect(instance.inner_element_nesting.map(&:name)).to eq([ :p, :div ])
+    nesting = instance.inner_element_nesting
+    expect(nesting.shift).to be(instance)
+    expect(nesting.map(&:name)).to eq([ :p, :div ])
   end
 
   def record_tag_emission_should_be_false(klass)
     instance = klass.new
     expect(render(instance)).to eq("<p><div></div></p>")
-    expect(instance.inner_element_nesting).to eq([ ])
+    nesting = instance.inner_element_nesting
+    expect(nesting.shift).to be(instance)
+    expect(nesting).to eq([ ])
   end
 
 
