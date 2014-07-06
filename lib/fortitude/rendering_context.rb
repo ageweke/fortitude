@@ -93,7 +93,7 @@ module Fortitude
     end
 
     def emitting_tag!(widget, tag_object)
-      validate_element_for_rules(widget, tag_object)
+      validate_element_for_rules(widget, tag_object) if widget.class.enforce_element_nesting_rules
       @current_element_nesting << tag_object
 
       begin
