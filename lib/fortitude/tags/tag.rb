@@ -116,7 +116,9 @@ module Fortitude
       end
 
       def define_method_on!(mod, options = {})
-        options.assert_valid_keys(:enforce_element_nesting_rules, :enforce_attribute_rules, :enable_formatting, :enforce_id_uniqueness, :close_void_tags)
+        options.assert_valid_keys(
+          :record_emitting_tag, :enforce_attribute_rules, :enable_formatting,
+          :enforce_id_uniqueness, :close_void_tags)
 
         unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
           mod.send(:include, ::Fortitude::Tags::TagSupport)
@@ -148,7 +150,7 @@ module Fortitude
 
         text = Fortitude::MethodTemplates::SimpleTemplate.template('tag_method_template').result(
           :name => name.to_s, :method_name => "tag_#{name}".to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
-          :record_emitting_tag => !! options[:enforce_element_nesting_rules],
+          :record_emitting_tag => (!! options[:record_emitting_tag]),
           :needs_attribute_rules => !! options[:enforce_attribute_rules],
           :needs_id_uniqueness => !! options[:enforce_id_uniqueness],
           :needs_formatting => needs_formatting, :content_allowed => @content_allowed,

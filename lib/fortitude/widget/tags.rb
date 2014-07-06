@@ -40,7 +40,7 @@ module Fortitude
             which_tags.each do |tag_object|
               tag_object.define_method_on!(tags_module,
                 :enable_formatting => self.format_output,
-                :enforce_element_nesting_rules => self.enforce_element_nesting_rules,
+                :record_emitting_tag => self._fortitude_record_emitting_tag?,
                 :enforce_attribute_rules => self.enforce_attribute_rules,
                 :enforce_id_uniqueness => self.enforce_id_uniqueness,
                 :close_void_tags => self.close_void_tags)

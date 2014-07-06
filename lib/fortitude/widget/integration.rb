@@ -20,7 +20,7 @@ module Fortitude
           rebuilding(:text_methods, why, klass) do
             class_eval(Fortitude::MethodTemplates::SimpleTemplate.template('text_method_template').result(
               :format_output => format_output,
-              :record_emitting_tag => self.enforce_element_nesting_rules))
+              :record_emitting_tag => self._fortitude_record_emitting_tag?))
             direct_subclasses.each { |s| s.rebuild_text_methods!(why, klass) }
           end
         end
@@ -42,13 +42,13 @@ module Fortitude
 
       included do
         _fortitude_on_class_inheritable_attribute_change(
-          :format_output, :enforce_element_nesting_rules) do |attribute_name, old_value, new_value|
+          :format_output, :enforce_element_nesting_rules, :record_tag_emission) do |attribute_name, old_value, new_value|
           rebuild_text_methods!(:"#{attribute_name}_changed")
         end
 
         _fortitude_on_class_inheritable_attribute_change(
           :format_output, :close_void_tags, :enforce_element_nesting_rules,
-          :enforce_attribute_rules, :enforce_id_uniqueness) do |attribute_name, old_value, new_value|
+          :enforce_attribute_rules, :enforce_id_uniqueness, :record_tag_emission) do |attribute_name, old_value, new_value|
           rebuild_tag_methods!(:"#{attribute_name}_changed")
         end
 
