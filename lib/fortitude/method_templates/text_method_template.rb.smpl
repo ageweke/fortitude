@@ -2,7 +2,7 @@ def tag_text(s)
   @_fortitude_rendering_context.about_to_output_non_whitespace!    # :if format_output
 
   unless s.instance_variable_get("@html_safe")                     # :if needs_element_rules
-    @_fortitude_rendering_context.record_tag(self, FORTITUDE_TEXT_PSEUDOTAG) { } # :if needs_element_rules
+    @_fortitude_rendering_context.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG) { } # :if needs_element_rules
   end                                                              # :if needs_element_rules
 
   s.to_s.fortitude_append_escaped_string(@_fortitude_output_buffer_holder.output_buffer)

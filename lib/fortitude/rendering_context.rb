@@ -92,7 +92,7 @@ module Fortitude
       @current_widget_nesting.length - 1
     end
 
-    def record_tag(widget, tag_object)
+    def emitting_tag!(widget, tag_object)
       validate_element_for_rules(widget, tag_object)
       @current_element_nesting << tag_object
 
