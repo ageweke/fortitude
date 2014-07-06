@@ -148,7 +148,7 @@ module Fortitude
 
         text = Fortitude::MethodTemplates::SimpleTemplate.template('tag_method_template').result(
           :name => name.to_s, :method_name => "tag_#{name}".to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
-          :needs_element_rules => !! options[:enforce_element_nesting_rules],
+          :record_emitting_tag => !! options[:enforce_element_nesting_rules],
           :needs_attribute_rules => !! options[:enforce_attribute_rules],
           :needs_id_uniqueness => !! options[:enforce_id_uniqueness],
           :needs_formatting => needs_formatting, :content_allowed => @content_allowed,

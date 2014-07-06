@@ -1,9 +1,9 @@
 def #{method_name}(content_or_attributes = nil, attributes = nil)
   o = @_fortitude_output_buffer_holder.output_buffer
-  rc = @_fortitude_rendering_context                                       # :if needs_element_rules || needs_formatting
+  rc = @_fortitude_rendering_context                                       # :if record_emitting_tag || needs_formatting
 
-  this_tag = #{tag_object_const}                                           # :if needs_element_rules || needs_attribute_rules || needs_id_uniqueness
-  rc.emitting_tag!(self, this_tag) do                                         # :if needs_element_rules
+  this_tag = #{tag_object_const}                                           # :if record_emitting_tag || needs_attribute_rules || needs_id_uniqueness
+  rc.emitting_tag!(self, this_tag) do                                      # :if record_emitting_tag
     format_output = rc.format_output?                                      # :if needs_formatting
     if format_output                                                       # :if needs_formatting
       rc.needs_newline!                                                    # :if needs_formatting && newline_before
@@ -36,7 +36,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
     elsif (! attributes)
       _fortitude_raise_no_content_allowed_error(#{tag_object_const})       # :if ! content_allowed
       o.#{concat_method}(#{open_const})
-      rc.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG) { } unless content_or_attributes.instance_variable_get("@html_safe") # :if needs_element_rules
+      rc.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG) { } unless content_or_attributes.instance_variable_get("@html_safe") # :if record_emitting_tag
       content_or_attributes.to_s.fortitude_append_escaped_string(o)        # :if escape_direct_content
       o.#{concat_method}(content_or_attributes.to_s)                       # :if ! escape_direct_content
       if block_given?
@@ -52,7 +52,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       attributes.fortitude_append_as_attributes(o, nil)
       o.#{concat_method}(#{partial_open_end_const})
 
-      rc.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG) { } unless content_or_attributes.instance_variable_get("@html_safe") # :if needs_element_rules
+      rc.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG) { } unless content_or_attributes.instance_variable_get("@html_safe") # :if record_emitting_tag
       content_or_attributes.to_s.fortitude_append_escaped_string(o)        # :if escape_direct_content
       o.#{concat_method}(content_or_attributes.to_s)                       # :if ! escape_direct_content
       if block_given?
@@ -62,7 +62,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       o.#{concat_method}(#{close_const})
     end
     rc.needs_newline! if format_output                                     # :if needs_formatting && newline_before
-  end                                                                      # :if needs_element_rules
+  end                                                                      # :if record_emitting_tag
 
   FORTITUDE_NO_RETURN_VALUE_FROM_TAGS
 end
