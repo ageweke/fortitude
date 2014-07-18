@@ -163,14 +163,19 @@ class WidgetFromClass17 < Fortitude::Widget; end}
 
   context "when given a file" do
     it "should still be able to guess the class name correctly" do
-      splat!('sample_1.rb', %{class WidgetFromClass21 < Fortitude::Widget; end})
-      expect(wcff('sample_1.rb')).to eq(WidgetFromClass21)
+      splat!('widget_from_file_1.rb', %{class WidgetFromClass21 < Fortitude::Widget; end})
+      expect(wcff('widget_from_file_1.rb')).to eq(WidgetFromClass21)
     end
 
     it "should still be able to use magic comments" do
-
+      splat!('widget_from_file_2.rb', %{#!fortitude_class: WidgetFromClass22\ncname = 'WidgetFromCla' + 'ss22'; eval('class ' + cname + ' < ::Fortitude::Widget; end')})
+      expect(wcff('widget_from_file_2.rb')).to eq(WidgetFromClass22)
     end
 
-    it "should be able to use a root directory to infer a class name"
+    it "should be able to use a root directory to infer a class name" do
+      ::Object.class_eval("module Wcfs10; module Wcfs11; end; end")
+      splat!('wcfs10/wcfs_11/widget_from_class_23.rb', %{cname = 'WidgetFromCla' + 'ss23'; eval('class Wcfs10::Wcfs11::' + cname + ' < ::Fortitude::Widget; end')})
+      expect(wcff('wcfs10/wcfs_11/widget_from_class_23.rb', :root_dir => tempdir)).to eq(Wcfs10::Wcfs11::WidgetFromClass23)
+    end
   end
 end
