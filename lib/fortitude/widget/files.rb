@@ -146,10 +146,6 @@ or add a "magic comment" to the source code of this widget that looks like this:
             false
           elsif (! klass.kind_of?(Class))
             false
-          elsif defined?(::BasicObject) && (klass == ::BasicObject)
-            false
-          elsif klass == Object
-            false
           elsif klass == ::Fortitude::Widget
             true
           else
