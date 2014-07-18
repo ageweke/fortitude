@@ -53,17 +53,9 @@ or add a "magic comment" to the source code of this widget that looks like this:
             end
           end
 
-          out = begin
-            widget_class_from_source(source,
-              :class_names_to_try => class_names_to_try, :magic_comment_text => options[:magic_comment_text],
-              :filename => filename)
-          rescue CannotDetermineWidgetClassNameError => cdwcne
-            # maybe we need to load it?
-            require filename
-            widget_class_from_source(source,
-              :class_names_to_try => class_names_to_try, :magic_comment_text => options[:magic_comment_text],
-              :filename => filename)
-          end
+          widget_class_from_source(source,
+            :class_names_to_try => class_names_to_try, :magic_comment_text => options[:magic_comment_text],
+            :filename => filename)
         end
 
         def widget_class_from_source(source, options = { })
@@ -75,7 +67,19 @@ or add a "magic comment" to the source code of this widget that looks like this:
             Array(options[:class_names_to_try]) +
             scan_source_for_possible_class_names(source)
 
-          widget_class_from_class_names(all_class_names) || (
+          out = widget_class_from_class_names(all_class_names)
+
+          unless out
+            if options[:filename]
+              require options[:filename]
+            else
+              ::Object.class_eval(source)
+            end
+
+            out = widget_class_from_class_names(all_class_names)
+          end
+
+          out || (
             raise CannotDetermineWidgetClassNameError.new(all_class_names, :magic_comment_texts => magic_comment_texts,
               :filename => options[:filename]))
         end
@@ -87,7 +91,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
           magic_comment_texts = magic_comment_texts.map { |c| c.to_s.strip.downcase }.uniq
 
           out = [ ]
-          source.scan(/^\s*\#\s*\!\s*(\S+)\s*:\s*(\S+)\s*$/) do |(comment_text, class_name)|
+          source.scan(/^\s*\#\s*\!\s*(\S+)\s*:\s*([A-Za-z0-9_:]+)\s*$/) do |(comment_text, class_name)|
             out << class_name if magic_comment_texts.include?(comment_text.strip.downcase)
           end
           out
@@ -97,11 +101,11 @@ or add a "magic comment" to the source code of this widget that looks like this:
           out = [ ]
           module_nesting = [ ]
 
-          source.scan(/\bmodule\s+(\S+)/) do |(module_name)|
+          source.scan(/\bmodule\s+([A-Za-z0-9_:]+)/) do |(module_name)|
             module_nesting << module_name
           end
 
-          source.scan(/\bclass\s+(\S+)/) do |(class_name)|
+          source.scan(/\bclass\s+([A-Za-z0-9_:]+)/) do |(class_name)|
             out << class_name
           end
 
