@@ -37,6 +37,10 @@ module Fortitude
         out
       end
 
+      def tag_names
+        tags.keys
+      end
+
       def tags_added!(tags)
         tags_changed!(tags)
       end

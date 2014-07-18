@@ -14,6 +14,7 @@ module Fortitude
         class << self
           # INTERNAL USE ONLY
           def tags_changed!(tags)
+            super
             rebuild_tag_methods!(:tags_declared, tags)
           end
           private :tags_changed!
