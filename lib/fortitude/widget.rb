@@ -14,6 +14,7 @@ require 'fortitude/widget/helpers'
 require 'fortitude/widget/capturing'
 require 'fortitude/widget/rendering'
 require 'fortitude/widget/temporary_overrides'
+require 'fortitude/widget/files'
 
 require 'fortitude/doctypes'
 
@@ -38,6 +39,7 @@ module Fortitude
     include Fortitude::Widget::Capturing
     include Fortitude::Widget::Rendering
     include Fortitude::Widget::TemporaryOverrides
+    include Fortitude::Widget::Files
 
     if defined?(::Rails)
       require 'fortitude/rails/widget_methods'

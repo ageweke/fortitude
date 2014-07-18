@@ -308,14 +308,14 @@ EOS
   end
 
   it "should fail with a nice message if it can't figure out which class to render" do
-    e = capture_exception(Fortitude::Tilt::CannotDetermineTemplateClassError) do
+    e = capture_exception(Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
       render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(5), context_object, { })
     end
 
     expect(e).to be
     expect(e.tried_class_names).to eq([ ])
-    expect(e.message).to match(/\#\!fortitude_tilt_class/)
-    expect(e.message).to match(/:fortitude_class/)
+    expect(e.message).to match(/fortitude_tilt_class/)
+    expect(e.message).to match(/:class_names_to_try/)
   end
 
   it "should allow overriding the class that's defined in the module explicitly with an option" do
@@ -325,32 +325,29 @@ EOS
   end
 
   it "should fail with a nice message if you tell it to use something that doesn't exist, using an option" do
-    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+    e = capture_exception(Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
       render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(7), context_object, { },
         { :fortitude_class => "NonExistent" })
     end
-    expect(e.class_name).to eq("NonExistent")
-    expect(e.actual_object).to be_nil
+    expect(e.tried_class_names).to be_include("NonExistent")
     expect(e.message).to match(/NonExistent/)
   end
 
   it "should fail with a nice message if you tell it to use something that isn't a class, using an option" do
-    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+    e = capture_exception(Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
       render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(8), context_object, { },
         { :fortitude_class => 12345 })
     end
-    expect(e.class_name).to eq(12345)
-    expect(e.actual_object).to eq(12345)
+    expect(e.tried_class_names).to be_include(12345)
     expect(e.message).to match(/12345/)
   end
 
   it "should fail with a nice message if you tell it to use something that isn't a widget class, using an option" do
-    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+    e = capture_exception(Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
       render_text_with_tilt("random_#{rand(1_000_000)}.rb", impossible_to_find_class_name_text(9), context_object, { },
         { :fortitude_class => "String" })
     end
-    expect(e.class_name).to eq("String")
-    expect(e.actual_object).to eq(String)
+    expect(e.tried_class_names).to be_include("String")
     expect(e.message).to match(/String/)
   end
 
@@ -361,22 +358,20 @@ EOS
   end
 
   it "should fail with a nice message if you tell it to use something that isn't a class, using a comment in the template" do
-    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+    e = capture_exception(Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
       render_text_with_tilt("random_#{rand(1_000_000)}.rb",
         impossible_to_find_class_name_text(11, "#!fortitude_tilt_class: 12345"), context_object, { })
     end
-    expect(e.class_name).to eq("12345")
-    expect(e.actual_object).to be_nil
+    expect(e.tried_class_names).to be_include("12345")
     expect(e.message).to match(/12345/)
   end
 
   it "should fail with a nice message if you tell it to use something that isn't a widget class, using a comment in the template" do
-    e = capture_exception(Fortitude::Tilt::NotATemplateClassError) do
+    e = capture_exception(Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
       render_text_with_tilt("random_#{rand(1_000_000)}.rb",
         impossible_to_find_class_name_text(12, "#!fortitude_tilt_class: String"), context_object, { })
     end
-    expect(e.class_name).to eq("String")
-    expect(e.actual_object).to eq(String)
+    expect(e.tried_class_names).to be_include("String")
     expect(e.message).to match(/String/)
   end
 end
