@@ -38,13 +38,14 @@ or add a "magic comment" to the source code of this widget that looks like this:
 
       module ClassMethods
         def widget_class_from_file(filename, options = { })
-          options.assert_valid_keys(:root_dir, :class_names_to_try, :magic_comment_text)
+          options.assert_valid_keys(:root_dirs, :class_names_to_try, :magic_comment_text)
           filename = File.expand_path(filename)
           source = File.read(filename)
 
           class_names_to_try = Array(options[:class_names_to_try])
+          root_dirs = Array(options[:root_dirs])
 
-          if (root_dir = options[:root_dir])
+          root_dirs.each do |root_dir|
             root_dir = File.expand_path(root_dir)
 
             if filename[0..(root_dir.length - 1)].downcase == root_dir.downcase

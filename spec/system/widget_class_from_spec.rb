@@ -175,7 +175,13 @@ class WidgetFromClass17 < Fortitude::Widget; end}
     it "should be able to use a root directory to infer a class name" do
       ::Object.class_eval("module Wcfs10; module Wcfs11; end; end")
       splat!('wcfs10/wcfs_11/widget_from_class_23.rb', %{cname = 'WidgetFromCla' + 'ss23'; eval('class Wcfs10::Wcfs11::' + cname + ' < ::Fortitude::Widget; end')})
-      expect(wcff('wcfs10/wcfs_11/widget_from_class_23.rb', :root_dir => tempdir)).to eq(Wcfs10::Wcfs11::WidgetFromClass23)
+      expect(wcff('wcfs10/wcfs_11/widget_from_class_23.rb', :root_dirs => tempdir)).to eq(Wcfs10::Wcfs11::WidgetFromClass23)
+    end
+
+    it "should be able to use an array of root directories to infer a class name, and find the right one" do
+      ::Object.class_eval("module Wcfs10; module Wcfs11; end; end")
+      splat!('bar/wcfs10/wcfs_11/widget_from_class_23.rb', %{cname = 'WidgetFromCla' + 'ss23'; eval('class Wcfs10::Wcfs11::' + cname + ' < ::Fortitude::Widget; end')})
+      expect(wcff('bar/wcfs10/wcfs_11/widget_from_class_23.rb', :root_dirs => [ "#{tempdir}/foo", "#{tempdir}/bar" ])).to eq(Wcfs10::Wcfs11::WidgetFromClass23)
     end
   end
 
@@ -195,7 +201,7 @@ eval('class WidgetF' +
 'e::Widget; end')
     })
 
-    expect(wcff('widget_baz.rb', :root_dir => tempdir, :class_names_to_try => %w{WidgetBar})).to eq(WidgetFoo)
+    expect(wcff('widget_baz.rb', :root_dirs => tempdir, :class_names_to_try => %w{WidgetBar})).to eq(WidgetFoo)
   end
 
   it "should prioritize class names you told it to try above directory-based names or scanned source text" do
@@ -212,7 +218,7 @@ eval('class WidgetF' +
 'e::Widget; end')
     })
 
-    expect(wcff('widget_baz.rb', :root_dir => tempdir, :class_names_to_try => %w{WidgetBar})).to eq(WidgetBar)
+    expect(wcff('widget_baz.rb', :root_dirs => tempdir, :class_names_to_try => %w{WidgetBar})).to eq(WidgetBar)
   end
 
   it "should prioritize directory-based names above scanned source text" do
@@ -229,6 +235,6 @@ eval('class WidgetF' +
 'e::Widget; end')
     })
 
-    expect(wcff('widget_baz.rb', :root_dir => tempdir)).to eq(WidgetBaz)
+    expect(wcff('widget_baz.rb', :root_dirs => tempdir)).to eq(WidgetBaz)
   end
 end
