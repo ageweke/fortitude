@@ -178,4 +178,57 @@ class WidgetFromClass17 < Fortitude::Widget; end}
       expect(wcff('wcfs10/wcfs_11/widget_from_class_23.rb', :root_dir => tempdir)).to eq(Wcfs10::Wcfs11::WidgetFromClass23)
     end
   end
+
+  it "should prioritize a magic comment above class names you told it to try or directory-based names or scanned source text" do
+    splat!('widget_baz.rb', %{
+#!fortitude_class: WidgetFoo
+
+eval('class WidgetB' +
+'az < Fortitud' +
+'e::Widget; end')
+eval('class WidgetB' +
+'ar < Fortitud' +
+'e::Widget; end')
+class WidgetQuux < Fortitude::Widget; end
+eval('class WidgetF' +
+'oo < Fortitud' +
+'e::Widget; end')
+    })
+
+    expect(wcff('widget_baz.rb', :root_dir => tempdir, :class_names_to_try => %w{WidgetBar})).to eq(WidgetFoo)
+  end
+
+  it "should prioritize class names you told it to try above directory-based names or scanned source text" do
+    splat!('widget_baz.rb', %{
+eval('class WidgetB' +
+'az < Fortitud' +
+'e::Widget; end')
+eval('class WidgetB' +
+'ar < Fortitud' +
+'e::Widget; end')
+class WidgetQuux < Fortitude::Widget; end
+eval('class WidgetF' +
+'oo < Fortitud' +
+'e::Widget; end')
+    })
+
+    expect(wcff('widget_baz.rb', :root_dir => tempdir, :class_names_to_try => %w{WidgetBar})).to eq(WidgetBar)
+  end
+
+  it "should prioritize directory-based names above scanned source text" do
+    splat!('widget_baz.rb', %{
+eval('class WidgetB' +
+'az < Fortitud' +
+'e::Widget; end')
+eval('class WidgetB' +
+'ar < Fortitud' +
+'e::Widget; end')
+class WidgetQuux < Fortitude::Widget; end
+eval('class WidgetF' +
+'oo < Fortitud' +
+'e::Widget; end')
+    })
+
+    expect(wcff('widget_baz.rb', :root_dir => tempdir)).to eq(WidgetBaz)
+  end
 end
