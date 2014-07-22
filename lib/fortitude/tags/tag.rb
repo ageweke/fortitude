@@ -149,7 +149,7 @@ module Fortitude
         end
 
         text = Fortitude::MethodTemplates::SimpleTemplate.template('tag_method_template').result(
-          :name => name.to_s, :method_name => "tag_#{name}".to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
+          :name => name.to_s, :method_name => generated_method_name.to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
           :record_emitting_tag => (!! options[:record_emitting_tag]),
           :needs_attribute_rules => !! options[:enforce_attribute_rules],
           :needs_id_uniqueness => !! options[:enforce_id_uniqueness],
@@ -162,7 +162,19 @@ module Fortitude
           :partial_open_alone_end_const => tag_constant_name(:PARTIAL_OPEN_ALONE_END))
 
         mod.module_eval(text)
-        mod.alias_method(name, "tag_#{name}")
+        aliased_method_names.each { |an| mod.alias_method(an, generated_method_name) }
+      end
+
+      def generated_method_name
+        "tag_#{name}"
+      end
+
+      def aliased_method_names
+        [ name ]
+      end
+
+      def all_method_names
+        [ generated_method_name ] + aliased_method_names
       end
 
       private
