@@ -9,6 +9,19 @@ module Fortitude
       extend ActiveSupport::Concern
 
       module ClassMethods
+        def all_fortitude_superclasses
+          return [ ] if self.name == ::Fortitude::Widget.name
+
+          out = [ ]
+          klass = superclass
+          while true
+            out << klass
+            break if klass.name == ::Fortitude::Widget.name
+            klass = klass.superclass
+          end
+          out
+        end
+
         # INTERNAL USE ONLY
         def direct_subclasses
           @direct_subclasses || [ ]
