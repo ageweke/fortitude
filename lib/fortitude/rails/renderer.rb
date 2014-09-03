@@ -1,4 +1,5 @@
 require 'fortitude/rendering_context'
+require 'fortitude/erector'
 
 ::ActiveSupport::SafeBuffer.class_eval do
   alias_method :fortitude_concat, :original_concat
@@ -9,8 +10,19 @@ module Fortitude
   module Rails
     class Renderer
       class << self
+        def is_fortitude_widget?(widget_class)
+          return false unless widget_class.kind_of?(Class)
+          return true if widget_class == ::Fortitude::Widget
+          return false if widget_class == ::Object
+          return is_fortitude_widget?(widget_class.superclass)
+        end
+
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
-        def render(widget_class, template_handler, local_assigns, &block)
+        def render(widget_class, template_handler, local_assigns, is_partial, &block)
+          if ::Fortitude::Erector.is_erector_widget_class?(widget_class)
+            return ::Erector::Rails.render(widget_class, template_handler, local_assigns, is_partial)
+          end
+
           total_assigns = template_handler.assigns.symbolize_keys.merge(local_assigns.symbolize_keys)
 
           needed_assigns = if widget_class.extra_assigns == :use
