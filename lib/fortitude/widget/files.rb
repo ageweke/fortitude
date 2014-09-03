@@ -103,11 +103,13 @@ or add a "magic comment" to the source code of this widget that looks like this:
           out = [ ]
           module_nesting = [ ]
 
-          source.scan(/\bmodule\s+([A-Za-z0-9_:]+)/) do |(module_name)|
+          source.scan(/\bmodule\s+([A-Za-z0-9_:]+)/) do |match_data|
+            module_name = match_data[0]
             module_nesting << module_name
           end
 
-          source.scan(/\bclass\s+([A-Za-z0-9_:]+)/) do |(class_name)|
+          source.scan(/\bclass\s+([A-Za-z0-9_:]+)/) do |match_data|
+            class_name = match_data[0]
             out << class_name
           end
 
