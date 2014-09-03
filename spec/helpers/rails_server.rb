@@ -248,6 +248,10 @@ EOS
         # new-style hash syntax. As a result, we pin the version backwards in this one specific case.
         gemfile_contents << "\ngem 'execjs', '~> 2.0.0'\n" if RUBY_VERSION =~ /^1\.8\./
 
+        Array(@options[:additional_gemfile_lines] || [ ]).each do |gemfile_line|
+          gemfile_contents << "\n#{gemfile_line}\n"
+        end
+
         File.open(gemfile, 'w') { |f| f << gemfile_contents }
       end
 
