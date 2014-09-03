@@ -3,14 +3,14 @@ rvm:
     - "1.9.3"
     - "2.0.0"
     - "2.1.2"
-    - "jruby-1.7.12"
+    - "jruby-1.7.14"
 env:
-    - FORTITUDE_SPECS_RAILS_VERSION=4.1.1
-    - FORTITUDE_SPECS_RAILS_VERSION=4.0.5
-    - FORTITUDE_SPECS_RAILS_VERSION=3.2.18
+    - FORTITUDE_SPECS_RAILS_VERSION=4.1.5
+    - FORTITUDE_SPECS_RAILS_VERSION=4.0.9
+    - FORTITUDE_SPECS_RAILS_VERSION=3.2.19
     - FORTITUDE_SPECS_RAILS_VERSION=3.1.12
     - FORTITUDE_SPECS_RAILS_VERSION=3.0.20
-    - FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.1.1
+    - FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.1.5
     - FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=3.0.20
 before_script:
     - export JRUBY_OPTS="$JRUBY_OPTS -J-Xmx128m -J-Xms128m -J-Xss2048k"
@@ -18,11 +18,11 @@ matrix:
     exclude:
         # Rails 4.x doesn't support Ruby 1.8.7
         -   rvm: 1.8.7
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.1.1
+            env: FORTITUDE_SPECS_RAILS_VERSION=4.1.5
         -   rvm: 1.8.7
-            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.1.1
+            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.1.5
         -   rvm: 1.8.7
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.0.5
+            env: FORTITUDE_SPECS_RAILS_VERSION=4.0.9
         # 2014-06-19 ageweke -- ARGH. After trying about seventeen different things, no matter what I do,
         # Travis fails JRuby builds about 20% of the time with "Killed". Their documentation indicates that this
         # is likely an out-of-memory issue (i.e., entire VM's memory is consumed). However, I'm running JRuby with
@@ -35,16 +35,16 @@ matrix:
         # find a way around it. If there's a fix out there somewhere, I'm all ears!
     allow_failures:
         -   rvm: jruby-1.7.12
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.1.1
+            env: FORTITUDE_SPECS_RAILS_VERSION=4.1.5
         -   rvm: jruby-1.7.12
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.0.5
+            env: FORTITUDE_SPECS_RAILS_VERSION=4.0.9
         -   rvm: jruby-1.7.12
-            env: FORTITUDE_SPECS_RAILS_VERSION=3.2.18
+            env: FORTITUDE_SPECS_RAILS_VERSION=3.2.19
         -   rvm: jruby-1.7.12
             env: FORTITUDE_SPECS_RAILS_VERSION=3.1.12
         -   rvm: jruby-1.7.12
             env: FORTITUDE_SPECS_RAILS_VERSION=3.0.20
         -   rvm: jruby-1.7.12
-            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.1.1
+            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.1.5
         -   rvm: jruby-1.7.12
             env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=3.0.20
