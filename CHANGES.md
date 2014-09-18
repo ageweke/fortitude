@@ -1,5 +1,22 @@
 # Fortitude Releases
 
+## 0.0.5, 17 September 2014
+
+* You can now load both Fortitude and Erector at the same time into a project, and it will "just work": Erector
+  widgets will render using Erector, and Fortitude widgets will render using Fortitude. (Fortitude takes over the
+  actual template engine registration for `.rb` files, and uses a trick to keep Erector from displacing it; it then
+  looks at the widget class being rendered, and delegates all Erector rendering directly to Erector.)
+* Added `Fortitude::Widget.all_fortitude_superclasses`, which returns an `Array` of all superclasses of a widget up to,
+  but not including, `Fortitude::Widget` itself.
+* Added `Fortitude::Widget.widget_class_from_file`, which accepts the path to a file and an array of "root" directories
+  to look under (_i.e._, assuming you're using something like Rails' autoloading mechanism), and returns the `Class`
+  object for the widget that's contained in that file. This uses a series of mechansims to try to detect the class
+  that's present in the file: a "magic comment" that can be present in the file, an array of class names to try
+  that you can pass in, the position of the class in the file hierarchy, and scanning the source text itself.
+* Added a `record_tag_emission` class-level setting that tells a widget to call `#emitting_tag!` on the
+  `Fortitude::RenderingContext` when emitting a tag; you can use this to build various systems that need to know where
+  in the hierarchy of tags we are at the moment.
+
 ## 0.0.4, 24 June 2014
 
 * Added support for building a JRuby-specific gem to the gemspec, so that things work smoothly for JRuby users.

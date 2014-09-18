@@ -18,7 +18,7 @@ garbage as ERb/Erubis);
 * Full, complete native HTML5 support (with selectable X/HTML4.01 Strict/Transitional/Frameset doctypes);
 * Enforces HTML element-nesting and attribute-name rules, and enforce ID uniqueness across a page (configurable, and off by default);
 * In development, beautiful HTML comments around each widget, showing what class is being rendered, the values of all variables supplied to that class, and the nesting depth of that widget;
-* Fully compatible with Ruby 1.8.7-2.1.x, JRuby 1.7.11, and Rails 3.0.x-4.1.x;
+* Fully compatible with Ruby 1.8.7-2.1.x, JRuby 1.7.15, and Rails 3.0.x-4.1.x;
 * Full Tilt support, and can be used with or without Rails;
 * Much more thorough Rails support &mdash; all known Rails integration points have been resolved, and it should work
 as smoothly with Rails as does (_e.g._) ERb/Erubis;
