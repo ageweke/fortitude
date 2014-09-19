@@ -35,7 +35,7 @@ class RenderingContextSystemSpecController < ApplicationController
   def uses_direct_context_in_view
     $invoke_count = 0
     class << self
-      def fortitude_rendering_context(options)
+      def create_fortitude_rendering_context(options)
         out = SimpleRc.new(options.merge(:the_value => 67890 + $invoke_count))
         $invoke_count += 1
         out
@@ -46,7 +46,7 @@ class RenderingContextSystemSpecController < ApplicationController
   def uses_direct_context_for_all_widgets
     $invoke_count = 0
     class << self
-      def fortitude_rendering_context(options)
+      def create_fortitude_rendering_context(options)
         out = SimpleRc.new(options.merge(:the_value => 67890 + $invoke_count))
         $invoke_count += 1
         out

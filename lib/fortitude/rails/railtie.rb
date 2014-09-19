@@ -197,8 +197,8 @@ module Fortitude
         # So, instead, we simply transform <tt>render :widget => ...</tt> into a <tt>render :text => ...</tt> of the
         # widget's output, and let Rails take it away from there.
         ::ActionController::Base.class_eval do
-          def fortitude_rendering_context(options)
-            @_fortitude_rendering_context ||= create_fortitude_rendering_context(options)
+          def create_and_assign_new_fortitude_rendering_context!(options)
+            @_fortitude_rendering_context = create_fortitude_rendering_context(options)
           end
 
           def create_fortitude_rendering_context(options)
@@ -208,7 +208,7 @@ module Fortitude
           def render_with_fortitude(*args, &block)
             if (options = args[0]).kind_of?(Hash)
               if (widget = options[:widget])
-                rendering_context = fortitude_rendering_context(:delegate_object => self)
+                rendering_context = create_and_assign_new_fortitude_rendering_context!(:delegate_object => self)
                 widget.render_to(rendering_context)
 
                 options = options.dup
@@ -220,7 +220,7 @@ module Fortitude
               elsif (widget_block = options[:inline]) && (options[:type] == :fortitude)
                 options.delete(:inline)
 
-                rendering_context = fortitude_rendering_context(:delegate_object => self)
+                rendering_context = create_and_assign_new_fortitude_rendering_context!(:delegate_object => self)
                 widget_class = Class.new(Fortitude::Widgets::Html5)
                 widget_class.use_instance_variables_for_assigns(true)
                 widget_class.extra_assigns(:use)

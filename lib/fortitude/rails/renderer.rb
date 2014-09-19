@@ -20,7 +20,7 @@ module Fortitude
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
         def render(widget_class, template_handler, local_assigns, is_partial, &block)
           if ::Fortitude::Erector.is_erector_widget_class?(widget_class)
-            return ::Erector::Rails.render(widget_class, template_handler, local_assigns, is_partial)
+            return ::Erector::Rails.render(widget_class, template_handler, local_assigns, is_partial, &block)
           end
 
           total_assigns = template_handler.assigns.symbolize_keys.merge(local_assigns.symbolize_keys)
@@ -35,7 +35,7 @@ module Fortitude
           template_handler.with_output_buffer do
             rendering_context_options = { :delegate_object => template_handler, :yield_block => block }
             controller = template_handler.controller
-            rendering_context = controller.fortitude_rendering_context(rendering_context_options)
+            rendering_context = controller.create_and_assign_new_fortitude_rendering_context!(rendering_context_options)
 
             # TODO: Refactor this -- both passing it into the constructor and setting yield_block here is gross.
             #
