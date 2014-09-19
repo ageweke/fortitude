@@ -50,8 +50,15 @@ module Fortitude
       end
 
       # PUBLIC API
-      def widget(w)
-        w.render_to(@_fortitude_rendering_context)
+      def widget(w, hash = nil)
+        if w.respond_to?(:render_to)
+          w.render_to(@_fortitude_rendering_context)
+        elsif w.kind_of?(Class)
+          hash ||= { }
+          w.new(hash).render_to(@_fortitude_rendering_context)
+        else
+          raise "You tried to render a widget, but this is not valid: #{w.inspect}(#{hash.inspect})"
+        end
       end
 
       # PUBLIC API
