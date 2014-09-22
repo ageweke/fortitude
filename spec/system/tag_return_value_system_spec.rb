@@ -38,4 +38,11 @@ describe "Fortitude tag return values", :type => :system do
       expect_nrv(:foo) { p("foo", :foo => :bar) { text "whatever" }.foo }
     end
   end
+
+  context "should not blow up when calling" do
+    it "#is_a?" do
+      wc = widget_class_with_content { text("value: #{p.is_a?(String).inspect}") }
+      expect(render(wc)).to eq("<p></p>value: false")
+    end
+  end
 end
