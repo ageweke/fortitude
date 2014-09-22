@@ -3,7 +3,7 @@ class BasicRailsSystemSpecController < ApplicationController
   end
 
   def double_render
-    @rendered_string = render_to_string(:action => 'double_render_one')
+    @rendered_string = render_to_string(:action => 'double_render_one', :layout => nil)
     render :action => 'double_render_two'
   end
 

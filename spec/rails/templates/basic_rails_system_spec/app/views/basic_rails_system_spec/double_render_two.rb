@@ -4,5 +4,6 @@ class Views::BasicRailsSystemSpec::DoubleRenderTwo < Fortitude::Widgets::Html5
   def content
     rawtext rendered_string
     p "goodbye, world"
+    render :partial => 'double_render_three'
   end
 end

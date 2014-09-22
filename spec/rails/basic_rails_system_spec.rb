@@ -6,6 +6,6 @@ describe "basic Rails support", :type => :rails do
   end
 
   it "should be able to use 'render' more than once in an action, and it should work fine" do
-    expect_match("double_render", /layout_default/, /hello, world.*goodbye, world/mi)
+    expect_match("double_render", /layout_default/, /hello, world.*goodbye, world.*and this is the last partial\!/mi)
   end
 end
