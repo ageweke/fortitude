@@ -21,6 +21,27 @@ describe "Fortitude rendering context interactions", :type => :system do
     super(widget_or_class, options.merge(:rendering_context => @rc))
   end
 
+  it "should return the parent widget properly" do
+    child_widget_class = widget_class_with_content { p "child: #{rendering_context.parent_widget.some_method}" }
+    parent_widget_class = widget_class do
+      attr_accessor :child_widget_class
+
+      def some_method
+        "ahoy!"
+      end
+
+      def content
+        p "foo"
+        widget child_widget_class.new
+        p "baz"
+      end
+    end
+
+    pw = parent_widget_class.new
+    pw.child_widget_class = child_widget_class
+    expect(render(pw)).to eq("<p>foo</p><p>child: ahoy!</p><p>baz</p>")
+  end
+
   it "should call start_widget! and end_widget! on the context when starting and ending a simple widget" do
     wc = widget_class_with_content { p "foo" }
     instance = wc.new
