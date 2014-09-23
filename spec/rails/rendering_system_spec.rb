@@ -20,6 +20,12 @@ describe "Rails rendering support", :type => :rails do
       expect(data).not_to match(/rails_spec_application/)
     end
 
+    it "should set the Content-Type to text/html when using render :widget" do
+      response = get_response("render_widget")
+      expect(response.body).to match(/hello from a widget named Fred/)
+      expect(response.header['Content-Type']).to match(%r{text/html}i)
+    end
+
     it "should let you render a widget with 'render \"foo\"'" do
       expect_match("render_widget_via_file_path", /hello from a widget named Fred/)
     end
