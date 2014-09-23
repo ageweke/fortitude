@@ -1,11 +1,20 @@
 # Fortitude Releases
 
-## 0.0.5, 17 September 2014
+## 0.0.5, 22 September 2014
 
 * You can now load both Fortitude and Erector at the same time into a project, and it will "just work": Erector
   widgets will render using Erector, and Fortitude widgets will render using Fortitude. (Fortitude takes over the
   actual template engine registration for `.rb` files, and uses a trick to keep Erector from displacing it; it then
   looks at the widget class being rendered, and delegates all Erector rendering directly to Erector.)
+* When inside a widget, you can now render a sub-widget using `widget MyWidget.new(...)` &mdash; _i.e._, passing an
+  actual widget instance &mdash; or using `widget MyWidget, { :param1 => value1 }` &mdash; _i.e._, passing a widget
+  class and a `Hash` of assignments (which can be omitted if the widget doesn't have any `need`s).
+* Fixed an issue where, _e.g._, calling `#render_to_string` on a Fortitude widget within a Rails controller, and then
+  also rendering a Fortitude widget as the template for that action, would cause a method to be called on `nil`.
+* Added `Fortitude::RenderingContext#parent_widget`, which returns the parent widget of the current widget during
+  rendering at runtime. (In other words, this is not the superclass of the current widget, but the widget that caused
+  this widget to get rendered, using either `Fortitude::Widget#widget` or `render :partial => ...`.) This can, of
+  course, be `nil` if there is no current parent widget.
 * Added `Fortitude::Widget.all_fortitude_superclasses`, which returns an `Array` of all superclasses of a widget up to,
   but not including, `Fortitude::Widget` itself.
 * Added `Fortitude::Widget.widget_class_from_file`, which accepts the path to a file and an array of "root" directories
@@ -16,6 +25,11 @@
 * Added a `record_tag_emission` class-level setting that tells a widget to call `#emitting_tag!` on the
   `Fortitude::RenderingContext` when emitting a tag; you can use this to build various systems that need to know where
   in the hierarchy of tags we are at the moment.
+* The object being returned from Fortitude tag methods &mdash; which, in general, you should never use &mdash; now
+  inherits from `Object`, not `BasicObject`, so that some built-in methods like `#is_a?` can be safely called on it.
+  This is for use in some users' environments doing funny things with the Ruby runtime that end up calling methods
+  like that on the return values of widget `#content` methods, which very often just end up being the tag return
+  value object.
 
 ## 0.0.4, 24 June 2014
 
