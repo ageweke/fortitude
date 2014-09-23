@@ -10,13 +10,6 @@ module Fortitude
   module Rails
     class Renderer
       class << self
-        def is_fortitude_widget?(widget_class)
-          return false unless widget_class.kind_of?(Class)
-          return true if widget_class == ::Fortitude::Widget
-          return false if widget_class == ::Object
-          return is_fortitude_widget?(widget_class.superclass)
-        end
-
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
         def render(widget_class, template_handler, local_assigns, is_partial, &block)
           if ::Fortitude::Erector.is_erector_widget_class?(widget_class)
@@ -33,9 +26,7 @@ module Fortitude
 
           widget = widget_class.new(needed_assigns)
           template_handler.with_output_buffer do
-            rendering_context_options = { :delegate_object => template_handler, :yield_block => block }
-            controller = template_handler.controller
-            rendering_context = controller.create_and_assign_new_fortitude_rendering_context!(rendering_context_options)
+            rendering_context = template_handler.controller.fortitude_rendering_context_for(template_handler, block)
 
             # TODO: Refactor this -- both passing it into the constructor and setting yield_block here is gross.
             #

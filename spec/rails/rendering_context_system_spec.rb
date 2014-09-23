@@ -32,7 +32,7 @@ describe "Rails RenderingContext support", :type => :rails do
   end
 
   it "should still call that method for all widgets" do
-    expect_match("uses_direct_context_for_all_widgets", /context is: SimpleRc, value 67890.*context is: SimpleRc, value 67891.*context is: SimpleRc, value 67890/mi)
+    expect_match("uses_direct_context_for_all_widgets", /context is: SimpleRc, value 67890.*context is: SimpleRc, value 67890.*context is: SimpleRc, value 67890/mi)
   end
 
   it "should call start_widget! and end_widget! properly on widgets in Rails" do
