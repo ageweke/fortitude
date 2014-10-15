@@ -71,9 +71,19 @@ The data is:
       before :all do
         @rails_template_name = template_name
 
-        templates = [ 'base', template_name ].map { |t| "rails/templates/#{t}" }
+        gem_root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
+        templates = [ 'base', template_name ].map do |t|
+          File.expand_path(File.join(gem_root, "spec/rails/templates/#{t}"))
+        end
+        runtime_base_directory = File.join(gem_root, 'tmp/spec/rails')
+        additional_gemfile_lines = [ "gem 'fortitude', :path => '#{gem_root}'" ]
+        additional_gemfile_lines += Array(options[:additional_gemfile_lines] || [ ])
 
-        @rails_server = Spec::Helpers::RailsServer.new(template_name, templates, options)
+        @rails_server = Spec::Helpers::RailsServer.new(
+          :name => template_name, :template_paths => templates, :runtime_base_directory => runtime_base_directory,
+          :rails_version => (ENV['FORTITUDE_SPECS_RAILS_VERSION'] || options[:rails_version]),
+          :rails_env => options[:rails_env], :additional_gemfile_lines => additional_gemfile_lines)
+
         @rails_server.start!
       end
 
