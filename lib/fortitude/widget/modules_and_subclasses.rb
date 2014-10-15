@@ -44,8 +44,10 @@ module Fortitude
           @tags_module = Fortitude::Tags::TagsModule.new(self)
           @helpers_module = Module.new
           include @helpers_module
+          const_set(:DefinedFortitudeHelpers, @helpers_module)
           @needs_module = Module.new
           include @needs_module
+          const_set(:FortitudeNeedsMethods, @helpers_module)
         end
         private :create_modules!
 

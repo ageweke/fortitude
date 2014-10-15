@@ -7,6 +7,7 @@ module Fortitude
         include Fortitude::Tags::TagSupport
 
         @widget_class = widget_class
+        @widget_class.send(:const_set, :DefinedFortitudeTags, self)
         @widget_class.send(:include, self)
       end
 
