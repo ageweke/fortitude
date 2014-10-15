@@ -23,20 +23,19 @@ module Spec
         end
       end
 
-      class << self
-        def run_bundle_install!(name)
-          @bundle_installs_run ||= { }
+      def run_bundle_install!(name)
+        @bundle_installs_run ||= { }
 
-          cmd = "bundle install"
-          description = "running bundle install for #{name.inspect}"
+        cmd = "bundle install"
+        description = "running bundle install for #{name.inspect}"
 
-          can_run_locally = @bundle_installs_run[name] || (ENV['FORTITUDE_SPECS_RAILS_GEMS_INSTALLED'] == 'true')
+        can_run_locally = @bundle_installs_run[name] || (ENV['FORTITUDE_SPECS_RAILS_GEMS_INSTALLED'] == 'true')
 
-          if can_run_locally
-            cmd << " --local"
-          else
-            description << " (WITHOUT --local flag)"
-            say %{NOTE: We're running 'bundle install' without the --local flag, meaning it will
+        if can_run_locally
+          cmd << " --local"
+        else
+          description << " (WITHOUT --local flag)"
+          say %{NOTE: We're running 'bundle install' without the --local flag, meaning it will
 go out and access rubygems.org for the lists of the latest gems. This is a slow operation.
 If you run multiple Rails specs at once, this will only happen once.
 
@@ -44,57 +43,56 @@ However, this only actually needs to happen once, ever, for a given Rails versio
 FORTITUDE_SPECS_RAILS_GEMS_INSTALLED=true (e.g.,
 FORTITUDE_SPECS_RAILS_GEMS_INSTALLED=true bundle exec rspec spec/rails/...),
 then we will skip this command and your spec will run much faster.}
-          end
+        end
 
-          # Sigh. Travis CI sometimes fails this with the following exception:
-          #
-          # Gem::RemoteFetcher::FetchError: Errno::ETIMEDOUT: Connection timed out - connect(2)
-          #
-          # So, we catch the command failure, look to see if this is the problem, and, if so, retry
-          iterations = 0
-          while true
-            begin
-              safe_system(cmd, description)
-              break
-            rescue CommandFailedError => cfe
-              raise if (cfe.output !~ /Gem::RemoteFetcher::FetchError.*connect/i) || (iterations >= 5)
-              say %{Got an exception trying to run 'bundle install'; sleeping and trying again (iteration #{iterations}):
+        # Sigh. Travis CI sometimes fails this with the following exception:
+        #
+        # Gem::RemoteFetcher::FetchError: Errno::ETIMEDOUT: Connection timed out - connect(2)
+        #
+        # So, we catch the command failure, look to see if this is the problem, and, if so, retry
+        iterations = 0
+        while true
+          begin
+            safe_system(cmd, description)
+            break
+          rescue CommandFailedError => cfe
+            raise if (cfe.output !~ /Gem::RemoteFetcher::FetchError.*connect/i) || (iterations >= 5)
+            say %{Got an exception trying to run 'bundle install'; sleeping and trying again (iteration #{iterations}):
 
 #{cfe.output}}
-              # keep going
-            end
-
-            sleep 1
-            iterations += 1
+            # keep going
           end
 
-          @bundle_installs_run[name] ||= true
+          sleep 1
+          iterations += 1
         end
 
-        def say(s, newline = true)
-          if newline
-            $stdout.puts s
-          else
-            $stdout << s
-          end
-          $stdout.flush
+        @bundle_installs_run[name] ||= true
+      end
+
+      def say(s, newline = true)
+        if newline
+          $stdout.puts s
+        else
+          $stdout << s
+        end
+        $stdout.flush
+      end
+
+      def safe_system(cmd, notice = nil, options = { })
+        say("#{notice}...", false) if notice
+
+        total_cmd = if options[:background]
+          "#{cmd} 2>&1 &"
+        else
+          "#{cmd} 2>&1"
         end
 
-        def safe_system(cmd, notice = nil, options = { })
-          say("#{notice}...", false) if notice
+        output = `#{total_cmd}`
+        raise CommandFailedError.new(Dir.pwd, total_cmd, $?, output) unless $?.success?
+        say "OK" if notice
 
-          total_cmd = if options[:background]
-            "#{cmd} 2>&1 &"
-          else
-            "#{cmd} 2>&1"
-          end
-
-          output = `#{total_cmd}`
-          raise CommandFailedError.new(Dir.pwd, total_cmd, $?, output) unless $?.success?
-          say "OK" if notice
-
-          output
-        end
+        output
       end
 
       attr_reader :rails_root
@@ -117,14 +115,6 @@ then we will skip this command and your spec will run much faster.}
 
       def rails_version
         @rails_version || :default
-      end
-
-      def say(*args)
-        self.class.say(*args)
-      end
-
-      def safe_system(*args)
-        self.class.safe_system(*args)
       end
 
       def start!
@@ -174,7 +164,7 @@ then we will skip this command and your spec will run much faster.}
             end
 
             in_rails_root do
-              self.class.run_bundle_install!(:primary)
+              run_bundle_install!(:primary)
               splat_template_files!
               start_server!
               verify_server!
@@ -224,7 +214,7 @@ gem 'rails'#{rails_version_spec}
 EOS
         end
 
-        self.class.run_bundle_install!(:bootstrap)
+        run_bundle_install!(:bootstrap)
       end
 
       def rails_new!
