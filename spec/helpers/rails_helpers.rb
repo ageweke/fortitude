@@ -7,20 +7,17 @@ module RailsHelpers
 
   attr_reader :rails_server
 
-  def rails_template_name
-    @rails_template_name || raise("No Rails template name!")
-  end
 
   def full_path(subpath)
     "#{rails_template_name}/#{subpath}"
   end
 
   def get(subpath, options = { })
-    @rails_server.get(full_path(subpath), options)
+    rails_server.get(full_path(subpath), options)
   end
 
   def get_response(subpath, options = { })
-    @rails_server.get_response(full_path(subpath), options)
+    rails_server.get_response(full_path(subpath), options)
   end
 
   def get_success(subpath, options = { })
@@ -62,25 +59,35 @@ The data is:
     json['exception']['message'].should match(message)
   end
 
-  module ClassMethods
-    def rails_template_name
-      @rails_template_name || raise("No Rails template name!")
-    end
+  def rails_template_name
+    @rails_template_name || raise("No Rails template name!")
+  end
 
+  def rails_server_project_root
+    @rails_server_project_root ||= File.expand_path(File.join(File.dirname(__FILE__), '../..'))
+  end
+
+  def rails_server_templates_root
+    @rails_server_templates_root ||= File.join(rails_server_project_root, "spec/rails/templates")
+  end
+
+  def rails_server_runtime_base_directory
+    @rails_server_runtime_base_directory ||= File.join(rails_server_project_root, "tmp/spec/rails")
+  end
+
+  module ClassMethods
     def uses_rails_with_template(template_name, options = { })
       before :all do
         @rails_template_name = template_name
 
-        gem_root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
         templates = [ 'base', template_name ].map do |t|
-          File.expand_path(File.join(gem_root, "spec/rails/templates/#{t}"))
+          File.join(rails_server_templates_root, t.to_s)
         end
-        runtime_base_directory = File.join(gem_root, 'tmp/spec/rails')
-        additional_gemfile_lines = [ "gem 'fortitude', :path => '#{gem_root}'" ]
+        additional_gemfile_lines = [ "gem 'fortitude', :path => '#{rails_server_project_root}'" ]
         additional_gemfile_lines += Array(options[:additional_gemfile_lines] || [ ])
 
         @rails_server = Spec::Helpers::RailsServer.new(
-          :name => template_name, :template_paths => templates, :runtime_base_directory => runtime_base_directory,
+          :name => template_name, :template_paths => templates, :runtime_base_directory => rails_server_runtime_base_directory,
           :rails_version => (ENV['FORTITUDE_SPECS_RAILS_VERSION'] || options[:rails_version]),
           :rails_env => options[:rails_env], :additional_gemfile_lines => additional_gemfile_lines)
 
