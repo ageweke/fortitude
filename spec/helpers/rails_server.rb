@@ -100,7 +100,6 @@ module Spec
         template_paths.each do |template_path|
           raise Errno::ENOENT, "You must specify template paths that exist; this doesn't: '#{template_path}'" unless File.directory?(template_path)
         end
-        $stderr.puts "rails_root: #{rails_root.inspect}"
         FileUtils.rm_rf(rails_root) if File.exist?(rails_root)
         FileUtils.mkdir_p(rails_root)
 
@@ -133,7 +132,6 @@ EOS
         # http://stackoverflow.com/questions/379141/specifying-rails-version-to-use-when-creating-a-new-application
         rails_version_spec = rails_version == :default ? "" : "_#{rails_version}_"
         cmd = "bundle exec rails #{rails_version_spec} new #{File.basename(rails_root)} -d sqlite3 -f -B"
-        $stderr.puts "Running rails new in #{Dir.pwd} with #{rails_version_spec.inspect} for #{rails_version.inspect}: #{cmd}"
         safe_system(cmd, "creating a new Rails installation for '#{name}'")
       end
 
