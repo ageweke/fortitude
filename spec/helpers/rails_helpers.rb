@@ -75,18 +75,29 @@ The data is:
     @rails_server_runtime_base_directory ||= File.join(rails_server_project_root, "tmp/spec/rails")
   end
 
+  def rails_server_additional_gemfile_lines
+    [
+      "gem 'fortitude', :path => '#{rails_server_project_root}'"
+    ]
+  end
+
+  def rails_server_default_version
+    ENV['FORTITUDE_SPECS_RAILS_VERSION']
+  end
+
   def start_rails_server_with_template!(template_name, options = { })
     @rails_template_name = template_name
 
     templates = [ 'base', template_name ].map do |t|
       File.join(rails_server_templates_root, t.to_s)
     end
-    additional_gemfile_lines = [ "gem 'fortitude', :path => '#{rails_server_project_root}'" ]
+    additional_gemfile_lines = Array(rails_server_additional_gemfile_lines || [ ])
     additional_gemfile_lines += Array(options[:additional_gemfile_lines] || [ ])
 
     @rails_server = Spec::Helpers::RailsServer.new(
-      :name => template_name, :template_paths => templates, :runtime_base_directory => rails_server_runtime_base_directory,
-      :rails_version => (ENV['FORTITUDE_SPECS_RAILS_VERSION'] || options[:rails_version]),
+      :name => template_name, :template_paths => templates,
+      :runtime_base_directory => rails_server_runtime_base_directory,
+      :rails_version => (options[:rails_version] || rails_server_default_version),
       :rails_env => options[:rails_env], :additional_gemfile_lines => additional_gemfile_lines)
 
     rails_server.start!
