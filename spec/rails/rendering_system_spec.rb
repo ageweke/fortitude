@@ -149,7 +149,7 @@ describe "Rails rendering support", :type => :rails do
     end
 
     it "should let you stream from a widget that's in an ERb layout" do
-      skip("Fortitude streaming test is not supported under Rails 3.0.x") if @rails_server.rails_version =~ /^3\.0\./
+      skip("Fortitude streaming test is not supported under Rails 3.0.x") if rails_server.rails_version =~ /^3\.0\./
       skip("Fortitude streaming test is not supported under Ruby 1.8") if RUBY_VERSION =~ /^1\.8\./
 
       chunks = collect_chunks("stream_widget_with_layout")

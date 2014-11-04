@@ -6,7 +6,7 @@ require 'uri'
 module Spec
   module Helpers
     class RailsServer
-      attr_reader :rails_root, :rails_version
+      attr_reader :rails_root, :rails_version, :name
 
       def initialize(options)
         options.assert_valid_keys(
@@ -60,7 +60,7 @@ module Spec
       end
 
       private
-      attr_reader :name, :template_paths, :runtime_base_directory, :rails_env, :additional_gemfile_lines, :port, :server_pid
+      attr_reader :template_paths, :runtime_base_directory, :rails_env, :additional_gemfile_lines, :port, :server_pid
 
       def do_start!
         Bundler.with_clean_env do

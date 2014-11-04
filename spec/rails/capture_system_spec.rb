@@ -23,7 +23,7 @@ describe "Rails capture support", :type => :rails do
   end
 
   it "should be able to provide content in a widget with provide" do
-    skip "Rails 3.0.x doesn't support :provide" if @rails_server.rails_version =~ /^3\.0\./
+    skip "Rails 3.0.x doesn't support :provide" if rails_server.rails_version =~ /^3\.0\./
 
     expect_match('widget_provide',
       %r{erb_layout_needing_content}i,

@@ -60,7 +60,7 @@ The data is:
   end
 
   def rails_template_name
-    @rails_template_name || raise("No Rails template name!")
+    rails_server.name
   end
 
   def rails_server_project_root
@@ -85,36 +85,75 @@ The data is:
     ENV['FORTITUDE_SPECS_RAILS_VERSION']
   end
 
-  def start_rails_server_with_template!(template_name, options = { })
-    @rails_template_name = template_name
-
-    templates = [ 'base', template_name ].map do |t|
-      File.join(rails_server_templates_root, t.to_s)
-    end
-    additional_gemfile_lines = Array(rails_server_additional_gemfile_lines || [ ])
-    additional_gemfile_lines += Array(options[:additional_gemfile_lines] || [ ])
-
-    @rails_server = Spec::Helpers::RailsServer.new(
-      :name => template_name, :template_paths => templates,
-      :runtime_base_directory => rails_server_runtime_base_directory,
-      :rails_version => (options[:rails_version] || rails_server_default_version),
-      :rails_env => options[:rails_env], :additional_gemfile_lines => additional_gemfile_lines)
-
-    rails_server.start!
+  def rails_servers
+    @rails_servers ||= { }
   end
 
-  def stop_rails_server!
-    rails_server.stop!
+  def rails_server
+    if rails_servers.size == 1
+      rails_servers[rails_servers.keys.first]
+    elsif rails_servers.size == 0
+      raise "No Rails servers have been started!"
+    else
+      raise "Multiple Rails servers have been started; you must specify which one you want: #{rails_servers.keys.join(", ")}"
+    end
+  end
+
+  def start_rails_server!(options = { })
+    templates = Array(options[:templates] || options[:name] || [ ])
+    raise "You must specify a template" unless templates.length >= 1
+
+    name = options[:name]
+    name ||= templates[0] if templates.length == 1
+    name = name.to_s.strip
+    raise "You must specify a name" unless name && name.to_s.strip.length > 0
+
+    server = rails_servers[name]
+    server ||= begin
+      templates = [ 'base' ] + templates unless options[:skip_base_template]
+
+      template_paths = templates.map do |t|
+        File.join(rails_server_templates_root, t.to_s)
+      end
+
+      additional_gemfile_lines = Array(rails_server_additional_gemfile_lines || [ ])
+      additional_gemfile_lines += Array(options[:additional_gemfile_lines] || [ ])
+
+      server = Spec::Helpers::RailsServer.new(
+        :name => name, :template_paths => template_paths,
+        :runtime_base_directory => rails_server_runtime_base_directory,
+        :rails_version => (options[:rails_version] || rails_server_default_version),
+        :rails_env => options[:rails_env], :additional_gemfile_lines => additional_gemfile_lines)
+
+      rails_servers[name] = server
+
+      server
+    end
+
+    server.start!
+  end
+
+  def stop_rails_servers!
+    exceptions = [ ]
+    rails_servers.each do |name, server|
+      begin
+        server.stop!
+      rescue => e
+        exceptions << [ name, e ]
+      end
+    end
+
+    raise "Unable to stop all Rails servers! Got:\n#{exceptions.join("\n")}" if exceptions.length > 0
   end
 
   module ClassMethods
     def uses_rails_with_template(template_name, options = { })
       before :all do
-        start_rails_server_with_template!(template_name, options)
+        start_rails_server!({ :templates => [ template_name ] }.merge(options))
       end
 
       after :all do
-        stop_rails_server!
+        stop_rails_servers!
       end
     end
   end
