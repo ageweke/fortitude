@@ -301,50 +301,53 @@ EOS
         end
       end
 
-      def run_bundle_install!(name)
-        @bundle_installs_run ||= { }
-
+      def attempt_bundle_install_cmd!(name, use_local)
         cmd = "bundle install"
-        description = "running bundle install for #{name.inspect}"
+        cmd << " --local" if use_local
 
-        can_run_locally = @bundle_installs_run[name] || (ENV['FORTITUDE_SPECS_RAILS_GEMS_INSTALLED'] == 'true')
+        description = "running 'bundle install' for #{name.inspect}"
+        description << " (with remote fetching allowed)" if (! use_local)
 
-        if can_run_locally
-          cmd << " --local"
-        else
-          description << " (WITHOUT --local flag)"
-          say %{NOTE: We're running 'bundle install' without the --local flag, meaning it will
-go out and access rubygems.org for the lists of the latest gems. This is a slow operation.
-If you run multiple Rails specs at once, this will only happen once.
-
-However, this only actually needs to happen once, ever, for a given Rails version; if you set
-FORTITUDE_SPECS_RAILS_GEMS_INSTALLED=true (e.g.,
-FORTITUDE_SPECS_RAILS_GEMS_INSTALLED=true bundle exec rspec spec/rails/...),
-then we will skip this command and your spec will run much faster.}
-        end
-
-        # Sigh. Travis CI sometimes fails this with the following exception:
-        #
-        # Gem::RemoteFetcher::FetchError: Errno::ETIMEDOUT: Connection timed out - connect(2)
-        #
-        # So, we catch the command failure, look to see if this is the problem, and, if so, retry
-        iterations = 0
+        attempts = 0
         while true
           begin
             safe_system(cmd, description)
             break
           rescue CommandFailedError => cfe
-            raise if (cfe.output !~ /Gem::RemoteFetcher::FetchError.*connect/i) || (iterations >= 5)
-            say %{Got an exception trying to run 'bundle install'; sleeping and trying again (iteration #{iterations}):
-
-#{cfe.output}}
-            # keep going
+            # Sigh. Travis CI sometimes fails this with the following exception:
+            #
+            # Gem::RemoteFetcher::FetchError: Errno::ETIMEDOUT: Connection timed out - connect(2)
+            #
+            # So, we catch the command failure, look to see if this is the problem, and, if so, retry
+            raise if (! is_travis_remote_fetcher_error?(cfe)) || attempts >= 5
+            attempts += 1
           end
-
-          sleep 1
-          iterations += 1
         end
+      end
 
+      def is_travis_remote_fetcher_error?(command_failed_error)
+        command_failed_error.output =~ /Gem::RemoteFetcher::FetchError.*connect/i
+      end
+
+      def is_remote_flag_required_error?(command_failed_error)
+        command_failed_error.output =~ /could\s+not\s+find.*in\s+the\s+gems\s+available\s+on\s+this\s+machine/i
+      end
+
+      def do_bundle_install!(name, allow_remote)
+        begin
+          attempt_bundle_install_cmd!(name, true)
+        rescue CommandFailedError => cfe
+          if is_remote_flag_required_error?(cfe) && allow_remote
+            attempt_bundle_install_cmd!(name, false)
+          else
+            raise
+          end
+        end
+      end
+
+      def run_bundle_install!(name)
+        @bundle_installs_run ||= { }
+        do_bundle_install!(name, ! @bundle_installs_run[name])
         @bundle_installs_run[name] ||= true
       end
 
