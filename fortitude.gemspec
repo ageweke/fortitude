@@ -39,4 +39,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake-compiler"
   s.add_development_dependency "json"
   s.add_development_dependency "tilt", "~> 2.0"
+  s.add_development_dependency "oop_rails_server", "~> 0"
 end
