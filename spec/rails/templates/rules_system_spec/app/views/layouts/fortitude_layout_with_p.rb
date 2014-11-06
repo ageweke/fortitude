@@ -7,7 +7,7 @@ class Views::Layouts::FortitudeLayoutWithP < Fortitude::Widgets::Html5
 
     html {
       head {
-        title "rails_spec_application"
+        title "oop_rails_server_base_template"
       }
     }
     body {

@@ -12,12 +12,12 @@ describe "Rails rendering support", :type => :rails do
 
     it "should let you specify a widget with 'render :widget =>', which should use a layout by default" do
       data = expect_match("render_widget", /hello from a widget named Fred/)
-      expect(data).to match(/rails_spec_application/)
+      expect(data).to match(/oop_rails_server_base_template/)
     end
 
     it "should let you omit the layout with 'render :widget =>', if you ask for it" do
       data = expect_match("render_widget_without_layout", /hello from a widget named Fred/, :no_layout => true)
-      expect(data).not_to match(/rails_spec_application/)
+      expect(data).not_to match(/oop_rails_server_base_template/)
     end
 
     it "should set the Content-Type to text/html when using render :widget" do
