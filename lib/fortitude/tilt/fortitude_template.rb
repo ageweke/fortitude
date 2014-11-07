@@ -19,7 +19,9 @@ module Fortitude
         end
       end
 
-      def render(scope=Object.new, locals={}, &block)
+      def render(scope=Object.new, locals = nil, &block)
+        locals ||= { }
+
         rendering_context = Fortitude::RenderingContext.new({
           :yield_block => block, :render_yield_result => false,
           :helpers_object => scope, :instance_variables_object => scope })

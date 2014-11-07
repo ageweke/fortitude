@@ -1,5 +1,10 @@
 # Fortitude Releases
 
+## 0.0.6,
+
+* Fixed an issue where trying to use Fortitude as a Tilt engine, but passing `nil` for the `locals`, would cause an
+  exception. (Thanks to [Roman Heinrich](https://github.com/mindreframer) for reporting the bug!)
+
 ## 0.0.5, 22 September 2014
 
 * You can now load both Fortitude and Erector at the same time into a project, and it will "just work": Erector
