@@ -196,7 +196,7 @@ module Fortitude
         #
         # So, instead, we simply transform <tt>render :widget => ...</tt> into a <tt>render :text => ...</tt> of the
         # widget's output, and let Rails take it away from there.
-        [::ActionController::Base, ::ActionMailer].each do |m|
+        [::ActionController::Base, ::ActionMailer::Base].each do |m|
           m.class_eval do
             def fortitude_rendering_context_for(delegate_object, yield_block)
               @_fortitude_rendering_contexts ||= { }
