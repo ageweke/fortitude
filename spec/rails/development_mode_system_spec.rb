@@ -44,6 +44,10 @@ describe "Rails development-mode support", :type => :rails do
 <!-- END Views::DevelopmentModeSystemSpec::SampleOutput depth 0 -->}mi)
   end
 
+  it "should pick up changes to mailer views"
+  it "should pick up changes to mailer layouts"
+  it "should format output and output BEGIN/END debugging tags in mailers"
+
   private
   def splat_new_widget!
     reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget.rb')

@@ -187,6 +187,7 @@ module Fortitude
         require "fortitude/rails/rendering_methods"
 
         ::ActionController::Base.send(:include, ::Fortitude::Rails::RenderingMethods)
+        ::ActionMailer::Base.send(:include, ::Fortitude::Rails::RenderingMethods)
       end
     end
   end
