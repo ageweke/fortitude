@@ -3,6 +3,10 @@ class DevelopmentModeSystemSpecController < ApplicationController
     @datum = "one"
   end
 
+  def reload_widget_with_html_extension
+    @datum = "five"
+  end
+
   def sample_output
     @name = "Jessica"
   end
