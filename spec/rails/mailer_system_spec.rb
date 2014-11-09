@@ -10,5 +10,11 @@ describe "Rails ActionMailer support", :type => :rails do
 
   it "should allow using a Fortitude layout with a non-Fortitude view"
   it "should allow using a non-Fortitude layout with a Fortitude view"
-  it "should allow using a Fortitude layout with a Fortitude view"
+
+  it "should allow using a Fortitude layout with a Fortitude view" do
+    expect_match("send_mail_with_fortitude_layout", /mail sent/)
+
+    mail = mail_sent_to('somebody_with_fortitude_layout@example.com')
+    expect(mail[:body].strip).to eq("<div><p>this is the Fortitude layout</p><p>this is the mail with Fortitude layout!</p></div>")
+  end
 end
