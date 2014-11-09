@@ -10,4 +10,16 @@ class BasicMailer < ActionMailer::Base
       format.html { render :layout => 'fortitude_layout' }
     end
   end
+
+  def mail_with_fortitude_layout_and_erb_view
+    mail(:to => 'somebody_with_fortitude_layout_and_erb_view@example.com', :subject => 'Basic Mail') do |format|
+      format.html { render :layout => 'fortitude_layout' }
+    end
+  end
+
+  def mail_with_erb_layout_and_fortitude_view
+    mail(:to => 'somebody_with_erb_layout_and_fortitude_view@example.com', :subject => 'Basic Mail') do |format|
+      format.html { render :layout => 'erb_layout' }
+    end
+  end
 end
