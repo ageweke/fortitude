@@ -4,6 +4,15 @@
 
 * Fixed an issue where trying to use Fortitude as a Tilt engine, but passing `nil` for the `locals`, would cause an
   exception. (Thanks to [Roman Heinrich](https://github.com/mindreframer) for reporting the bug!)
+* Using Fortitude as a template engine for mailers (`ActionMailer::Base` subclasses) now works. (Believe it or not,
+  this was almost completely an issue of forgetting to support this, rather than it being undone &mdash; the code
+  was complete, and it was just a matter of applying it to `ActionMailer::Base` as well as `ActionController::Base`.)
+  (Thanks to [Jacob Maine](https://github.com/mainej) for the bug report and pull request!)
+* The various on-the-fly modules that Fortitude creates and mixes in to widgets (and define helpers,  tag methods,
+  and `needs` methods) now all have actual names, which makes them much easier to identify in debugging printouts.
+* The code in `spec/` that knew how to reliably create, maintain, shut down, and otherwise manipulate an external
+  `rails server` process has now been pulled out into its own gem, `oop_rails_server`; this is so I can also use it
+  with a new, closely-related upcoming project, and because reuse is good. ;)
 
 ## 0.0.5, 22 September 2014
 
