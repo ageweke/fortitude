@@ -14,7 +14,6 @@ describe "Rails development-mode support", :type => :rails do
   end
 
   it "should automatically reload widgets if they change on disk, even if they're named '.html.rb' at the end" do
-    skip "nope"
     expect_match("reload_widget_with_html_extension", /with_html_extension_before_reload/)
     # The sleep is unfortunate, but required: without it, Rails will not necessarily pick up our change,
     # especially if we run multiple tests back-to-back. (There's a maximum frequency at which Rails can
