@@ -10,4 +10,16 @@ class DevelopmentModeSystemSpecController < ApplicationController
   def sample_output
     @name = "Jessica"
   end
+
+  def mailer_view_test
+    DevelopmentModeMailer.mailer_view_test.deliver
+  end
+
+  def mailer_layout_test
+    DevelopmentModeMailer.mailer_layout_test.deliver
+  end
+
+  def mailer_formatting_test
+    DevelopmentModeMailer.mailer_formatting_test.deliver
+  end
 end
