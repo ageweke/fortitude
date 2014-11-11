@@ -13,16 +13,14 @@ describe "Rails development-mode support", :type => :rails do
     expect_match("reload_widget", /after_reload/)
   end
 
-  it "should automatically reload widgets if they change on disk, even if they're named '.html.rb' at the end" do
-    expect_match("reload_widget_with_html_extension", /with_html_extension_before_reload/)
-    # The sleep is unfortunate, but required: without it, Rails will not necessarily pick up our change,
-    # especially if we run multiple tests back-to-back. (There's a maximum frequency at which Rails can
-    # detect distinct file changes on disk, which on the order of 1 Hz -- i.e., once a second; any more
-    # than this and it fails. This is irrelevant for human-centered development, but important for
-    # tests like this.)
+  it "should automatically reload widgets if related files change on disk, even if they're named '.html.rb' at the end" do
+    expect_match("reload_widget_with_html_extension", /with_html_extension.*helper: yo/)
     sleep 1
-    splat_new_widget_with_html_extension!
-    expect_match("reload_widget_with_html_extension", /with_html_extension_after_reload/)
+    splat_new_module_for_reload_widget_failing!
+    expect_exception("reload_widget_with_html_extension", NameError, "some_helper")
+    sleep 1
+    splat_new_module_for_reload_widget!
+    expect_match("reload_widget_with_html_extension", /with_html_extension.*helper: yo/)
   end
 
   it "should let you change the controller, and that should work fine, too" do
@@ -96,7 +94,30 @@ EOS
     end
   end
 
-  def splat_new_widget_with_html_extension!
+  def splat_new_module_for_reload_widget_failing!
+    module_file = File.join(rails_server.rails_root, 'app/views/shared/some_module.rb')
+    File.open(module_file, 'w') do |f|
+      f.puts <<-EOS
+module Views::Shared::SomeModule
+end
+EOS
+    end
+  end
+
+  def splat_new_module_for_reload_widget!
+    module_file = File.join(rails_server.rails_root, 'app/views/shared/some_module.rb')
+    File.open(module_file, 'w') do |f|
+      f.puts <<-EOS
+module Views::Shared::SomeModule
+  def some_helper
+    "yo"
+  end
+end
+EOS
+    end
+  end
+
+  def splat_new_widget_with_html_extension_failing!
     reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget_with_html_extension.html.rb')
     File.open(reload_file, 'w') do |f|
       f.puts <<-EOS
@@ -104,7 +125,23 @@ class Views::DevelopmentModeSystemSpec::ReloadWidgetWithHtmlExtension < Fortitud
   needs :datum
 
   def content
-    p "with_html_extension_after_reload: datum \#{datum} datum"
+    p "with_html_extension_after_reload: datum \#{datum} datum, helper: \#{some_helper}"
+  end
+end
+EOS
+    end
+  end
+
+  def splat_new_widget_with_html_extension!
+    reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget_with_html_extension.html.rb')
+    File.open(reload_file, 'w') do |f|
+      f.puts <<-EOS
+class Views::DevelopmentModeSystemSpec::ReloadWidgetWithHtmlExtension < Fortitude::Widgets::Html5
+  include Views::Shared::SomeModule
+  needs :datum
+
+  def content
+    p "with_html_extension_after_reload: datum \#{datum} datum, helper: \#{some_helper}"
   end
 end
 EOS
