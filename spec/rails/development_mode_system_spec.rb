@@ -117,37 +117,6 @@ EOS
     end
   end
 
-  def splat_new_widget_with_html_extension_failing!
-    reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget_with_html_extension.html.rb')
-    File.open(reload_file, 'w') do |f|
-      f.puts <<-EOS
-class Views::DevelopmentModeSystemSpec::ReloadWidgetWithHtmlExtension < Fortitude::Widgets::Html5
-  needs :datum
-
-  def content
-    p "with_html_extension_after_reload: datum \#{datum} datum, helper: \#{some_helper}"
-  end
-end
-EOS
-    end
-  end
-
-  def splat_new_widget_with_html_extension!
-    reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget_with_html_extension.html.rb')
-    File.open(reload_file, 'w') do |f|
-      f.puts <<-EOS
-class Views::DevelopmentModeSystemSpec::ReloadWidgetWithHtmlExtension < Fortitude::Widgets::Html5
-  include Views::Shared::SomeModule
-  needs :datum
-
-  def content
-    p "with_html_extension_after_reload: datum \#{datum} datum, helper: \#{some_helper}"
-  end
-end
-EOS
-    end
-  end
-
   def splat_new_controller!
     controller_file = File.join(rails_server.rails_root, 'app/controllers/replaced_controller.rb')
     File.open(controller_file, 'w') do |f|
