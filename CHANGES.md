@@ -2,6 +2,10 @@
 
 ## 0.0.6,
 
+* Fixed an issue where naming a widget with an `.html.rb` extension (for example) at the end would work at first,
+  but cause really irritating errors (like `uninitialized constant Views::Foo::Bar` apparently _in_ the very file
+  that defines `Views::Foo::Bar` correctly in `app/views/foo/bar.html.rb`) when editing code in development mode.
+  (Thanks to [Jacob Maine](https://github.com/mainej) for the very detailed bug report!)
 * Fixed an issue where trying to use Fortitude as a Tilt engine, but passing `nil` for the `locals`, would cause an
   exception. (Thanks to [Roman Heinrich](https://github.com/mindreframer) for reporting the bug!)
 * Using Fortitude as a template engine for mailers (`ActionMailer::Base` subclasses) now works. (Believe it or not,
