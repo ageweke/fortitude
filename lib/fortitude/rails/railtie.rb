@@ -130,18 +130,25 @@ module Fortitude
           # "Search for a file in autoload_paths matching the provided suffix."
           #
           # So, we just look to see if the given +path_suffix+ is specifying something like
-          # <tt>views/foo/bar</tt>; if so, we glue it together properly, removing the initial
-          # <tt>views/</tt> first. (Otherwise, the mechanism would expect
+          # <tt>views/foo/bar</tt> or the fully-qualified version thereof; if so, we glue it together properly,
+          # removing the initial <tt>views/</tt> first. (Otherwise, the mechanism would expect
           # <tt>Views::Foo::Bar</tt> to show up in <tt>app/views/views/foo/bar</tt> (yes, a double
           # +views+), since <tt>app/views</tt> is on the autoload path.)
           def search_for_file_with_fortitude(path_suffix)
-            # This just makes sure our path always ends in exactly one ".rb", whether it started
-            # with one or not.
-            new_path_suffix = path_suffix.sub(/(\.rb)?$/, ".rb")
+            # Remove any ".rb" extension, if present...
+            new_path_suffix = path_suffix.sub(/(\.rb)?$/, "")
 
-            if new_path_suffix =~ %r{^views(/.*)$}i
-              path = File.join(@@_fortitude_views_root, $1)
-              return path if File.file?(path)
+            found_subpath = if new_path_suffix =~ %r{^views(/.*)$}i
+              $1
+            elsif new_path_suffix =~ %r{^#{Regexp.escape(@@_fortitude_views_root)}(/.*)$}i
+              $1
+            end
+
+            if found_subpath
+              [ ".html.rb", ".rb" ].each do |extension|
+                path = File.join(@@_fortitude_views_root, "#{found_subpath}#{extension}")
+                return path if File.file?(path)
+              end
             end
 
             # Make sure that we remove the views autoload path before letting the rest of
