@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.0.6,
+## 0.0.6, 11 November 2014
 
 * Fixed an issue where naming a widget with an `.html.rb` extension (for example) at the end would work at first,
   but cause really irritating errors (like `uninitialized constant Views::Foo::Bar` apparently _in_ the very file
@@ -17,6 +17,7 @@
 * The code in `spec/` that knew how to reliably create, maintain, shut down, and otherwise manipulate an external
   `rails server` process has now been pulled out into its own gem, `oop_rails_server`; this is so I can also use it
   with a new, closely-related upcoming project, and because reuse is good. ;)
+* Updated the Travis configuration to the very latest Ruby and Rails versions.
 
 ## 0.0.5, 22 September 2014
 
