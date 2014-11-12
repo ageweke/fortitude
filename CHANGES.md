@@ -1,5 +1,10 @@
 # Fortitude Releases
 
+## 0.0.7, 11 November 2014
+
+* Fortitude 0.0.6 introduced a regression, where referring to an autoloaded view class by partially-qualified namespace
+  path could cause an `Errno::ENOENT` exception indicating that a particular directory wasn't found.
+
 ## 0.0.6, 11 November 2014
 
 * Fixed an issue where naming a widget with an `.html.rb` extension (for example) at the end would work at first,

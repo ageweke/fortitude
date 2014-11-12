@@ -78,6 +78,10 @@ describe "Rails development-mode support", :type => :rails do
 <!-- END Views::DevelopmentModeMailer::MailerFormattingTest depth 0 -->})
   end
 
+  it "should allow referencing a widget by partial namespace" do
+    expect_match("namespace_reference", /before.*referenced.*after/mi)
+  end
+
   private
   def splat_new_widget!
     reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget.rb')

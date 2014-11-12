@@ -147,17 +147,20 @@ module Fortitude
             if found_subpath
               full_path = File.join(@@_fortitude_views_root, "#{found_subpath}")
               directory = File.dirname(full_path)
-              filename = File.basename(full_path)
 
-              regexp1 = /^#{Regexp.escape(filename)}\./
-              regexp2 = /\.rb$/i
-              applicable_entries = Dir.entries(directory).select do |entry|
-                ((entry == filename) || (entry =~ regexp1 && entry =~ regexp2)) && File.file?(File.join(directory, entry))
+              if File.directory?(directory)
+                filename = File.basename(full_path)
+
+                regexp1 = /^#{Regexp.escape(filename)}\./
+                regexp2 = /\.rb$/i
+                applicable_entries = Dir.entries(directory).select do |entry|
+                  ((entry == filename) || (entry =~ regexp1 && entry =~ regexp2)) && File.file?(File.join(directory, entry))
+                end
+                return nil if applicable_entries.length == 0
+
+                entry_to_use = applicable_entries.sort_by { |e| e.length }.reverse.first
+                return File.join(directory, entry_to_use)
               end
-              return nil if applicable_entries.length == 0
-
-              entry_to_use = applicable_entries.sort_by { |e| e.length }.reverse.first
-              return File.join(directory, entry_to_use)
             end
 
             # Make sure that we remove the views autoload path before letting the rest of

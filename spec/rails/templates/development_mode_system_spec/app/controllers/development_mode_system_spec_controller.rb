@@ -11,6 +11,10 @@ class DevelopmentModeSystemSpecController < ApplicationController
     @name = "Jessica"
   end
 
+  def namespace_reference
+    # nothing here
+  end
+
   def mailer_view_test
     DevelopmentModeMailer.mailer_view_test.deliver
   end
