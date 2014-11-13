@@ -151,12 +151,16 @@ module Fortitude
               if File.directory?(directory)
                 filename = File.basename(full_path)
 
-                regexp1 = /^#{Regexp.escape(filename)}\./
+                regexp1 = /^_?#{Regexp.escape(filename)}\./
                 regexp2 = /\.rb$/i
                 applicable_entries = Dir.entries(directory).select do |entry|
                   ((entry == filename) || (entry =~ regexp1 && entry =~ regexp2)) && File.file?(File.join(directory, entry))
                 end
                 return nil if applicable_entries.length == 0
+
+                # Prefer those without an underscore
+                without_underscore = applicable_entries.select { |e| e !~ /^_/ }
+                applicable_entries = without_underscore if without_underscore.length > 0
 
                 entry_to_use = applicable_entries.sort_by { |e| e.length }.reverse.first
                 return File.join(directory, entry_to_use)

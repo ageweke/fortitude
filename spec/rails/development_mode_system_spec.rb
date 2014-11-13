@@ -84,7 +84,7 @@ describe "Rails development-mode support", :type => :rails do
 
   it "should allow you to toggle back and forth between two forms of referencing a superclass" do
     current_form = :full_reference
-    100.times do
+    5.times do
       if current_form == :full_reference
         splat_full_reference_edit!
       else

@@ -4,7 +4,7 @@ module Fortitude
   module Rails
     class TemplateHandler
       def call(template, &block)
-        require_dependency template.identifier
+        # require_dependency template.identifier
         widget_class_name = "views/#{template.identifier =~ %r(views/([^.]*)(\..*)?\.rb) && $1}".camelize
         is_partial = !! (File.basename(template.identifier) =~ /^_/)
 
