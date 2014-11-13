@@ -110,11 +110,29 @@ describe "Rails development-mode support", :type => :rails do
       f.puts <<-EOS
 module Views
   module DevelopmentModeSystemSpec
+    if const_defined?(:Edit)
+      $stderr.puts "(full) Edit constant: \#{const_get(:Edit).inspect}"
+      $stderr.puts "(full) Edit superclass: \#{const_get(:Edit).superclass}/\#{const_get(:Edit).superclass.object_id}"
+
+      if (::Views.const_defined?(:Base))
+        $stderr.puts "(full) Views::Base already defined: \#{::Views::Base.object_id}"
+      else
+        $stderr.puts "(full) Views::Base not defined"
+      end
+
+      $stderr.puts "(full) ::Views::Base: \#{::Views::Base.name}/\#{::Views::Base.object_id}"
+      $stderr.puts "(full) Views::Base: \#{Views::Base.name}/\#{Views::Base.object_id}"
+    else
+      $stderr.puts "(full) No edit constant!"
+    end
+
     class Edit < Views::Base
       def content
         widget(Views::DevelopmentModeSystemSpec::Form, :label => "full_reference")
       end
     end
+
+    $stderr.puts "(full) After definition: \#{::Views::Base.object_id}"
   end
 end
 EOS
@@ -127,11 +145,29 @@ EOS
       f.puts <<-EOS
 module Views
   module DevelopmentModeSystemSpec
+    if const_defined?(:Edit)
+      $stderr.puts "(partial) Edit constant: \#{const_get(:Edit).inspect}"
+      $stderr.puts "(partial) Edit superclass: \#{const_get(:Edit).superclass}/\#{const_get(:Edit).superclass.object_id}"
+
+      if (::Views.const_defined?(:Base))
+        $stderr.puts "(partial) Views::Base already defined: \#{::Views::Base.object_id}"
+      else
+        $stderr.puts "(partial) Views::Base not defined"
+      end
+
+      $stderr.puts "(partial) ::Views::Base: \#{::Views::Base.name}/\#{::Views::Base.object_id}"
+      $stderr.puts "(partial) Views::Base: \#{Views::Base.name}/\#{Views::Base.object_id}"
+    else
+      $stderr.puts "(partial) No edit constant!"
+    end
+
     class Edit < Views::Base
       def content
         widget(Form, :label => "partial_reference")
       end
     end
+
+    $stderr.puts "(partial) After definition: \#{::Views::Base.object_id}"
   end
 end
 EOS
