@@ -82,7 +82,62 @@ describe "Rails development-mode support", :type => :rails do
     expect_match("namespace_reference", /before.*referenced.*after/mi)
   end
 
+  it "should allow you to toggle back and forth between two forms of referencing a superclass" do
+    current_form = :full_reference
+    100.times do
+      if current_form == :full_reference
+        splat_full_reference_edit!
+      else
+        splat_partial_reference_edit!
+      end
+
+      sleep 1
+      $stderr.puts "checking for #{current_form.inspect}"
+      expect_match("edit", /#{Regexp.escape(current_form.to_s)}/i)
+
+      current_form = if current_form == :full_reference
+        :partial_reference
+      else
+        :full_reference
+      end
+    end
+  end
+
   private
+  def splat_full_reference_edit!
+    widget_file = File.join(rails_server.rails_root, "app/views/development_mode_system_spec/edit.rb")
+    File.open(widget_file, 'w') do |f|
+      f.puts <<-EOS
+module Views
+  module DevelopmentModeSystemSpec
+    class Edit < Views::Base
+      def content
+        widget(Views::DevelopmentModeSystemSpec::Form, :label => "full_reference")
+      end
+    end
+  end
+end
+EOS
+    end
+  end
+
+  def splat_partial_reference_edit!
+    widget_file = File.join(rails_server.rails_root, "app/views/development_mode_system_spec/edit.rb")
+    File.open(widget_file, 'w') do |f|
+      f.puts <<-EOS
+module Views
+  module DevelopmentModeSystemSpec
+    class Edit < Views::Base
+      def content
+        widget(Form, :label => "partial_reference")
+      end
+    end
+  end
+end
+EOS
+    end
+  end
+
   def splat_new_widget!
     reload_file = File.join(rails_server.rails_root, 'app/views/development_mode_system_spec/reload_widget.rb')
     File.open(reload_file, 'w') do |f|

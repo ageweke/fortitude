@@ -15,6 +15,10 @@ class DevelopmentModeSystemSpecController < ApplicationController
     # nothing here
   end
 
+  def edit
+    # nothing here
+  end
+
   def mailer_view_test
     DevelopmentModeMailer.mailer_view_test.deliver
   end
