@@ -53,8 +53,12 @@ class ClassLoadingSystemSpecController < ApplicationController
     # nothing here
   end
 
-  def underscore_widget
-    render :text => Views::ClassLoadingSystemSpec::UnderscoreWidget.data
+  def foo
+    # nothing here
+  end
+
+  def bar
+    # nothing here
   end
 
   def require_loaded_underscore_widget_without_views

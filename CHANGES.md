@@ -1,5 +1,15 @@
 # Fortitude Releases
 
+## 0.0.8, 13 November 2014
+
+* Fixed an issue where repeated reloading of a view in development mode in Rails could cause an error of the form
+  `superclass mismatch for class MyView`. (The issue was that Fortitude was calling `require_dependency` on the view
+  `.rb` file in the template handler, which caused it to get loaded outside of the scope where Rails is watching for
+  loaded constants, so that it can unload them before the next request. This caused view classes to hang around
+  forever, but not necessarily their superclasses, causing a very confusing `superclass mismatch` error.) Many thanks
+  again to [Jacob Maine](https://github.com/mainej) for the very detailed bug report and collaboration to fix the
+  issue.
+
 ## 0.0.7, 11 November 2014
 
 * Fortitude 0.0.6 introduced a regression, where referring to an autoloaded view class by partially-qualified namespace

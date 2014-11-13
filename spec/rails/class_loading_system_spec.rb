@@ -45,6 +45,14 @@ describe "Rails class-loading support", :type => :rails do
     expect_exception('underscore_view', 'ActionView::MissingTemplate', /class_loading_system_spec\/underscore_view/)
   end
 
+  it "should prefer widgets defined in a file without an underscore to those with" do
+    expect_match('foo', /foo WITHOUT underscore/)
+  end
+
+  it "should prefer widgets ending in .html.rb to those just ending in .rb" do
+    expect_match('bar', /bar WITH html/)
+  end
+
   # it "should not let me define a widget in a file starting with an underscore, and autoload it" do
   #   expect_exception('underscore_widget', 'NameError', /uninitialized constant Views::ClassLoadingSystemSpec::UnderscoreWidget/)
   # end
