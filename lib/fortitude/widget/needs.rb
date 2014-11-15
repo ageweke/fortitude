@@ -97,6 +97,24 @@ module Fortitude
 
         # INTERNAL USE ONLY
         def rebuild_my_needs_methods!
+          @_fortitude_needs_methods_built = false
+        end
+
+        def ensure_needs_are_built!
+          out = false
+
+          out ||= superclass.ensure_needs_are_built! unless self == ::Fortitude::Widget
+
+          unless @_fortitude_needs_methods_built
+            do_rebuild_my_needs_methods!
+            @_fortitude_needs_methods_built = true
+            out = true
+          end
+
+          out
+        end
+
+        def do_rebuild_my_needs_methods!
           n = needs_as_hash
 
           needs_text = n.map do |need, default_value|
@@ -117,7 +135,13 @@ module Fortitude
             needs_module.module_eval(text)
           end
         end
-        private :rebuild_my_needs_methods!
+
+        private :do_rebuild_my_needs_methods!
+      end
+
+      def assign_locals_from(assigns)
+        self.class.ensure_needs_are_built!
+        assign_locals_from(assigns)
       end
 
       # PUBLIC API

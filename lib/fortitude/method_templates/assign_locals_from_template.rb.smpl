@@ -1,4 +1,6 @@
 def assign_locals_from(assigns)
+  return assign_locals_from(assigns) if self.class.ensure_needs_are_built!
+
   @_fortitude_raw_assigns = assigns
   @_fortitude_raw_assigns = @_fortitude_raw_assigns.delete_if { |k,v| ! self.class.is_valid_ruby_method_name?(k) } # :if extra_assigns == :use
   @_fortitude_default_assigns = { }
