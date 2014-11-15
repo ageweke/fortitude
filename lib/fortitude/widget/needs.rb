@@ -68,7 +68,7 @@ module Fortitude
         def rebuild_needs!(why, klass = self)
           rebuilding(:needs, why, klass) do
             @_fortitude_needs_as_hash = nil
-            rebuild_my_needs_methods!
+            mark_my_needs_methods_as_stale!
             direct_subclasses.each { |s| s.rebuild_needs!(why, klass) }
           end
         end
@@ -96,25 +96,24 @@ module Fortitude
         end
 
         # INTERNAL USE ONLY
-        def rebuild_my_needs_methods!
-          @_fortitude_needs_methods_built = false
+        def mark_my_needs_methods_as_stale!
+          @_fortitude_my_needs_methods_up_to_date = false
         end
 
-        def ensure_needs_are_built!
+        def ensure_needs_methods_are_up_to_date!
           out = false
+          out ||= superclass.ensure_needs_methods_are_up_to_date! if superclass.respond_to?(:ensure_needs_methods_are_up_to_date!)
 
-          out ||= superclass.ensure_needs_are_built! unless self == ::Fortitude::Widget
-
-          unless @_fortitude_needs_methods_built
-            do_rebuild_my_needs_methods!
-            @_fortitude_needs_methods_built = true
+          unless @_fortitude_my_needs_methods_up_to_date
+            rebuild_my_needs_methods!
+            @_fortitude_my_needs_methods_up_to_date = true
             out = true
           end
 
           out
         end
 
-        def do_rebuild_my_needs_methods!
+        def rebuild_my_needs_methods!
           n = needs_as_hash
 
           needs_text = n.map do |need, default_value|
@@ -136,11 +135,11 @@ module Fortitude
           end
         end
 
-        private :do_rebuild_my_needs_methods!
+        private :rebuild_my_needs_methods!
       end
 
       def assign_locals_from(assigns)
-        self.class.ensure_needs_are_built!
+        self.class.ensure_needs_methods_are_up_to_date!
         assign_locals_from(assigns)
       end
 
