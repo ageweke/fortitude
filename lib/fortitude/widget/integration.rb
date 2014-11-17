@@ -15,6 +15,11 @@ module Fortitude
         end
         private :rebuilding
 
+        def invalidating(what, why, klass, &block)
+          ActiveSupport::Notifications.instrument("fortitude.invalidating", :what => what, :why => why, :originating_class => klass, :class => self, &block)
+        end
+        private :invalidating
+
         # INTERNAL USE ONLY
         def rebuild_text_methods!(why, klass = self)
           rebuilding(:text_methods, why, klass) do
@@ -54,7 +59,7 @@ module Fortitude
 
         _fortitude_on_class_inheritable_attribute_change(
           :debug, :extra_assigns, :use_instance_variables_for_assigns) do |attribute_name, old_value, new_value|
-          rebuild_needs!(:"#{attribute_name}_changed")
+          invalidate_needs!(:"#{attribute_name}_changed")
         end
 
         _fortitude_on_class_inheritable_attribute_change(:implicit_shared_variable_access) do |attribute_name, old_value, new_value|

@@ -45,7 +45,7 @@ module Fortitude
             @this_class_needs[name] = default_value.freeze
           end
 
-          rebuild_needs!(:need_declared)
+          invalidate_needs!(:need_declared)
 
           needs_as_hash
         end
@@ -65,11 +65,11 @@ module Fortitude
         end
 
         # INTERNAL USE ONLY
-        def rebuild_needs!(why, klass = self)
-          rebuilding(:needs, why, klass) do
+        def invalidate_needs!(why, klass = self)
+          invalidating(:needs, why, klass) do
             @_fortitude_needs_as_hash = nil
-            mark_my_needs_methods_as_stale!
-            direct_subclasses.each { |s| s.rebuild_needs!(why, klass) }
+            invalidate_my_needs_methods!
+            direct_subclasses.each { |s| s.invalidate_needs!(why, klass) }
           end
         end
 
@@ -96,17 +96,20 @@ module Fortitude
         end
 
         # INTERNAL USE ONLY
-        def mark_my_needs_methods_as_stale!
-          @_fortitude_my_needs_methods_up_to_date = false
+        def invalidate_my_needs_methods!
+          @_fortitude_my_needs_methods_valid = false
         end
 
-        def ensure_needs_methods_are_up_to_date!
+        def ensure_needs_methods_are_valid!
           out = false
-          out ||= superclass.ensure_needs_methods_are_up_to_date! if superclass.respond_to?(:ensure_needs_methods_are_up_to_date!)
+          out ||= superclass.ensure_needs_methods_are_valid! if superclass.respond_to?(:ensure_needs_methods_are_valid!)
 
-          unless @_fortitude_my_needs_methods_up_to_date
-            rebuild_my_needs_methods!
-            @_fortitude_my_needs_methods_up_to_date = true
+          unless @_fortitude_my_needs_methods_valid
+            rebuilding(:needs, :invalid, self) do
+              rebuild_my_needs_methods!
+              @_fortitude_my_needs_methods_valid = true
+            end
+
             out = true
           end
 
@@ -139,7 +142,7 @@ module Fortitude
       end
 
       def assign_locals_from(assigns)
-        self.class.ensure_needs_methods_are_up_to_date!
+        self.class.ensure_needs_methods_are_valid!
         assign_locals_from(assigns)
       end
 

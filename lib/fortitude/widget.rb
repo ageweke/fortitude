@@ -50,7 +50,7 @@ module Fortitude
     end
 
     rebuild_run_content!(:initial_setup)
-    rebuild_needs!(:initial_setup)
+    invalidate_needs!(:initial_setup)
     rebuild_text_methods!(:initial_setup)
   end
 end

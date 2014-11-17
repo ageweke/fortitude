@@ -16,6 +16,37 @@ describe "Fortitude needs", :type => :system do
     expect(child.needs(:baz => 'def_baz')).to eq(:foo => required, :bar => required, :baz => 'def_baz')
   end
 
+  it "should not rebuild 'needs' at all unless you actually use a widget" do
+    notifications = [ ]
+    ActiveSupport::Notifications.subscribe("fortitude.rebuilding") do |*args|
+      notifications << args
+    end
+
+    wc1 = widget_class do
+      def content
+        p "hello, world"
+      end
+    end
+
+    wc2 = widget_class do
+      needs :foo, :bar, :baz
+
+      def content
+        p "foo: #{foo}, bar: #{bar}"
+      end
+    end
+
+    wc3 = widget_class do
+      needs :foo, :bar
+
+      def content
+        p "foo: #{foo}"
+      end
+    end
+
+    expect(notifications).to eq([ ])
+  end
+
   it "should raise an exception if you try to modify a 'needs' default value" do
     wc = widget_class do
       needs :foo, :bar => [ 'a', 'b' ]
