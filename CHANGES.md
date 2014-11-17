@@ -1,5 +1,15 @@
 # Fortitude Releases
 
+## 0.0.9,
+
+* Fortitude internally uses dynamic compliation (method creation using things like `Class#class_eval`) to achieve
+  a lot of its high performance. This dynamic compliation happens entirely at class-load and setup time, which means
+  it is not a factor in runtime performance (and is, in fact, a deliberate tradeoff for very high runtime performance
+  in rendering). However, some users were encountering slowness when loading very large numbers of widget classes
+  &mdash; not instantiating them, just loading them &mdash; because this compilation was happening. This release makes
+  much of that compliation lazy, making such things considerably faster. (Thanks to [Leaf](https://github.com/leafo)
+  for reporting this issue and testing fixes for it!)
+
 ## 0.0.8, 13 November 2014
 
 * Fixed an issue where repeated reloading of a view in development mode in Rails could cause an error of the form
