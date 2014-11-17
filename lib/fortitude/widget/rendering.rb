@@ -23,17 +23,19 @@ module Fortitude
         end
       end
 
-      def render_to(rendering_context)
+      def render_to(rendering_context, &block_for_content_method)
         @_fortitude_rendering_context = rendering_context
         @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
+        @_fortitude_block_for_content_method = block_for_content_method
 
-        block = lambda { |*args| @_fortitude_rendering_context.yield_from_widget(*args) }
+        block = lambda { |*args| yield_from_widget(*args) }
 
         rendering_context.record_widget(self) do
           begin
             run_content(&block)
           ensure
             @_fortitude_rendering_context = nil
+            @_fortitude_block_for_content_method = nil
           end
         end
       end
@@ -50,12 +52,12 @@ module Fortitude
       end
 
       # PUBLIC API
-      def widget(w, hash = nil)
+      def widget(w, hash = nil, &block)
         if w.respond_to?(:render_to)
-          w.render_to(@_fortitude_rendering_context)
+          w.render_to(@_fortitude_rendering_context, &block)
         elsif w.kind_of?(Class)
           hash ||= { }
-          w.new(hash).render_to(@_fortitude_rendering_context)
+          w.new(hash, &block).render_to(@_fortitude_rendering_context)
         else
           raise "You tried to render a widget, but this is not valid: #{w.inspect}(#{hash.inspect})"
         end
@@ -67,8 +69,9 @@ module Fortitude
       end
 
       # PUBLIC API
-      def initialize(assigns = { })
+      def initialize(assigns = { }, &block)
         assign_locals_from(assigns)
+        @_fortitude_constructor_block = block
       end
 
       # INTERNAL USE ONLY
@@ -96,9 +99,24 @@ module Fortitude
       end
       private :_fortitude_class_for_new_buffer
 
+      def _fortitude_yield_from_widget(*args)
+        if @_fortitude_block_for_content_method
+          @_fortitude_block_for_content_method.call(*args)
+        elsif @_fortitude_constructor_block
+          @_fortitude_constructor_block.call(*args)
+        else
+          @_fortitude_rendering_context.yield_from_widget(*args)
+        end
+      end
+
       # PUBLIC API
       def yield_from_widget(*args)
-        @_fortitude_rendering_context.yield_from_widget(*args)
+        _fortitude_yield_from_widget(self, *args)
+      end
+
+      # PUBLIC API (Erector compatibility)
+      def call_block
+        _fortitude_yield_from_widget
       end
     end
   end

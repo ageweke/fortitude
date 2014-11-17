@@ -179,8 +179,8 @@ module Fortitude
 
     NEWLINE = "\n"
 
-    def yield_from_widget(*args)
-      raise "No layout to yield to!" unless @yield_block
+    def yield_from_widget(widget, *args)
+      raise Fortitude::Errors::NoBlockToYieldTo.new(widget) unless @yield_block
       result = @yield_block.call(*args)
       @output_buffer_holder.output_buffer << result if @render_yield_result
       result
