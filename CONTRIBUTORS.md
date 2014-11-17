@@ -13,3 +13,5 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
 * [Leaf](https://github.com/leafo) for:
   * Reporting slow widget classloading in very large systems due to eager, not lazy, complication of `needs`-related
     methods.
+  * Reporting the need for support for passing blocks to `widget`, and thus being able to `yield` from one widget
+    to another.

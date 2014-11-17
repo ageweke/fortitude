@@ -2,6 +2,43 @@
 
 ## 0.0.9,
 
+* Fortitude now supports passing blocks to widgets (above and beyond support for Rails' standard layouts and their
+  usage using `yield`). You can now do the following:
+
+```ruby
+class Views::Foo < Views::Base
+  def content
+    p "something here"
+    widget Views::Bar, :name => 'Yoko' { text "hello" }
+    p "something else"
+  end
+end
+
+class Views::Bar < Views::Base
+  def content
+    p "more content"
+    yield
+    p "even more content"
+  end
+end
+```
+
+  This will do as expected and cause `Views::Bar`'s `yield` call to call the block passed to it. Furthermore, because
+  it's often very useful to break a widget down into methods, and you might not want to explicitly pass the block all
+  over, you can call `yield_from_widget` from _any_ widget method and it will behave correctly. (This has actually
+  always been true in Fortitude for yielding to layouts; it just now will also yield to blocks passed into the widget
+  directly, too).
+
+  Fortitude first prefers a block passed in to `#widget`; it then looks for a block passed to the constructor of a
+  widget, and, finally, it will delegate to the layout (if any) if no other block is found. If there isn't even a
+  layout, you will receive an error.
+
+  Unlike Erector, Fortitude passes any arguments you give `yield` through to the widget, whether using `yield` or
+  `yield_from_widget`; it also passes, as the first argument, the widget instance being yielded from, too. This allows
+  a more elegant solution to the fact that the block is evaluated in the scope of the caller, not the wiget, and thus
+  may not have access to Fortitude methods (like `p`, `text`, and so on) if the caller is not itself a widget; you can
+  simply call those methods on the passed-in widget instance.
+
 * Fortitude internally uses dynamic compliation (method creation using things like `Class#class_eval`) to achieve
   a lot of its high performance. This dynamic compliation happens entirely at class-load and setup time, which means
   it is not a factor in runtime performance (and is, in fact, a deliberate tradeoff for very high runtime performance
