@@ -100,12 +100,12 @@ module Fortitude
           @_fortitude_my_needs_methods_valid = false
         end
 
-        def ensure_needs_methods_are_valid!
+        def ensure_needs_methods_are_valid!(originating_class = self)
           out = false
-          out ||= superclass.ensure_needs_methods_are_valid! if superclass.respond_to?(:ensure_needs_methods_are_valid!)
+          out ||= superclass.ensure_needs_methods_are_valid!(originating_class) if superclass.respond_to?(:ensure_needs_methods_are_valid!)
 
           unless @_fortitude_my_needs_methods_valid
-            rebuilding(:needs, :invalid, self) do
+            rebuilding(:needs, :invalid, originating_class) do
               rebuild_my_needs_methods!
               @_fortitude_my_needs_methods_valid = true
             end

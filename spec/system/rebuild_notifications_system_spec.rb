@@ -2,14 +2,25 @@ describe "Fortitude rebuilding notifications", :type => :system do
   before :each do
     @rebuild_notifications = [ ]
     rbn = @rebuild_notifications
-    ActiveSupport::Notifications.subscribe("fortitude.rebuilding") do |*args|
-      rbn << args
+    ActiveSupport::Notifications.subscribe("fortitude.rebuilding") do |name, start, finish, id, payload|
+      if payload[:what] == :needs && [ ::Fortitude::Widget, ::SystemHelpers::TestWidgetClass ].include?(payload[:class])
+        # So, here's the deal: needs get rebuilt on ::Fortitude::Widget and ::SystemHelpers::TestWidgetClass by
+        # whatever example in this file is the *first* one to actually instantiate a widget, and then not past that
+        # point, since we never change anything need-related on either of those classes. (Which is really important,
+        # or we'd reconfigure Fortitude internally for *all other specs*.)
+        #
+        # As a result, it's much simpler and more reliable to simply ignore these notifications than try to keep track
+        # of which is the first spec to cause these to be rebuilt. Specs below do check things like superclass-subclass
+        # needs invalidation, so we're good there too.
+      else
+        rbn << [ name, start, finish, id, payload ]
+      end
     end
 
     @invalidating_notifications = [ ]
     ivn = @invalidating_notifications
-    ActiveSupport::Notifications.subscribe("fortitude.invalidating") do |*args|
-      ivn << args
+    ActiveSupport::Notifications.subscribe("fortitude.invalidating") do |name, start, finish, id, payload|
+      ivn << [ name, start, finish, id, payload ]
     end
 
     @wc = widget_class
@@ -91,6 +102,68 @@ describe "Fortitude rebuilding notifications", :type => :system do
 
       @wc.use_instance_variables_for_assigns false
       expect_invalidating_notification(:what => :needs, :why => :use_instance_variables_for_assigns_changed)
+      expect_no_more_invalidating_notifications!(:needs)
+    end
+
+    it "should only rebuild needs when a widget is actually instantiated" do
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_no_more_rebuild_notifications!(:needs)
+
+      @wc.new
+
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_rebuild_notification(:what => :needs, :why => :invalid, :class => @wc, :originating_class => @wc)
+      expect_no_more_rebuild_notifications!(:needs)
+    end
+
+    it "should only rebuild needs when a widget is actually instantiated the first time" do
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_no_more_rebuild_notifications!(:needs)
+
+      @wc.new
+
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_rebuild_notification(:what => :needs, :why => :invalid, :class => @wc, :originating_class => @wc)
+      expect_no_more_rebuild_notifications!(:needs)
+
+      @wc.new
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_no_more_rebuild_notifications!(:needs)
+    end
+
+    it "should invalidate multiple times, but not rebuild more than once if multiple things are changed" do
+      @wc.new
+
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_rebuild_notification(:what => :needs, :why => :invalid, :class => @wc, :originating_class => @wc)
+      expect_no_more_rebuild_notifications!(:needs)
+
+      @wc.needs :foobar
+      @wc.use_instance_variables_for_assigns true
+
+      expect_invalidating_notification(:what => :needs, :why => :need_declared, :class => @wc, :originating_class => @wc)
+      expect_invalidating_notification(:what => :needs, :why => :use_instance_variables_for_assigns_changed, :class => @wc, :originating_class => @wc)
+      expect_no_more_invalidating_notifications!(:needs)
+    end
+
+    it "should rebuild on both parent and child classes when a parent class is modified" do
+      wc_child = widget_class(:superclass => @wc)
+
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_no_more_rebuild_notifications!(:needs)
+
+      @wc.needs :foobar
+
+      expect_invalidating_notification(:what => :needs, :why => :need_declared, :class => @wc, :originating_class => @wc)
+      expect_invalidating_notification(:what => :needs, :why => :need_declared, :class => wc_child, :originating_class => @wc)
+      expect_no_more_invalidating_notifications!(:needs)
+      expect_no_more_rebuild_notifications!(:needs)
+
+      wc_child.new(:foobar => 12)
+
+      expect_rebuild_notification(:what => :needs, :why => :invalid, :class => @wc, :originating_class => wc_child)
+      expect_rebuild_notification(:what => :needs, :why => :invalid, :class => wc_child, :originating_class => wc_child)
+      expect_no_more_rebuild_notifications!(:needs)
       expect_no_more_invalidating_notifications!(:needs)
     end
   end
