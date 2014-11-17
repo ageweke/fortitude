@@ -81,4 +81,31 @@ describe "Fortitude Erector compatibility", :type => :system do
       expect(render(wc.new(:foo => "the_foo", :bar => "the_bar"))).to eq("foo: the_foo, bar: the_bar")
     end
   end
+
+  it "should allow calling #call_block as an alias for #yield_from_widget, but not pass the widget instance" do
+    wc_sub = widget_class do
+      def content
+        text "inner_before"
+        call_block
+        text "inner_after"
+      end
+    end
+
+    wc = widget_class do
+      cattr_accessor :other_widget_class
+
+      def content
+        text "before"
+        widget other_widget_class do |*args|
+          raise "invalid: #{args.inspect}" if args.length > 0
+          text "middle"
+        end
+        text "after"
+      end
+    end
+
+    wc.other_widget_class = wc_sub
+
+    expect(render(wc)).to eq("beforeinner_beforemiddleinner_afterafter")
+  end
 end

@@ -149,5 +149,21 @@ you simply need to convert these to "p :class => :some_class" or
         @tag_name = tag_name
       end
     end
+
+    class NoBlockToYieldTo < Base
+      attr_reader :widget
+
+      def initialize(widget)
+        super(%{You're trying to call 'yield' (or 'yield_from_widget', or the Erector-compatibility method 'call_block')
+from the widget #{widget}; however, there is nothing to yield to. Fortitude
+looks for something to yield to in this order:
+  1. A block passed to a yield at render time directly (usually via the 'widget' call);
+  2. A block passed to the constructor of the widget;
+  3. The layout the widget is being rendered in.
+None of these exist here, and so calling 'yield', 'yield_from_widget', or 'call_block' is an
+undefined operation.})
+        @widget = widget
+      end
+    end
   end
 end
