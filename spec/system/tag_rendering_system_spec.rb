@@ -7,6 +7,30 @@ describe "Fortitude tag rendering", :type => :system do
     expect(r(&block)).to eq(value)
   end
 
+  it "should allow passing numbers to a tag" do
+    should_render_to("<p>123.45</p>") { p(123.45) }
+  end
+
+  it "should allow rendering nil to a tag" do
+    should_render_to("<p></p>") { p(nil) }
+  end
+
+  it "should allow rendering nil via text" do
+    should_render_to("") { text(nil) }
+  end
+
+  it "should allow rendering nil via rawtext" do
+    should_render_to("") { rawtext(nil) }
+  end
+
+  it "should render an attribute with no value if it's mapped to nil" do
+    should_render_to("<p class></p>") { p(:class => nil) }
+  end
+
+  it "should render an attribute with no value if it's mapped to nil, even with a prefix" do
+    should_render_to("<p foo-bar></p>") { p(:foo => { :bar => nil } )}
+  end
+
   it "should render a void tag correctly" do
     should_render_to("<hr>") { hr }
   end

@@ -156,57 +156,80 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
     VALUE prefix = prefix_and_output->prefix;
     VALUE rb_output = prefix_and_output->rb_output;
 
-    if (TYPE(value) == T_HASH) {
-        VALUE new_prefix_as_string;
-        ID dup;
-        ID to_s;
+    VALUE new_prefix_as_string;
+    ID dup;
+    ID to_s;
 
-#ifdef CONST_ID
-        CONST_ID(dup, "dup");
-        CONST_ID(to_s, "to_s");
-#else
-        dup = rb_intern("dup");
-        to_s = rb_intern("to_s");
-#endif
+    switch(TYPE(value)) {
+        case T_HASH:
+            #ifdef CONST_ID
+                CONST_ID(dup, "dup");
+                CONST_ID(to_s, "to_s");
+            #else
+                dup = rb_intern("dup");
+                to_s = rb_intern("to_s");
+            #endif
 
-        switch (TYPE(prefix)) {
-            case T_STRING:
-                new_prefix_as_string = rb_funcall(prefix, dup, 0);
-                fortitude_append_to(key, new_prefix_as_string);
-                break;
+            switch (TYPE(prefix)) {
+                case T_STRING:
+                    new_prefix_as_string = rb_funcall(prefix, dup, 0);
+                    fortitude_append_to(key, new_prefix_as_string);
+                    break;
 
-            case T_NIL:
-                new_prefix_as_string = rb_str_new("", 0);
-                fortitude_append_to(key, new_prefix_as_string);
-                break;
+                case T_NIL:
+                    new_prefix_as_string = rb_str_new("", 0);
+                    fortitude_append_to(key, new_prefix_as_string);
+                    break;
 
-            default:
-                rb_raise(rb_eArgError, "You can only use a String as a prefix (this is a native (C) method)");
-                break;
-        }
+                default:
+                    rb_raise(rb_eArgError, "You can only use a String as a prefix (this is a native (C) method)");
+                    break;
+            }
 
-        rb_str_cat2(new_prefix_as_string, "-");
-        method_append_as_attributes(value, rb_output, new_prefix_as_string);
-    } else {
-        rb_str_cat2(rb_output, " ");
+            rb_str_cat2(new_prefix_as_string, "-");
+            method_append_as_attributes(value, rb_output, new_prefix_as_string);
+            break;
 
-        switch (TYPE(prefix)) {
-            case T_STRING:
-                rb_str_append(rb_output, prefix);
-                break;
+        case T_NIL:
+            rb_str_cat2(rb_output, " ");
 
-            case T_NIL:
-                break;
+            switch (TYPE(prefix)) {
+                case T_STRING:
+                    rb_str_append(rb_output, prefix);
+                    break;
 
-            default:
-                rb_raise(rb_eArgError, "You can only use a String as a prefix (this is a native (C) method)");
-                break;
-        }
+                case T_NIL:
+                    break;
 
-        fortitude_append_to(key, rb_output);
-        rb_str_cat2(rb_output, "=\"");
-        fortitude_append_to(value, rb_output);
-        rb_str_cat2(rb_output, "\"");
+                default:
+                    rb_raise(rb_eArgError, "You can only use a String as a prefix (this is a native (C) method)");
+                    break;
+            }
+
+            fortitude_append_to(key, rb_output);
+            break;
+
+        default:
+            rb_str_cat2(rb_output, " ");
+
+            switch (TYPE(prefix)) {
+                case T_STRING:
+                    rb_str_append(rb_output, prefix);
+                    break;
+
+                case T_NIL:
+                    break;
+
+                default:
+                    rb_raise(rb_eArgError, "You can only use a String as a prefix (this is a native (C) method)");
+                    break;
+            }
+
+            fortitude_append_to(key, rb_output);
+            rb_str_cat2(rb_output, "=\"");
+            fortitude_append_to(value, rb_output);
+            rb_str_cat2(rb_output, "\"");
+            break;
     }
 
     return 0;

@@ -10,7 +10,7 @@ end
 
 def tag_rawtext(s)
   @_fortitude_rendering_context.about_to_output_non_whitespace!    # :if format_output
-  @_fortitude_output_buffer_holder.output_buffer.original_concat(s)
+  @_fortitude_output_buffer_holder.output_buffer.original_concat(s) if s != nil
 end
 
 alias_method :text, :tag_text
