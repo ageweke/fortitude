@@ -23,8 +23,11 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("") { rawtext(nil) }
   end
 
-  it "should render an attribute with no value if it's mapped to nil" do
+  it "should render an attribute with no value if it's mapped to nil, but an empty string if it's mapped to an empty string" do
     should_render_to("<p class></p>") { p(:class => nil) }
+    should_render_to("<p class>foo</p>") { p("foo", :class => nil) }
+    should_render_to("<p class=\"\"></p>") { p(:class => '') }
+    should_render_to("<p class=\"\">foo</p>") { p("foo", :class => '') }
   end
 
   it "should render an attribute with no value if it's mapped to nil, even with a prefix" do

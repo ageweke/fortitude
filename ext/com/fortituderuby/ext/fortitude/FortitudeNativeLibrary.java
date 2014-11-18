@@ -192,9 +192,12 @@ public class FortitudeNativeLibrary implements Library {
                     }
 
                     fortitude_append_to(key, output);
-                    output.cat(EQUALS_QUOTE);
-                    fortitude_append_to(value, output);
-                    output.cat('"');
+
+                    if (value != null && ! (value instanceof RubyNil)) {
+                        output.cat(EQUALS_QUOTE);
+                        fortitude_append_to(value, output);
+                        output.cat('"');
+                    }
                 }
             }
         }

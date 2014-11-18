@@ -50,9 +50,11 @@ end
         end
 
         fortitude_append_to(key, target)
-        target.original_concat(::Hash::FORTITUDE_EQUALS_QUOTE)
-        fortitude_append_to(value, target)
-        target.original_concat(::Hash::FORTITUDE_QUOTE)
+        if value
+          target.original_concat(::Hash::FORTITUDE_EQUALS_QUOTE)
+          fortitude_append_to(value, target)
+          target.original_concat(::Hash::FORTITUDE_QUOTE)
+        end
       end
     end
 
