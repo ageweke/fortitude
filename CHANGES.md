@@ -59,6 +59,14 @@ end
   much of that compliation lazy, making such things considerably faster. (Thanks to [Leaf](https://github.com/leafo)
   for reporting this issue and testing fixes for it!)
 
+* Along these lines, the method Fortitude was using to detect presence of localized content methods (Fortitude will
+  run a method called `localized_content_fr` _instead_ of just `content` if that method is present and the current
+  I18n locale is `fr`) turned out to be quite expensive. (It was using Ruby's `#method_added`, `#method_removed`, and
+  `#include` callbacks/methods.) Those are now no longer used at all, and, instead, there is a new
+  `use_localized_content_methods` configuration setting that must be set to `true` (it defaults to `false`) if you want
+  to use such localized content methods. (Thanks to [Leaf](https://github.com/leafo) for helping figure out this was
+  the problem!)
+
 ## 0.0.8, 13 November 2014
 
 * Fixed an issue where repeated reloading of a view in development mode in Rails could cause an error of the form

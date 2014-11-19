@@ -1,6 +1,8 @@
 describe "Fortitude native (non-Rails) localization support", :type => :system do
   before :each do
     @klass = widget_class do
+      use_localized_content_methods true
+
       def localized_content_en
         text "english!"
       end
@@ -47,6 +49,8 @@ describe "Fortitude native (non-Rails) localization support", :type => :system d
     before :each do
       @klass = widget_class do
         attr_accessor :widget_locale
+
+        use_localized_content_methods true
 
         def initialize(attributes = { })
           self.widget_locale = attributes.delete(:widget_locale)

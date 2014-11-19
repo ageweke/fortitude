@@ -269,6 +269,8 @@ describe "Fortitude staticization behavior", :type => :system do
   it "should still run the proper localized content methods even if #content, or one of them, is static" do
     $global_value = 12345
     wc = widget_class do
+      use_localized_content_methods true
+
       def initialize(locale)
         self.widget_locale = locale
         super({ })

@@ -30,6 +30,7 @@ module Fortitude
           end
         end)
         _fortitude_class_inheritable_attribute :debug, false, [ true, false ]
+        _fortitude_class_inheritable_attribute :use_localized_content_methods, false, [ true, false ]
       end
 
       module ClassMethods

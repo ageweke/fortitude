@@ -77,6 +77,10 @@ module Fortitude
             remove_around_content :start_and_end_comments, :fail_if_not_present => false
           end
         end
+
+        _fortitude_on_class_inheritable_attribute_change(:use_localized_content_methods) do |attribute_name, old_value, new_value|
+          rebuild_run_content!(:use_localized_content_methods_changed)
+        end
       end
     end
   end

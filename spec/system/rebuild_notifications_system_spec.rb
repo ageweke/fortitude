@@ -189,17 +189,15 @@ describe "Fortitude rebuilding notifications", :type => :system do
       expect_no_more_rebuild_notifications!(:run_content)
     end
 
-    it "should fire a notification when rebuilding because a localized content method was added" do
+    it "should fire a notification when rebuilding because use_localized_content_methods was changed" do
       @wc.class_eval do
-        def localized_content_en
-          text "foo"
-        end
+        use_localized_content_methods true
       end
-      expect_rebuild_notification(:what => :run_content, :why => :localized_methods_presence_changed)
+      expect_rebuild_notification(:what => :run_content, :why => :use_localized_content_methods_changed)
       expect_no_more_rebuild_notifications!(:run_content)
 
-      @wc.send(:remove_method, :localized_content_en)
-      expect_rebuild_notification(:what => :run_content, :why => :localized_methods_presence_changed)
+      @wc.send(:use_localized_content_methods, false)
+      expect_rebuild_notification(:what => :run_content, :why => :use_localized_content_methods_changed)
       expect_no_more_rebuild_notifications!(:run_content)
     end
   end

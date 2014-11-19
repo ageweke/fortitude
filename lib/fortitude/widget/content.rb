@@ -27,7 +27,7 @@ module Fortitude
               text += "  " + ("  " * index) + "#{method_name}(*args) do\n"
             end
 
-            if has_localized_content_methods?
+            if use_localized_content_methods
               text += "  " + ("  " * acm.length) + "the_locale = widget_locale\n"
               text += "  " + ("  " * acm.length) + "locale_method_name = \"localized_content_\#{the_locale}\" if the_locale\n"
               text += "  " + ("  " * acm.length) + "out = if locale_method_name && respond_to?(locale_method_name)\n"

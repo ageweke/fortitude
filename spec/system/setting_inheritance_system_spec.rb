@@ -11,6 +11,7 @@ describe "Fortitude setting inheritance", :type => :system do
   #   - translation_base
   #   - enforce_id_uniqueness
   #   - debug
+  #   - use_localized_content_methods
   #
   # needs are covered by the needs_system_spec, and around_content is covered by the around_content_system_spec;
   # these are not tested here because their semantics are quite a bit more complex than the settings here.
@@ -33,6 +34,32 @@ describe "Fortitude setting inheritance", :type => :system do
 
     rendering_context = rc(:helpers_object => ho)
     expect(render(klass, :rendering_context => rendering_context)).to eq("translation: translation_for:#{expected_result}.foo.bar.baz")
+  end
+
+
+  def use_localized_content_methods_should_be(expected_result, *klasses)
+    klasses.each do |klass|
+      expect(klass.use_localized_content_methods).to eq(expected_result)
+      send("localized_content_methods_should_be_for_class", expected_result, klass)
+    end
+  end
+
+  def localized_content_methods_should_be_for_class(expected_result, klass)
+    klass.send(:define_method, :content) do
+      text "hello!"
+    end
+
+    klass.send(:define_method, :localized_content_fr) do
+      text "bonjour!"
+    end
+
+    klass.send(:define_method, :widget_locale) { :fr }
+
+    if expected_result
+      expect(render(klass)).to eq("bonjour!")
+    else
+      expect(render(klass)).to eq("hello!")
+    end
   end
 
 
@@ -633,5 +660,25 @@ describe "Fortitude setting inheritance", :type => :system do
     @grandparent.use_instance_variables_for_assigns false
     use_instance_variables_for_assigns_should_be(false, @grandparent, @parent2, @child21, @child22)
     use_instance_variables_for_assigns_should_be(true, @parent1, @child11, @child12)
+  end
+
+  it "should properly inherit use_localized_content_methods" do
+    use_localized_content_methods_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
+
+    @parent1.use_localized_content_methods true
+    use_localized_content_methods_should_be(false, @grandparent, @parent2, @child21, @child22)
+    use_localized_content_methods_should_be(true, @parent1, @child11, @child12)
+
+    @parent2.use_localized_content_methods false
+    use_localized_content_methods_should_be(false, @grandparent, @parent2, @child21, @child22)
+    use_localized_content_methods_should_be(true, @parent1, @child11, @child12)
+
+    @grandparent.use_localized_content_methods true
+    use_localized_content_methods_should_be(false, @parent2, @child21, @child22)
+    use_localized_content_methods_should_be(true, @grandparent, @parent1, @child11, @child12)
+
+    @grandparent.use_localized_content_methods false
+    use_localized_content_methods_should_be(false, @grandparent, @parent2, @child21, @child22)
+    use_localized_content_methods_should_be(true, @parent1, @child11, @child12)
   end
 end
