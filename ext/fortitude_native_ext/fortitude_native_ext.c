@@ -3,7 +3,7 @@
 void Init_fortitude_native_ext();
 
 VALUE method_append_escaped_string(VALUE self, VALUE rb_output);
-VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix);
+VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix, VALUE allows_bare_attributes);
 
 void Init_fortitude_native_ext() {
     VALUE string_class, hash_class;
@@ -12,7 +12,7 @@ void Init_fortitude_native_ext() {
     rb_define_method(string_class, "fortitude_append_escaped_string", method_append_escaped_string, 1);
 
     hash_class = rb_const_get(rb_cObject, rb_intern("Hash"));
-    rb_define_method(hash_class, "fortitude_append_as_attributes", method_append_as_attributes, 2);
+    rb_define_method(hash_class, "fortitude_append_as_attributes", method_append_as_attributes, 3);
 }
 
 #define BUF_SIZE 256
@@ -145,16 +145,18 @@ void fortitude_append_to(VALUE object, VALUE rb_output) {
     }
 }
 
-struct fortitude_prefix_and_output {
+struct fortitude_append_key_and_value_data {
     VALUE prefix;
     VALUE rb_output;
+    VALUE allows_bare_attributes;
 };
 
-int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_output_value) {
-    struct fortitude_prefix_and_output * prefix_and_output = (struct fortitude_prefix_and_output *)prefix_and_output_value;
+int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE key_and_value_data_param) {
+    struct fortitude_append_key_and_value_data * key_and_value_data = (struct fortitude_append_key_and_value_data *)key_and_value_data_param;
 
-    VALUE prefix = prefix_and_output->prefix;
-    VALUE rb_output = prefix_and_output->rb_output;
+    VALUE prefix = key_and_value_data->prefix;
+    VALUE rb_output = key_and_value_data->rb_output;
+    VALUE allows_bare_attributes = key_and_value_data->allows_bare_attributes;
 
     VALUE new_prefix_as_string;
     ID dup;
@@ -187,10 +189,14 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
             }
 
             rb_str_cat2(new_prefix_as_string, "-");
-            method_append_as_attributes(value, rb_output, new_prefix_as_string);
+            method_append_as_attributes(value, rb_output, new_prefix_as_string, allows_bare_attributes);
             break;
 
         case T_NIL:
+        case T_FALSE:
+            break;
+
+        case T_TRUE:
             rb_str_cat2(rb_output, " ");
 
             switch (TYPE(prefix)) {
@@ -207,6 +213,13 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
             }
 
             fortitude_append_to(key, rb_output);
+            if (TYPE(allows_bare_attributes) == T_TRUE) {
+                /* ok */
+            } else {
+                rb_str_cat2(rb_output, "=\"");
+                fortitude_append_to(key, rb_output);
+                rb_str_cat2(rb_output, "\"");
+            }
             break;
 
         default:
@@ -236,17 +249,18 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE prefix_and_outp
 }
 
 
-VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix) {
-    struct fortitude_prefix_and_output prefix_and_output;
+VALUE method_append_as_attributes(VALUE self, VALUE rb_output, VALUE prefix, VALUE allows_bare_attributes) {
+    struct fortitude_append_key_and_value_data key_and_value_data;
 
     if (TYPE(rb_output) != T_STRING) {
         rb_raise(rb_eArgError, "You can only append to a String (this is a native (C) method)");
     }
 
-    prefix_and_output.prefix = prefix;
-    prefix_and_output.rb_output = rb_output;
+    key_and_value_data.prefix = prefix;
+    key_and_value_data.rb_output = rb_output;
+    key_and_value_data.allows_bare_attributes = allows_bare_attributes;
 
-    rb_hash_foreach(self, fortitude_append_key_and_value, (VALUE) &prefix_and_output);
+    rb_hash_foreach(self, fortitude_append_key_and_value, (VALUE) &key_and_value_data);
     return Qnil;
 }
 

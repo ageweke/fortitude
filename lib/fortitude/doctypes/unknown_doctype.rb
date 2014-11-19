@@ -15,6 +15,10 @@ module Fortitude
       def needs_cdata_in_javascript_tag?
         false
       end
+
+      def allows_bare_attributes?
+        true
+      end
     end
   end
 end

@@ -47,62 +47,84 @@ describe "Fortitude doctype support", :type => :system do
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
       :requires_close_void_tags_to_be => nil,
       :doctype_line => '<!DOCTYPE html>',
-      :javascript => :none
+      :javascript => :none,
+      :true_value_has_attribute_value => false
     },
 
     :html4_strict => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => false,
       :requires_close_void_tags_to_be => false,
       :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">',
-      :javascript => :type
+      :javascript => :type,
+      :true_value_has_attribute_value => false
     },
 
     :html4_transitional => {
       :allows_dir  => true, :allows_background => true, :allows_frame => false, :closes_void_tags => false,
       :requires_close_void_tags_to_be => false,
       :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
-      :javascript => :type
+      :javascript => :type,
+      :true_value_has_attribute_value => false
     },
 
     :html4_frameset => {
       :allows_dir  => true, :allows_background => true, :allows_frame => true, :closes_void_tags => false,
       :requires_close_void_tags_to_be => false,
       :doctype_line => '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">',
-      :javascript => :type
+      :javascript => :type,
+      :true_value_has_attribute_value => false
     },
 
     :xhtml10_strict => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => true,
       :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
-      :javascript => :type_and_cdata
+      :javascript => :type_and_cdata,
+      :true_value_has_attribute_value => true
     },
 
     :xhtml10_transitional => {
       :allows_dir  => true, :allows_background => true, :allows_frame => false, :closes_void_tags => true,
       :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
-      :javascript => :type_and_cdata
+      :javascript => :type_and_cdata,
+      :true_value_has_attribute_value => true
     },
 
     :xhtml10_frameset => {
       :allows_dir  => true, :allows_background => true, :allows_frame => true, :closes_void_tags => true,
       :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">',
-      :javascript => :type_and_cdata
+      :javascript => :type_and_cdata,
+      :true_value_has_attribute_value => true
     },
 
     :xhtml11 => {
       :allows_dir  => false, :allows_background => false, :allows_frame => false, :closes_void_tags => true,
       :requires_close_void_tags_to_be => true,
       :doctype_line => '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">',
-      :javascript => :type_and_cdata
+      :javascript => :type_and_cdata,
+      :true_value_has_attribute_value => true
     }
   }.each do |doctype, expected_results|
     describe doctype do
       let(:the_widget_class) {
         @classes_by_doctype[doctype] ||= wc_with_doctype(doctype)
       }
+
+      it "should #{expected_results[:true_value_has_attribute_value] ? "" : "not "}have an attribute value for attribute values of true" do
+        the_widget_class.class_eval do
+          def content
+            p(:class => true)
+          end
+        end
+
+        if expected_results[:true_value_has_attribute_value]
+          expect(render(the_widget_class)).to eq("<p class=\"class\"></p>")
+        else
+          expect(render(the_widget_class)).to eq("<p class></p>")
+        end
+      end
 
       it "should #{expected_results[:allows_dir] ? "" : "not "}allow <dir>" do
         the_widget_class.class_eval do

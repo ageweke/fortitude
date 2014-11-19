@@ -39,6 +39,18 @@ end
   may not have access to Fortitude methods (like `p`, `text`, and so on) if the caller is not itself a widget; you can
   simply call those methods on the passed-in widget instance.
 
+  Thank you to [Leaf](https://github.com/leafo) for bringing up this issue!
+
+* The exact interpretation of attribute values has changed. Along with
+  [considerable discussion](https://github.com/ageweke/fortitude/issues/12), it became clear that the most desirable
+  behavior was the following: attributes with a value of `false` or `nil` simply are not output at all (thus making
+  behavior like `input(:type => :checkbox, :checked => some_boolean_variable)` work properly); attributes with a
+  value of `true` are output as the key only (so the previous example becomes `<input type="checkbox" checked>` if
+  `some_boolean_variable` is `true`) &mdash; except in XHTML document types, where that would be illegal, so they
+  become (_e.g._) `<input type="checkbox" checked="checked">`; and attributes mapped to the empty string are output
+  with a value of the empty string. Many thanks to [Leaf](https://github.com/leafo) and
+  [Adam Becker](https://github.com/ajb) for all the discussion and validation around this!
+
 * Fortitude internally uses dynamic compliation (method creation using things like `Class#class_eval`) to achieve
   a lot of its high performance. This dynamic compliation happens entirely at class-load and setup time, which means
   it is not a factor in runtime performance (and is, in fact, a deliberate tradeoff for very high runtime performance

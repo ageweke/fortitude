@@ -25,7 +25,7 @@ end
     const_set(constant_name, value)
   end
 
-  def fortitude_append_as_attributes(output, prefix)
+  def fortitude_append_as_attributes(output, prefix, allows_bare_attributes)
     raise ArgumentError, "You can only append to a String" unless output.kind_of?(String)
 
     target = ::Hash::TARGET_BASE.dup
@@ -39,21 +39,34 @@ end
         end
 
         new_prefix.original_concat(::Hash::FORTITUDE_HYPHEN)
-        value.fortitude_append_as_attributes(target, new_prefix)
+        value.fortitude_append_as_attributes(target, new_prefix, allows_bare_attributes)
       else
-        target.original_concat(::Hash::FORTITUDE_SPACE)
+        if value == nil || value == false
+          # nothing
+        else
+          target.original_concat(::Hash::FORTITUDE_SPACE)
 
-        case prefix
-        when String then target.original_concat(prefix)
-        when nil then nil
-        else raise ArgumentError, "You can only use a String as a prefix"
-        end
+          case prefix
+          when String then target.original_concat(prefix)
+          when nil then nil
+          else raise ArgumentError, "You can only use a String as a prefix"
+          end
 
-        fortitude_append_to(key, target)
-        if value
-          target.original_concat(::Hash::FORTITUDE_EQUALS_QUOTE)
-          fortitude_append_to(value, target)
-          target.original_concat(::Hash::FORTITUDE_QUOTE)
+          fortitude_append_to(key, target)
+
+          if value == true
+            if allows_bare_attributes
+              # nothing here
+            else
+              target.original_concat(::Hash::FORTITUDE_EQUALS_QUOTE)
+              fortitude_append_to(key, target)
+              target.original_concat(::Hash::FORTITUDE_QUOTE)
+            end
+          else
+            target.original_concat(::Hash::FORTITUDE_EQUALS_QUOTE)
+            fortitude_append_to(value, target)
+            target.original_concat(::Hash::FORTITUDE_QUOTE)
+          end
         end
       end
     end

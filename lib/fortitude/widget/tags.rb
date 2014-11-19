@@ -48,7 +48,8 @@ module Fortitude
                 :record_emitting_tag => self._fortitude_record_emitting_tag?,
                 :enforce_attribute_rules => self.enforce_attribute_rules,
                 :enforce_id_uniqueness => self.enforce_id_uniqueness,
-                :close_void_tags => self.close_void_tags)
+                :close_void_tags => self.close_void_tags,
+                :allows_bare_attributes => self.doctype.allows_bare_attributes?)
             end
 
             direct_subclasses.each { |s| s.rebuild_tag_methods!(why, which_tags_in, klass) }

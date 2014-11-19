@@ -118,7 +118,7 @@ module Fortitude
       def define_method_on!(mod, options = {})
         options.assert_valid_keys(
           :record_emitting_tag, :enforce_attribute_rules, :enable_formatting,
-          :enforce_id_uniqueness, :close_void_tags)
+          :enforce_id_uniqueness, :close_void_tags, :allows_bare_attributes)
 
         unless mod.respond_to?(:fortitude_tag_support_included?) && mod.fortitude_tag_support_included?
           mod.send(:include, ::Fortitude::Tags::TagSupport)
@@ -153,6 +153,7 @@ module Fortitude
           :record_emitting_tag => (!! options[:record_emitting_tag]),
           :needs_attribute_rules => !! options[:enforce_attribute_rules],
           :needs_id_uniqueness => !! options[:enforce_id_uniqueness],
+          :allows_bare_attributes => (!! options[:allows_bare_attributes]),
           :needs_formatting => needs_formatting, :content_allowed => @content_allowed,
           :newline_before => @newline_before,
           :escape_direct_content => @escape_direct_content,

@@ -12,6 +12,7 @@ describe "Fortitude void tags", :type => :system do
 
   it "should not close void tags by default" do
     vtc = widget_class(:superclass => Fortitude::Widget) do
+      doctype SystemHelpers::TestDoctype.new
       tag :thevoid, :content_allowed => false
 
       def content

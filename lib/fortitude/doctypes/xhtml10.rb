@@ -12,6 +12,10 @@ module Fortitude
         true
       end
 
+      def allows_bare_attributes?
+        false
+      end
+
       def close_void_tags_must_be
         true
       end

@@ -23,7 +23,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       this_tag.validate_attributes(self, content_or_attributes)            # :if needs_attribute_rules
       this_tag.validate_id_uniqueness(self, content_or_attributes)         # :if needs_id_uniqueness
       o.#{concat_method}(#{partial_open_const})
-      content_or_attributes.fortitude_append_as_attributes(o, nil)
+      content_or_attributes.fortitude_append_as_attributes(o, nil, #{allows_bare_attributes})
 
       if block_given?
         _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
@@ -49,7 +49,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       this_tag.validate_attributes(self, attributes)                       # :if needs_attribute_rules
       this_tag.validate_id_uniqueness(self, attributes)                    # :if needs_id_uniqueness
       o.#{concat_method}(#{partial_open_const})
-      attributes.fortitude_append_as_attributes(o, nil)
+      attributes.fortitude_append_as_attributes(o, nil, #{allows_bare_attributes})
       o.#{concat_method}(#{partial_open_end_const})
 
       rc.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG, content_or_attributes, nil) { } unless content_or_attributes.instance_variable_get("@html_safe") # :if record_emitting_tag

@@ -12,6 +12,12 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     (resulting in `uninitialized constant` or `superclass mismatch` errors) in development mode.
 * [Leaf](https://github.com/leafo) for:
   * Reporting slow widget classloading in very large systems due to eager, not lazy, complication of `needs`-related
-    methods.
+    methods, and significant work helping determine that widget localization support was a major source of slowness
+    here.
   * Reporting the need for support for passing blocks to `widget`, and thus being able to `yield` from one widget
     to another.
+  * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
+    from Fortitude.
+* [Adam Becker](https://github.com/ajb) for:
+  * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
+    from Fortitude.

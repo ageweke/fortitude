@@ -23,15 +23,29 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("") { rawtext(nil) }
   end
 
-  it "should render an attribute with no value if it's mapped to nil, but an empty string if it's mapped to an empty string" do
-    should_render_to("<p class></p>") { p(:class => nil) }
-    should_render_to("<p class>foo</p>") { p("foo", :class => nil) }
-    should_render_to("<p class=\"\"></p>") { p(:class => '') }
-    should_render_to("<p class=\"\">foo</p>") { p("foo", :class => '') }
+  it "should render an attribute mapped to nil as missing" do
+    should_render_to("<p></p>") { p(:class => nil) }
+    should_render_to("<p></p>") { p(:foo => { :bar => nil }) }
   end
 
-  it "should render an attribute with no value if it's mapped to nil, even with a prefix" do
-    should_render_to("<p foo-bar></p>") { p(:foo => { :bar => nil } )}
+  it "should render an attribute mapped to the empty string as the empty string" do
+    should_render_to("<p class=\"\"></p>") { p(:class => '') }
+    should_render_to("<p foo-bar=\"\"></p>") { p(:foo => { :bar => '' }) }
+  end
+
+  it "should render an attribute mapped to false as missing" do
+    should_render_to("<p></p>") { p(:class => false) }
+    should_render_to("<p></p>") { p(:foo => { :bar => false }) }
+  end
+
+  it "should render an attribute mapped to true as just a bare attribute" do
+    should_render_to("<p class></p>") { p(:class => true) }
+    should_render_to("<p foo-bar></p>") { p(:foo => { :bar => true }) }
+  end
+
+  it "should render an attribute mapped to the string 'true' as that string" do
+    should_render_to("<p class=\"true\"></p>") { p(:class => 'true') }
+    should_render_to("<p foo-bar=\"true\"></p>") { p(:foo => { :bar => 'true' }) }
   end
 
   it "should render a void tag correctly" do

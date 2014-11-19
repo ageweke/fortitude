@@ -42,6 +42,10 @@ module SystemHelpers
       { }
     end
 
+    def allows_bare_attributes?
+      true
+    end
+
     def needs_cdata_in_javascript_tag?
       false
     end

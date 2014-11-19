@@ -3,6 +3,7 @@ package com.fortituderuby.ext.fortitude;
 import java.io.IOException;
 import org.jruby.Ruby;
 import org.jruby.RubyBasicObject;
+import org.jruby.RubyBoolean;
 import org.jruby.RubyArray;
 import org.jruby.RubyClass;
 import org.jruby.RubyFixnum;
@@ -159,13 +160,15 @@ public class FortitudeNativeLibrary implements Library {
             public final ThreadContext threadContext;
             public final RubyString prefix;
             public final RubyString output;
+            public final RubyBoolean allowsBareAttributes;
 
             public static final byte[] EQUALS_QUOTE = new byte[] { (byte) '=', (byte) '"' };
 
-            public AppendKeyAndValueVisitor(ThreadContext threadContext, RubyString prefix, RubyString output) {
+            public AppendKeyAndValueVisitor(ThreadContext threadContext, RubyString prefix, RubyString output, RubyBoolean allowsBareAttributes) {
                 this.threadContext = threadContext;
                 this.prefix = prefix;
                 this.output = output;
+                this.allowsBareAttributes = allowsBareAttributes;
             }
 
             public void visit(IRubyObject key, IRubyObject value) {
@@ -181,7 +184,9 @@ public class FortitudeNativeLibrary implements Library {
                     }
 
                     newPrefix.cat('-');
-                    fortitude_append_as_attributes(threadContext, value, output, newPrefix);
+                    fortitude_append_as_attributes(threadContext, value, output, newPrefix, this.allowsBareAttributes);
+                } else if ((value instanceof RubyNil) || ((value instanceof RubyBoolean) && (! value.isTrue()))) {
+                    // nothing here
                 } else {
                     output.cat(' ');
 
@@ -193,7 +198,15 @@ public class FortitudeNativeLibrary implements Library {
 
                     fortitude_append_to(key, output);
 
-                    if (value != null && ! (value instanceof RubyNil)) {
+                    if ((value instanceof RubyBoolean) && (value.isTrue())) {
+                        if (this.allowsBareAttributes.isTrue()) {
+                            // ok, nothing here
+                        } else {
+                            output.cat(EQUALS_QUOTE);
+                            fortitude_append_to(key, output);
+                            output.cat('"');
+                        }
+                    } else {
                         output.cat(EQUALS_QUOTE);
                         fortitude_append_to(value, output);
                         output.cat('"');
@@ -203,7 +216,7 @@ public class FortitudeNativeLibrary implements Library {
         }
 
         @JRubyMethod(name = "fortitude_append_as_attributes")
-        public static IRubyObject fortitude_append_as_attributes(ThreadContext context, IRubyObject self, IRubyObject output, IRubyObject prefix) {
+        public static IRubyObject fortitude_append_as_attributes(ThreadContext context, IRubyObject self, IRubyObject output, IRubyObject prefix, IRubyObject allowsBareAttributes) {
             if (! (output instanceof RubyString)) {
                 RaiseException exception = runtime.newArgumentError("You can only append to a String (this is a native (Java) method)");
                 throw exception;
@@ -216,7 +229,7 @@ public class FortitudeNativeLibrary implements Library {
                 throw exception;
             }
 
-            AppendKeyAndValueVisitor visitor = new AppendKeyAndValueVisitor(context, (RubyString) prefix, (RubyString) output);
+            AppendKeyAndValueVisitor visitor = new AppendKeyAndValueVisitor(context, (RubyString) prefix, (RubyString) output, (RubyBoolean) allowsBareAttributes);
 
             ((RubyHash) self).visitAll(visitor);
 
