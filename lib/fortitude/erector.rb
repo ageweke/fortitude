@@ -23,6 +23,7 @@ module Fortitude
 
       def is_erector_widget_class?(widget_class)
         return false unless is_erector_available?
+        return false unless widget_class.kind_of?(::Class)
         return true if widget_class == ::Erector::Widget
         return false if widget_class == ::Object
         return is_erector_widget_class?(widget_class.superclass)

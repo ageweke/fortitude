@@ -1,4 +1,5 @@
 require 'active_support/concern'
+require 'action_controller/metal/renderers'
 
 module Fortitude
   module Rails
@@ -19,6 +20,7 @@ module Fortitude
         ::Fortitude::RenderingContext.new(options)
       end
 
+
       # This is our support for render :widget. Although, originally, it looked like creating a new subclass
       # of ActionView::Template was going to be the correct thing to do here, it turns out it isn't: the entire
       # template system is predicated around the idea that you have a template, which is compiled to output
@@ -32,7 +34,7 @@ module Fortitude
       # widget's output, and let Rails take it away from there.
       def render_with_fortitude(*args, &block)
         if (options = args[0]).kind_of?(Hash)
-          if (widget = options[:widget])
+          if (widget = options[:widget]) && false
             rendering_context = fortitude_rendering_context_for(self, nil)
             widget.render_to(rendering_context)
 
@@ -74,4 +76,33 @@ module Fortitude
       end
     end
   end
+end
+
+::ActionController.add_renderer(:widget) do |widget, options|
+  if ::Fortitude::Erector.is_erector_widget_class?(widget) || ::Fortitude::Erector.is_erector_widget_class?(widget.class)
+    return ::Erector::Rails.render(widget, view_context, { }, false, options)
+  end
+
+  # self.content_type ||= options[:content_type] || Mime[:html]
+  if widget.kind_of?(Class)
+    if widget < ::Fortitude::Widget
+      widget = widget.new(widget.extract_needed_assigns_from(view_context.assigns))
+    else
+      raise "You tried to render something using 'render :widget' that is a class, but not a subclass of Fortitude::Widget: #{widget.inspect}"
+    end
+  end
+
+  if (! widget.kind_of?(::Fortitude::Widget))
+    raise "You tried to render something using 'render :widget' that is neither an instance of a subclass of Fortitude::Widget, nor a class that inherits from Fortitude::Widget: #{widget.inspect}"
+  end
+
+  rendering_context = create_fortitude_rendering_context(:helpers_object => view_context)
+  widget.render_to(rendering_context)
+
+  passed_options = options.dup
+  passed_options.delete(:widget)
+  passed_options[:text] = rendering_context.output_buffer_holder.output_buffer.to_s
+  passed_options[:layout] = true unless passed_options.has_key?(:layout)
+
+  return render_to_string(passed_options)
 end
