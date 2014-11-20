@@ -41,7 +41,7 @@ class RenderingSystemSpecController < ApplicationController
   def render_widget_via_inline
     @name = "Fred"
     proc = lambda do
-      p "this is an inline widget named #{shared_variables[:name]}"
+      p "this is an inline widget named #{name}"
     end
     render :inline => proc, :type => :fortitude
   end
