@@ -11,6 +11,19 @@ class RenderingSystemSpecController < ApplicationController
     render :widget => Views::WidgetToRender.new(:name => 'Fred')
   end
 
+  def render_widget_with_helper
+    render :widget => Views::WidgetToRenderWithHelper.new
+  end
+
+  def render_widget_class_only
+    render :widget => Views::WidgetToRenderClassOnly
+  end
+
+  def render_widget_class_and_assigns
+    @name = 'Yaravan'
+    render :widget => Views::WidgetToRender
+  end
+
   def render_widget_without_layout
     render :widget => Views::WidgetToRender.new(:name => 'Fred'), :layout => false
   end
