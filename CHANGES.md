@@ -51,21 +51,17 @@ end
   with a value of the empty string. Many thanks to [Leaf](https://github.com/leafo) and
   [Adam Becker](https://github.com/ajb) for all the discussion and validation around this!
 
-* Fortitude internally uses dynamic compliation (method creation using things like `Class#class_eval`) to achieve
-  a lot of its high performance. This dynamic compliation happens entirely at class-load and setup time, which means
-  it is not a factor in runtime performance (and is, in fact, a deliberate tradeoff for very high runtime performance
-  in rendering). However, some users were encountering slowness when loading very large numbers of widget classes
-  &mdash; not instantiating them, just loading them &mdash; because this compilation was happening. This release makes
-  much of that compliation lazy, making such things considerably faster. (Thanks to [Leaf](https://github.com/leafo)
-  for reporting this issue and testing fixes for it!)
+* Multiple huge performance increases in Fortitude's class-loading time for widgets. Fortitude internally uses
+  dynamic compilation of many methods to achieve the very highest runtime performance; however, the system that did
+  this compilation could cause slow startup times if you had a very large number of widgets. Fortitude now lazy-
+  compiles some methods and caches its own internal trivial template language in order to make startup much faster
+  without slowing down critical runtime performance. Many thanks to [Leaf](https://github.com/leafo) for reporting this
+  issue and testing a number of fixes for it as they were made!
 
-* Along these lines, the method Fortitude was using to detect presence of localized content methods (Fortitude will
-  run a method called `localized_content_fr` _instead_ of just `content` if that method is present and the current
-  I18n locale is `fr`) turned out to be quite expensive. (It was using Ruby's `#method_added`, `#method_removed`, and
-  `#include` callbacks/methods.) Those are now no longer used at all, and, instead, there is a new
-  `use_localized_content_methods` configuration setting that must be set to `true` (it defaults to `false`) if you want
-  to use such localized content methods. (Thanks to [Leaf](https://github.com/leafo) for helping figure out this was
-  the problem!)
+* Fixed a number of bugs in Fortitude's support for `render :widget => ...`, including use of helpers, coexistence
+  with Erector, and being able to pass a widget class rather than an already-instantiated widget. Many thanks to
+  [Leaf](https://github.com/leafo) for the detailed bug report, suggestions for fixes, and pointers to new methods that
+  made the implementation much more robust.
 
 ## 0.0.8, 13 November 2014
 

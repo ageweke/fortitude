@@ -18,6 +18,8 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     to another.
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
+  * Reporting multiple bugs in support for `render :widget => ...`, and many useful pointers to possible fixes and
+    additional methods to make the implementation a lot more robust.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
