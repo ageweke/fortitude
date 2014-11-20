@@ -1,7 +1,6 @@
 require 'active_support'
 require 'active_support/concern'
 
-require 'fortitude/method_templates/simple_template'
 require 'fortitude/method_templates/simple_compiled_template'
 require 'fortitude/support/assigns_proxy'
 

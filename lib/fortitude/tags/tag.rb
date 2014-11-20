@@ -1,5 +1,5 @@
 require 'fortitude/tags/tag_support'
-require 'fortitude/method_templates/simple_template'
+require 'fortitude/method_templates/simple_compiled_template'
 
 # Note on handling tags that have no content inside them:
 #
