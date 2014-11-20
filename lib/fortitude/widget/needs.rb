@@ -2,6 +2,7 @@ require 'active_support'
 require 'active_support/concern'
 
 require 'fortitude/method_templates/simple_template'
+require 'fortitude/method_templates/simple_compiled_template'
 require 'fortitude/support/assigns_proxy'
 
 module Fortitude
@@ -119,23 +120,26 @@ module Fortitude
         def rebuild_my_needs_methods!
           n = needs_as_hash
 
+          start_time = Time.now
           needs_text = n.map do |need, default_value|
-            Fortitude::MethodTemplates::SimpleTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
+            Fortitude::MethodTemplates::SimpleCompiledTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
               :need => need, :has_default => (default_value != REQUIRED_NEED),
               :ivar_name => instance_variable_name_for_need(need)
             )
           end.join("\n\n")
 
-          assign_locals_from_text = Fortitude::MethodTemplates::SimpleTemplate.template('assign_locals_from_template').result(
+          assign_locals_from_text = Fortitude::MethodTemplates::SimpleCompiledTemplate.template('assign_locals_from_template').result(
             :extra_assigns => extra_assigns, :needs_text => needs_text)
-          class_eval(assign_locals_from_text)
 
+          needs_methods_text = ""
           n.each do |need, default_value|
-            text = Fortitude::MethodTemplates::SimpleTemplate.template('need_method_template').result(
+            needs_methods_text << (Fortitude::MethodTemplates::SimpleCompiledTemplate.template('need_method_template').result(
               :need => need, :ivar_name => instance_variable_name_for_need(need),
-              :debug => self.debug)
-            needs_module.module_eval(text)
+              :debug => self.debug))
           end
+
+          class_eval(assign_locals_from_text)
+          needs_module.module_eval(needs_methods_text)
         end
 
         private :rebuild_my_needs_methods!

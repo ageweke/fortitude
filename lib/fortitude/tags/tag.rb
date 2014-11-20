@@ -148,7 +148,7 @@ module Fortitude
           yield_call = "yield"
         end
 
-        text = Fortitude::MethodTemplates::SimpleTemplate.template('tag_method_template').result(
+        text = Fortitude::MethodTemplates::SimpleCompiledTemplate.template('tag_method_template').result(
           :name => name.to_s, :method_name => generated_method_name.to_s, :yield_call => yield_call, :concat_method => CONCAT_METHOD,
           :record_emitting_tag => (!! options[:record_emitting_tag]),
           :needs_attribute_rules => !! options[:enforce_attribute_rules],
