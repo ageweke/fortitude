@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.0.9,
+## 0.0.9, 20 November 2014
 
 * Fortitude now supports passing blocks to widgets (above and beyond support for Rails' standard layouts and their
   usage using `yield`). You can now do the following:
