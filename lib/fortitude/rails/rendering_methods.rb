@@ -49,7 +49,7 @@ module Fortitude
       end
 
       def self._fortitude_register_renderer!
-        ::ActionController.add_renderer(:widget) do |widget, options|
+        ::ActionController.add_renderer_without_fortitude(:widget) do |widget, options|
           ::Fortitude::Rails::RenderingMethods._fortitude_render_widget(self, widget, options)
         end
       end
@@ -79,6 +79,17 @@ module Fortitude
         return render_without_fortitude(*args, &block)
       end
     end
+  end
+end
+
+::ActionController.module_eval do
+  class << self
+    def add_renderer_with_fortitude(key, *args, &block)
+      add_renderer_without_fortitude(key, *args, &block)
+      ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!
+    end
+
+    alias_method_chain :add_renderer, :fortitude
   end
 end
 
