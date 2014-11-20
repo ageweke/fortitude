@@ -15,6 +15,11 @@ describe "Rails rendering support", :type => :rails do
       expect(data).to match(/oop_rails_server_base_template/)
     end
 
+    it "should always set a content-type of text/html when using 'render :widget'" do
+      response = get_response("render_widget")
+      expect(response['Content-Type']).to match(/^text\/html/)
+    end
+
     it "should let you use view helpers from within a widget passed to 'render :widget =>'" do
       expect_match("render_widget_with_helper", /hello from a widget named Judy/)
     end

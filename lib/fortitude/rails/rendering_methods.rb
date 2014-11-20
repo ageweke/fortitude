@@ -83,7 +83,6 @@ end
     return ::Erector::Rails.render(widget, view_context, { }, false, options)
   end
 
-  # self.content_type ||= options[:content_type] || Mime[:html]
   if widget.kind_of?(Class)
     if widget < ::Fortitude::Widget
       widget = widget.new(widget.extract_needed_assigns_from(view_context.assigns))
