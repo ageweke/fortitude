@@ -16,4 +16,20 @@ class ErectorCoexistenceSystemSpecController < ApplicationController
   def erector_widget_in_app_v_views
     @foo = "quux"
   end
+
+  def render_widget_fortitude
+    render :widget => ::Views::FortitudeWidget.new
+  end
+
+  def render_widget_erector
+    render :widget => ::Views::ErectorWidget.new
+  end
+
+  def render_widget_fortitude_class
+    render :widget => ::Views::FortitudeWidget
+  end
+
+  def render_widget_erector_class
+    render :widget => ::Views::ErectorWidget
+  end
 end

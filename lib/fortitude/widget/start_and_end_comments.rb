@@ -35,6 +35,7 @@ module Fortitude
               out << "(DEFAULT) " if assigns.is_default?(assign)
 
               value_string = if value.respond_to?(:to_fortitude_comment_string) then value.to_fortitude_comment_string else value.inspect end
+              value_string ||= ''
               if value_string.length > MAX_START_COMMENT_VALUE_STRING_LENGTH
                 value_string = value_string[0..(MAX_START_COMMENT_VALUE_STRING_LENGTH - START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS.length)] + START_COMMENT_VALUE_STRING_TOO_LONG_ELLIPSIS
               end
