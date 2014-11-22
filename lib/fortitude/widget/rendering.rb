@@ -53,11 +53,18 @@ module Fortitude
 
       # PUBLIC API
       def widget(w, hash = nil, &block)
-        if w.respond_to?(:render_to)
-          w.render_to(@_fortitude_rendering_context, &block)
-        elsif w.kind_of?(Class)
+        if w.kind_of?(Class) && ((w < ::Fortitude::Widget) || ::Fortitude::Erector.is_erector_widget_class?(w))
           hash ||= { }
-          w.new(hash, &block).render_to(@_fortitude_rendering_context)
+          w = w.new(hash, &block)
+        end
+
+        if w.kind_of?(::Fortitude::Widget)
+          w.render_to(@_fortitude_rendering_context, &block)
+        elsif ::Fortitude::Erector.is_erector_widget?(w)
+          w.send(:_emit,
+            :parent => rendering_context.helpers_object,
+            :helpers => rendering_context.helpers_object,
+            :output => rendering_context.output_buffer_holder.output_buffer)
         else
           raise "You tried to render a widget, but this is not valid: #{w.inspect}(#{hash.inspect})"
         end

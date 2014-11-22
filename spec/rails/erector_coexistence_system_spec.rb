@@ -45,5 +45,19 @@ describe "Erector coexistence support", :type => :rails do
     it "should be able to render an Erector widget with just a class using render :widget" do
       expect_match("render_widget_erector_class", /this is an Erector widget/, :no_layout => true)
     end
+
+    it "should be able to render an Erector widget from a Fortitude widget using just 'widget'" do
+      expect_match("render_erector_widget_from_fortitude_widget",
+        %r{before erector widget: this is my_helper\!\s*inside erector widget: this is my_helper\!, passed_foo\s*after erector widget: this is my_helper\!}mi)
+    end
+
+    it "should be able to render an Erector widget from a Fortitude widget using just 'widget' with an instantiated widget" do
+      expect_match("render_erector_widget_from_fortitude_widget?instantiate_widget=true",
+        %r{before erector widget: this is my_helper\!\s*inside erector widget: this is my_helper\!, passed_foo\s*after erector widget: this is my_helper\!}mi)
+    end
+
+    it "should be able to render a Fortitude widget from an Erector widget using just 'widget'" do
+
+    end
   end
 end

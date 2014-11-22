@@ -32,4 +32,12 @@ class ErectorCoexistenceSystemSpecController < ApplicationController
   def render_widget_erector_class
     render :widget => ::Views::ErectorWidget
   end
+
+  def render_erector_widget_from_fortitude_widget
+    @instantiate_widget = !! (params[:instantiate_widget] == "true")
+  end
+
+  def render_fortitude_widget_from_erector_widget
+    # nothing here
+  end
 end
