@@ -1,5 +1,11 @@
 # Fortitude Releases
 
+## 0.0.10,
+
+* Fixed an issue where Fortitude could write the close tag of an element to the wrong output buffer if the output
+  buffer was changed inside the element (as can happen with, among other things, Rails' `cache` method). This could
+  cause the output HTML to be structured improperly. (Thanks to [Leaf](https://github.com/leafo) for the bug report,tracking down the exact cause, and providing the fix!)
+
 ## 0.0.9, 20 November 2014
 
 * Fortitude now supports passing blocks to widgets (above and beyond support for Rails' standard layouts and their

@@ -15,6 +15,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
         _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
         o.#{concat_method}(#{open_const})
         #{yield_call}
+        o = @_fortitude_output_buffer_holder.output_buffer
         o.#{concat_method}(#{close_const})
       else
         o.#{concat_method}(#{alone_const})
@@ -29,6 +30,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
         _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
         o.#{concat_method}(#{partial_open_end_const})
         #{yield_call}
+        o = @_fortitude_output_buffer_holder.output_buffer
         o.#{concat_method}(#{close_const})
       else
         o.#{concat_method}(#{partial_open_alone_end_const})
@@ -42,6 +44,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       if block_given?
         _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
         #{yield_call}
+        o = @_fortitude_output_buffer_holder.output_buffer
       end
       o.#{concat_method}(#{close_const})
     else
@@ -58,6 +61,7 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       if block_given?
         _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
         #{yield_call}
+        o = @_fortitude_output_buffer_holder.output_buffer
       end
       o.#{concat_method}(#{close_const})
     end

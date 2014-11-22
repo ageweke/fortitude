@@ -20,6 +20,9 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     from Fortitude.
   * Reporting multiple bugs in support for `render :widget => ...`, and many useful pointers to possible fixes and
     additional methods to make the implementation a lot more robust.
+  * Reporting a bug, tracking down the exact cause, and providing a fix for a case where the closing tag of an element
+    would get written to the wrong output buffer if the output buffer was changed inside the element (as could happen
+    with, among other things, Rails' `cache` method).
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
