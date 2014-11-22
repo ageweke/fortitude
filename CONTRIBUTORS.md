@@ -26,3 +26,4 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
+  * Reporting an issue where you could not easily render a Fortitude widget from Erector, nor vice-versa.

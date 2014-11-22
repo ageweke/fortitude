@@ -60,5 +60,10 @@ describe "Erector coexistence support", :type => :rails do
       expect_match("render_fortitude_widget_from_erector_widget",
         %r{before fortitude widget: this is my_helper\!\s*inside fortitude widget: this is my_helper\!, passed_foo\s*after fortitude widget: this is my_helper\!}mi)
     end
+
+    it "should be able to render a Fortitude widget from an Erector widget using just 'widget' with an instantiated widget" do
+      expect_match("render_fortitude_widget_from_erector_widget?instantiate_widget=true",
+        %r{before fortitude widget: this is my_helper\!\s*inside fortitude widget: this is my_helper\!, passed_foo\s*after fortitude widget: this is my_helper\!}mi)
+    end
   end
 end

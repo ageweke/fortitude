@@ -2,6 +2,12 @@
 
 ## 0.0.10,
 
+* You can now render Erector widgets from Fortitude widgets using just `widget MyErectorWidget`, and vice-versa, using
+  either the class-and-assigns or instantiated-widget calling conventions. Note that this integration is not 100%
+  perfect; in particular, passing a block from a Fortitude widget to an Erector widget, or vice-versa, is likely to
+  fail or produce incorrect output due to the way Erector manipulates output buffers. However, the simple case of
+  invoking a widget from another works fine, and can be very useful to those migrating to Fortitude. (Thanks to
+  [Adam Becker](https://github.com/ajb) for the bug report!)
 * Fixed an issue where Fortitude could write the close tag of an element to the wrong output buffer if the output
   buffer was changed inside the element (as can happen with, among other things, Rails' `cache` method). This could
   cause the output HTML to be structured improperly. (Thanks to [Leaf](https://github.com/leafo) for the bug report,tracking down the exact cause, and providing the fix!)
