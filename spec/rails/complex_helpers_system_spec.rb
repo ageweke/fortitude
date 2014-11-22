@@ -30,4 +30,30 @@ describe "Rails complex helper support", :type => :rails do
     expect_match("cache_test?a=a2&b=b2",
       /before_cache\(a2,b2\).*inside_cache\(a2,b2\).*after_cache\(a2,b2\)/mi)
   end
+
+  it "should cache with nesting in tags properly" do
+    expect_match("cache_tags_test?a=a1&b=b1",
+      %r{<p\s+class="before_cache">\s*
+        <span>before_cache:\s*a=a1,b=b1</span>\s*
+        <p\s+class="in_cache">\s*
+          <span>in_cache:\s*a=a1,b=b1</span>\s*
+        </p>\s*
+        <span>after_cache:\s*a=a1,b=b1</span>\s*
+        <p\s+class="after_cache_2">\s*
+          <span>after_cache_2:\s*a=a1,b=b1</span>\s*
+        </p>}mix
+      )
+
+    expect_match("cache_tags_test?a=a1&b=b2",
+      %r{<p\s+class="before_cache">\s*
+        <span>before_cache:\s*a=a1,b=b2</span>\s*
+        <p\s+class="in_cache">\s*
+          <span>in_cache:\s*a=a1,b=b1</span>\s*
+        </p>\s*
+        <span>after_cache:\s*a=a1,b=b2</span>\s*
+        <p\s+class="after_cache_2">\s*
+          <span>after_cache_2:\s*a=a1,b=b2</span>\s*
+        </p>}mix
+      )
+  end
 end

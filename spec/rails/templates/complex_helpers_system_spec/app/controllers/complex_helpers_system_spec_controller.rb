@@ -11,4 +11,9 @@ class ComplexHelpersSystemSpecController < ApplicationController
     @a = params[:a]
     @b = params[:b]
   end
+
+  def cache_tags_test
+    @a = params[:a]
+    @b = params[:b]
+  end
 end
