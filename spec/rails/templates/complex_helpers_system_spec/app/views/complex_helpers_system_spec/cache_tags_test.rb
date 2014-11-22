@@ -7,7 +7,7 @@ class Views::ComplexHelpersSystemSpec::CacheTagsTest < Fortitude::Widgets::Html5
     p(:class => 'before_cache') do
       span "before_cache: a=#{a},b=#{b}"
 
-      cache(a) do
+      cache("cache_tags_test-#{a}") do
         p(:class => "in_cache") do
           span "in_cache: a=#{a},b=#{b}"
         end
