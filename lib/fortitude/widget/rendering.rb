@@ -55,7 +55,7 @@ module Fortitude
       def widget(w, hash = nil, &block)
         if w.kind_of?(Class) && ((w < ::Fortitude::Widget) || ::Fortitude::Erector.is_erector_widget_class?(w))
           hash ||= { }
-          w = w.new(hash, &block)
+          w = w.new(hash)
         end
 
         if w.kind_of?(::Fortitude::Widget)
