@@ -185,4 +185,74 @@ describe "Fortitude widgets and 'yield'", :type => :system do
 
     expect(render(wc.new { |widget| widget.text "constructor" }, :rendering_context => the_rc)).to eq("beforeinner_beforemiddleinner_afterafter")
   end
+
+  it "should allow creating an elegant modal-dialog widget" do
+    modal_dialog_module = Module.new do
+      cattr_accessor :modal_dialog_class
+
+      def modal_dialog(title, options = { }, &block)
+        widget modal_dialog_class.new(options.merge(:title => title), &block)
+      end
+    end
+
+    modal_dialog_class = widget_class do
+      needs :title, :button_text => 'Go!'
+
+      def content
+        div(:class => 'modal_dialog') do
+          h3 "Modal title: #{title}"
+
+          yield("#{title}123", "234#{title}")
+
+          button button_text, :class => 'modal_button'
+        end
+      end
+
+      def modal_section(title)
+        div(:class => 'modal_section') do
+          h5 "Modal section: #{title}"
+
+          yield("#{title}345", "456#{title}")
+        end
+      end
+    end
+
+    modal_dialog_module.modal_dialog_class = modal_dialog_class
+
+    wc = widget_class do
+      needs :name
+
+      def banner(text)
+        p(text, :class => 'banner')
+      end
+
+      def content
+        h1 "Name: #{name}"
+
+        modal_dialog('Details', :button_text => 'Submit Details') { |modal_arg1, modal_arg2|
+          banner "Before details modal_section for #{name}: #{modal_arg1}, #{modal_arg2}"
+
+          modal_section("Details for #{name}") { |section_arg1, section_arg2|
+            p "These are the details for #{name}: #{section_arg1}, #{section_arg2}"
+          }
+
+          p "After details modal_section for #{name}"
+        }
+
+        modal_dialog('Security', :button_text => 'Submit Security') { |modal_arg1, modal_arg2|
+          banner "Before security modal_section for #{name}: #{modal_arg1}, #{modal_arg2}"
+
+          modal_section("Security for #{name}") { |section_arg1, section_arg2|
+            text "These are the security settings for #{name}: #{section_arg1}, #{section_arg2}"
+          }
+
+          text "After security modal_section for #{name}"
+        }
+      end
+    end
+
+    wc.send(:include, modal_dialog_module)
+
+    expect(render(wc.new(:name => 'Jones'))).to eq('XXX')
+  end
 end
