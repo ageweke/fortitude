@@ -237,7 +237,7 @@ describe "Fortitude widgets and 'yield'", :type => :system do
     end
 
     modal_dialog_module = Module.new do
-      cattr_accessor :modal_dialog_class
+      mattr_accessor :modal_dialog_class
 
       def modal_dialog(title, options = { }, &block)
         widget(modal_dialog_class.new(options.merge(:title => title)), &block)
