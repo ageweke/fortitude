@@ -59,7 +59,12 @@ module Fortitude
         end
 
         if w.kind_of?(::Fortitude::Widget)
-          w.render_to(@_fortitude_rendering_context, &block)
+          begin
+            @_fortitude_in_block_for_sub_widget = w if block
+            w.render_to(@_fortitude_rendering_context, &block)
+          ensure
+            @_fortitude_in_block_for_sub_widget = nil
+          end
         elsif ::Fortitude::Erector.is_erector_widget?(w)
           w.send(:_emit,
             :parent => rendering_context.helpers_object,
@@ -110,15 +115,15 @@ module Fortitude
         if @_fortitude_block_for_content_method
           @_fortitude_block_for_content_method.call(*args)
         elsif @_fortitude_constructor_block
-          @_fortitude_constructor_block.call(*args)
+          @_fortitude_constructor_block.call(self, *args)
         else
-          @_fortitude_rendering_context.yield_from_widget(*args)
+          @_fortitude_rendering_context.yield_from_widget(self, *args)
         end
       end
 
       # PUBLIC API
       def yield_from_widget(*args)
-        _fortitude_yield_from_widget(self, *args)
+        _fortitude_yield_from_widget(*args)
       end
 
       # PUBLIC API (Erector compatibility)

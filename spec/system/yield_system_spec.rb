@@ -186,16 +186,65 @@ describe "Fortitude widgets and 'yield'", :type => :system do
     expect(render(wc.new { |widget| widget.text "constructor" }, :rendering_context => the_rc)).to eq("beforeinner_beforemiddleinner_afterafter")
   end
 
+  it "should evaluate blocks passed to #widget in their defining context, but allow falling back to child-widget methods (but only as a recourse)" do
+    wc_sub = widget_class do
+      def baz
+        "sub_baz"
+      end
+
+      def quux
+        "sub_quux"
+      end
+
+      def content
+        text "sub_before"
+        yield
+        text "sub_after"
+      end
+    end
+
+    wc_parent = widget_class do
+      cattr_accessor :wc_sub
+
+      needs :foo
+
+      def bar
+        "wc_bar"
+      end
+
+      def baz
+        "wc_baz"
+      end
+
+      def content
+        text "before"
+        widget wc_sub.new do
+          text "in block: #{foo}, #{bar}, #{baz}, #{quux}"
+          text "respond: #{respond_to?(:foo).inspect}, #{respond_to?(:bar).inspect}, #{respond_to?(:baz).inspect}, #{respond_to?(:quux).inspect}"
+        end
+        text "after"
+      end
+    end
+
+    wc_parent.wc_sub = wc_sub
+
+    expect(render(wc_parent.new(:foo => 'passed_foo'))).to eq("beforesub_beforein block: passed_foo, wc_bar, wc_baz, sub_quuxrespond: true, true, true, truesub_afterafter")
+  end
+
   it "should allow creating an elegant modal-dialog widget" do
+    parent_class = widget_class do
+      format_output true
+    end
+
     modal_dialog_module = Module.new do
       cattr_accessor :modal_dialog_class
 
       def modal_dialog(title, options = { }, &block)
-        widget modal_dialog_class.new(options.merge(:title => title), &block)
+        widget(modal_dialog_class.new(options.merge(:title => title)), &block)
       end
     end
 
-    modal_section_class = widget_class do
+    modal_section_class = widget_class(:superclass => parent_class) do
       needs :section_title
 
       def content
@@ -207,7 +256,7 @@ describe "Fortitude widgets and 'yield'", :type => :system do
       end
     end
 
-    modal_dialog_class = widget_class do
+    modal_dialog_class = widget_class(:superclass => parent_class) do
       cattr_accessor :modal_section_class
 
       needs :title, :button_text => 'Go!'
@@ -230,7 +279,7 @@ describe "Fortitude widgets and 'yield'", :type => :system do
     modal_dialog_class.modal_section_class = modal_section_class
     modal_dialog_module.modal_dialog_class = modal_dialog_class
 
-    wc = widget_class do
+    wc = widget_class(:superclass => parent_class) do
       needs :name
 
       def banner(text)
@@ -264,8 +313,28 @@ describe "Fortitude widgets and 'yield'", :type => :system do
 
     wc.send(:include, modal_dialog_module)
 
-    $stderr.puts "modal_dialog_class: #{modal_dialog_class}"
-    $stderr.puts "wc: #{wc}"
-    expect(render(wc.new(:name => 'Jones'))).to eq('XXX')
+    expect(render(wc.new(:name => 'Jones'))).to match(%r{
+      <h1>Name:\ Jones</h1>\s+
+      <div\ class="modal_dialog">\s+
+        <h3>Modal\ title:\ Details</h3>\s+
+        <p\ class="banner">Before\ details\ modal_section\ for\ Jones:\ Details123,\ 234Details</p>\s+
+        <div\ class="modal_section">\s+
+          <h5>Modal\ section:\ Details\ for\ Jones</h5>\s+
+          <p>These\ are\ the\ details\ for\ Jones:\ Details\ for\ Jones345,\ 456Details\ for\ Jones</p>\s+
+        </div>\s+
+        <p>After\ details\ modal_section\ for\ Jones</p>\s+
+        <button\ class="modal_button">Submit\ Details</button>\s+
+      </div>\s+
+      <div\ class="modal_dialog">\s+
+        <h3>Modal\ title:\ Security</h3>\s+
+        <p\ class="banner">Before\ security\ modal_section\ for\ Jones:\ Security123,\ 234Security</p>\s+
+        <div\ class="modal_section">\s+
+          <h5>Modal\ section:\ Security\ for\ Jones</h5>\s+
+          These\ are\ the\ security\ settings\ for\ Jones:\ Security\ for\ Jones345,\ 456Security\ for\ Jones\s+
+        </div>\s+
+        After\ security\ modal_section\ for\ Jones\s+
+        <button\ class="modal_button">Submit\ Security</button>\s+
+      </div>
+      }mix)
   end
 end

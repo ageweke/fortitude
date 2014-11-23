@@ -61,6 +61,7 @@ module SystemHelpers
     tag :h1, :newline_before => true
     tag :h3, :newline_before => true
     tag :h5, :newline_before => true
+    tag :button, :newline_before => true
     tag :img, :content_allowed => false
     tag :script, :newline_before => true, :escape_direct_content => false
     tag :head, :newline_before => true

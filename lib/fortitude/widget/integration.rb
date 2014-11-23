@@ -33,16 +33,44 @@ module Fortitude
 
       # RUBY CALLBACK
       def method_missing(name, *args, &block)
-        if self.class.extra_assigns == :use
-          ivar_name = self.class.instance_variable_name_for_need(name)
-          return instance_variable_get(ivar_name) if instance_variable_defined?(ivar_name)
-        end
+        target_method_and_args = _fortitude_target_method_and_args_for_method_missing(name, *args, &block)
+        if target_method_and_args
+          target = target_method_and_args[0]
+          method = target_method_and_args[1]
+          args = target_method_and_args[2..-1]
 
-        if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(name, true)
-          @_fortitude_rendering_context.helpers_object.send(name, *args, &block)
+          target.send(method, *args, &block)
         else
           super(name, *args, &block)
         end
+      end
+
+      def respond_to?(name, include_all = false)
+        out = super(name, include_all)
+
+        if (! out)
+          target_method_and_args = _fortitude_target_method_and_args_for_method_missing(name)
+          out = true if target_method_and_args
+        end
+
+        out
+      end
+
+      def _fortitude_target_method_and_args_for_method_missing(missing_method_name, *missing_method_args, &missing_method_block)
+        if self.class.extra_assigns == :use && missing_method_args.length == 0 && (! missing_method_block)
+          ivar_name = self.class.instance_variable_name_for_need(missing_method_name)
+          return [ self, :instance_variable_get, ivar_name ] if instance_variable_defined?(ivar_name)
+        end
+
+        if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(missing_method_name, true)
+          return [ @_fortitude_rendering_context.helpers_object, missing_method_name, *missing_method_args ]
+        end
+
+        if @_fortitude_in_block_for_sub_widget
+          return [ @_fortitude_in_block_for_sub_widget, missing_method_name, *missing_method_args ]
+        end
+
+        nil
       end
 
       included do

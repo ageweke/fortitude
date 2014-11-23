@@ -44,6 +44,18 @@ describe "Fortitude assigns access", :type => :system do
     expect(render(wc.new(:foo => 'the_foo', :bar => 'the_bar'))).to eq("assigns[:foo] = the_foo, assigns[:bar] = the_bar")
   end
 
+  it "should allow accessing extra assigns via method, and also indicate respond_to?" do
+    wc = widget_class do
+      extra_assigns :use
+
+      def content
+        text "foo = #{foo}, respond_to? #{respond_to?(:foo).inspect}"
+      end
+    end
+
+    expect(render(wc.new(:foo => 'the_foo'))).to eq("foo = the_foo, respond_to? true")
+  end
+
   it "should allow changing assigns, and always return the current value of the assign" do
     wc = widget_class do
       needs :foo

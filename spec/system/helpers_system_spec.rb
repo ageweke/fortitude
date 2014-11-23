@@ -93,6 +93,12 @@ describe "Fortitude helper support", :type => :system do
     expect(render(widget_class_with_content { helper3("ho") })).to eq("this is ho helper3")
   end
 
+  it "should indicate that it responds to helpers using respond_to? for automatic helper methods" do
+    expect(render(widget_class_with_content { text "respond_to helper1: #{respond_to?(:helper1)}" } )).to eq("respond_to helper1: true")
+    expect(render(widget_class_with_content { text "respond_to helper2: #{respond_to?(:helper2)}" } )).to eq("respond_to helper2: true")
+    expect(render(widget_class_with_content { text "respond_to helper3: #{respond_to?(:helper3)}" } )).to eq("respond_to helper3: true")
+  end
+
   it "should not allow automatic access to helpers if we say not to" do
     wc = widget_class do
       automatic_helper_access false

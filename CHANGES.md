@@ -2,6 +2,54 @@
 
 ## 0.0.10,
 
+* When you're invoking a widget from another widget using the `#widget` method, and you pass a block, that block is
+  evaluated in the context of the parent widget. (This has always been true.) However, this meant that something like
+  the following was impossible, where you're effectively defining new DSL on a widget-by-widget basis:
+
+```ruby
+class Views::ModalDialog < Views::Base
+  needs :title
+
+  def content
+    h3 "Modal: #{title}"
+    yield
+    button "Submit"
+  end
+
+  def modal_header(name)
+    h5 "Modal header: #{name}"
+    hr
+  end
+end
+
+class Views::MyView < Views::Base
+  needs :username
+
+  def content
+    h1 "User #{username}"
+
+    widget Views::ModalDialog, :title => "User Settings" do
+      modal_header "Settings for #{username}"
+      input :type => :text, :name => :email
+      ...
+    end
+  end
+end
+```
+
+  The problem arises because, within the block in `Views::MyView#content`, you want to be able to access methods from
+  two contexts: the parent widget (for `#username`), and the child widget (for `#modal_header`). Ruby provides no
+  single, simple way to do this, but, without it, it's very difficult to come up with a truly elegant DSL for cases
+  like this.
+
+  Fortitude now supports this via a small bit of `method_missing` magic: the block passed to a widget is still
+  evaluated in the context of the parent, but, if a method is called that is not present, Fortitude looks for that
+  method in the child widget and invokes it there, if present. This allows the above situation, which is important
+  for writing libraries that "feel right" to a Ruby programmer. (The fact that the block is evaluated primarily in the
+  context of the parent widget, like all other Ruby blocks, preserves important standard Ruby semantics, and also
+  means that the onus is on the author of a feature like `Views::ModalDialog` to present method names that are
+  unlikely to conflict with those in use in parent widgets &mdash; which seems correct.)
+
 * You can now render Erector widgets from Fortitude widgets using just `widget MyErectorWidget`, and vice-versa, using
   either the class-and-assigns or instantiated-widget calling conventions. Note that this integration is not 100%
   perfect; in particular, passing a block from a Fortitude widget to an Erector widget, or vice-versa, is likely to
