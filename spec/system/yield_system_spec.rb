@@ -195,7 +195,21 @@ describe "Fortitude widgets and 'yield'", :type => :system do
       end
     end
 
+    modal_section_class = widget_class do
+      needs :section_title
+
+      def content
+        div(:class => 'modal_section') do
+          h5 "Modal section: #{section_title}"
+
+          yield("#{section_title}345", "456#{section_title}")
+        end
+      end
+    end
+
     modal_dialog_class = widget_class do
+      cattr_accessor :modal_section_class
+
       needs :title, :button_text => 'Go!'
 
       def content
@@ -208,15 +222,12 @@ describe "Fortitude widgets and 'yield'", :type => :system do
         end
       end
 
-      def modal_section(title)
-        div(:class => 'modal_section') do
-          h5 "Modal section: #{title}"
-
-          yield("#{title}345", "456#{title}")
-        end
+      def modal_section(title, &block)
+        widget(modal_section_class.new(:section_title => title), &block)
       end
     end
 
+    modal_dialog_class.modal_section_class = modal_section_class
     modal_dialog_module.modal_dialog_class = modal_dialog_class
 
     wc = widget_class do
@@ -253,6 +264,8 @@ describe "Fortitude widgets and 'yield'", :type => :system do
 
     wc.send(:include, modal_dialog_module)
 
+    $stderr.puts "modal_dialog_class: #{modal_dialog_class}"
+    $stderr.puts "wc: #{wc}"
     expect(render(wc.new(:name => 'Jones'))).to eq('XXX')
   end
 end
