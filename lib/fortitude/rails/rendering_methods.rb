@@ -25,9 +25,11 @@ module Fortitude
           return ::Erector::Rails.render(widget, controller.view_context, { }, false, options)
         end
 
+        view_context = controller.view_context
+
         if widget.kind_of?(Class)
           if widget < ::Fortitude::Widget
-            widget = widget.new(widget.extract_needed_assigns_from(controller.view_context.assigns))
+            widget = widget.new(widget.extract_needed_assigns_from(view_context.assigns))
           else
             raise "You tried to render something using 'render :widget' that is a class, but not a subclass of Fortitude::Widget: #{widget.inspect}"
           end
@@ -37,12 +39,16 @@ module Fortitude
           raise "You tried to render something using 'render :widget' that is neither an instance of a subclass of Fortitude::Widget, nor a class that inherits from Fortitude::Widget: #{widget.inspect}"
         end
 
-        rendering_context = controller.create_fortitude_rendering_context(:helpers_object => controller.view_context)
-        widget.render_to(rendering_context)
+        rendering_context = controller.create_fortitude_rendering_context(
+          :helpers_object => view_context, :output_buffer_holder => view_context)
+
+        output_buffer = view_context.with_output_buffer do
+          widget.render_to(rendering_context)
+        end
 
         passed_options = options.dup
         passed_options.delete(:widget)
-        passed_options[:text] = rendering_context.output_buffer_holder.output_buffer.to_s
+        passed_options[:text] = output_buffer.to_s
         passed_options[:layout] = true unless passed_options.has_key?(:layout)
 
         return controller.render_to_string(passed_options)
