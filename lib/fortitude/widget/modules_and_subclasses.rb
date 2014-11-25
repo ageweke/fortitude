@@ -47,7 +47,7 @@ module Fortitude
           const_set(:DefinedFortitudeHelpers, @helpers_module)
           @needs_module = Module.new
           include @needs_module
-          const_set(:FortitudeNeedsMethods, @helpers_module)
+          const_set(:FortitudeNeedsMethods, @needs_module)
         end
         private :create_modules!
 
