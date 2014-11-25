@@ -23,6 +23,10 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
   * Reporting a bug, tracking down the exact cause, and providing a fix for a case where the closing tag of an element
     would get written to the wrong output buffer if the output buffer was changed inside the element (as could happen
     with, among other things, Rails' `cache` method).
+  * Reporting a bug where overriding a "needs" method would work only for the class it was defined on, and not any
+    subclasses.
+  * Reporting an issue where the module Fortitude uses to mix in its "needs" methods was not given a name, and instead
+    the module it used to mix in helper methods was given two names, one of them incorrect.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.

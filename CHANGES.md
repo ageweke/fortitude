@@ -2,6 +2,12 @@
 
 ## 0.0.10,
 
+* Fixed an issue where, if you overrode a "needs" method in a class, subclasses of that class would not use the
+  overridden method, but instead access the "needs" method directly. (Thanks for [Leaf](https://github.com/leafo)
+  for the bug report!)
+* Fixed a simple mistake that meant the module Fortitude uses to declare `needs` methods was not given a name at all,
+  and instead the module it uses to declare helpers was given two names, one of them incorrect. (Thanks to
+  [Leaf](https://github.com/leafo) for catching this.)
 * When you're invoking a widget from another widget using the `#widget` method, and you pass a block, that block is
   evaluated in the context of the parent widget. (This has always been true.) However, this meant that something like
   the following was impossible, where you're effectively defining new DSL on a widget-by-widget basis:
