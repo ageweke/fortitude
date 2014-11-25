@@ -65,6 +65,11 @@ module Fortitude
         end
 
         # INTERNAL USE ONLY
+        def my_needs_as_hash
+          @this_class_needs ||= { }
+        end
+
+        # INTERNAL USE ONLY
         def invalidate_needs!(why, klass = self)
           invalidating(:needs, why, klass) do
             @_fortitude_needs_as_hash = nil
@@ -117,10 +122,11 @@ module Fortitude
         end
 
         def rebuild_my_needs_methods!
-          n = needs_as_hash
+          all_needs_as_hash = needs_as_hash
+          mnah = my_needs_as_hash
 
           start_time = Time.now
-          needs_text = n.map do |need, default_value|
+          needs_text = all_needs_as_hash.map do |need, default_value|
             Fortitude::MethodTemplates::SimpleCompiledTemplate.template('need_assignment_template').result(:extra_assigns => extra_assigns,
               :need => need, :has_default => (default_value != REQUIRED_NEED),
               :ivar_name => instance_variable_name_for_need(need)
@@ -131,7 +137,7 @@ module Fortitude
             :extra_assigns => extra_assigns, :needs_text => needs_text)
 
           needs_methods_text = ""
-          n.each do |need, default_value|
+          mnah.each do |need, default_value|
             needs_methods_text << (Fortitude::MethodTemplates::SimpleCompiledTemplate.template('need_method_template').result(
               :need => need, :ivar_name => instance_variable_name_for_need(need),
               :debug => self.debug))
@@ -162,6 +168,11 @@ module Fortitude
       # INTERNAL USE ONLY
       def needs_as_hash
         @_fortitude_needs_as_hash ||= self.class.needs_as_hash
+      end
+
+      # INTERNAL USE ONLY
+      def my_needs_as_hash
+        @_fortitude_my_needs_as_hash ||= self.class.my_needs_as_hash
       end
 
       # PUBLIC API
