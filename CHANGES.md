@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.0.10,
+## 0.0.10, 25 November 2014
 
 * Fixed an issue where `#capture` was not working properly if you rendered a widget using `render :widget =>` in a
   controller. The fix further simplifies Fortitude's support for that feature and integrates even more correctly with
