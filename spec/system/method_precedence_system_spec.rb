@@ -45,4 +45,26 @@ describe "Fortitude method precedence", :type => :system do
     expect(render(wc, :rendering_context => rc(
       :helpers_object => helpers_object))).to eq("foo: method foo, bar: need_bar, baz: helper_baz, <quux></quux>")
   end
+
+  it "should let you override 'needs' methods in superclasses, and have them still apply in subclasses" do
+    wc_parent = widget_class do
+      needs :foo, :bar => 'default_bar'
+
+      def foo
+        "pre#{super}post"
+      end
+
+      def content
+        text "parent: foo: #{foo}, bar: #{bar}"
+      end
+    end
+
+    wc_child = widget_class(:superclass => wc_parent) do
+      def content
+        text "child: foo: #{foo}, bar: #{bar}"
+      end
+    end
+
+    expect(render(wc_child.new(:foo => 'supplied_foo'))).to eq("child: foo: presupplied_foopost, bar: default_bar")
+  end
 end
