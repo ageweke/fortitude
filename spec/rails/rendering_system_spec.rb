@@ -24,6 +24,10 @@ describe "Rails rendering support", :type => :rails do
       expect_match("render_widget_with_helper", /hello from a widget named Judy/)
     end
 
+    it "should let you use #capture from within a widget passed to 'render :widget =>'" do
+      expect_match("render_widget_with_capture", %r{<p class="one">before_captureafter_capture</p><p class="two">before_splat<p>inside_capture</p>after_splat</p>})
+    end
+
     it "should let you specify just a widget class with 'render :widget =>'" do
       expect_match("render_widget_class_only", /hello from a simple widget/)
     end

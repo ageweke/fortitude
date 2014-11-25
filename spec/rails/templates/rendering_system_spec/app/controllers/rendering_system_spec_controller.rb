@@ -15,6 +15,10 @@ class RenderingSystemSpecController < ApplicationController
     render :widget => Views::WidgetToRenderWithHelper.new
   end
 
+  def render_widget_with_capture
+    render :widget => Views::WidgetToRenderWithCapture.new
+  end
+
   def render_widget_class_only
     render :widget => Views::WidgetToRenderClassOnly
   end
