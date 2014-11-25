@@ -577,6 +577,14 @@ describe "Fortitude setting inheritance", :type => :system do
       end
     end
 
+    # We need to redefine this method on all child classes, because we let 'needs' methods inherit -- and only
+    # build such methods if the need is defined on the class in question. Without this, the only class that will
+    # actually define the method is @grandparent, and so none of the children will actually be affected when we set
+    # .debug on them.
+    [ @parent1, @child11, @child12, @parent2, @child21, @child22 ].each do |klass|
+      klass.send(:needs, :p => 'abc')
+    end
+
     debug_should_be(false, @grandparent, @parent1, @child11, @child12, @parent2, @child21, @child22)
 
     @parent1.debug true
