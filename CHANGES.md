@@ -2,8 +2,11 @@
 
 ## 0.0.10,
 
+* Fixed an issue where `#capture` was not working properly if you rendered a widget using `render :widget =>` in a
+  controller. The fix further simplifies Fortitude's support for that feature and integrates even more correctly with
+  Rails in that way. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
 * Fixed an issue where, if you overrode a "needs" method in a class, subclasses of that class would not use the
-  overridden method, but instead access the "needs" method directly. (Thanks for [Leaf](https://github.com/leafo)
+  overridden method, but instead access the "needs" method directly. (Thanks to [Leaf](https://github.com/leafo)
   for the bug report!)
 * Fixed a simple mistake that meant the module Fortitude uses to declare `needs` methods was not given a name at all,
   and instead the module it uses to declare helpers was given two names, one of them incorrect. (Thanks to

@@ -27,6 +27,8 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     subclasses.
   * Reporting an issue where the module Fortitude uses to mix in its "needs" methods was not given a name, and instead
     the module it used to mix in helper methods was given two names, one of them incorrect.
+  * Reporting a bug where using `#capture` inside a widget being rendered via `render :widget => ...` would not work
+    properly.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
