@@ -17,7 +17,8 @@ else
   rescue LoadError => le
     $stderr.puts <<-EOM
 WARNING: The Fortitude gem cannot load its native extensions. Performance may be reduced by a factor of 3-5x!
-         Load path: #{$:.inspect}
+         Load path:
+            #{$:.join("\n            ")}
          Error: #{le.message} (#{le.class})
 EOM
     native_loaded = false
