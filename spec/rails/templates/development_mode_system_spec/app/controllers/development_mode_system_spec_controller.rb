@@ -1,4 +1,8 @@
 class DevelopmentModeSystemSpecController < ApplicationController
+  def the_class_should_not_load
+    render :text => ::DevelopmentModeSystemSpec::ClassShouldNotLoad.name
+  end
+
   def reload_widget
     @datum = "one"
   end

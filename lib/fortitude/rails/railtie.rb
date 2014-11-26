@@ -71,6 +71,10 @@ module Fortitude
         ::ActiveSupport::Dependencies.module_eval do
           @@_fortitude_views_root = views_root
 
+          def self._fortitude_views_root
+            @@_fortitude_views_root
+          end
+
           # This is the method that gets called to auto-generate namespacing empty
           # modules (_e.g._, the toplevel <tt>Views::</tt> module) for directories
           # under an autoload path.
@@ -176,8 +180,54 @@ module Fortitude
           alias_method_chain :search_for_file, :fortitude
         end
 
+        # Two important comments here:
+        #
+        # 1: We also need to patch ::Rails::Engine.eager_load! so that it loads classes under app/views/. However, we
+        # can't just add it to the normal eager load paths, because that will allow people to do "require 'foo/bar'"
+        # and have it match app/views/foo/bar.rb, which we don't want. So, instead, we load these classes ourselves.
+        # Note that we ALSO have to do things slightly differently than Rails does it, because we need to skip loading
+        # 'foo.rb' if 'foo.html.rb' exists -- and because we have to require the fully-qualified pathname, since
+        # app/views is not actually on the load path.
+        #
+        # 2: I (ageweke) added this very late in the path of Fortitude development, after trying to use Fortitude in a
+        # deployment (production) environment in which widgets just weren't getting loaded at all. Yet there's something
+        # I don't understand: clearly, without this code, widgets will not be eager-loaded (which is probably not a
+        # great thing for performance reasons)...but I think they still should get auto-loaded and hence actually work
+        # just fine. But they don't in that environment (you'll get errors like "uninitialized constant Views::Base").
+        # Since I understand what's going on and have the fix for it here, that's fine...except that I can't seem to
+        # write a spec for it, because I don't know how to actually *make* it fail. If anybody comes along later and
+        # knows what would make it fail (and I double-checked, and we don't have autoloading disabled in production or
+        # anything like that), let me know, so that I can write a spec for this. Thanks!
+        ::Rails::Engine.class_eval do
+          def eager_load_with_fortitude!
+            eager_load_without_fortitude!
+            eager_load_fortitude_views!
+          end
+
+          def eager_load_fortitude_views!
+            load_path = ::ActiveSupport::Dependencies._fortitude_views_root
+            all_files = Dir.glob("#{load_path}/**/*.rb")
+            matcher = /\A#{Regexp.escape(load_path.to_s)}\/(.*)\.rb\Z/
+
+            all_files.sort.each do |full_path|
+              filename = File.basename(full_path, ".rb")
+              directory = File.dirname(full_path)
+
+              longer_name_regex = /^#{Regexp.escape(filename)}\..+\.rb$/i
+              longer_name = Dir.entries(directory).detect { |e| e =~ longer_name_regex }
+
+              unless longer_name
+                require_dependency File.join('views', full_path.sub(matcher, '\1'))
+              end
+            end
+          end
+
+          alias_method_chain :eager_load!, :fortitude
+        end
+
         # And, finally, this is where we add our root to the set of autoload paths.
         ::ActiveSupport::Dependencies.autoload_paths << views_root
+        # app.config.eager_load_paths << views_root
 
         # This is our support for partials. Fortitude doesn't really have a distinction between
         # partials and "full" templates -- everything is just a widget, which is much more elegant --

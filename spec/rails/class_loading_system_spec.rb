@@ -1,11 +1,6 @@
 describe "Rails class-loading support", :type => :rails do
   uses_rails_with_template :class_loading_system_spec
 
-  it "should not load classes under app/views without the Views:: prefix" do
-    expect_exception('the_class_should_not_load', 'NameError',
-      /uninitialized constant ClassLoadingSystemSpec::ClassShouldNotLoad/i)
-  end
-
   it "should allow me to define classes under Views:: outside of app/views, like in lib/views" do
     expect_match('lib_views', /hello: i am lib\/views/)
   end

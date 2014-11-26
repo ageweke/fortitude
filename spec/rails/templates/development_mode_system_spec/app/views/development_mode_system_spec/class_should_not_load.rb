@@ -1,4 +1,4 @@
-module ClassLoadingSystemSpec
+module DevelopmentModeSystemSpec
   class ClassShouldNotLoad
     class << self
       def is_loaded

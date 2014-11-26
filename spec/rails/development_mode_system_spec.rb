@@ -23,6 +23,11 @@ describe "Rails development-mode support", :type => :rails do
     expect_match("reload_widget_with_html_extension", /with_html_extension.*helper: yo/)
   end
 
+  it "should not autoload classes that live under views/ but don't start with a Views:: prefix" do
+    expect_exception('the_class_should_not_load', 'NameError',
+      /uninitialized constant DevelopmentModeSystemSpec::ClassShouldNotLoad/i)
+  end
+
   it "should let you change the controller, and that should work fine, too" do
     expect(rails_server.get("replaced/reload_widget")).to match(/datum\s+one\s+datum/)
     sleep 1
