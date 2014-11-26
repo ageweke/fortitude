@@ -53,9 +53,9 @@ describe "Rails class-loading support", :type => :rails do
     expect_match('bar', /bar WITH html/)
   end
 
-  # it "should not let me define a widget in a file starting with an underscore, and autoload it" do
-  #   expect_exception('underscore_widget', 'NameError', /uninitialized constant Views::ClassLoadingSystemSpec::UnderscoreWidget/)
-  # end
+  it "should let me define a widget in a file starting with an underscore, and autoload it" do
+    expect_match('underscore_widget_surrounding', /surrounding_widget before.*this is underscore_widget.*surrounding_widget after/)
+  end
 
   it "should not let me 'require' files in app/views without a views/ prefix" do
     expect_exception('require_loaded_underscore_widget_without_views', 'LoadError', /(cannot load such file|no such file to load)/)
@@ -67,5 +67,9 @@ describe "Rails class-loading support", :type => :rails do
 
   it "should let me render a widget defined outside of app/views/ if I use render :widget" do
     expect_match('render_widget_outside_app_views', /arbitrary_name_some_widget/)
+  end
+
+  it "should not load view classes with any module nesting applied" do
+    expect_match('show_module_nesting', /module_nesting: \[\]/)
   end
 end

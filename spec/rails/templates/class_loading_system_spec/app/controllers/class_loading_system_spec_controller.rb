@@ -53,6 +53,10 @@ class ClassLoadingSystemSpecController < ApplicationController
     # nothing here
   end
 
+  def underscore_widget_surrounding
+    # nothing here
+  end
+
   def foo
     # nothing here
   end
@@ -74,5 +78,9 @@ class ClassLoadingSystemSpecController < ApplicationController
   def render_widget_outside_app_views
     require 'arbitrary_name/some_widget'
     render :widget => ArbitraryName::SomeWidget.new
+  end
+
+  def show_module_nesting
+    # nothing here
   end
 end
