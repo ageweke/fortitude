@@ -1,5 +1,16 @@
 # Fortitude Releases
 
+## 0.9.0, 29 November 2014
+
+Updated Fortitude's version number to 0.9.0: at this point, Fortitude should be considered fully production-ready,
+as it is used successfully in multiple very large systems and bug reports are increasingly rare. I don't want to
+release a 1.0 until there's excellent documentation, but the codebase seems to be ready.
+
+* Added explicit support for eager-loading Fortitude widget classes under `views/` for Rails applications. This both
+  should improve first-run performance of Fortitude-using Rails applications in production, and should avoid an
+  occasional problem where Fortitude widget classes were not properly loaded in environments that used eager loading,
+  rather than autoloading, for classes.
+
 ## 0.0.10, 25 November 2014
 
 * Fixed an issue where `#capture` was not working properly if you rendered a widget using `render :widget =>` in a
