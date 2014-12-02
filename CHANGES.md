@@ -1,5 +1,10 @@
 # Fortitude Releases
 
+## 0.9.1,
+
+* Fixed a bug where doing something like `div nil, :class => 'foo'` would simply output `<div></div>`, rather than the
+  desired `<div class="foo"></div>`. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
+
 ## 0.9.0, 29 November 2014
 
 Updated Fortitude's version number to 0.9.0: at this point, Fortitude should be considered fully production-ready,

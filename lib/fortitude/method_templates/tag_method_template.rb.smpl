@@ -11,16 +11,24 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
     end                                                                    # :if needs_formatting
 
     if (! content_or_attributes)
-      if block_given?
-        _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
-        o.#{concat_method}(#{open_const})
-        #{yield_call}
-        o = @_fortitude_output_buffer_holder.output_buffer
-        o.#{concat_method}(#{close_const})
+      if attributes
+        content_or_attributes, attributes = attributes, nil
       else
-        o.#{concat_method}(#{alone_const})
+        if block_given?
+          _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
+          o.#{concat_method}(#{open_const})
+          #{yield_call}
+          o = @_fortitude_output_buffer_holder.output_buffer
+          o.#{concat_method}(#{close_const})
+        else
+          o.#{concat_method}(#{alone_const})
+        end
+
+        return FORTITUDE_NO_RETURN_VALUE_FROM_TAGS
       end
-    elsif content_or_attributes.kind_of?(Hash)
+    end
+
+    if content_or_attributes.kind_of?(Hash)
       this_tag.validate_attributes(self, content_or_attributes)            # :if needs_attribute_rules
       this_tag.validate_id_uniqueness(self, content_or_attributes)         # :if needs_id_uniqueness
       o.#{concat_method}(#{partial_open_const})

@@ -23,6 +23,10 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("") { rawtext(nil) }
   end
 
+  it "should allow rendering nil as text, but still passing options" do
+    should_render_to("<div class=\"foo\"></div>") { div(nil, :class => 'foo') }
+  end
+
   it "should render an attribute mapped to nil as missing" do
     should_render_to("<p></p>") { p(:class => nil) }
     should_render_to("<p></p>") { p(:foo => { :bar => nil }) }

@@ -29,6 +29,8 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     the module it used to mix in helper methods was given two names, one of them incorrect.
   * Reporting a bug where using `#capture` inside a widget being rendered via `render :widget => ...` would not work
     properly.
+  * Reporting a bug where doing something like `div(nil, :class => 'foo')` would produce just `<div></div>` instead of
+    the desired `<div class="foo"></div>`.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
