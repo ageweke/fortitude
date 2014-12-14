@@ -1,4 +1,5 @@
 require 'fortitude/rendering_context'
+require 'fortitude/rails/fortitude_rails_helpers'
 
 if defined?(ActiveSupport)
   ActiveSupport.on_load(:before_initialize) do
@@ -27,6 +28,8 @@ module Fortitude
           require 'fortitude/rails/helpers'
           Fortitude::Rails::Helpers.apply_refined_helpers_to!(Fortitude::Widget)
         end
+
+        ::ActionView::Base.send(:include, ::Fortitude::Rails::FortitudeRailsHelpers)
 
         if ::Rails.env.development?
           ::Fortitude::Widget.class_eval do

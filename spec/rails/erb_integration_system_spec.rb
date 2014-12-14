@@ -6,6 +6,16 @@ describe "Rails ERb integration support", :type => :rails do
       /erb_start/, /erb_end/, /erb_start.*erb to widget with render partial widget.*erb_end/m)
   end
 
+  it "should let you call a widget from an ERb file with widget" do
+    expect_match("erb_to_widget_with_widget", /erb to widget with widget widget/,
+      /erb_start/, /erb_end/, /erb_start.*erb to widget with widget widget, name Josephine.*erb_end/m)
+  end
+
+  it "should let you call a widget from an ERb file with widget, passing the class" do
+    expect_match("erb_to_widget_with_widget_class", /erb to widget with widget widget/,
+      /erb_start/, /erb_end/, /erb_start.*erb to widget with widget widget, name Josephine.*erb_end/m)
+  end
+
   it "should prefer ERb partials to Fortitude partials" do
     expect_match("prefers_erb_partial", /erb partial/,
       /erb_start.*erb partial.*erb_end/m)

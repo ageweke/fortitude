@@ -25,6 +25,14 @@ class ErectorCoexistenceSystemSpecController < ApplicationController
     render :widget => ::Views::ErectorWidget.new
   end
 
+  def widget_from_erb_fortitude
+    # nothing here
+  end
+
+  def widget_from_erb_erector
+    # nothing here
+  end
+
   def render_widget_fortitude_class
     render :widget => ::Views::FortitudeWidget
   end

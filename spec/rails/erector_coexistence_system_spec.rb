@@ -38,6 +38,14 @@ describe "Erector coexistence support", :type => :rails do
       expect_match("render_widget_erector", /this is an Erector widget/, :no_layout => true)
     end
 
+    it "should be able to render a Fortitude widget from ERb using #widget" do
+      expect_match("widget_from_erb_fortitude", /this is a Fortitude widget, Josephine.*this is a Fortitude widget, Amanda/mi)
+    end
+
+    it "should be able to render an Erector widget from ERb using #widget" do
+      expect_match("widget_from_erb_erector", /this is an Erector widget, Josephine.*this is an Erector widget, Amanda/mi)
+    end
+
     it "should be able to render a Fortitude widget with just a class using render :widget" do
       expect_match("render_widget_fortitude_class", /this is a Fortitude widget/)
     end

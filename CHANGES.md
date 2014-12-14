@@ -4,6 +4,8 @@
 
 * Fixed a bug where doing something like `div nil, :class => 'foo'` would simply output `<div></div>`, rather than the
   desired `<div class="foo"></div>`. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
+* You can now render widgets from ERb using a `widget` method, using the exact same syntax you would for rendering them
+  from Fortitude. In addition, this works for Erector widgets, too.
 
 ## 0.9.0, 29 November 2014
 
