@@ -56,6 +56,10 @@ describe "Fortitude widget-class-from-(file|source) support", :type => :system d
       expect(wcfs("class WidgetFromClass12 < WidgetFromClass12Parent; end")).to eq(WidgetFromClass12)
     end
 
+    it "should work if given a class name with a leading :: prefix" do
+      expect(wcfs("class ::WidgetFromClassWithColons < Fortitude::Widget; end")).to eq(::WidgetFromClassWithColons)
+    end
+
     it "should be able to guess the class name of a class namespaced in a module" do
       module ::Wcfs1; end
       expect(wcfs("class Wcfs1::WidgetFromClass6 < ::Fortitude::Widget; end")).to eq(Wcfs1::WidgetFromClass6)

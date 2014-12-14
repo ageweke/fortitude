@@ -6,6 +6,8 @@
   desired `<div class="foo"></div>`. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
 * You can now render widgets from ERb using a `widget` method, using the exact same syntax you would for rendering them
   from Fortitude. In addition, this works for Erector widgets, too.
+* Fixed a bug where calling `Fortitude::Widget.widget_class_from_file` would fail if the class name as specified in the
+  source text of the file started with leading colons (_e.g._, `class ::Views::Foo`).
 
 ## 0.9.0, 29 November 2014
 

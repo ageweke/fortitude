@@ -130,6 +130,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
           out = nil
 
           class_names.each do |class_name|
+            class_name = $1 if class_name =~ /^:+(.*)$/i
             klass = begin
               "::#{class_name}".constantize
             rescue NameError => ne
