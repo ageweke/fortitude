@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.9.1,
+## 0.9.1, 14 December 2014
 
 * Fixed a bug where doing something like `div nil, :class => 'foo'` would simply output `<div></div>`, rather than the
   desired `<div class="foo"></div>`. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
