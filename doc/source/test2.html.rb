@@ -1,7 +1,7 @@
-require 'source/shared_views/base'
+require 'source/shared/base'
 
-class Test2 < ::SharedViews::Base
+class Views::Test2 < ::Views::Shared::Base
   def content
-    h1 "hi hi, test2d!"
+    h1 "hi hi, test2e!"
   end
 end
