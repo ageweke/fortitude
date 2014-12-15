@@ -1,4 +1,5 @@
 require 'fortitude'
+require 'source/shared/base'
 
 ###
 # Compass

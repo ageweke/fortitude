@@ -1,5 +1,3 @@
-require 'source/shared/base'
-
 class Views::Layout < Views::Shared::Base
   def content
     doctype!
