@@ -6,6 +6,10 @@
   become an object of class `ActiveSupport::HashWithIndifferentAccess` instead. (This was because we were, internally,
   calling `#with_indifferent_access` on the `Hash` we had that contained all assignments to a widget, and
   `#with_indifferent_access` is recursive.)
+* `Fortitude::Widget.widget_class_from_file`, when it cannot find a class in the given file, now returns any constants
+  it _did_ find matching names it thinks that file might use in the resulting exception. This can be used to, for
+  example, determine if the file in question actually contains a module with the appropriate name, rather than a
+  widget class.
 
 ## 0.9.1, 14 December 2014
 
