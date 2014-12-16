@@ -9,6 +9,8 @@ module Views
       enforce_element_nesting_rules true
       enforce_attribute_rules       true
       enforce_id_uniqueness         true
+
+      enable_parcels!
     end
   end
 end

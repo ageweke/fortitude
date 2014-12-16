@@ -1,4 +1,5 @@
 require 'fortitude'
+require 'parcels'
 require 'source/shared/base'
 
 ###
@@ -72,4 +73,13 @@ configure :build do
 
   # Or use a different image path
   # set :http_prefix, "/Content/images/"
+end
+
+after_configuration do
+  doc_root = File.expand_path(File.dirname(__FILE__))
+  widgets_root = File.join(doc_root, 'source')
+  temp_dir_root = File.expand_path(File.join(File.dirname(doc_root), 'tmp', 'docs'))
+
+  sprockets.parcels.workaround_directories_root = temp_dir_root
+  sprockets.parcels.add_widget_tree!(widgets_root)
 end
