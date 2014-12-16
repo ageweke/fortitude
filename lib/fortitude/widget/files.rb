@@ -7,14 +7,15 @@ module Fortitude
       extend ActiveSupport::Concern
 
       class CannotDetermineWidgetClassNameError < StandardError
-        attr_reader :tried_class_names, :filename, :magic_comment_texts
+        attr_reader :tried_class_names, :filename, :magic_comment_texts, :resulting_objects
 
         def initialize(tried_class_names, options = { })
-          options.assert_valid_keys(:filename, :magic_comment_texts)
+          options.assert_valid_keys(:filename, :magic_comment_texts, :resulting_objects)
 
           @tried_class_names = tried_class_names
           @filename = options[:filename]
           @magic_comment_texts = options[:magic_comment_texts]
+          @resulting_objects = options[:resulting_objects]
           from_what = filename ? "from the file '#{filename}'" : "from some Fortitude source code"
 
           super %{You asked for a Fortitude widget class #{from_what},
@@ -25,7 +26,7 @@ We tried the following class names, in order:
 #{tried_class_names.join("\n")}
 
 ...but none of them both existed and were a class that eventually inherits from
-::Fortitude::Widget.
+::Fortitude::Widget. (We got back resulting objects: #{resulting_objects.inspect})
 
 You can either pass the class name into this method via the :class_names_to_try option,
 or add a "magic comment" to the source code of this widget that looks like this:
@@ -70,8 +71,9 @@ or add a "magic comment" to the source code of this widget that looks like this:
             scan_source_for_possible_class_names(source)
 
           out = widget_class_from_class_names(all_class_names)
+          resulting_objects = out[:resulting_objects]
 
-          unless out
+          unless out[:widget_class]
             if options[:filename]
               require options[:filename]
             else
@@ -79,11 +81,12 @@ or add a "magic comment" to the source code of this widget that looks like this:
             end
 
             out = widget_class_from_class_names(all_class_names)
+            resulting_objects += out[:resulting_objects]
           end
 
-          out || (
+          out[:widget_class] || (
             raise CannotDetermineWidgetClassNameError.new(all_class_names, :magic_comment_texts => magic_comment_texts,
-              :filename => options[:filename]))
+              :filename => options[:filename], :resulting_objects => resulting_objects))
         end
 
         private
@@ -120,6 +123,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
             out.reverse.each do |class_name|
               out.unshift("#{possible_module_name}::#{class_name}")
             end
+            out.unshift(possible_module_name)
             module_nesting.pop
           end
 
@@ -127,7 +131,10 @@ or add a "magic comment" to the source code of this widget that looks like this:
         end
 
         def widget_class_from_class_names(class_names)
-          out = nil
+          out = {
+            :widget_class      => nil,
+            :resulting_objects => [ ]
+          }
 
           class_names.each do |class_name|
             class_name = $1 if class_name =~ /^:+(.*)$/i
@@ -138,11 +145,12 @@ or add a "magic comment" to the source code of this widget that looks like this:
             end
 
             if is_widget_class?(klass)
-              out = klass
+              out[:widget_class] = klass
               break
+            elsif klass
+              out[:resulting_objects] << klass
             end
           end
-
           out
         end
 

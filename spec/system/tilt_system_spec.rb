@@ -93,6 +93,11 @@ EOS
     expect(result).to eq("foo: the_foo, bar: the_bar")
   end
 
+  it "should pass explicit locals to the template, as strings" do
+    result = render_text_with_tilt("simple_template_with_variables.rb", SIMPLE_TEMPLATE_WITH_VARIABLES, context_object, { 'foo' => 'the_foo', 'bar' => 'the_bar' })
+    expect(result).to eq("foo: the_foo, bar: the_bar")
+  end
+
   it "should allow passing nil for locals to the template, and should act like there are no variables" do
     result = render_text_with_tilt("simple_template_with_variables.rb", SIMPLE_TEMPLATE_WITH_VARIABLES_ALL_DEFAULTED, context_object, nil)
     expect(result).to eq("foo: something, bar: whatever")

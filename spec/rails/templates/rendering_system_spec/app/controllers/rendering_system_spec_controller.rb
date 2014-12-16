@@ -125,4 +125,13 @@ class RenderingSystemSpecController < ApplicationController
     @d = "quux<marph"
     @e = "marph>foo".html_safe
   end
+
+  def render_hash_subclass
+    require 'my_hash'
+
+    @the_hash = MyHash.new
+    @the_hash[:foo] = 'bar'
+    @the_hash['bar'] = :baz
+    @other_hash = { 'quux' => 'bazzle', :marph => :bar }
+  end
 end

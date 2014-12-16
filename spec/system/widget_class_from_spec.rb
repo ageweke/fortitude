@@ -51,6 +51,13 @@ describe "Fortitude widget-class-from-(file|source) support", :type => :system d
       expect(cdne.tried_class_names).to be_include("WidgetFromClass11")
     end
 
+    it "should fail, but return the object, if the source code contains an object of that class that just isn't a widget class" do
+      cdne = capture_exception(::Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
+        wcfs("module WidgetFromClass24\nend")
+      end
+      expect(cdne.resulting_objects).to eq([ ::WidgetFromClass24 ])
+    end
+
     it "should work if given something that's a grandchild of Fortitude::Widget, not a direct child" do
       ::Object.class_eval("class WidgetFromClass12Parent < ::Fortitude::Widget; end")
       expect(wcfs("class WidgetFromClass12 < WidgetFromClass12Parent; end")).to eq(WidgetFromClass12)

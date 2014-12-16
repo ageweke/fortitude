@@ -26,7 +26,7 @@ module Fortitude
           :yield_block => block, :render_yield_result => false,
           :helpers_object => scope, :instance_variables_object => scope })
 
-        widget_assigns = { }.with_indifferent_access
+        widget_assigns = { }
 
         scope.instance_variables.each do |instance_variable_name|
           if instance_variable_name.to_s =~ /^\@(.*)$/
