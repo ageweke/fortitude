@@ -1,5 +1,12 @@
 # Fortitude Releases
 
+## 0.9.2,
+
+* Fixed a bug where passing an object that was a `Hash`, or a subclass of `Hash`, to a view would cause that object to
+  become an object of class `ActiveSupport::HashWithIndifferentAccess` instead. (This was because we were, internally,
+  calling `#with_indifferent_access` on the `Hash` we had that contained all assignments to a widget, and
+  `#with_indifferent_access` is recursive.)
+
 ## 0.9.1, 14 December 2014
 
 * Fixed a bug where doing something like `div nil, :class => 'foo'` would simply output `<div></div>`, rather than the

@@ -67,6 +67,19 @@ describe "Rails rendering support", :type => :rails do
     it "should let you render a widget inline, and use all instance and local variables, with locals overriding instance variables" do
       expect_match("render_widget_via_inline_with_var_access", /this is an inline widget named Fred, and it is 27 years old, and friends with Mary/)
     end
+
+    it "should let you pass a subclass of Hash, and not accidentally get rid of it via #with_indifferent_access" do
+      expect_match("render_hash_subclass", /the_hash class: MyHash/,
+        /the_hash\[:foo\] &quot;bar&quot;/,
+        /the_hash\[&quot;foo&quot;\] nil/,
+        /the_hash\[:bar\] nil/,
+        /the_hash\[&quot;bar&quot;\] :baz/,
+        /other_hash class: Hash/,
+        /other_hash\[:quux\] nil/,
+        /other_hash\[&quot;quux&quot;\] &quot;bazzle&quot;/,
+        /other_hash\[:marph\] :bar/,
+        /other_hash\[&quot;marph&quot;\] nil/)
+    end
   end
 
   describe "rendering in a widget" do

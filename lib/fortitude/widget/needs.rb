@@ -80,11 +80,13 @@ module Fortitude
 
         # PUBLIC API
         def extract_needed_assigns_from(input)
-          input = input.with_indifferent_access
-
           out = { }
           needs_as_hash.keys.each do |name|
-            out[name] = input[name] if input.has_key?(name)
+            if input.has_key?(name)
+              out[name] = input[name]
+            elsif input.has_key?(name.to_s)
+              out[name] = input[name.to_s]
+            end
           end
           out
         end
