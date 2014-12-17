@@ -9,8 +9,8 @@ class Views::Layout < Views::Shared::Base
 
         render_title
 
-        rawtext(stylesheet_link_tag 'normalize', 'all')
-        rawtext(javascript_include_tag 'all')
+        stylesheet_link_tag 'all'
+        javascript_include_tag 'all'
       }
 
       body(:class => page_classes) {

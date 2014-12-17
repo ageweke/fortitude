@@ -11,6 +11,9 @@ module Views
       enforce_id_uniqueness         true
 
       enable_parcels!
+
+      helper :stylesheet_link_tag, :transform => :output_return_value
+      helper :javascript_include_tag, :transform => :output_return_value
     end
   end
 end
