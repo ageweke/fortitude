@@ -15,3 +15,4 @@ gem "tzinfo-data", platforms: [:mswin, :mingw]
 
 gem "fortitude", :path => "../"
 gem "parcels", :path => '../../parcels'
+gem "bootstrap-sass", :require => false

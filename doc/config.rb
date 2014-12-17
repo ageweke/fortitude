@@ -75,6 +75,8 @@ configure :build do
   # set :http_prefix, "/Content/images/"
 end
 
+sprockets.import_asset 'bootstrap.js'
+
 after_configuration do
   doc_root = File.expand_path(File.dirname(__FILE__))
   widgets_root = File.join(doc_root, 'source')
