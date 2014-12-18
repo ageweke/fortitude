@@ -394,4 +394,30 @@ EOS
     expect(e.tried_class_names).to be_include("String")
     expect(e.message).to match(/String/)
   end
+
+  it "should pass the filename of the template into the eval of the class source" do
+    text = <<-EOS
+class ClassSourceTemplate < Fortitude::Widgets::Html5
+  def self.set_caller!
+    @caller = caller
+  end
+
+  def self.get_caller
+    @caller
+  end
+
+  set_caller!
+
+  def content
+    text "widget file: \#{__FILE__}\n"
+    text "called at: \#{self.class.get_caller.join("\n    ")}"
+  end
+end
+EOS
+
+    full_path = File.join(tempdir, "class_source_template.rb")
+    html = render_text_with_tilt("class_source_template.rb", text)
+    expect(html).to match(/widget file: #{Regexp.escape(full_path)}/)
+    expect(html).to match(/called at: #{Regexp.escape(full_path)}:\d+/)
+  end
 end

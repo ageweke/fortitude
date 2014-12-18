@@ -7,7 +7,11 @@ module Fortitude
   module Tilt
     class FortitudeTemplate < ::Tilt::Template
       def prepare
-        ::Object.class_eval(data)
+        if file && line
+          ::Object.class_eval(data, file, line)
+        else
+          ::Object.class_eval(data)
+        end
 
         # 2014-06-19 ageweke -- Earlier versions of Tilt try to instantiate the engine with an empty tempate as a way
         # of making sure it can be created, so we have to support this case.

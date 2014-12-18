@@ -10,6 +10,9 @@
   it _did_ find matching names it thinks that file might use in the resulting exception. This can be used to, for
   example, determine if the file in question actually contains a module with the appropriate name, rather than a
   widget class.
+* When rendering using Tilt, Fortitude now properly supplies the file and line to the call to `eval` the source code of
+  the widget. This, in turn, means that `__FILE__`, `__LINE__`, and `caller` will work properly when used at class
+  level inside a widget rendered via Tilt.
 
 ## 0.9.1, 14 December 2014
 

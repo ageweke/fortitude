@@ -97,7 +97,6 @@ describe "Rails development-mode support", :type => :rails do
       end
 
       sleep 1
-      $stderr.puts "checking for #{current_form.inspect}"
       expect_match("edit", /#{Regexp.escape(current_form.to_s)}/i)
 
       current_form = if current_form == :full_reference
