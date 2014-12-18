@@ -14,6 +14,10 @@ module Views
 
       helper :stylesheet_link_tag, :transform => :output_return_value
       helper :javascript_include_tag, :transform => :output_return_value
+
+      css_prefix %{
+@import "#{File.expand_path(File.join(File.dirname(__FILE__), '..', 'stylesheets', '_shared_prefix.scss'))}";
+}
     end
   end
 end

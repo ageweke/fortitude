@@ -1,0 +1,12 @@
+@import "shared_prefix";
+
+body {
+  font-family: $body-font, serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font: {
+    family: $heading-font, sans-serif;
+    weight: 700;
+  }
+}

@@ -18,6 +18,8 @@ class Views::Layout < Views::Shared::Base
         stylesheet_link_tag 'all'
         javascript_include_tag 'all'
 
+        link :rel => 'stylesheet', :type => 'text/css', :href => "http://fonts.googleapis.com/css?family=Fjord+One|Oswald:400,300,700"
+
         render_title
       }
 
