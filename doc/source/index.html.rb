@@ -9,10 +9,29 @@ class Views::Index < ::Views::Shared::Base
     h2 {
       font-family: $body-font;
       color: $highlight-color;
-      width: 50%;
       margin-left: auto;
       margin-right: auto;
       margin-top: 60px;
+    }
+
+    h3 {
+      font-weight: 400;
+      font-size: 200%;
+    }
+
+    ul {
+      text-align: center;
+      list-style-type: none;
+      padding-left: 0;
+
+      margin-top: 100px;
+      margin-left: auto;
+      margin-right: auto;
+
+      li {
+        width: 33%;
+        float: left;
+      }
     }
 
     padding-top: 120px;
@@ -23,8 +42,19 @@ class Views::Index < ::Views::Shared::Base
   def content
     div(:class => :jumbotron) {
       h1 "Fortitude"
-
       h2 "Beautifully-factored HTML views for your Ruby or Rails application.", :class => :subhead
+
+      ul {
+        li {
+          h3 "Why use Fortitude?"
+        }
+        li {
+          h3 "Getting Started"
+        }
+        li {
+          h3 "Reference"
+        }
+      }
     }
   end
 end
