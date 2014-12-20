@@ -1,9 +1,14 @@
 class Views::Index < ::Views::Shared::Base
   css %{
-    @at-root div\#{&} {
-      background-color: $background-color;
+    background-color: $background-color;
+    padding-bottom: 120px;
+
+    .jumbotron {
       color: $bold-color;
       text-align: center;
+      padding-top: 120px;
+      padding-bottom: 60px;
+      background-color: $background-color;
     }
 
     h2 {
@@ -18,45 +23,29 @@ class Views::Index < ::Views::Shared::Base
       font-family: $body-font;
     }
 
-    ul {
+    .nav-link-button {
       text-align: center;
-      list-style-type: none;
-      padding-left: 0;
 
-      margin-top: 100px;
-      margin-left: auto;
-      margin-right: -2%;
+      h3 {
+        padding-top: 15px;
+        padding-bottom: 15px;
+      }
 
-      li {
-        width: 31%;
-        float: left;
-        margin-right: 2%;
-
-        h3 {
-          padding-top: 15px;
-          padding-bottom: 15px;
-        }
-
-        a {
-          color: $highlight-color;
-
-          &:link h3 {
-            background-color: $bold-translucent;
-          }
-        }
+      a {
+        color: $highlight-color;
+        h3 { background-color: $bold-translucent; }
       }
     }
-
-    padding-top: 120px;
-    padding-bottom: 150px;
   }
 
   def content
-    div(:class => :jumbotron) {
-      h1 "Fortitude"
-      h2 "Beautifully-factored HTML views for your Ruby or Rails application.", :class => :subhead
+    fluid_container {
+      jumbotron {
+        h1 "Fortitude"
+        h2 "Beautifully-factored HTML views for your Ruby or Rails application.", :class => :subhead
+      }
 
-      ul {
+      row {
         big_nav_link "Why use Fortitude?", "/why"
         big_nav_link "Getting Started", "/getting-started"
         big_nav_link "Reference", "/reference"
@@ -65,7 +54,7 @@ class Views::Index < ::Views::Shared::Base
   end
 
   def big_nav_link(text, to_where)
-    li {
+    columns(:medium => 4, :class => 'nav-link-button') {
       a(:href => to_where) {
         h3 text, :class => 'nav-link'
       }

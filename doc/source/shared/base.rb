@@ -1,3 +1,5 @@
+require 'source/portable/fortitude-bootstrap'
+
 module Views
   module Shared
     class Base < Fortitude::Widget
@@ -18,6 +20,8 @@ module Views
       css_prefix %{
 @import "#{File.expand_path(File.join(File.dirname(__FILE__), '..', 'stylesheets', '_shared_prefix.scss'))}";
 }
+
+      include ::FortitudeBootstrap
     end
   end
 end
