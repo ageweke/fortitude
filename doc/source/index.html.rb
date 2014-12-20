@@ -10,7 +10,7 @@ class Views::Index < ::Views::Shared::Base
     .jumbotron {
       color: $bold-color;
       text-align: center;
-      padding-top: 120px;
+      padding-top: 60px;
       padding-bottom: 20px;
       background-color: $background-color;
     }
@@ -89,8 +89,9 @@ class Views::Index < ::Views::Shared::Base
 
       font-family: $heading-font;
       font-weight: 300;
-      a { color: black; }
+      a { padding-bottom: 15px; color: black; }
       color: black;
+
     }
   }
 
@@ -113,8 +114,8 @@ class Views::Index < ::Views::Shared::Base
           columns(:medium => 12) {
             # h3 "What is Fortitude?", :class => 'what-is'
             p %{Fortitude is a templating engine for Ruby, with or without Rails, that gives you all the power of
-  Ruby to factor your views. Using Fortitude, you'll build dramatically better-factored, readable,
-  maintainable views.}
+  Ruby to factor your views. Using Fortitude, you'll build dramatically better-factored, more readable,
+  more maintainable views.}
           }
         }
 
