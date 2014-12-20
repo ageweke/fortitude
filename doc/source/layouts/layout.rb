@@ -23,7 +23,7 @@ class Views::Layout < Views::Shared::Base
         render_title
       }
 
-      body(:class => page_classes) {
+      body {
         rawtext(yield)
 
         footer_javascript
@@ -31,8 +31,12 @@ class Views::Layout < Views::Shared::Base
     }
   end
 
+  def page_title
+    nil
+  end
+
   def render_title
-    title(current_page.data.title || "The Middleman")
+    title(page_title || "Fortitude")
   end
 
   def footer_javascript
