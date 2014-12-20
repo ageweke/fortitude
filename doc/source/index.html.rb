@@ -15,8 +15,7 @@ class Views::Index < ::Views::Shared::Base
     }
 
     h3 {
-      font-weight: 400;
-      font-size: 200%;
+      font-family: $body-font;
     }
 
     ul {
@@ -26,11 +25,25 @@ class Views::Index < ::Views::Shared::Base
 
       margin-top: 100px;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: -2%;
 
       li {
-        width: 33%;
+        width: 31%;
         float: left;
+        margin-right: 2%;
+
+        h3 {
+          padding-top: 15px;
+          padding-bottom: 15px;
+        }
+
+        a {
+          color: $highlight-color;
+
+          &:link h3 {
+            background-color: $bold-translucent;
+          }
+        }
       }
     }
 
@@ -38,22 +51,23 @@ class Views::Index < ::Views::Shared::Base
     padding-bottom: 150px;
   }
 
-
   def content
     div(:class => :jumbotron) {
       h1 "Fortitude"
       h2 "Beautifully-factored HTML views for your Ruby or Rails application.", :class => :subhead
 
       ul {
-        li {
-          h3 "Why use Fortitude?"
-        }
-        li {
-          h3 "Getting Started"
-        }
-        li {
-          h3 "Reference"
-        }
+        big_nav_link "Why use Fortitude?", "/why"
+        big_nav_link "Getting Started", "/getting-started"
+        big_nav_link "Reference", "/reference"
+      }
+    }
+  end
+
+  def big_nav_link(text, to_where)
+    li {
+      a(:href => to_where) {
+        h3 text, :class => 'nav-link'
       }
     }
   end
