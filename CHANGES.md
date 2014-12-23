@@ -13,6 +13,10 @@
 * When rendering using Tilt, Fortitude now properly supplies the file and line to the call to `eval` the source code of
   the widget. This, in turn, means that `__FILE__`, `__LINE__`, and `caller` will work properly when used at class
   level inside a widget rendered via Tilt.
+* Fixed a bug where `Fortitude::Widget.widget_class_from_file` and `Fortitude::Widget.widget_class_from_source` would,
+  when scanning a file containing an ordinary class definition like
+  `module Foo; module Bar; class Baz < Fortitude::Widget`, instead return a class `Foo::Baz` if such existed and
+  was a descendant of `Fortitude::Widget` instead of the correct `Foo::Bar::Baz`.
 
 ## 0.9.1, 14 December 2014
 

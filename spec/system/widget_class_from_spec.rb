@@ -38,6 +38,13 @@ describe "Fortitude widget-class-from-(file|source) support", :type => :system d
       expect(wcfs(text)).to eq(::WidgetFromClass2)
     end
 
+    it "should prefer the longest class name to a shorter name" do
+      eval("module WidgetFromClass25; class Widget1 < Fortitude::Widget; end; end")
+      text = "module WidgetFromClass25; module Foo; class Widget1 < Fortitude::Widget; end; end; end"
+      eval(text)
+      expect(wcfs(text)).to eq(::WidgetFromClass25::Foo::Widget1)
+    end
+
     it "should fail if given source code it can't guess the class name from" do
       expect do
         wcfs("cname = 'WidgetFromCla' + 'ss3'; eval('class ' + cname + ' < ::Fortitude::Widget; end')")

@@ -121,9 +121,9 @@ or add a "magic comment" to the source code of this widget that looks like this:
           while module_nesting.length > 0
             possible_module_name = module_nesting.join("::")
             out.reverse.each do |class_name|
-              out.unshift("#{possible_module_name}::#{class_name}")
+              out.push("#{possible_module_name}::#{class_name}")
             end
-            out.unshift(possible_module_name)
+            out.push(possible_module_name)
             module_nesting.pop
           end
 
