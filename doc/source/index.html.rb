@@ -48,7 +48,6 @@ class Views::Index < ::Views::Shared::Base
       padding-right: 30px;
     }
 
-
     blockquote {
       .attribution {
         margin-top: 10px;
@@ -67,15 +66,20 @@ class Views::Index < ::Views::Shared::Base
     }
 
     .nav-link-button {
+      border: 1px solid $highlight-color;
+      background-color: $bold-translucent;
+      vertical-align: center;
+
       h3 {
         padding-top: 15px;
         padding-bottom: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
       a {
         h3 {
           font-weight: 400;
-          background-color: $bold-translucent;
           text-align: center;
         }
       }
@@ -105,14 +109,13 @@ class Views::Index < ::Views::Shared::Base
 
         row(:class => 'praise-quotes') {
           praise_quote "Quin H.", %{At first, I was skeptical. But after writing views in Fortitude for a couple of weeks,
-  I realized I could never go back to anything else. It really is that good.}
+  I realized I could never go back to anything else. It makes that big a difference.}
           praise_quote "Oleksiy K.", %{I’ve been doing Rails (95% backend) for 8 years now...and today, after hearing about Fortitude
   and Parcels, was the first time ever that I wanted to actually try to do some user-facing feature development.}
         }
 
         row(:class => 'what-is') {
           columns(:medium => 12) {
-            # h3 "What is Fortitude?", :class => 'what-is'
             p %{Fortitude is a templating engine for Ruby, with or without Rails, that gives you all the power of
   Ruby to factor your views. Using Fortitude, you'll build dramatically better-factored, more readable,
   more maintainable views.}
@@ -141,9 +144,11 @@ class Views::Index < ::Views::Shared::Base
   end
 
   def big_nav_link(text, to_where)
-    columns(:small => 4, :class => 'nav-link-button') {
-      a(:href => to_where) {
-        h3 text, :class => 'nav-link'
+    columns(:small => 4) {
+      div(:class => 'nav-link-button') {
+        a(:href => to_where) {
+          h3 text, :class => 'nav-link'
+        }
       }
     }
   end
