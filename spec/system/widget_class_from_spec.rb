@@ -45,10 +45,12 @@ describe "Fortitude widget-class-from-(file|source) support", :type => :system d
       expect(wcfs(text)).to eq(::WidgetFromClass25::Foo::Widget1)
     end
 
-    it "should fail if given source code it can't guess the class name from" do
-      expect do
-        wcfs("cname = 'WidgetFromCla' + 'ss3'; eval('class ' + cname + ' < ::Fortitude::Widget; end')")
-      end.to raise_error(::Fortitude::Widget::Files::CannotDetermineWidgetClassNameError)
+    it "should fail if given source code it can't guess the class name from, returning any :class_names_to_try in the exception" do
+      cdne = capture_exception(::Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
+        wcfs("cname = 'WidgetFromCla' + 'ss3'; eval('class ' + cname + ' < ::Fortitude::Widget; end')",
+          :class_names_to_try => [ 'WidgetFromClass3::Foo', 'WidgetFromClass3::Baz' ])
+      end
+      expect(cdne.class_names_to_try).to eq([ 'WidgetFromClass3::Foo', 'WidgetFromClass3::Baz' ])
     end
 
     it "should fail if the source code contains something that isn't a widget class" do

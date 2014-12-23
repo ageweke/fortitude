@@ -7,15 +7,16 @@ module Fortitude
       extend ActiveSupport::Concern
 
       class CannotDetermineWidgetClassNameError < StandardError
-        attr_reader :tried_class_names, :filename, :magic_comment_texts, :resulting_objects
+        attr_reader :tried_class_names, :filename, :magic_comment_texts, :resulting_objects, :class_names_to_try
 
         def initialize(tried_class_names, options = { })
-          options.assert_valid_keys(:filename, :magic_comment_texts, :resulting_objects)
+          options.assert_valid_keys(:filename, :magic_comment_texts, :resulting_objects, :class_names_to_try)
 
           @tried_class_names = tried_class_names
           @filename = options[:filename]
           @magic_comment_texts = options[:magic_comment_texts]
           @resulting_objects = options[:resulting_objects]
+          @class_names_to_try = options[:class_names_to_try]
           from_what = filename ? "from the file '#{filename}'" : "from some Fortitude source code"
 
           super %{You asked for a Fortitude widget class #{from_what},
@@ -28,7 +29,8 @@ We tried the following class names, in order:
 ...but none of them both existed and were a class that eventually inherits from
 ::Fortitude::Widget. (We got back resulting objects: #{resulting_objects.inspect})
 
-You can either pass the class name into this method via the :class_names_to_try option,
+You can either pass the class name into this method via the :class_names_to_try option
+(we were passed #{class_names_to_try.inspect}),
 or add a "magic comment" to the source code of this widget that looks like this:
 
 #!<token>: <class_name>
@@ -86,7 +88,8 @@ or add a "magic comment" to the source code of this widget that looks like this:
 
           out[:widget_class] || (
             raise CannotDetermineWidgetClassNameError.new(all_class_names, :magic_comment_texts => magic_comment_texts,
-              :filename => options[:filename], :resulting_objects => resulting_objects))
+              :filename => options[:filename], :resulting_objects => resulting_objects,
+              :class_names_to_try => options[:class_names_to_try]))
         end
 
         private
