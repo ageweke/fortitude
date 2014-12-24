@@ -3,34 +3,9 @@ require 'active_support/concern'
 module ::FortitudeBootstrap
   extend ActiveSupport::Concern
 
-  def _fortitude_bootstrap_add_classes(classes_to_add, content_or_attributes = nil, attributes = nil)
-    classes_to_add = Array(classes_to_add)
-    passed_content = passed_attributes = nil
-
-    if content_or_attributes.kind_of?(String)
-      passed_content = content_or_attributes
-      passed_attributes = attributes
-    elsif content_or_attributes.kind_of?(Hash)
-      passed_attributes = content_or_attributes
-    end
-    passed_attributes ||= { }
-
-    new_attributes = if passed_attributes.has_key?('class')
-      passed_attributes.merge('class' => Array(passed_attributes['class'] || [ ]) + classes_to_add)
-    else
-      passed_attributes.merge(:class => Array(passed_attributes[:class] || [ ]) + classes_to_add)
-    end
-
-    if content_or_attributes.kind_of?(String)
-      [ content_or_attributes, new_attributes ]
-    else
-      [ new_attributes ]
-    end
-  end
-
   def self._fortitude_bootstrap_class_adding_method(method_name, tag_name, classes_to_add)
     define_method(method_name) do |*args, &block|
-      send(tag_name, *_fortitude_bootstrap_add_classes(classes_to_add, *args), &block)
+      send(tag_name, *add_css_classes(classes_to_add, *args), &block)
     end
   end
 
@@ -73,6 +48,6 @@ module ::FortitudeBootstrap
       args = [ attributes ]
     end
 
-    div(*_fortitude_bootstrap_add_classes(_fortitude_bootstrap_column_classes(column_spec), *args), &block)
+    div(*add_css_classes(_fortitude_bootstrap_column_classes(column_spec), *args), &block)
   end
 end
