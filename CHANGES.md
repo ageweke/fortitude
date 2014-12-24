@@ -31,7 +31,7 @@
 
 ```ruby
 def super_p(*args, &block)
-  p(add_css_classes(:super, *args), &block)
+  p(*add_css_classes(:super, *args), &block)
 end
 ```
 
