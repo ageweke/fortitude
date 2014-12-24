@@ -60,4 +60,10 @@ describe "Fortitude formatting support", :type => :system do
   </div>
 </div>}) { div(:class => 'foo') { div(:class => 'bar') { } } }
   end
+
+  it "should not leave a blank line after pre { }" do
+    should_format_to(%{<pre><p>hello
+  world
+there</p></pre>}) { pre { p "hello\n  world\nthere" } }
+  end
 end
