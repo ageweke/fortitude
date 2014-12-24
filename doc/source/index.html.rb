@@ -30,13 +30,13 @@ class Views::Index < ::Views::Shared::Base
       }
 
       row(:class => 'offsite-links') {
-        columns(:medium => 3) {
+        columns(:medium => 4) {
           a("Fortitude on GitHub", :href => 'https://github.com/ageweke/fortitude')
         }
-        columns(:medium => 3) {
+        columns(:medium => 4) {
           a("Fortitude on Travis CI", :href => 'https://travis-ci.org/ageweke/fortitude')
         }
-        columns(:medium => 3) {
+        columns(:medium => 4) {
           a("Fortitude on Google Groups", :href => 'https://groups.google.com/forum/#!forum/fortitude-ruby')
         }
       }

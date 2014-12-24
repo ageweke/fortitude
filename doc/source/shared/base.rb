@@ -1,3 +1,4 @@
+require 'source/shared/common'
 require 'source/portable/fortitude-bootstrap'
 
 module Views
@@ -22,6 +23,7 @@ module Views
 }
 
       include ::FortitudeBootstrap
+      include ::Views::Shared::Common
     end
   end
 end
