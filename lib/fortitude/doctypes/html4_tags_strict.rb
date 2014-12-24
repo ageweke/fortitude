@@ -107,6 +107,7 @@ module Fortitude
         :spec => 'http://www.w3.org/TR/html401/struct/text.html#h-9.3.2.1'
       tag :pre, :newline_before => true, :valid_attributes => ATTRS_ATTRIBUTES,
         :can_enclose => INLINE_CONTENT - %w{img object big small sub sup},
+        :suppress_formatting_inside => true,
         :spec => 'http://www.w3.org/TR/html401/struct/text.html#h-9.3.4'
       tag :ins, :valid_attributes => ATTRS_ATTRIBUTES + %w{cite datetime}, :can_enclose => FLOW_CONTENT,
         :spec => 'http://www.w3.org/TR/html401/struct/text.html#h-9.4'

@@ -152,6 +152,7 @@ module Fortitude
       html5_tag :hr, :newline_before => true, :content_allowed => false,
         :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-hr-element'
       html5_tag :pre, :newline_before => true, :can_enclose => PHRASING_CONTENT,
+        :suppress_formatting_inside => true,
         :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-pre-element'
       html5_tag :blockquote, :newline_before => true, :can_enclose => FLOW_CONTENT, :valid_attributes => %w{cite},
         :spec => 'http://www.w3.org/TR/html5/grouping-content.html#the-blockquote-element'

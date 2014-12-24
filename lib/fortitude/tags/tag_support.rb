@@ -18,17 +18,22 @@ module Fortitude
 
       FORTITUDE_TAG_PARTIAL_OPEN_END = ">".freeze
 
-      def _fortitude_formatted_output_tag_yield(tag_name)
+      def _fortitude_formatted_output_tag_yield(tag_name, suppress_formatting_inside)
         rc = @_fortitude_rendering_context
         if rc.format_output?
           rc.needs_newline!
           rc.increase_indent!
           begin
+            rc.suppress_formatting! if suppress_formatting_inside
             yield
           ensure
             rc.decrease_indent!
-            rc.needs_newline!
-            rc.about_to_output_non_whitespace!
+            if suppress_formatting_inside
+              rc.desuppress_formatting!
+            else
+              rc.needs_newline!
+              rc.about_to_output_non_whitespace!
+            end
           end
         else
           yield

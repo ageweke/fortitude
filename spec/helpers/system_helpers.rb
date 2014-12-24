@@ -66,7 +66,7 @@ module SystemHelpers
     tag :script, :newline_before => true, :escape_direct_content => false
     tag :head, :newline_before => true
     tag :style, :newline_before => true, :escape_direct_content => false
-    tag :pre, :newline_before => true
+    tag :pre, :newline_before => true, :suppress_formatting_inside => true
   end
 
   class TestWidgetClass < Fortitude::Widget

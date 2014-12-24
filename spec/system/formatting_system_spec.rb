@@ -5,7 +5,8 @@ describe "Fortitude formatting support", :type => :system do
     end
 
     wc.send(:define_method, :content, &block)
-    expect(render(wc)).to eq(text)
+    actual = render(wc)
+    expect(actual).to eq(text)
   end
 
   it "should add newlines around <div> and <p>" do
@@ -61,9 +62,26 @@ describe "Fortitude formatting support", :type => :system do
 </div>}) { div(:class => 'foo') { div(:class => 'bar') { } } }
   end
 
-  it "should not leave a blank line after pre { }" do
+  it "should suppress all formatting inside <pre>" do
     should_format_to(%{<pre><p>hello
   world
 there</p></pre>}) { pre { p "hello\n  world\nthere" } }
+  end
+
+  it "should suppress all formatting inside <pre> (complex example)" do
+    should_format_to(%{<div>
+  <pre><p>hello
+  world
+there</p><div><p>another here</p></div><p>yet another</p></pre>
+</div>}) { div { pre { p "hello\n  world\nthere"; div { p "another here" }; p "yet another" } } }
+  end
+
+  it "should suppress all formatting inside <pre>, even with nested <pre> tags" do
+    should_format_to(%{<div>
+  <pre><p>hello
+  world
+there</p><pre><p>another
+  here</p></pre><p>yet another</p></pre>
+</div>}) { div { pre { p "hello\n  world\nthere"; pre { p "another\n  here" }; p "yet another" } } }
   end
 end

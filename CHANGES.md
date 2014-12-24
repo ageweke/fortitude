@@ -17,6 +17,9 @@
   when scanning a file containing an ordinary class definition like
   `module Foo; module Bar; class Baz < Fortitude::Widget`, instead return a class `Foo::Baz` if such existed and
   was a descendant of `Fortitude::Widget` instead of the correct `Foo::Bar::Baz`.
+* Fixed a bug where, if `format_output` was turned on, `<pre>` tags would still insert whitespace and newlines for
+  formatting like any other tag &mdash; which is incorrect, because, only inside `<pre>` tags, such whitespace is
+  significant. Now, `<pre>` tags correctly suppress all formatting within them.
 * Added `Fortitude::Widget#content_and_attributes_from_tag_arguments`; this takes as input any style of arguments
   permitted to a Fortitude tag method (_e.g._, `p`, `p 'hello'`, `p :id => :foo`, `p 'hello', :id => :foo`) and always
   returns a two-element array &mdash; the first element is the text supplied to the method (if any), and the second

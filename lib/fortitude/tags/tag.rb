@@ -31,7 +31,7 @@ module Fortitude
 
       def initialize(name, options = { })
         options.assert_valid_keys(:valid_attributes, :newline_before, :content_allowed, :can_enclose,
-          :allow_data_attributes, :allow_aria_attributes, :spec, :escape_direct_content)
+          :allow_data_attributes, :allow_aria_attributes, :spec, :escape_direct_content, :suppress_formatting_inside)
 
         @name = self.class.normalize_tag_name(name)
 
@@ -42,6 +42,7 @@ module Fortitude
         @allow_data_attributes = true unless options.has_key?(:allow_data_attributes) && (! options[:allow_data_attributes])
         @allow_aria_attributes = true unless options.has_key?(:allow_aria_attributes) && (! options[:allow_aria_attributes])
         @escape_direct_content = true unless options.has_key?(:escape_direct_content) && (! options[:escape_direct_content])
+        @suppress_formatting_inside = !! options[:suppress_formatting_inside]
         @spec = options[:spec]
       end
 
@@ -141,7 +142,7 @@ module Fortitude
         needs_formatting = !! options[:enable_formatting]
 
         if needs_formatting && @newline_before
-          yield_call = "_fortitude_formatted_output_tag_yield(:#{name}) { yield }"
+          yield_call = "_fortitude_formatted_output_tag_yield(:#{name}, #{@suppress_formatting_inside.inspect}) { yield }"
         elsif needs_formatting
           yield_call = "yield; rc.about_to_output_non_whitespace!"
         else

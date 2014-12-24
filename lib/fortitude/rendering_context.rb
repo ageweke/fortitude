@@ -140,6 +140,15 @@ module Fortitude
       @newline_needed = true
     end
 
+    def suppress_formatting!
+      @suppress_formatting_level ||= 0
+      @suppress_formatting_level += 1
+    end
+
+    def desuppress_formatting!
+      @suppress_formatting_level -= 1
+    end
+
     def current_indent
       ("  " * @indent).freeze
     end
@@ -155,7 +164,7 @@ module Fortitude
     end
 
     def about_to_output_non_whitespace!
-      if @newline_needed
+      if @newline_needed && ((@suppress_formatting_level ||= 0) == 0)
         if @have_output
           o = @output_buffer_holder.output_buffer
           o.original_concat(NEWLINE)
