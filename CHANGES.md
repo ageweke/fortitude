@@ -17,6 +17,26 @@
   when scanning a file containing an ordinary class definition like
   `module Foo; module Bar; class Baz < Fortitude::Widget`, instead return a class `Foo::Baz` if such existed and
   was a descendant of `Fortitude::Widget` instead of the correct `Foo::Bar::Baz`.
+* Added `Fortitude::Widget#content_and_attributes_from_tag_arguments`; this takes as input any style of arguments
+  permitted to a Fortitude tag method (_e.g._, `p`, `p 'hello'`, `p :id => :foo`, `p 'hello', :id => :foo`) and always
+  returns a two-element array &mdash; the first element is the text supplied to the method (if any), and the second
+  is the attributes supplied to the method (if any), or an empty `Hash` otherwise. This can help take a fair amount of
+  bookkeeping burden off of helper methods you might build on top of Fortitude.
+* Added `Fortitude::Widget#add_css_classes` (_a.k.a._ `#add_css_class`). This takes as its first argument one or more
+  CSS classes to add (as a `String`, `Symbol`, or `Array` of such), and, as its remainder, any arguments valid for a
+  Fortitude tag method (_e.g._, textual content, a `Hash` of attributes, textual content and a `Hash`, or neither).
+  It then returns a two-argument array of textual content and attributes; the attributes will have a `class` or
+  `:class` key that contains any classes specified in the original, plus the additional classes to add. In other
+  words, you can use it as such:
+
+```ruby
+def super_p(*args, &block)
+  p(add_css_classes(:super, *args), &block)
+end
+```
+
+  ...and now `super_p` acts just like `p`, except that it adds a class of `super` to its output. This is an extremely
+  common pattern in code built on top of Fortitude, and so now it is baked into the core.
 
 ## 0.9.1, 14 December 2014
 
