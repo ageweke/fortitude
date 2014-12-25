@@ -17,6 +17,16 @@ class Views::Layout < Views::Shared::Base
         javascript_include_tag 'all'
 
         link :rel => 'stylesheet', :type => 'text/css', :href => "http://fonts.googleapis.com/css?family=Oswald:400,300,700|Gentium+Basic:400,700,400italic,700italic|Inconsolata:400,700"
+
+        javascript_include_tag 'https://code.jquery.com/jquery-2.1.3.min.js'
+        javascript <<-EOS
+$(document).ready(function() {
+  $('figure.source pre code').each(function(i, block) {
+    hljs.highlightBlock(block);
+  });
+});
+EOS
+
         javascript "hljs.initHighlightingOnLoad();"
 
         render_title

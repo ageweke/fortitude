@@ -10,16 +10,21 @@
   h1, h2, h3, h4, h5, h6 { margin-top: 10px; }
 }
 
-pre, code {
-  font-family: $monospace-font;
-  font-size: 12px;
-  border: none;
-}
+figure.source {
+  figcaption {
+    font-family: $monospace-font;
+    font-weight: $monospace-font-medium-weight;
+    text-align: right;
+    background-color: $faint-highlight;
+    border-bottom: 1px solid black;
+    padding-right: 6px;
+  }
 
-pre {
-  background: none;
-  margin: 0;
-  padding: 0;
+  pre {
+    background: none;
+    padding: 0;
+    margin: 0;
+  }
 }
 
 blockquote.emphatic {

@@ -53,8 +53,7 @@ bring all the power of Ruby to bear on your views. As they grow in size, differe
 
               p %{Let’s start with an example. This is a snippet of a realistic, moderately complex view written in ERb:}
 
-              pre {
-                code(<<-EOS, :class => 'erb')
+              erb 'user_settings.html.erb', <<-EOS
 <div class="row">
   <div class="col-sm-6 table_container">
     <h3>Your Settings</h3>
@@ -80,7 +79,6 @@ bring all the power of Ruby to bear on your views. As they grow in size, differe
   </div>
 </div>
 EOS
-              }
             }
             columns(:small => 2) { }
           }
