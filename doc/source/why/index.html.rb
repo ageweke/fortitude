@@ -137,7 +137,7 @@ EOS
 
               p %{When rendered, this button looks something like the following when you hover over it:}
 
-              img(:src => '/images/why/icon_button@2x.png')
+              retina_image(:src => 'why/icon_button.png')
             }
             columns(:small => 2) { }
           }
