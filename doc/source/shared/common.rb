@@ -10,6 +10,10 @@ module Views
         blockquote(*add_css_classes(:emphatic, *args), &block)
       end
 
+      def small_pullquote(*args, &block)
+        blockquote(*add_css_classes(:small, *args), &block)
+      end
+
       def vertical_space
         div(:class => 'vertical-space')
       end
