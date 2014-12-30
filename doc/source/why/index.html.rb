@@ -11,28 +11,10 @@ module Views
             columns(:small => 3) { }
             columns(:small => 7) {
               bang_intro
+              examples_setup
+              other_benefits_pullquote
 
-              p {
-                text %{But, of course, good programmers wouldn’t just take our word for it.
-Below are seven short examples that give you a quick }
-                em "tour de force"
-                text %{ showing what makes Fortitude so compelling.}
-              }
-
-              small_pullquote {
-                text %{Fortitude offers }
-                a("many other benefits", :href => "/why/other_benefits.html")
-                text %{, too. It’s incredibly fast (20–40% faster than ERb, 4–5x faster than HAML),
-provides extremely powerful debugging and validation tools, and is almost certainly
-compatible with any stack you’re using.}
-              }
-
-              h3 "How Does it Work?"
-
-              p {
-                text %{Fortitude expresses your views as Ruby code. By doing this, it allows you to
-bring all the power of Ruby to bear on your views. As they grow in size, difference this makes is enormous.}
-              }
+              how_does_it_work
 
               factoring_out_commonality_example
             }
@@ -61,6 +43,34 @@ your codebase grows, not decelerate.}
         }
       end
 
+      def examples_setup
+        p {
+          text %{But, of course, good programmers wouldn’t just take our word for it.
+Below are seven short examples that give you a quick }
+          em "tour de force"
+          text %{ showing what makes Fortitude so compelling.}
+        }
+      end
+
+      def other_benefits_pullquote
+        small_pullquote {
+          text %{Fortitude offers }
+          a("many other benefits", :href => "/why/other_benefits.html")
+          text %{, too. It’s incredibly fast (20–40% faster than ERb, 4–5x faster than HAML),
+provides extremely powerful debugging and validation tools, and is almost certainly
+compatible with any stack you’re using.}
+        }
+      end
+
+      def how_does_it_work
+        h3 "How Does it Work?"
+
+        p {
+          text %{Fortitude expresses your views as Ruby code. By doing this, it allows you to
+bring all the power of Ruby to bear on your views. As they grow in size, difference this makes is enormous.}
+        }
+      end
+
       def factoring_out_commonality_example
         h4 "Factoring Out Commonality"
 
@@ -86,6 +96,67 @@ EOS
           a("repeating ourselves", :href => 'dont_repeat_yourself')
           text %{, which we know is bad.}
         }
+
+        h5 "How ERb/HAML/etc. Fails"
+
+        p {
+          text %{So, let’s factor it out into a partial using ERb. This should be easy, right? We just need to deal
+with a few things:}
+        }
+
+        ul {
+          li {
+            text "The URL (the "
+            code "href"
+            text " parameter) is, of course, different in almost every case."
+          }
+          li {
+            text %{Sometimes we need to add additional attributes }
+            em "(e.g."
+            text ", "
+            code "onclick"
+            text ", "
+            code "data-*"
+            text ", "
+            em "etc."
+            text ") to the "
+            code "a"
+            text " element, and sometimes not."
+          }
+          li {
+            text "Sometimes we need to add additional CSS classes to the "
+            code "a"
+            text " element, and sometimes not."
+          }
+          li {
+            text %{Sometimes the tooltip has static text inside it, sometimes HTML, sometimes user-supplied data,
+and sometimes a combination of all of the above.}
+          }
+          li {
+            text %{Sometimes we want to include an entire image as the tooltip (and nothing else);
+other times, we want text.}
+          }
+        }
+
+        p {
+          text %{Given that, here’s what the resulting ERb looks like:}
+        }
+
+        erb '_icon_button.html.erb', <<-EOS
+<a href="<%= target %>" class="button icon <%= icon_name %> <%= additional_classes if defined?(additional_classes) %> <%= (defined?(additional_attributes) ? additional_attributes || '').html_safe %>">
+  <% if tooltip_image %>
+    <img src="<%= tooltip_image %>" />
+  <% else %>
+    <span class="button_text">
+      <% if tooltip_html %>
+        <%= tooltip_html.html_safe %>
+      <% else %>
+        <%= tooltip_text %>
+      <% end %>
+    </span>
+  <% end %>
+</a>
+EOS
       end
     end
   end
