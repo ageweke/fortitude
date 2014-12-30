@@ -1,5 +1,6 @@
 require 'fortitude'
 require 'parcels'
+require 'retina_images'
 require 'source/shared/base'
 
 ###
@@ -80,8 +81,11 @@ sprockets.import_asset 'bootstrap.js'
 after_configuration do
   doc_root = File.expand_path(File.dirname(__FILE__))
   widgets_root = File.join(doc_root, 'source')
+  images_root = File.join(doc_root, 'source', 'images')
   temp_dir_root = File.expand_path(File.join(File.dirname(doc_root), 'tmp', 'docs'))
 
   sprockets.parcels.workaround_directories_root = temp_dir_root
   sprockets.parcels.add_widget_tree!(widgets_root)
+
+  sprockets.retina_images.add_image_tree!(images_root)
 end

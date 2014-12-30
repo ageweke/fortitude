@@ -1,6 +1,11 @@
 module Views
   module Shared
     module Common
+      def retina_image(canonical_path, attributes = { })
+        classes = retina_image_div_based_image_classes(canonical_path)
+        div(*add_css_classes(classes, attributes))
+      end
+
       def emphatic_pullquote(*args, &block)
         blockquote(*add_css_classes(:emphatic, *args), &block)
       end
@@ -20,6 +25,10 @@ module Views
             code the_code
           }
         }
+      end
+
+      def featured_image(image_path)
+        retina_image(image_path, :class => 'featured_image')
       end
     end
   end

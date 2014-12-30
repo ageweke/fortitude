@@ -1,6 +1,5 @@
 require 'source/shared/common'
 require 'source/portable/fortitude-bootstrap'
-require 'source/portable/fortitude_retina_images'
 
 module Views
   module Shared
@@ -24,10 +23,8 @@ module Views
 }
 
       include ::FortitudeBootstrap
-      include ::FortitudeRetinaImages
       include ::Views::Shared::Common
-
-      retina_image_base_directory File.join(File.dirname(File.dirname(__FILE__)), 'images') => '/images'
+      include ::RetinaImages::Helpers
     end
   end
 end
