@@ -17,4 +17,5 @@ gem "fortitude", :path => "../"
 gem "parcels", :path => '../../parcels'
 gem "bootstrap-sass", :require => false
 gem "retina_images", :path => '../../retina_images'
+gem "humanize"
 gem "awesome_print"

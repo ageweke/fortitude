@@ -2,6 +2,7 @@ require 'fortitude'
 require 'parcels'
 require 'retina_images'
 require 'source/shared/base'
+require 'source/shared/standard_page'
 
 ###
 # Compass
