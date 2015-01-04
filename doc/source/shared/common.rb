@@ -22,6 +22,10 @@ module Views
         source_code(:erb, title, the_code)
       end
 
+      def fortitude(title, the_code)
+        source_code(:rb, title, the_code)
+      end
+
       def source_code(language, title, the_code)
         figure(:class => :source) {
           figcaption title

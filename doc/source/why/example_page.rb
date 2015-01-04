@@ -55,9 +55,21 @@ module Views
           }
 
           section {
+            h4 "Issues with Standard Templating Engines"
+            standard_engine_issues
+          }
+
+          section {
             h4 "Using Fortitude"
             using_fortitude
           }
+
+          section {
+            h4 "The Benefits"
+            fortitude_benefits
+          }
+
+          link_to_next_example if next_example
         }
       end
 
@@ -77,7 +89,15 @@ module Views
         raise "Must override in #{self.class.name}"
       end
 
+      def standard_engine_issues
+        raise "Must override in #{self.class.name}"
+      end
+
       def using_fortitude
+        raise "Must override in #{self.class.name}"
+      end
+
+      def fortitude_benefits
         raise "Must override in #{self.class.name}"
       end
 
