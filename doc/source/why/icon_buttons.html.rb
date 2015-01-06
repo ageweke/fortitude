@@ -2,7 +2,7 @@ require 'source/why/example_page'
 
 module Views
   module Why
-    class FactoringOutCommonality < Views::Why::ExamplePage
+    class IconButtons < Views::Why::ExamplePage
       def example_intro
         p %{We’ll start small. In Fortitude (and unlike ERb, HAML, and friends), “helpers”
 are nothing more than ordinary Ruby methods that use the exact same semantics as
@@ -12,15 +12,21 @@ caller’s perspective) than the equivalent using traditional templating engines
       end
 
       def example_description
-        p %{Let’s start small. This is a piece of code that, combined with appropriate CSS,
+        p %{This is a piece of code that, combined with appropriate CSS,
 renders an “icon button” — a button consisting of a small icon, with a tooltip available:}
 
         erb 'icon_button_instance_1.html.erb', <<-EOS
+...
 <a href='<%= conditional_refresh_url(:user => @user) %>' class="button icon refresh">
-  <span class="button_text">
-    <span>Refresh this page, <strong>only</strong> if content has changed</span>
-  </span>
+  <div class="button_text">
+    <p>Refresh this page if:</p>
+    <ul>
+      <li>Content has changed</li>
+      <li>Local data is <%= @out_of_date_condition %></li>
+    </ul>
+  </div>
 </a>
+...
 EOS
 
         p %{When rendered, this button looks something like the following when you hover over it:}
@@ -62,17 +68,9 @@ with a few things:}
             text " element, and sometimes not."
           }
           li {
-            text "Sometimes we need to add additional CSS classes to the "
-            code "a"
-            text " element, and sometimes not."
-          }
-          li {
-            text %{Sometimes the tooltip has static text inside it, sometimes HTML, sometimes user-supplied data,
-and sometimes a combination of all of the above.}
-          }
-          li {
-            text %{Sometimes we want to include an entire image as the tooltip (and nothing else);
-other times, we want text.}
+            text %{What’s inside the tooltip varies: sometimes it’s plain text, sometimes it’s HTML,
+sometimes it’s an image — really, it can be anything at all. And sometimes there are variable
+substitutions in that data.}
           }
         }
 
@@ -81,58 +79,213 @@ other times, we want text.}
         }
 
         erb '_icon_button.html.erb', <<-EOS
-<a href="<%= target %>" class="button icon <%= icon_name %> <%= additional_classes if defined?(additional_classes) %> <%= (defined?(additional_attributes) ? additional_attributes || '').html_safe %>">
-  <% if defined?(tooltip_image) && tooltip_image %>
-    <img src="<%= tooltip_image %>" />
-  <% else %>
-    <span class="button_text">
-      <% if defined?(tooltip_html) && tooltip_html %>
-        <%= tooltip_html.html_safe %>
-      <% else %>
-        <%= tooltip_text %>
-      <% end %>
-    </span>
-  <% end %>
+<a href="<%= target %>" class="button icon <%= icon_name %>" <%= (defined?(additional_attributes) ? additional_attributes || '') %>">
+  <div class="button_text">
+    <%= tooltip_html %>
+  </div>
 </a>
 EOS
 
-        p %{Here’s the calling code in a simple case:}
+        p %{And here’s the calling code:}
 
-        erb 'icon_button_simple_caller.html.erb', <<-EOS
+        erb 'icon_button_caller.html.erb', <<-EOS
 <%= render :partial => '/shared/buttons/icon_button', :locals => {
   :target => conditional_refresh_url(:user => @user),
   :icon_name => 'refresh',
-  :tooltip_text => "Refresh this page"
+  :additional_attributes => 'onclick="javascript:handleRefreshClick();"'.html_safe,
+  :tooltip_html => %{<p>Refresh this page if:</p>
+    <ul>
+      <li>Content has changed</li>
+      <li>Local data is \#{h(@out_of_date_condition)}</li>
+    </ul>}.html_safe
 } %>
 EOS
+      end
 
-        p %{And here’s the calling code in a more complex case:}
+      def standard_engine_issues
+        p %{Even though this is a simple example, this is already quite messy. Let’s try to enumerate the
+problems we see, starting with the new partial (which is by far the least problematic
+of the two sides of this approach):}
 
-        erb 'icon_button_complex_caller.html.erb', <<-EOS
-<%= render :partila => '/shared/buttons/icon_button', :locals => {
-  :target => conditional_refresh_url(:user => @user),
-  :additional_classes => 'spinner_on_run background',
-  :additional_attributes => 'onclick=""'
-} %>
-EOS
+        ul {
+          li {
+            strong "Passed Variables"
+            text %{: The }
+            code "defined?(additional_attributes)"
+            text %{ is ugly and very un-Ruby-like, and yet we need this if we want to make passing the }
+            code "additional_attributes"
+            text %{ parameter optional.}
+          }
+          li {
+            strong "Method Signature"
+            text %{: If you look at the }
+            code '_icon_button.html.rb'
+            text %{ file, how can you tell which variables you need to pass to it? }
+            em "You can’t"
+            text %{ — you just have to examine the entire text of the partial to see what it happens to use,
+and investigate to see if those are variables used by the partial internally,
+variables you’re required to pass using }
+            code ":locals"
+            text %{, or variables that optionally can be passed.}
+          }
+          li {
+            strong "HTML Escaping"
+            text %{: Both the }
+            code "additional_attributes"
+            text " and "
+            code "tooltip_html"
+            text " parameters, since they can contain HTML, must be declared "
+            code "html_safe"
+            text " by the caller. And if you forget? In the case of "
+            code "tooltip_html"
+            text ", you’ll get raw HTML rendered into your output. In the case of "
+            code "additional_attributes"
+            text %{, it’s even worse: you’ll generate serious HTML syntax errors. (Which your browser will
+likely ignore for you…which is convenient until you spend quite a bit of time trying to
+debug why your }
+            code "onclick"
+            text %{ declaration doesn’t work, only to find out it’s not even being inserted properly.)}
+          }
+        }
 
+        p %{The calling code, however, is much worse:}
+
+        ul {
+          li {
+            strong "Verbosity"
+            text %{: First and foremost, we have managed to build a caller that is 33% }
+            em "longer"
+            text %{ than the original code it replaced. Refactoring is supposed to make code shorter, not longer.}
+          }
+          li {
+            strong "HTML Escaping"
+            text %{: }
+            em "Every single caller"
+            text %{ needs to remember to call }
+            code "html_safe"
+            text %{ on the }
+            code "additional_attributes"
+            text " and "
+            code "tooltip_html"
+            text " parameters; if not, you’ll end up with raw HTML or corrupt HTML, as mentioned above."
+          }
+          li {
+            strong "HTML Escaping, Part II"
+            text %{: When we go to interpolate the }
+            code "@out_of_date_condition"
+            text %{ parameter into our }
+            code "tooltip_html"
+            text %{, we now need to worry about calling }
+            code "h()"
+            text %{ — and if we don’t, we’re now vulnerable to XSS attacks. This is not good.}
+          }
+        }
 
         p {
-          text %{That’s pretty messy — the visual back-and-forth between the HTML and the
-interpolated data alone is really distracting, and there are many different variables floating
-around.}
+          text %{To the extent these issues seem unfamiliar, it’s probably because of this: }
+          em "nobody does this"
+          text %{. Why? It’s not because there are no benefits from refactoring out this commonality —
+those benefits are every bit as big as they are with refactoring any kind of code, anywhere.
+Rather, it’s because the tools that you’re given make the refactored code arguably }
+          em "worse"
+          text %{ than just repeating yourself everywhere. (Which has its own whole set of serious
+downsides; it’s just that most engineers accept this as “just the way things are” when it comes
+to building views.)}
         }
-        p {
-          text %{Here’s a challenge: by looking at the view, }
-          strong "which variables must you pass in order to render this partial, and which ones are optional?"
-          text %{ Now, consider that }
-          em "every single programmer"
-          text %{ who uses that view will have to figure out that list and get it right, every single time.}
-        }
+
+        p %{In reality, most teams simply leave well enough alone, and suffer the pains
+of repeating themselves and the consequent difficulty of refactoring.}
+
+        p "But there is a better way."
       end
 
       def using_fortitude
-        h1 "nyi"
+        p %{First off, let’s look at the Fortitude code for the original example, before we try to
+refactor it:}
+
+        fortitude 'icon_button_instance_1.html.rb', <<-EOS
+...
+a(:href => conditional_refresh_url(:user => @user), :class => 'button icon refresh') {
+  div(:class => 'button_text') {
+    p "Refresh this page if:"
+    ul {
+      li "Content has changed"
+      li "Local data is \#{@out_of_date_condition}"
+    }
+  }
+}
+...
+EOS
+
+        p {
+          text %{We won’t delve more deeply into Fortitude’s syntax immediately, but it should be clear that
+Fortitude expresses HTML using a very simple Ruby DSL that’s easy to grasp.
+Using this syntax, we can now factor out this shared code as a simple method that
+we can easily make available on any view that needs it:}
+        }
+
+        fortitude '_icon_button.html.rb', <<-EOS
+def icon_button(icon_name, target, additional_attributes = { })
+  a(additional_attributes.merge(:href => target, :class => "button icon \#{icon_name}")) {
+    div(:class => :button_text) {
+      yield
+    }
+  }
+end
+EOS
+
+        p "And now our caller looks like this:"
+
+        fortitude 'icon_button_caller.html.rb', <<-EOS
+...
+icon_button('refresh', conditional_refresh_url(:user => @user), :onclick => 'javascript:handleRefreshClick();') {
+  p "Refresh this page if:"
+  ul {
+    li "Content has changed"
+    li "Local data is \#{@out_of_date_condition}"
+  }
+}
+...
+EOS
+      end
+
+      def fortitude_benefits
+        p %{Let’s take a look at how much cleaner this is. A few of the most obvious improvements:}
+
+        ul {
+          li {
+            strong "Verbosity"
+            text %{: Our caller is now actually both (much) }
+            em "shorter"
+            text " and "
+            em "more expressive"
+            text " than the code it replaced."
+          }
+          li {
+            strong "Passed Variables"
+            text %{: with one look, you can see what you need to pass to the }
+            code "icon_button"
+            text %{ method, including what’s required and what’s optional — using the exact same
+syntax you use for the rest of your application.}
+          }
+          li {
+            strong "HTML Escaping"
+            text %{: All of our HTML-escaping issues have simply vanished. We can completely ignore
+this, and it will all “do the right thing”.}
+          }
+        }
+
+        p {
+          text %{However, one of the biggest improvements we’ve made is slightly more subtle: in the }
+          code "ERb"; text %{ partial above, the }; code "tooltip_html"; text %{ parameter is created using ordinary }
+          text "Ruby string interpolation, which is a totally different language than the rest of ERb (and, for this "
+          text "purpose, is considerably less flexible)."
+        }
+
+        p {
+          text %{In our next example, we’ll see how this benefit makes all the difference in the world when we make
+one small change to our example.}
+        }
       end
     end
   end
