@@ -3,7 +3,7 @@ module Views
     module ExampleList
       EXAMPLES = begin
         out = [
-          { :subpath => 'icon_buttons', :title => 'Icon Buttons' }
+          { :subpath => 'a_simple_helper', :title => 'A Simple Helper' }
         ]
         out.each_with_index do |hash, index|
           hash[:number] = (index + 1)

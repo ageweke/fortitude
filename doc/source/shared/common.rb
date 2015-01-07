@@ -18,17 +18,21 @@ module Views
         div(:class => 'vertical-space')
       end
 
-      def erb(title, the_code)
-        source_code(:erb, title, the_code)
+      def erb(*args)
+        source_code(:erb, *args)
       end
 
-      def fortitude(title, the_code)
-        source_code(:rb, title, the_code)
+      def fortitude(*args)
+        source_code(:rb, *args)
       end
 
-      def source_code(language, title, the_code)
+      def source_code(language, *args)
+        title = args.shift if args.length > 1
+        the_code = args.shift
+        raise ArgumentError, "Too many arguments: #{args.inspect}" if args.length > 0
+
         figure(:class => :source) {
-          figcaption title
+          figcaption title if title
           pre(:class => language) {
             code the_code
           }

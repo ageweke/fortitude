@@ -2,7 +2,7 @@ require 'source/why/example_page'
 
 module Views
   module Why
-    class IconButtons < Views::Why::ExamplePage
+    class ASimpleHelper < Views::Why::ExamplePage
       def example_intro
         p %{We’ll start small. In Fortitude (and unlike ERb, HAML, and friends), “helpers”
 are nothing more than ordinary Ruby methods that use the exact same semantics as
@@ -15,7 +15,7 @@ caller’s perspective) than the equivalent using traditional templating engines
         p %{This is a piece of code that, combined with appropriate CSS,
 renders an “icon button” — a button consisting of a small icon, with a tooltip available:}
 
-        erb 'icon_button_instance_1.html.erb', <<-EOS
+        erb <<-EOS
 ...
 <a href='<%= conditional_refresh_url(:user => @user) %>' class="button icon refresh">
   <div class="button_text">
@@ -78,7 +78,7 @@ substitutions in that data.}
           text %{Given that, here’s what the resulting ERb looks like:}
         }
 
-        erb '_icon_button.html.erb', <<-EOS
+        erb <<-EOS
 <a href="<%= target %>" class="button icon <%= icon_name %>" <%= (defined?(additional_attributes) ? additional_attributes || '') %>">
   <div class="button_text">
     <%= tooltip_html %>
@@ -88,7 +88,7 @@ EOS
 
         p %{And here’s the calling code:}
 
-        erb 'icon_button_caller.html.erb', <<-EOS
+        erb <<-EOS
 <%= render :partial => '/shared/buttons/icon_button', :locals => {
   :target => conditional_refresh_url(:user => @user),
   :icon_name => 'refresh',
@@ -114,7 +114,7 @@ of the two sides of this approach):}
             code "defined?(additional_attributes)"
             text %{ is ugly and very un-Ruby-like, and yet we need this if we want to make passing the }
             code "additional_attributes"
-            text %{ parameter optional.}
+            text %{ parameter optional. (Yes, there are other ways of doing this, too — but they’re all pretty ugly.)}
           }
           li {
             strong "Method Signature"
@@ -155,7 +155,8 @@ debug why your }
             strong "Verbosity"
             text %{: First and foremost, we have managed to build a caller that is 33% }
             em "longer"
-            text %{ than the original code it replaced. Refactoring is supposed to make code shorter, not longer.}
+            text %{ than the original code it replaced. Although making code shorter is not the only point of
+refactoring, we’d sure like a call to a helper like this to be shorter than just inlining the results of the method!}
           }
           li {
             strong "HTML Escaping"
@@ -183,8 +184,11 @@ debug why your }
 
         p {
           text %{To the extent these issues seem unfamiliar, it’s probably because of this: }
-          em "nobody does this"
-          text %{. Why? It’s not because there are no benefits from refactoring out this commonality —
+          em "nobody does this"; text %{ — meaning most engineers or teams wouldn’t do this refactoring in the first place.}
+        }
+
+        p {
+          text %{Why? It’s not because there are no benefits from refactoring out this commonality —
 those benefits are every bit as big as they are with refactoring any kind of code, anywhere.
 Rather, it’s because the tools that you’re given make the refactored code arguably }
           em "worse"
@@ -203,7 +207,7 @@ of repeating themselves and the consequent difficulty of refactoring.}
         p %{First off, let’s look at the Fortitude code for the original example, before we try to
 refactor it:}
 
-        fortitude 'icon_button_instance_1.html.rb', <<-EOS
+        fortitude <<-EOS
 ...
 a(:href => conditional_refresh_url(:user => @user), :class => 'button icon refresh') {
   div(:class => 'button_text') {
@@ -224,7 +228,7 @@ Using this syntax, we can now factor out this shared code as a simple method tha
 we can easily make available on any view that needs it:}
         }
 
-        fortitude '_icon_button.html.rb', <<-EOS
+        fortitude <<-EOS
 def icon_button(icon_name, target, additional_attributes = { })
   a(additional_attributes.merge(:href => target, :class => "button icon \#{icon_name}")) {
     div(:class => :button_text) {
@@ -236,7 +240,7 @@ EOS
 
         p "And now our caller looks like this:"
 
-        fortitude 'icon_button_caller.html.rb', <<-EOS
+        fortitude <<-EOS
 ...
 icon_button('refresh', conditional_refresh_url(:user => @user), :onclick => 'javascript:handleRefreshClick();') {
   p "Refresh this page if:"
@@ -279,12 +283,14 @@ this, and it will all “do the right thing”.}
           text %{However, one of the biggest improvements we’ve made is slightly more subtle: in the }
           code "ERb"; text %{ partial above, the }; code "tooltip_html"; text %{ parameter is created using ordinary }
           text "Ruby string interpolation, which is a totally different language than the rest of ERb (and, for this "
-          text "purpose, is considerably less flexible)."
+          text "purpose, is considerably less flexible). This happens because the “language” you write the rest of your "
+          text "markup in — unescaped HTML — is completely different from the language you write partial and helper "
+          text "calls in, Ruby."
         }
 
         p {
-          text %{In our next example, we’ll see how this benefit makes all the difference in the world when we make
-one small change to our example.}
+          text %{In Fortitude, these two languages are one and the same. In our next example, we’ll see how this
+makes all the difference in the world with just one small change to our example.}
         }
       end
     end
