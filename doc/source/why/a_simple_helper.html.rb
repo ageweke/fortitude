@@ -4,6 +4,9 @@ module Views
   module Why
     class ASimpleHelper < Views::Why::ExamplePage
       def example_intro
+        p %{Fortitude expresses your view code as Ruby itself, using a simple DSL patterned
+after HTML. This allows you to factor your views in extremely powerful ways.}
+
         p %{We’ll start small. In Fortitude (and unlike ERb, HAML, and friends), “helpers”
 are nothing more than ordinary Ruby methods that use the exact same semantics as
 the rest of Fortitude — and they can take blocks, too. We’ll use this to create
@@ -75,7 +78,7 @@ substitutions in that data.}
         }
 
         p {
-          text %{Given that, here’s what the resulting ERb looks like:}
+          text %{Given that, here’s what the resulting ERb looks like for our new partial:}
         }
 
         erb <<-EOS

@@ -17,7 +17,46 @@ module Views
 
         emphatic_pullquote %{It allows you to write vastly better-factored views.}
 
-        p %{This means:}
+        p %{With Fortitude, you can turn this:}
+
+        erb <<-EOS
+<div class="container main outermost" id="main-container">
+  <div class="row primary">
+    <div class="col-sm-7">
+      <figure class="source">
+        <figcaption>example_code_1.rb</figcaption>
+        <pre class="ruby">
+[ 1, 2, 3 ].map { |x| x * 2 } # =&gt; [ 2, 4, 6 ]
+</pre>
+      </figure>
+
+      <%= render :partial => '/shared/buttons/icon_button', :locals => {
+        :target => conditional_refresh_url(:user => @user),
+        :icon_name => 'refresh',
+        :tooltip_html => %{<p>Refresh this page</p>}
+      } %>
+    </div>
+  </div>
+</div>
+EOS
+
+        p %{Into this:}
+
+        fortitude <<-EOS
+simple_page {
+  ruby "[ 1, 2, 3 ].map { |x| x * 2 } # => [ 2, 4, 6 ]"
+
+  icon_button(:refresh, conditional_refresh_url(:user => @user)) {
+    p "Refresh this page"
+  }
+}
+EOS
+
+        p {
+          text %{…and that’s just the beginning. With Fortitude, you can }
+          strong "refactor your views into the methods that are right for your application"
+          text ". This means:"
+        }
 
         ul {
           li "You’ll be able to enhance, modify, and debug views much faster."
