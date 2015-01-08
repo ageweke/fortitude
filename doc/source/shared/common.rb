@@ -26,6 +26,10 @@ module Views
         source_code(:rb, *args)
       end
 
+      def ruby(*args)
+        source_code(:rb, *args)
+      end
+
       def source_code(language, *args)
         title = args.shift if args.length > 1
         the_code = args.shift

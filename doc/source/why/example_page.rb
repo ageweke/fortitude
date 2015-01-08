@@ -25,6 +25,7 @@ module Views
           margin-left: auto;
           margin-right: 0;
           margin-top: 40px;
+          margin-bottom: 40px;
 
           background-color: $bold-translucent;
 
@@ -45,7 +46,7 @@ module Views
           example_intro
 
           section {
-            h4 "Our Challenge"
+            h4 "What We’re Trying To Do"
             example_description
           }
 
