@@ -19,7 +19,8 @@ example of where Fortitude can help the most.}
 
         erb <<-EOS
 ...
-<a href='<%= conditional_refresh_url(:user => @user) %>' class="button icon refresh" onclick="javascript:handleRefreshClick();">
+<a href='<%= conditional_refresh_url(:user => @user) %>'
+   class="button icon refresh" onclick="javascript:handleRefreshClick();">
   <div class="button_text">
     <p>Refresh this page if:</p>
     <ul>
@@ -139,7 +140,8 @@ EOS
         p %{Here’s what our new partial looks like:}
 
         erb <<-EOS
-<a href="<%= target %>" class="button icon <%= icon_name %>" <%= (defined?(additional_attributes) ? additional_attributes || '') %>">
+<a href="<%= target %>" class="button icon <%= icon_name %>"
+   <%= (defined?(additional_attributes) ? additional_attributes || '') %>">
   <div class="button_text">
     <%= tooltip_html %>
   </div>
@@ -205,8 +207,9 @@ EOS
         p {
           text "Ironically, some of the issues above may feel a little unfamiliar, and it’s probably because of this: "
           em "nobody does this"; text " — because both these approaches have such serious tradeoffs, most teams, "
-          text "developers, or designers just leave well enough alone, and repeat the original HTML everywhere, over "
-          text "and over. We imagine that this is "; em "just the way views are"; text ". And when it comes time to change the "
+          text "developers, or designers just leave well enough alone for small(ish) examples like this, and "
+          text "repeat the original HTML everywhere, over "
+          text "and over. And when it comes time to change the "
           text "HTML structure of this “icon button” element that’s been repeated all over the site, we either just "
           text "bite the bullet and do a really painful global search and repeated manual modificaftion, or give up, "
           text "hack on CSS to make it do sort of what we want it to do, and then leave "; em "that"
@@ -214,6 +217,7 @@ EOS
         }
 
         p {
+          text "We imagine that this is "; em "just the way views are"; text ". "
           text "In fact, these problems are all because we generally don’t have the right tools to do a better job. "
           text "Views don’t need to be like this, any more than "; em "any"; text " code needs to be like this."
         }
@@ -225,14 +229,13 @@ example, before we try to refactor it:}
 
         fortitude <<-EOS
 ...
-a(:href => conditional_refresh_url(:user => @user), :class => 'button icon refresh') {
+a(:href => conditional_refresh_url(:user => @user),
+  :class => 'button icon refresh') {
   div(:class => 'button_text') {
     p "Refresh this page if:"
     ul {
       li "Content has changed"
       li "Local data is \#{@out_of_date_condition}"
-
-
     }
   }
 }
@@ -263,7 +266,8 @@ we can easily make available on any view that needs it.}
 
         fortitude <<-EOS
 def icon_button(icon_name, target, additional_attributes = { })
-  a(additional_attributes.merge(:href => target, :class => "button icon \#{icon_name}")) {
+  a(additional_attributes.merge(
+    :href => target, :class => "button icon \#{icon_name}")) {
     div(:class => :button_text) {
       yield
     }
@@ -275,7 +279,8 @@ EOS
 
         fortitude <<-EOS
 ...
-icon_button('refresh', conditional_refresh_url(:user => @user), :onclick => 'javascript:handleRefreshClick();') {
+icon_button('refresh', conditional_refresh_url(:user => @user),
+  :onclick => 'javascript:handleRefreshClick();') {
   p "Refresh this page if:"
   ul {
     li "Content has changed"
