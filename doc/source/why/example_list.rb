@@ -4,7 +4,7 @@ module Views
       EXAMPLES = begin
         out = [
           { :subpath => 'a_simple_helper', :title => 'A Simple Helper' },
-          { :subpath => 'varying_table_rows', :title => 'Varying Table Rows' }
+          { :subpath => 'a_larger_view', :title => 'A Larger View' }
         ]
         out.each_with_index do |hash, index|
           hash[:number] = (index + 1)
