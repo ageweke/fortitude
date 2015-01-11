@@ -33,7 +33,7 @@ module Views
       <%= render :partial => '/shared/buttons/icon_button', :locals => {
         :target => conditional_refresh_url(:user => @user),
         :icon_name => 'refresh',
-        :tooltip_html => %{<p>Refresh this page</p>}
+        :tooltip_html => "<p>Refresh this page</p>"
       } %>
     </div>
   </div>
@@ -44,7 +44,7 @@ EOS
 
         fortitude <<-EOS
 simple_page {
-  ruby "[ 1, 2, 3 ].map { |x| x * 2 } # => [ 2, 4, 6 ]"
+  ruby "example_code_1.rb", "[ 1, 2, 3 ].map { |x| x * 2 } # => [ 2, 4, 6 ]"
 
   icon_button(:refresh, conditional_refresh_url(:user => @user)) {
     p "Refresh this page"

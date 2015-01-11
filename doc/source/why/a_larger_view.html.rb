@@ -150,6 +150,15 @@ EOS
         }
 
         p {
+          text "Even worse, "; em "nowhere in the originating view are any of these variables mentioned"; text "! "
+          text "If you were to look at the view, it’s literally impossible to tell which variables the controller "
+          text "needs to set in order to make it work. You need to go look at the partials it renders. Now, imagine "
+          text "we perform some further refactorings — you might need to look through several layers of partials, "
+          text "carefully writing down which "; code "@"; text " variables are used and deduplicating them, just to "
+          text "wrap your head around the data being communicated from the controller to the view."
+        }
+
+        p {
           text "Although many views are written this way, this is not any better in view code than it is in any other "
           text "code. We’re passing data using what are effectively implicit global variables, and that’s seriously "
           text "detrimental to maintainability and readability in any application."
@@ -158,15 +167,16 @@ EOS
         p {
           text "Further: if we do this, we haven’t done anything to factor out the commonality of these tables…and, "
           text "because they’re now in three separate files, the likelihood that they’ll diverge in a bad way goes up. "
-          text "(For example, it’d be much easier for a developer to add a new common column to one of them, without "
-          text "adding it to the others — and now we have not just duplication, but duplication "; em "and"
+          text "(For example, it’d be much easier for a developer to add a new common column to one of them, while "
+          text "forgetting to add it to the others — and now we have not just duplication, but duplication "; em "and"
           text " inconsistency, which is pretty close to the canonical definition of poorly-factored code.)"
         }
 
         h5 "Unifying the Tables"
 
         p {
-          text "Trying to unify the tables is a lot trickier. While the tables actually have a great deal of commonality, "
+          text "Trying to unify the code for the three tables is a lot trickier. While the tables actually have a "
+          text "great deal of commonality, "
           text "they also have varying numbers of columns, and that makes it considerably harder. We have a few "
           text "choices here:"
         }
@@ -726,6 +736,11 @@ EOS
   </body>
 </html>
 EOS
+
+            p {
+              text "(In production, Fortitude will, by default, emit this code with no whitespace at all, reducing your "
+              text "page weight significantly — also something that ERb cannot do.)"
+            }
           }
         }
 
