@@ -130,21 +130,21 @@ EOS
 
       def using_standard_engines
         p {
-          text "Using traditional templating engines, what can we do here? Well, we basically have the same "
-          text "tools at our disposal: partials and helpers. We can factor out commonality using these tools, "
+          text "Using traditional templating engines, what can we do here? Well, have the same tools at our disposal "
+          text "as always: partials and helpers. We can factor out commonality using these tools, "
           text "potentially using "; code "capture"; text " to allow us to write HTML we pass into a view using "
           text "ERb instead of Ruby string interpolation."
         }
 
         p {
           text "Let’s first see what this looks like without using "; code "capture"; text ", and then we’ll see how "
-          text "or if it improves things."
+          text "or if using "; code "capture"; text " improves things."
         }
 
         h5 "Using Partials and Helpers"
 
         p {
-          text "If we do our very best with this, here’s what we can end up with. It starts with a partial that "
+          text "If we do our very best with this, here’s what we can end up with. We begin with a partial that "
           text "starts the header of our view:"
         }
 
@@ -236,10 +236,11 @@ EOS
 EOS
 
         p {
-          text "Is this an improvement? Yes — probably, anyway. We’ve successfully removed some of the commonality, "
+          text "Is this an improvement? Yes — well, "; em "maybe"; text ". We’ve successfully removed some of the commonality, "
           text "although at the price of introducing a lot of verbosity. We’ve also added some serious weirdness, "
           text "like "; code "div"; text "s that get opened in one partial and closed in another — all of which is, "
-          text "of course, added opportunity for error."
+          text "of course, added opportunity for error. All in all, it certainly isn’t clean or clear; once again, "
+          text "extracting the commonality has come at a serious cost in comprehensibility and readability."
         }
 
         p {
@@ -341,6 +342,13 @@ EOS
       :body_html => body_html
 } %>
 EOS
+
+        p {
+          text "Alas, although we have a much nicer shared partial this time around, the views have become "
+          text "really verbose and quite messy. The use of "; code "capture"; text " clutters up the code and causes a lot of "
+          text "action-at-a-distance, and the shared partial takes enough inputs at this point that just calling it "
+          text "requires passing many variables that create further visual clutter."
+        }
       end
 
       def standard_engine_issues
@@ -359,8 +367,9 @@ EOS
             strong "Disappearing Structure"; text ": In both refactorings, the overall structure of our views has "
             text "effectively vanished — when using partials and helpers, from the shared code; when using "
             code "capture"; text ", from the callers. This makes the code a lot harder to read, and, more importantly, "
-            text "much harder to reason about: it’s all to easy to omit a closing tag, add an extra opening tag, or "
-            text "just have a really hard time figuring out how and where to add something."
+            text "much harder to reason about: it’s all too easy to omit a closing tag, add an extra opening tag, or "
+            text "just have a really hard time figuring out how and where to change something. If you wanted to create "
+            text "a structure prone to generating lots of bugs, this is almost exactly what you’d do. "
           }
           li {
             strong "Verbosity"; text ": Our refactored code is almost as long as the code it replaces in both cases, "
@@ -380,7 +389,8 @@ EOS
       def using_fortitude
         p {
           text "OK. So, how can Fortitude help? Because each Fortitude view or partial is simply a Ruby class, we can "
-          text "define a base view class here with methods for overridden or missing content:"
+          text "define a base view class here outlining the general structure, and with simple method calls for "
+          text "overridden or missing content:"
         }
 
         fortitude 'app/views/feed/items/feed_item.html.rb', <<-EOS
@@ -400,6 +410,14 @@ class Views::Feed::Items::FeedItem < Views::Base
     }
   end
 
+  def header_content
+    raise "You must implement this method in \#{self.class.name}"
+  end
+
+  def body_content
+    raise "You must implement this method in \#{self.class.name}"
+  end
+
   def outer_css_class
     self.class.name.demodulize.underscore
   end
@@ -417,11 +435,13 @@ EOS
           text "convention-over-configuration to calculate the "; code "outer_css_class"; text ", instead of having "
           text "to pass it in. This both makes callers cleaner and eliminates a source of inconsistency or error, "
           text "because "; code "outer_css_class"; text " can no longer differ from the name of the view itself "
-          text "at all."
+          text "at all. And yet, exactly because it’s a separate method, if a subclass needed to override this class, "
+          text "it could, extremely easily."
         }
 
         p {
-          text "Given this, what do these subclasses look like? We’ll start with the “accepted friend request” view:"
+          text "Given this, what do these subclasses look like? We’ll start with the “accepted friend request” view, "
+          text "which turns out to be the most complex one:"
         }
 
         fortitude 'app/views/feed/items/accepted_friend_request.html.rb', <<-EOS
