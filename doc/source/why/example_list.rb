@@ -4,7 +4,8 @@ module Views
       EXAMPLES = begin
         out = [
           { :subpath => 'a_simple_helper', :title => 'A Simple Helper' },
-          { :subpath => 'a_larger_view', :title => 'A Larger View' }
+          { :subpath => 'a_larger_view', :title => 'A Larger View' },
+          { :subpath => 'commonality_and_inheritance', :title => 'Commonality and Inheritance' }
         ]
         out.each_with_index do |hash, index|
           hash[:number] = (index + 1)
