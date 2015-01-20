@@ -62,7 +62,7 @@ module Fortitude
         %w{check_box color_field date_field datetime_field datetime_local_field} +
         %w{email_field file_field hidden_field label month_field number_field password_field phone_field} +
         %w{radio_button range_field search_field telephone_field text_area text_field time_field url_field} +
-        %w{week_field} +
+        %w{week_field submit button} +
 
         # From form_options_helper
         %w{select collection_select grouped_collection_select time_zone_select options_for_select} +
