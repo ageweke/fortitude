@@ -540,7 +540,7 @@ EOS
 
         p {
           text "In many ways, the key behind Fortitude is exactly that it "; em "doesn’t"; text " invent some "
-          text "brand-new amazing paradigm for writing your view code. Instead, it simply allows you to leverage "
+          text "brand-new paradigm for writing your view code. Instead, it allows you to leverage "
           text "all the techniques you already have for factoring the rest of your application, and simply lets you "
           text "apply them to your views."
         }
@@ -548,9 +548,15 @@ EOS
         p {
           text "Imagine, for example, that you finally "; em "do"; text " need to customize that shared footer "
           text "in at least one feed-item view. What do you do? Simple: extract it into a method in the base class, "
-          text "and override it in whichever view you need to customize it in. The really cool thing is that you can "
+          text "and override it in whichever view you need to customize it in. You can even easily "
           text "call "; code "super"; text " (or not), either before, after, or in the middle of the overridden "
-          text "method, and it behaves exactly how you’d expect."
+          text "method, and it behaves exactly how you’d expect, inserting the default footer contents at exactly "
+          text "that point in your view."
+        }
+
+        p {
+          text "Next, we’ll see how using Fortitude classes can allow us to create a contextual, elegant "
+          text "“mini-language” for building complex views very easily."
         }
       end
     end
