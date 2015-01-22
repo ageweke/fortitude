@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.9.2,
+## 0.9.2, 22 January 2015
 
 * Began writing lots of documentation for Fortitude, beginning with the reasons why you should use it.
 * Fixed a single spec that caused failures under Rails 4.2.0 (which was an issue with the spec and something changed
