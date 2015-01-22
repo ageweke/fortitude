@@ -39,6 +39,8 @@ matrix:
         # find a way around it. If there's a fix out there somewhere, I'm all ears!
     allow_failures:
         -   rvm: jruby-1.7.18
+            env: FORTITUDE_SPECS_RAILS_VERSION=4.2.0
+        -   rvm: jruby-1.7.18
             env: FORTITUDE_SPECS_RAILS_VERSION=4.1.9
         -   rvm: jruby-1.7.18
             env: FORTITUDE_SPECS_RAILS_VERSION=4.0.13
