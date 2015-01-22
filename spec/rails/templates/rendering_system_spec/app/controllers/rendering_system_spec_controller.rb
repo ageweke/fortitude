@@ -37,6 +37,10 @@ class RenderingSystemSpecController < ApplicationController
     render File.join(Rails.root, 'app', 'views', 'widget_to_render')
   end
 
+  def render_widget_via_template_path
+    render "rendering_system_spec/trivial_widget"
+  end
+
   def render_widget_via_colon_file
     @name = "Fred"
     render :file => File.join(Rails.root, 'app', 'views', 'widget_to_render')

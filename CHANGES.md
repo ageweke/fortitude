@@ -3,6 +3,8 @@
 ## 0.9.2,
 
 * Began writing lots of documentation for Fortitude, beginning with the reasons why you should use it.
+* Fixed a single spec that caused failures under Rails 4.2.0 (which was an issue with the spec and something changed
+  in Rails 4.2, not Fortitude).
 * Fixed a bug where passing an object that was a `Hash`, or a subclass of `Hash`, to a view would cause that object to
   become an object of class `ActiveSupport::HashWithIndifferentAccess` instead. (This was because we were, internally,
   calling `#with_indifferent_access` on the `Hash` we had that contained all assignments to a widget, and

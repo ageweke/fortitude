@@ -52,8 +52,14 @@ describe "Rails rendering support", :type => :rails do
       expect(response.header['Content-Type']).to match(%r{text/html}i)
     end
 
-    it "should let you render a widget with 'render \"foo\"'" do
+    it "should let you render a widget with 'render \"foo\" and the full path'" do
+      skip "Rails 4.2 makes this mean something different (render :template, vs. render :file)" unless rails_server.rails_version =~ /^(3\.|4\.[01]\.)/
       expect_match("render_widget_via_file_path", /hello from a widget named Fred/)
+    end
+
+    it "should let you render a widget with 'render \"foo\"' and the template path" do
+      skip "Rails 4.2 enables this" if rails_server.rails_version =~ /^(3\.|4\.[01]\.)/
+      expect_match("render_widget_via_template_path", /hello, world/)
     end
 
     it "should let you render a widget with 'render :file =>'" do
