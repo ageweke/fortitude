@@ -9,7 +9,6 @@ module Spec
         out = [
           "gem 'fortitude', :path => '#{rails_server_project_root}'"
         ]
-        out << "gem 'i18n', '< 0.7.0'" if RUBY_VERSION =~ /^1\.8\./
         out
       end
 
