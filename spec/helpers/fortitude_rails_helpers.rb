@@ -6,10 +6,9 @@ module Spec
       end
 
       def rails_server_additional_gemfile_lines
-        out = [
+        [
           "gem 'fortitude', :path => '#{rails_server_project_root}'"
         ]
-        out
       end
 
       def rails_server_default_version
