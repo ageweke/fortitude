@@ -92,6 +92,79 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("<p>12345</p>") { p 12345 }
   end
 
+  it "should allow returning from within an element, and still render the close tags" do
+    wc = widget_class do
+      def content
+        div {
+          text "content_before"
+          foo
+          text "content_after"
+        }
+      end
+
+      def foo
+        p {
+          text "foo_before"
+          bar
+          text "foo_after"
+        }
+      end
+
+      def bar
+        span {
+          text "bar_first"
+          a {
+            text "bar_before"
+            return
+            text "bar_after"
+          }
+          text "bar_last"
+        }
+      end
+    end
+
+    expect(render(wc)).to eq("<div>content_before<p>foo_before<span>bar_first<a>bar_before</a></span>foo_after</p>content_after</div>")
+  end
+
+  it "should allow raising an exception from within an element, and still render the close tags" do
+    wc = widget_class do
+      def content
+        div {
+          text "content_before"
+          foo
+          text "content_after"
+        }
+      end
+
+      def foo
+        p {
+          text "foo_before"
+          bar
+          text "foo_after"
+        }
+      end
+
+      def bar
+        span {
+          text "bar_first"
+          a {
+            text "bar_before"
+            raise "kaboom"
+            text "bar_after"
+          }
+          text "bar_last"
+        }
+      end
+    end
+
+    widget = wc.new
+    rendering_context = ::Fortitude::RenderingContext.new({ })
+    expect { widget.render_to(rendering_context) }.to raise_error(/kaboom/)
+    output = html_from(rendering_context)
+
+    expect(output).to eq("<div>content_before<p>foo_before<span>bar_first<a>bar_before</a></span></p></div>")
+  end
+
   it "should render a tag using a specific tag_* method" do
     should_render_to("<p>foo</p>") { tag_p "foo" }
   end

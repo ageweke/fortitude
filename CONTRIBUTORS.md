@@ -31,6 +31,7 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     properly.
   * Reporting a bug where doing something like `div(nil, :class => 'foo')` would produce just `<div></div>` instead of
     the desired `<div class="foo"></div>`.
+  * Reporting an issue where `return`ing from inside a block passed to a tag method would not render the closing tags.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.

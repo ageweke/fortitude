@@ -17,9 +17,12 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
         if block_given?
           _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
           o.#{concat_method}(#{open_const})
-          #{yield_call}
-          o = @_fortitude_output_buffer_holder.output_buffer
-          o.#{concat_method}(#{close_const})
+          begin
+            #{yield_call}
+            o = @_fortitude_output_buffer_holder.output_buffer
+          ensure
+            o.#{concat_method}(#{close_const})
+          end
         else
           o.#{concat_method}(#{alone_const})
         end
@@ -37,9 +40,12 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       if block_given?
         _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
         o.#{concat_method}(#{partial_open_end_const})
-        #{yield_call}
-        o = @_fortitude_output_buffer_holder.output_buffer
-        o.#{concat_method}(#{close_const})
+        begin
+          #{yield_call}
+        ensure
+          o = @_fortitude_output_buffer_holder.output_buffer
+          o.#{concat_method}(#{close_const})
+        end
       else
         o.#{concat_method}(#{partial_open_alone_end_const})
       end
@@ -49,12 +55,16 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       rc.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG, content_or_attributes, nil) { } unless content_or_attributes.instance_variable_get('@html_safe') # :if record_emitting_tag
       content_or_attributes.to_s.fortitude_append_escaped_string(o)        # :if escape_direct_content
       o.#{concat_method}(content_or_attributes.to_s)                       # :if ! escape_direct_content
-      if block_given?
-        _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
-        #{yield_call}
+
+      begin
+        if block_given?
+          _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
+          #{yield_call}
+        end
+      ensure
         o = @_fortitude_output_buffer_holder.output_buffer
+        o.#{concat_method}(#{close_const})
       end
-      o.#{concat_method}(#{close_const})
     else
       _fortitude_raise_no_content_allowed_error(#{tag_object_const})       # :if ! content_allowed
       this_tag.validate_attributes(self, attributes)                       # :if needs_attribute_rules
@@ -66,12 +76,15 @@ def #{method_name}(content_or_attributes = nil, attributes = nil)
       rc.emitting_tag!(self, FORTITUDE_TEXT_PSEUDOTAG, content_or_attributes, nil) { } unless content_or_attributes.instance_variable_get('@html_safe') # :if record_emitting_tag
       content_or_attributes.to_s.fortitude_append_escaped_string(o)        # :if escape_direct_content
       o.#{concat_method}(content_or_attributes.to_s)                       # :if ! escape_direct_content
-      if block_given?
-        _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
-        #{yield_call}
+      begin
+        if block_given?
+          _fortitude_raise_no_content_allowed_error(#{tag_object_const})     # :if ! content_allowed
+          #{yield_call}
+        end
+      ensure
         o = @_fortitude_output_buffer_holder.output_buffer
+        o.#{concat_method}(#{close_const})
       end
-      o.#{concat_method}(#{close_const})
     end
     rc.needs_newline! if format_output                                     # :if needs_formatting && newline_before
   end                                                                      # :if record_emitting_tag
