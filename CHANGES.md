@@ -6,9 +6,11 @@
 * Fixed a single spec that caused failures under Rails 4.2.0 (which was an issue with the spec and something changed
   in Rails 4.2, not Fortitude).
 * Fixed a bug where if you call `return` from inside a block passed to a tag method, the closing tags would not be
-  output, resulting in invalid HTML.
+  output, resulting in invalid HTML. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
 * Fixed a bug where if you raised an exception from inside a block passed to a tag method, the closing tags would not
   be output, resulting in invalid HTML.
+* Added a couple of missing `form_for` helper methods (`button`, `submit`) that somehow I missed. (Thanks to
+  [Leaf](https://github.com/leafo) for the bug report!)
 * Fixed a bug where passing an object that was a `Hash`, or a subclass of `Hash`, to a view would cause that object to
   become an object of class `ActiveSupport::HashWithIndifferentAccess` instead. (This was because we were, internally,
   calling `#with_indifferent_access` on the `Hash` we had that contained all assignments to a widget, and

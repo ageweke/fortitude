@@ -59,9 +59,9 @@ module Fortitude
       # form_helper
       FORM_FOR_YIELDED_METHODS_TO_OUTPUT =
         # Directly from form_helper
-        %w{check_box color_field date_field datetime_field datetime_local_field} +
+        %w{button check_box color_field date_field datetime_field datetime_local_field} +
         %w{email_field file_field hidden_field label month_field number_field password_field phone_field} +
-        %w{radio_button range_field search_field telephone_field text_area text_field time_field url_field} +
+        %w{radio_button range_field search_field submit telephone_field text_area text_field time_field url_field} +
         %w{week_field} +
 
         # From form_options_helper
