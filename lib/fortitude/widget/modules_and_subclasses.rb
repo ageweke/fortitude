@@ -1,6 +1,8 @@
 require 'active_support'
 require 'active_support/concern'
 
+require 'ref'
+
 require 'fortitude/tags/tags_module'
 
 module Fortitude
@@ -28,14 +30,17 @@ module Fortitude
 
         # INTERNAL USE ONLY
         def direct_subclasses
-          @direct_subclasses || [ ]
+          @direct_subclasses ||= [ ]
+          @direct_subclasses.delete_if { |ref| (! ref.object) }
+          @direct_subclasses.map { |ref| ref.object }
         end
         private :direct_subclasses
 
         # INTERNAL USE ONLY -- RUBY CALLBACK
         def inherited(subclass)
-          @direct_subclasses ||= [ ]
-          @direct_subclasses |= [ subclass ]
+          unless direct_subclasses.detect { |sc| sc.equal?(subclass) }
+            @direct_subclasses << ::Ref::WeakReference.new(subclass)
+          end
         end
 
         # INTERNAL USE ONLY

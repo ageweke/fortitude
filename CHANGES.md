@@ -1,5 +1,15 @@
 # Fortitude Releases
 
+## 0.9.3,
+
+* Fixed a memory leak when using `render :inline`, or certain other cases triggered by a user. (Fortitude widget
+  classes know about all their subclasses, in order to enable proper propagation of configuration changes.
+  If you created a subclass of a Fortitude widget that was intended to be single-use or otherwise temporary, it would
+  not get garbage-collected, since its superclass would still maintain a reference to it. Fortitude now uses the
+  [ref](https://github.com/ruby-concurrency/ref) gem in order to make this a weak reference, hence allowing it to
+  be garbage-collected. `render :inline` creates a temporary subclass of a Fortitude widget, thus triggering exactly
+  this issue.)
+
 ## 0.9.2, 22 January 2015
 
 * Began writing lots of documentation for Fortitude, beginning with the reasons why you should use it.
