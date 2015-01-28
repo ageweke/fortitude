@@ -43,34 +43,39 @@ module Views
       def example_body
         standard_text_row {
           show_example_title
-          example_intro
 
-          section {
-            h4 "What We’re Trying To Do"
-            example_description
-          }
-
-          section {
-            h4 "Using Standard Templating Engines"
-            using_standard_engines
-          }
-
-          section {
-            h4 "Issues with Standard Templating Engines"
-            standard_engine_issues
-          }
-
-          section {
-            h4 "Using Fortitude"
-            using_fortitude
-          }
-
-          section {
-            h4 "The Benefits"
-            fortitude_benefits
-          }
+          example_content
 
           link_to_next_example if next_example
+        }
+      end
+
+      def example_content
+        example_intro
+
+        section {
+          h4 "What We’re Trying To Do"
+          example_description
+        }
+
+        section {
+          h4 "Using Standard Templating Engines"
+          using_standard_engines
+        }
+
+        section {
+          h4 "Issues with Standard Templating Engines"
+          standard_engine_issues
+        }
+
+        section {
+          h4 "Using Fortitude"
+          using_fortitude
+        }
+
+        section {
+          h4 "The Benefits"
+          fortitude_benefits
         }
       end
 
