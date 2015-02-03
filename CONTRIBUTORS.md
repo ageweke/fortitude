@@ -32,6 +32,9 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
   * Reporting a bug where doing something like `div(nil, :class => 'foo')` would produce just `<div></div>` instead of
     the desired `<div class="foo"></div>`.
   * Reporting an issue where `return`ing from inside a block passed to a tag method would not render the closing tags.
+  * Reporting, and helping verify, an issue where creating anonymous subclasses of a Fortitude widget class (like
+    those used by `render :inline`) would cause those anonymous subclasses to never be garbage collected, causing
+    a memory leak.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
