@@ -18,6 +18,8 @@ module Views
 
         h4 "A Bonus"
         self_closing_example
+
+        closing
       end
 
       def nesting_example
@@ -128,8 +130,12 @@ a DOM ID, 'para', that has already been used. It was originally
 used on a <p> tag within widget #<Views::Example::Test3:0x007fcf7ae3ed00>,
 and is now trying to be used on a <p> tag.}
 
+        vertical_space
+
         p {
-          text "Fortitude’s ID checking operates "; em "across the entire page"; text " — if you re-use an ID "
+          text "Fortitude’s ID checking operates "; em "across the entire page"; text ", and is fully dynamic — "
+          text "if you re-use an ID that’s been used in any view or partial, anywhere on that page, you’ll get a "
+          text "precise error, telling you exactly what’s wrong."
         }
       end
 
@@ -153,7 +159,8 @@ and is now trying to be used on a <p> tag.}
         }
 
         html_source <<-EOS
-<p>We’ll use CSS to add some space at this empty span: <span class="spacer" />. See?<br />
+<p>We’ll use CSS to add some space
+at this empty span: <span class="spacer" />. See?<br />
 Wasn’t that nice?</p>
 EOS
 
@@ -186,9 +193,18 @@ EOS
         }
 
         html_source <<-EOS
-<p>We’ll use CSS to add some space at this empty span: <span class="spacer"></span>. See?<br>
+<p>We’ll use CSS to add some space
+at this empty span: <span class="spacer"></span>. See?<br>
 Wasn’t that nice?</p>
 EOS
+      end
+
+      def closing
+        p {
+          text "In our next example, we’ll see how Fortitude’s formatting and commenting features make it a whole "
+          text "lot easier to read the resulting HTML and discover which view is responsible for emitting a particular "
+          text "piece of HTML."
+        }
       end
     end
   end
