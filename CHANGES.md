@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.9.3,
+## 0.9.3, 2 February 2015
 
 * Fixed a memory leak when using `render :inline`, or certain other cases triggered by a user. (Fortitude widget
   classes know about all their subclasses, in order to enable proper propagation of configuration changes.
