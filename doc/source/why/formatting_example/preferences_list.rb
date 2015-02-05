@@ -1,17 +1,21 @@
 module Views
-  module Why
-    module FormattingExample
+  module Admin
+    module Users
       class PreferencesList < Views::Shared::Base
+        needs :user
+
+        disable_parcels!
+
         def content
           require 'source/why/formatting_example/boolean_user_preference'
           require 'source/why/formatting_example/string_user_preference'
 
           form {
-            widget Views::Why::FormattingExample::BooleanUserPreference, :name => 'visible_to_public',
+            widget Views::Admin::Users::BooleanUserPreference, :user => user, :name => 'visible_to_public',
               :display => 'Visible to Public', :hint => 'Enable visiblity to public'
-            widget Views::Why::FormattingExample::BooleanUserPreference, :name => 'email_over_sms',
+            widget Views::Admin::Users::BooleanUserPreference, :user => user, :name => 'email_over_sms',
               :display => 'Prefer email to SMS for communication', :hint => 'Prefer sending email to sending SMSes'
-            widget Views::Why::FormattingExample::StringUserPreference, :name => 'name_override',
+            widget Views::Admin::Users::StringUserPreference, :user => user, :name => 'name_override',
               :display => 'Show this name to public instead',
               :hint => "Specify custom name to be shown instead of user's actual name"
 

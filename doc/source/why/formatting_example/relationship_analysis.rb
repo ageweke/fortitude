@@ -1,7 +1,11 @@
 module Views
-  module Why
-    module FormattingExample
+  module Admin
+    module Users
       class RelationshipAnalysis < Views::Shared::Base
+        needs :user
+
+        disable_parcels!
+
         def content
           h4 "Friend Relationship Analysis"
 

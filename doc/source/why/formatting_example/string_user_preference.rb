@@ -1,8 +1,10 @@
 module Views
-  module Why
-    module FormattingExample
+  module Admin
+    module Users
       class StringUserPreference < Views::Shared::Base
-        needs :name, :display, :hint
+        needs :user, :name, :display, :hint
+
+        disable_parcels!
 
         def content
           div(:class => [ :input, :string, :optional, :field_with_hint ]) {

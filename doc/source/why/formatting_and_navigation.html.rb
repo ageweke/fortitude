@@ -8,6 +8,7 @@ module Views
         fortitude_output
         about_production
         transition
+        # the_html
       end
 
       def erb_example
@@ -195,16 +196,25 @@ EOS
         }
       end
 
+      class ::User
+        def initialize(id, name)
+          @id = id
+          @name = name
+        end
+      end
+
       def the_html
         require 'source/why/formatting_example/preferences_list'
         require 'source/why/formatting_example/custom_blocking_rules'
         require 'source/why/formatting_example/relationship_analysis'
         require 'source/why/formatting_example/whitelisted_applications'
 
-        widget Views::Why::FormattingExample::PreferencesList
-        widget Views::Why::FormattingExample::CustomBlockingRules
-        widget Views::Why::FormattingExample::RelationshipAnalysis
-        widget Views::Why::FormattingExample::WhitelistedApplications
+        user = User.new(4832424, "Megan Yelms")
+
+        widget Views::Admin::Users::PreferencesList, :user => user
+        widget Views::Admin::Users::CustomBlockingRules, :user => user
+        widget Views::Admin::Users::RelationshipAnalysis, :user => user
+        widget Views::Admin::Users::WhitelistedApplications, :user => user
       end
     end
   end
