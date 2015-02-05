@@ -22,6 +22,22 @@ describe "Rails complex helper support", :type => :rails do
         OUTSIDE_AFTER}mix)
   end
 
+  it "should render a nested fields_for inside a form_for" do
+    expect_match("nesting_test",
+      %r{OUTSIDE_BEFORE\s*<form.*action=\"complex_helpers_system_spec/nesting_test\".*
+        INSIDE_FORM_BEFORE\s*
+        FIRST:\s*
+        <input.*person_first_name.*/>\s*
+        WHATSIT\s*BAR:\s*
+        <input.*xxx.*/>\s*
+        AFTER\s*WHATSIT\s*BAR\s*
+        LAST:\s*
+        <input.*person_last_name.*/>\s*
+        INSIDE_FORM_AFTER\s*
+        </form>\s*
+        OUTSIDE_AFTER}mix)
+  end
+
   it "should cache based on a name properly" do
     expect_match("cache_test?a=a1&b=b1",
       /before_cache\(a1,b1\).*inside_cache\(a1,b1\).*after_cache\(a1,b1\)/mi)
