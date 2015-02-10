@@ -67,7 +67,10 @@ module Fortitude
         # From form_options_helper
         %w{select collection_select grouped_collection_select time_zone_select options_for_select} +
         %w{options_from_collection_for_select option_groups_from_collection_for_select grouped_options_for_select} +
-        %w{time_zone_options_for_select collection_radio_buttons collection_check_boxes}
+        %w{time_zone_options_for_select collection_radio_buttons collection_check_boxes} +
+
+        # And these can nest inside each other
+        %w{form_for fields_for}
 
       helper :form_for, :transform => :output_return_value, :output_yielded_methods => FORM_FOR_YIELDED_METHODS_TO_OUTPUT
       helper :fields_for, :transform => :output_return_value, :output_yielded_methods => FORM_FOR_YIELDED_METHODS_TO_OUTPUT

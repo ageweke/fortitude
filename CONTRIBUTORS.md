@@ -35,6 +35,8 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
   * Reporting, and helping verify, an issue where creating anonymous subclasses of a Fortitude widget class (like
     those used by `render :inline`) would cause those anonymous subclasses to never be garbage collected, causing
     a memory leak.
+  * Reporting an issue where use of Rails' `form_for` and/or `fields_for` from within another `form_for` or
+    `fields_for` block would not produce the correct output.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.

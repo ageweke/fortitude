@@ -35,15 +35,10 @@ module Fortitude
             else raise ArgumentError, "Invalid value for :transform: #{transform.inspect}"
             end
 
-            block_transform = "effective_block = block"
-
-            yielded_methods = options[:output_yielded_methods]
-            if yielded_methods
-              block_transform = <<-EOS
-      effective_block = lambda do |yielded_object|
-        block.call(Fortitude::Rails::YieldedObjectOutputter.new(self, yielded_object, #{yielded_methods.inspect}))
-      end
-EOS
+            block_transform = if (yielded_methods_to_output = options[:output_yielded_methods])
+              "effective_block = ::Fortitude::Rails::YieldedObjectOutputter.wrap_block_as_needed(self, #{name.inspect}, block, #{yielded_methods_to_output.inspect})"
+            else
+              "effective_block = block"
             end
 
             text = <<-EOS

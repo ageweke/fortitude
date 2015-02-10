@@ -7,6 +7,10 @@ class ComplexHelpersSystemSpecController < ApplicationController
     # nothing here
   end
 
+  def nesting_test
+    # nothing here
+  end
+
   def cache_test
     @a = params[:a]
     @b = params[:b]
