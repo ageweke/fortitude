@@ -8,7 +8,8 @@ module Views
           { :subpath => 'commonality_and_inheritance', :title => 'Commonality and Inheritance' },
           { :subpath => 'building_a_rich_modal_dialog', :title => 'Building a Rich Modal Dialog' },
           { :subpath => 'writing_correct_html', :title => 'Writing Correct HTML' },
-          { :subpath => 'formatting_and_navigation', :title => 'Formatting and Navigation' }
+          { :subpath => 'formatting_and_navigation', :title => 'Formatting and Navigation' },
+          { :subpath => 'performance', :title => 'Performance' }
         ]
         out.each_with_index do |hash, index|
           hash[:number] = (index + 1)

@@ -160,14 +160,21 @@ EOS
         ul {
           li {
             strong "Formatting"; text ": All of our HTML is perfectly indented according to the actual structure of "
-            text "the DOM…and this even works perfectly across partials. This alone makes the output vastly more "
-            text "readable."
+            text "the DOM…and, unlike many templating engines, this even works perfectly across partials. (Your entire "
+            text "page will be indented properly, all the way down, no matter what the structure of your views or "
+            text "partials is.) This alone makes the output vastly more readable."
           }
           li {
-            strong "Comments"; text ": Fortitude automatically adds comments to the generated HTML output, every time "
-            text "a widget is invoked. These comments tell you exactly what widget class is being rendered, what "
-            text "variables it was passed, and its nesting depth in the output. At this point, it’s trivial to see "
-            text "exactly what view or partial contains the source code for any given section of HTML output."
+            p {
+              strong "Comments"; text ": Fortitude automatically adds comments to the generated HTML output, every time "
+              text "a widget is invoked. These comments tell you exactly what widget class is being rendered, what "
+              text "variables it was passed, and how deeply down the stack of views/partials it’s been nested "
+              text "(which can be completely different from the nesting/indentation depth of the DOM/HTML structure itself). "
+            }
+            p {
+              text "At this point, it’s trivial to see "
+              text "exactly what view or partial contains the source code for any given section of HTML output."
+            }
           }
         }
 
@@ -191,8 +198,9 @@ EOS
 
       def transition
         p {
-          text "In our next example, we’ll take a look at Fortitude’s runtime performance vis-à-vis other templating "
-          text "engines. How fast can Fortitude emit HTML?"
+          text "In our next example, we’ll look at the last of Fortitude’s major features: its runtime performance. "
+          text "Given that Fortitude is quite a lot more sophisticated than other templating engines, how much does "
+          text "it pay for that advantage in maintainability and factorability?"
         }
       end
 
