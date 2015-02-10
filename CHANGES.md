@@ -1,5 +1,10 @@
 # Fortitude Releases
 
+## 0.9.4,
+
+* Fixed an issue where use of Rails' `form_for` or `fields_for` from within another `form_for` or `fields_for` block
+  would not produce the correct output. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
+
 ## 0.9.3, 2 February 2015
 
 * Fixed a memory leak when using `render :inline`, or certain other cases triggered by a user. (Fortitude widget

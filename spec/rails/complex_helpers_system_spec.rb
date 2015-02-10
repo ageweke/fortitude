@@ -24,12 +24,12 @@ describe "Rails complex helper support", :type => :rails do
 
   it "should render a nested fields_for inside a form_for" do
     expect_match("nesting_test",
-      %r{OUTSIDE_BEFORE\s*<form.*action=\"complex_helpers_system_spec/nesting_test\".*
+      %r{OUTSIDE_BEFORE\s*<form.*action=\"/complex_helpers_system_spec/nesting_test\".*
         INSIDE_FORM_BEFORE\s*
         FIRST:\s*
         <input.*person_first_name.*/>\s*
         WHATSIT\s*BAR:\s*
-        <input.*xxx.*/>\s*
+        <input.*person_whatsit_bar.*/>\s*
         AFTER\s*WHATSIT\s*BAR\s*
         LAST:\s*
         <input.*person_last_name.*/>\s*

@@ -28,12 +28,13 @@ module Fortitude
       EMPTY_RETURN_VALUE = ''.freeze
 
       def method_missing(method_name, *args, &block)
-        return_value = @yielded_object.send(method_name, *args, &block)
         if @method_names_hash[method_name.to_sym]
+          block = ::Fortitude::Rails::YieldedObjectOutputter.wrap_block_as_needed(@output_target, method_name, block, @method_names_hash.keys)
+          return_value = @yielded_object.send(method_name, *args, &block)
           @output_target.rawtext(return_value)
           EMPTY_RETURN_VALUE
         else
-          return_value
+          @yielded_object.send(method_name, *args, &block)
         end
       end
 
