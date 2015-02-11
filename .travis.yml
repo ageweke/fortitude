@@ -37,20 +37,23 @@ matrix:
         # At this point, I have little choice other than to mark these as 'allowed failures', and check in on each
         # one manually to make sure there aren't other failures, too. This is very frustrating, but I can't seem to
         # find a way around it. If there's a fix out there somewhere, I'm all ears!
-    allow_failures:
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.2.0
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.1.9
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.0.13
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_SPECS_RAILS_VERSION=3.2.21
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_SPECS_RAILS_VERSION=3.1.12
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_SPECS_RAILS_VERSION=3.0.20
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.0
-        -   rvm: jruby-1.7.18
-            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=3.0.20
+    # 2015-02-11 ageweke -- This appears to finally be fixed? My JRuby builds have been consistently passing.
+    # Let's try commenting this out...
+    #
+    # allow_failures:
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=4.2.0
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=4.1.9
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=4.0.13
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=3.2.21
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=3.1.12
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=3.0.20
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.0
+    #     -   rvm: jruby-1.7.18
+    #         env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=3.0.20
