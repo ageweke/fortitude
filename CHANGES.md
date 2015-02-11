@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.9.4,
+## 0.9.4, 11 February 2015
 
 * Fixed an issue where use of Rails' `form_for` or `fields_for` from within another `form_for` or `fields_for` block
   would not produce the correct output. (Thanks to [Leaf](https://github.com/leafo) for the bug report!)
