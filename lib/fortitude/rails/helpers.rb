@@ -151,11 +151,6 @@ module Fortitude
       helper :mail_to, :transform => :output_return_value
 
       helper :capture
-
-      # This one is here just because it gets used very, very often in internationalized Rails applications,
-      # and declaring it as a helper causes us not to use method_missing -- which makes this speed up
-      # internationalized Rails applications by quite a bit (15-20%!).
-      helper :t
     end
   end
 end
