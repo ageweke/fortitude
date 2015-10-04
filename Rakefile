@@ -32,7 +32,7 @@ namespace :jruby do
   end
 
   task :ensure_jruby do
-    unless RUBY_ENGINE == 'jruby'
+    unless defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
       raise "You must run this task using JRuby, not #{RUBY_ENGINE}"
     end
   end
