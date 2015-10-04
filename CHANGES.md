@@ -1,5 +1,12 @@
 # Fortitude Releases
 
+## 0.9.5,
+
+* Significant improvements in performance to our dispatching to #t, the Rails method to produce translations of
+  localized strings. Localized Rails applications tend to use this method a _lot_, so its performance can have a
+  big impact on overall application performance.
+* Updated versions of Ruby and Rails that Travis CI tests against to the very latest.
+
 ## 0.9.4, 11 February 2015
 
 * Fixed an issue where use of Rails' `form_for` or `fields_for` from within another `form_for` or `fields_for` block
