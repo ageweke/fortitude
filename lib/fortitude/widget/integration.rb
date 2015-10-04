@@ -98,6 +98,10 @@ module Fortitude
           end
         end
 
+        _fortitude_on_class_inheritable_attribute_change(:translation_base) do |attribute_name, old_value, new_value|
+          ::Fortitude::Widget._fortitude_ensure_translation_base_supported_if_needed!
+        end
+
         _fortitude_on_class_inheritable_attribute_change(:start_and_end_comments) do |attribute_name, old_value, new_value|
           if new_value
             around_content :start_and_end_comments
