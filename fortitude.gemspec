@@ -31,8 +31,14 @@ Gem::Specification.new do |s|
     [ ">= 3.0" ]
   end
 
+  ref_spec = if RUBY_VERSION =~ /^1\.8\./
+    [ ">= 1.0.5", "< 2.0.0" ]
+  else
+    [ ">= 1.0.5" ]
+  end
+
   s.add_dependency "activesupport", *activesupport_spec
-  s.add_dependency "ref", ">= 1.0.5"
+  s.add_dependency "ref", *ref_spec
 
   s.add_development_dependency "bundler", "~> 1.5"
   s.add_development_dependency "rake"
