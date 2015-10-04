@@ -46,7 +46,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake-compiler"
   s.add_development_dependency "json"
   s.add_development_dependency "tilt", "~> 2.0"
-  s.add_development_dependency "oop_rails_server", ">= 0.0.10"
+  s.add_development_dependency "oop_rails_server", ">= 0.0.11"
 
   # This is because i18n >= 0.7 is incompatible with Ruby 1.8.x.
   if RUBY_VERSION =~ /^1\.8\./
