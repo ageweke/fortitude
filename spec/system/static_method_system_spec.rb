@@ -38,6 +38,22 @@ describe "Fortitude staticization behavior", :type => :system do
     expect(render(wc)).to eq('<p class="foo">bar: 12345</p><p>baz</p>')
   end
 
+  it "should give you a good error if you try to make a method static before it's defined" do
+    expect do
+      widget_class do
+        def content
+          foo
+        end
+
+        static :foo
+
+        def foo
+          p "bar"
+        end
+      end
+    end.to raise_error(NameError, /no method declared on this class with that name/mi)
+  end
+
   it "should update the static definition of a method if static is called again" do
     $global_value = 12345
     wc = widget_class do

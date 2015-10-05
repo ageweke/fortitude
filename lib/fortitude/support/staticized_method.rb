@@ -28,6 +28,18 @@ module Fortitude
       end
 
       def create_method!
+        begin
+          widget_class.instance_method(method_name)
+        rescue NameError => ne
+          raise NameError, %{You declared the method #{method_name.inspect} in class
+#{widget_class.name.inspect} to be a Fortitude static content method,
+but there is no method declared on this class with that name.
+
+(It's possible you simply tried to declare the method static before
+it was defined on that class -- the call to 'static' must come
+_after_ the definition of the method in the class's source code.)}
+        end
+
         unless widget_class.instance_methods.map(&:to_s).include?(dynamic_method_name.to_s)
           widget_class.send(:alias_method, dynamic_method_name, method_name)
         end

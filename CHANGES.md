@@ -5,6 +5,9 @@
 * Significant improvements in performance to our dispatching to #t, the Rails method to produce translations of
   localized strings. Localized Rails applications tend to use this method a _lot_, so its performance can have a
   big impact on overall application performance.
+* A much better error message if you try to declare a method `static` when it hasn't been defined yet &mdash; this
+  can often be the result of putting the `static` declaration above the method definition in the source file,
+  rather than below it. (Thanks to [`tobymao`](https://github.com/tobymao) for the bug report!)
 * Updated versions of Ruby and Rails that Travis CI tests against to the very latest.
 
 ## 0.9.4, 11 February 2015
