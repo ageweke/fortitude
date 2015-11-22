@@ -31,6 +31,10 @@ module Fortitude
         return is_erector_widget_class?(widget_class.superclass)
       end
 
+      def erector_widget_base_class_if_available
+        ::Erector::Widget if is_erector_available?
+      end
+
       def is_erector_widget?(widget)
         is_erector_widget_class?(widget.class)
       end

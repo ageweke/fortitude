@@ -41,7 +41,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
 
       module ClassMethods
         def widget_class_from_file(filename, options = { })
-          options.assert_valid_keys(:root_dirs, :class_names_to_try, :magic_comment_text)
+          options.assert_valid_keys(:root_dirs, :class_names_to_try, :magic_comment_text, :valid_base_classes)
           filename = File.expand_path(filename)
           source = File.read(filename)
 
@@ -60,11 +60,11 @@ or add a "magic comment" to the source code of this widget that looks like this:
 
           widget_class_from_source(source,
             :class_names_to_try => class_names_to_try, :magic_comment_text => options[:magic_comment_text],
-            :filename => filename)
+            :filename => filename, :valid_base_classes => options[:valid_base_classes])
         end
 
         def widget_class_from_source(source, options = { })
-          options.assert_valid_keys(:class_names_to_try, :magic_comment_text, :filename)
+          options.assert_valid_keys(:class_names_to_try, :magic_comment_text, :filename, :valid_base_classes)
 
           magic_comment_texts = Array(options[:magic_comment_text]) + DEFAULT_MAGIC_COMMENT_TEXTS
           all_class_names =
@@ -72,7 +72,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
             Array(options[:class_names_to_try]) +
             scan_source_for_possible_class_names(source)
 
-          out = widget_class_from_class_names(all_class_names)
+          out = widget_class_from_class_names(all_class_names, :valid_base_classes => options[:valid_base_classes])
           resulting_objects = out[:resulting_objects]
 
           unless out[:widget_class]
@@ -82,7 +82,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
               ::Object.class_eval(source)
             end
 
-            out = widget_class_from_class_names(all_class_names)
+            out = widget_class_from_class_names(all_class_names, :valid_base_classes => options[:valid_base_classes])
             resulting_objects += out[:resulting_objects]
           end
 
@@ -133,7 +133,9 @@ or add a "magic comment" to the source code of this widget that looks like this:
           out
         end
 
-        def widget_class_from_class_names(class_names)
+        def widget_class_from_class_names(class_names, options = { })
+          options.assert_valid_keys(:valid_base_classes)
+
           out = {
             :widget_class      => nil,
             :resulting_objects => [ ]
@@ -147,7 +149,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
               nil
             end
 
-            if is_widget_class?(klass)
+            if is_widget_class?(klass, options)
               out[:widget_class] = klass
               break
             elsif klass
@@ -157,15 +159,19 @@ or add a "magic comment" to the source code of this widget that looks like this:
           out
         end
 
-        def is_widget_class?(klass)
+        def is_widget_class?(klass, options = { })
+          options.assert_valid_keys(:valid_base_classes)
+
+          valid_base_classes = Array(options[:valid_base_classes] || ::Fortitude::Widget)
+
           if (! klass)
             false
           elsif (! klass.kind_of?(Class))
             false
-          elsif klass == ::Fortitude::Widget
+          elsif valid_base_classes.include?(klass)
             true
           else
-            is_widget_class?(klass.superclass)
+            is_widget_class?(klass.superclass, :valid_base_classes => valid_base_classes)
           end
         end
       end

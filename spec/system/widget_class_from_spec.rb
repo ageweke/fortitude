@@ -60,6 +60,24 @@ describe "Fortitude widget-class-from-(file|source) support", :type => :system d
       expect(cdne.tried_class_names).to be_include("WidgetFromClass11")
     end
 
+    it "should allow specifying additional widget base classes, and return those if needed" do
+      eval("module WidgetFromClass26; class SomeOtherBase; end; end")
+      text = "class WidgetFromClass27 < WidgetFromClass26::SomeOtherBase; end"
+      eval(text)
+      expect(wcfs(text, :valid_base_classes => [ ::Fortitude::Widget, ::WidgetFromClass26::SomeOtherBase ])).to eq(::WidgetFromClass27)
+    end
+
+    it "should allow excluding Fortitude::Widget" do
+      eval("module WidgetFromClass28; class SomeOtherBase; end; end")
+      text = "class WidgetFromClass29 < ::Fortitude::Widget; end"
+      eval(text)
+
+      cdne = capture_exception(::Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
+        wcfs(text, :valid_base_classes => [ ::WidgetFromClass28::SomeOtherBase ])
+      end
+      expect(cdne.tried_class_names).to eq([ 'WidgetFromClass29' ])
+    end
+
     it "should fail, but return the object, if the source code contains an object of that class that just isn't a widget class" do
       cdne = capture_exception(::Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
         wcfs("module WidgetFromClass24\nend")
@@ -202,6 +220,21 @@ class WidgetFromClass17 < Fortitude::Widget; end}
       ::Object.class_eval("module Wcfs10; module Wcfs11; end; end")
       splat!('bar/wcfs10/wcfs_11/widget_from_class_23.rb', %{cname = 'WidgetFromCla' + 'ss23'; eval('class Wcfs10::Wcfs11::' + cname + ' < ::Fortitude::Widget; end')})
       expect(wcff('bar/wcfs10/wcfs_11/widget_from_class_23.rb', :root_dirs => [ "#{tempdir}/foo", "#{tempdir}/bar" ])).to eq(Wcfs10::Wcfs11::WidgetFromClass23)
+    end
+
+    it "should be able to have an additional base class and use it" do
+      eval("module Wcff12; class OtherBaseClass; end; end")
+      splat!("wcff12/widget_from_file_12.rb", %{class WidgetFromFile12 < Wcff12::OtherBaseClass; end})
+      expect(wcff('wcff12/widget_from_file_12.rb', :valid_base_classes => [ ::Fortitude::Widget, ::Wcff12::OtherBaseClass ])).to eq(WidgetFromFile12)
+    end
+
+    it "should be able to exclude ::Fortitude::Widget successfully" do
+      eval("module Wcff13; class OtherBaseClass; end; end")
+      splat!("wcff13/widget_from_file_13.rb", %{class WidgetFromFile13 < ::Fortitude::Widget; end})
+      cdne = capture_exception(::Fortitude::Widget::Files::CannotDetermineWidgetClassNameError) do
+        wcff('wcff13/widget_from_file_13.rb', :valid_base_classes => [ ::Wcff13::OtherBaseClass ])
+      end
+      expect(cdne.tried_class_names).to eq([ "WidgetFromFile13" ])
     end
   end
 
