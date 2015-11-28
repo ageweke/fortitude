@@ -5,16 +5,16 @@ rvm:
     - "2.0.0-p647"
     - "2.1.7"
     - "2.2.3"
-    - "jruby-1.7.22"
-    - "jruby-9.0.1.0"
+    - "jruby-1.7.23"
+    - "jruby-9.0.4.0"
 env:
-    - FORTITUDE_SPECS_RAILS_VERSION=4.2.4
-    - FORTITUDE_SPECS_RAILS_VERSION=4.1.13
+    - FORTITUDE_SPECS_RAILS_VERSION=4.2.5
+    - FORTITUDE_SPECS_RAILS_VERSION=4.1.14
     - FORTITUDE_SPECS_RAILS_VERSION=4.0.13
     - FORTITUDE_SPECS_RAILS_VERSION=3.2.22
     - FORTITUDE_SPECS_RAILS_VERSION=3.1.12
     - FORTITUDE_SPECS_RAILS_VERSION=3.0.20
-    - FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.4
+    - FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.5
     - FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=3.0.20
 before_script:
     - export JRUBY_OPTS="$JRUBY_OPTS -J-Xmx256m -J-Xms128m -J-Xss2048k"
@@ -22,11 +22,11 @@ matrix:
     exclude:
         # Rails 4.x doesn't support Ruby 1.8.7
         -   rvm: 1.8.7
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.2.4
+            env: FORTITUDE_SPECS_RAILS_VERSION=4.2.5
         -   rvm: 1.8.7
-            env: FORTITUDE_SPECS_RAILS_VERSION=4.1.13
+            env: FORTITUDE_SPECS_RAILS_VERSION=4.1.14
         -   rvm: 1.8.7
-            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.4
+            env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.5
         -   rvm: 1.8.7
             env: FORTITUDE_SPECS_RAILS_VERSION=4.0.13
         # 2014-06-19 ageweke -- ARGH. After trying about seventeen different things, no matter what I do,
@@ -44,9 +44,9 @@ matrix:
     #
     # allow_failures:
     #     -   rvm: jruby-1.7.18
-    #         env: FORTITUDE_SPECS_RAILS_VERSION=4.2.4
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=4.2.5
     #     -   rvm: jruby-1.7.18
-    #         env: FORTITUDE_SPECS_RAILS_VERSION=4.1.13
+    #         env: FORTITUDE_SPECS_RAILS_VERSION=4.1.14
     #     -   rvm: jruby-1.7.18
     #         env: FORTITUDE_SPECS_RAILS_VERSION=4.0.13
     #     -   rvm: jruby-1.7.18
@@ -56,6 +56,6 @@ matrix:
     #     -   rvm: jruby-1.7.18
     #         env: FORTITUDE_SPECS_RAILS_VERSION=3.0.20
     #     -   rvm: jruby-1.7.18
-    #         env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.4
+    #         env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.5
     #     -   rvm: jruby-1.7.18
     #         env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=3.0.20
