@@ -20,6 +20,11 @@ module ViewPathsSystemSpec
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
-    config.paths['app/views'].unshift(Rails.root.join('view_path_one'))
+    new_path = Rails.root.join('view_path_one')
+    if ::Rails.version =~ /^3\.0\./
+      config.paths.app.views.unshift(new_path)
+    else
+      config.paths['app/views'].unshift(new_path)
+    end
   end
 end
