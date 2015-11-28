@@ -9,6 +9,9 @@
   can often be the result of putting the `static` declaration above the method definition in the source file,
   rather than below it. (Thanks to [`tobymao`](https://github.com/tobymao) for the bug report!)
 * Updated versions of Ruby and Rails that Travis CI tests against to the very latest.
+* Fixed an issue where Fortitude wasn't properly respecting Rails' view paths. Fortitude templates could be found at
+  alternate view paths, but our trick of namespacing views under `Views::` wouldn't apply. Now, it all works
+  perfectly. (Thanks to [Karl He](https://github.com/karlhe) for the bug report and example patch!)
 
 ## 0.9.4, 11 February 2015
 
