@@ -52,4 +52,9 @@ Gem::Specification.new do |s|
   if RUBY_VERSION =~ /^1\.8\./
     s.add_development_dependency "i18n", "~> 0.6.0", "< 0.7.0"
   end
+
+  # This is because 'tins' >= 1.7.0 is incompatible with Ruby < 2.0.0.
+  if RUBY_VERSION =~ /^1\./
+    s.add_development_dependency "tins", "< 1.7.0"
+  end
 end
