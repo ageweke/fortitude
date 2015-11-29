@@ -188,6 +188,10 @@ module Fortitude
 
     NEWLINE = "\n"
 
+    def has_yield_block?
+      !! @yield_block
+    end
+
     def yield_from_widget(widget, *args)
       raise Fortitude::Errors::NoBlockToYieldTo.new(widget) unless @yield_block
       result = @yield_block.call(*args)

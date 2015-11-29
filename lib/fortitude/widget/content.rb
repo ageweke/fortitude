@@ -43,6 +43,8 @@ module Fortitude
               text += "  " + ("  " * (acm.length - (index + 1))) + "end\n"
             end
             text += "  out\n"
+            text += "rescue LocalJumpError => lje\n"
+            text += "  raise Fortitude::Errors::NoBlockToYieldTo.new(self, lje)\n"
             text += "end"
 
             class_eval(text)

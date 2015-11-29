@@ -1,4 +1,56 @@
 describe "Fortitude widgets and 'yield'", :type => :system do
+  it "should not have a block available if none is supplied" do
+    wc = widget_class do
+      def content
+        text "block_given? #{block_given?.inspect}"
+      end
+    end
+
+    expect(render(wc.new)).to eq("block_given? false")
+  end
+
+  it "should have a block available if one is passed to the constructor" do
+    wc = widget_class do
+      def content
+        text "block_given? #{block_given?.inspect}"
+      end
+    end
+
+    expect(render(wc.new { |w| nil })).to eq("block_given? true")
+  end
+
+  it "should have a block available if one is passed to #widget" do
+    wc_sub = widget_class do
+      def content
+        text "inner block_given? #{block_given?.inspect}"
+      end
+    end
+
+    wc = widget_class do
+      cattr_accessor :other_widget_class
+
+      def content
+        text "before"
+        widget(self.class.other_widget_class) { text "middle" }
+        text "after"
+      end
+    end
+
+    wc.other_widget_class = wc_sub
+    expect(render(wc.new)).to eq("beforeinner block_given? trueafter")
+  end
+
+  it "should have a block available if one is passed to the rendering context" do
+    wc = widget_class do
+      def content
+        text "block_given? #{block_given?.inspect}"
+      end
+    end
+
+    the_rc = rc(:yield_block => lambda { |w| nil })
+    expect(render(wc.new, :rendering_context => the_rc)).to eq("block_given? true")
+  end
+
   it "should call the block passed to the constructor when you call 'yield' from #content" do
     wc = widget_class do
       def content
@@ -88,7 +140,7 @@ describe "Fortitude widgets and 'yield'", :type => :system do
 
       def content
         text "before"
-        widget(self.class.other_widget_class) { text "middle"  }
+        widget(self.class.other_widget_class) { text "middle" }
         text "after"
       end
     end
