@@ -12,6 +12,8 @@
 * Fixed an issue where Fortitude wasn't properly respecting Rails' view paths. Fortitude templates could be found at
   alternate view paths, but our trick of namespacing views under `Views::` wouldn't apply. Now, it all works
   perfectly. (Thanks to [Karl He](https://github.com/karlhe) for the bug report and example patch!)
+* Fixed an issue where `#block_given?` always returned `true` inside a Fortitude widget's `#content` method, whether
+  a block was supplied to it or not. (Thanks to [Jeff Dickey](https://github.com/jdickey) for the bug report!)
 
 ## 0.9.4, 11 February 2015
 

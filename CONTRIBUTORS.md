@@ -46,3 +46,6 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
 * [Karl He](https://github.com/karlhe) for:
   * Reporting an issue (and supplying an example patch) where Fortitude wasn't respecting Rails' additional view
     paths correctly &mdash; only `app/views`.
+* [Jeff Dickey](https://github.com/jdickey) for:
+  * Reporting an issue where `#block_given?` inside a Fortitude widget's `#content` method returned `true` always,
+    whether or not there was anything to yield to.

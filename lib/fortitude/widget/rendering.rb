@@ -28,12 +28,9 @@ module Fortitude
         @_fortitude_output_buffer_holder = rendering_context.output_buffer_holder
         @_fortitude_block_for_content_method = block_for_content_method
 
-        # block = lambda { |*args| yield_from_widget(*args) }
-        block = _fortitude_run_content_block
-
         rendering_context.record_widget(self) do
           begin
-            run_content(&block)
+            run_content(&_fortitude_run_content_block)
           ensure
             @_fortitude_rendering_context = nil
             @_fortitude_block_for_content_method = nil
@@ -113,16 +110,20 @@ module Fortitude
       private :_fortitude_class_for_new_buffer
 
       # INTERNAL USE ONLY
-      # def _fortitude_yield_from_widget(*args)
-      #   if @_fortitude_block_for_content_method
-      #     @_fortitude_block_for_content_method.call(*args)
-      #   elsif @_fortitude_constructor_block
-      #     @_fortitude_constructor_block.call(self, *args)
-      #   else
-      #     @_fortitude_rendering_context.yield_from_widget(self, *args)
-      #   end
-      # end
-      def _fortitude_yield_from_widget(*args)
+      def _fortitude_run_content_block
+        if @_fortitude_block_for_content_method
+          @_fortitude_block_for_content_method
+        elsif @_fortitude_constructor_block
+          lambda { |*args| @_fortitude_constructor_block.call(self, *args) }
+        elsif @_fortitude_rendering_context.effective_yield_block
+          @_fortitude_rendering_context.effective_yield_block
+        else
+          nil
+        end
+      end
+
+      # PUBLIC API
+      def yield_from_widget(*args)
         block = _fortitude_run_content_block
         if block
           block.call(*args)
@@ -131,28 +132,9 @@ module Fortitude
         end
       end
 
-      # INTERNAL USE ONLY
-      def _fortitude_run_content_block
-        if @_fortitude_block_for_content_method
-          # lambda { |*args| @_fortitude_block_for_content_method.call(*args) }
-          @_fortitude_block_for_content_method
-        elsif @_fortitude_constructor_block
-          lambda { |*args| @_fortitude_constructor_block.call(self, *args) }
-        elsif @_fortitude_rendering_context.has_yield_block?
-          lambda { |*args| @_fortitude_rendering_context.yield_from_widget(self, *args) }
-        else
-          nil
-        end
-      end
-
-      # PUBLIC API
-      def yield_from_widget(*args)
-        _fortitude_yield_from_widget(*args)
-      end
-
       # PUBLIC API (Erector compatibility)
       def call_block
-        _fortitude_yield_from_widget
+        yield_from_widget
       end
     end
   end

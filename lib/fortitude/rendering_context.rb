@@ -188,15 +188,14 @@ module Fortitude
 
     NEWLINE = "\n"
 
-    def has_yield_block?
-      !! @yield_block
-    end
-
-    def yield_from_widget(widget, *args)
-      raise Fortitude::Errors::NoBlockToYieldTo.new(widget) unless @yield_block
-      result = @yield_block.call(*args)
-      @output_buffer_holder.output_buffer << result if @render_yield_result
-      result
+    def effective_yield_block
+      if @yield_block
+        lambda do |*args|
+          result = @yield_block.call(*args)
+          @output_buffer_holder.output_buffer << result if @render_yield_result
+          result
+        end
+      end
     end
 
     def flush!
