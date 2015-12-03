@@ -11,7 +11,7 @@ module Fortitude
             extra_assigns :ignore
           end
 
-          static_keys = opts.fetch(:key, [])
+          static_keys = Array(opts.fetch(:key, []))
           options = opts.fetch(:options, {})
 
           define_method(:cache_contents) do |&block|
