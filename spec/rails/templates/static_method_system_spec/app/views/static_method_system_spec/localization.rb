@@ -3,5 +3,5 @@ class Views::StaticMethodSystemSpec::Localization < Fortitude::Widgets::Html5
     text "hello is: #{t('.hello')}"
   end
 
-  # static :content
+  static :content
 end
