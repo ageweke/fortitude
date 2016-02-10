@@ -49,3 +49,6 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
 * [Jeff Dickey](https://github.com/jdickey) for:
   * Reporting an issue where `#block_given?` inside a Fortitude widget's `#content` method returned `true` always,
     whether or not there was anything to yield to.
+* [Luke Francl](https://github.com/look) for:
+  * Reporting an incompatibility between Fortitude and Rails 4.2.5.1, and discovering the underlying cause (a fifth
+    parameter added to `ActionView::PathResolver#find_templates`.)

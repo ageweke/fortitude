@@ -14,6 +14,8 @@
   perfectly. (Thanks to [Karl He](https://github.com/karlhe) for the bug report and example patch!)
 * Fixed an issue where `#block_given?` always returned `true` inside a Fortitude widget's `#content` method, whether
   a block was supplied to it or not. (Thanks to [Jeff Dickey](https://github.com/jdickey) for the bug report!)
+* Fixed an incompatibility between Fortitude and Rails 4.2.5.1, since Rails 4.2.5.1 added a fifth parameter to
+  `ActionView::PathResolver#find_templates`. (Thanks to [Luke Francl](https://github.com/look) for the bug report!)
 
 ## 0.9.4, 11 February 2015
 
