@@ -8,6 +8,21 @@ describe "Rails helper support", :type => :rails do
       %r{Select datetime:\s*<select.*name="date.*>.*<option.*value="2014".*</option>}mi)
   end
 
+  it 'should support built-in Rails helpers even when automatic_helper_access is false' do
+    expect_match("rails_helpers_without_automatic_helper_access",
+                 /Three months ago: 3 months/mi,
+                 /A million dollars: \$1,000,000\.00/mi,
+                 /class="debug_dump"/mi)
+  end
+
+  it 'should support url helpers even when automatic_helper_access is false' do
+    expect_match('url_helpers_without_automatic_helper_access',
+                 /Root Path: \//,
+                 /Foo Path: \/foo/,
+                 /Foo Url: http:\/\/example.com\/foo/,
+                 /Foo Url with host override: http:\/\/override.com\/foo/)
+  end
+
   it "should refine the built-in Rails helpers by default" do
     expect_match("helpers_that_output_when_refined",
       %r{START.*<img.*src="http://example.com/foo".*/><a href="mailto:test@example.com">test@example.com</a><link.*href="http://example.com/bar".*/>END}mi)
@@ -65,11 +80,11 @@ describe "Rails helper support", :type => :rails do
   end
 
   it "should allow turning off automatic helper access" do
-    expect_match("automatic_helpers_disabled", %r{excitedly: NoMethodError; time_ago_in_words: NoMethodError; number_to_currency: \$1,000,000.00})
+    expect_match("automatic_helpers_disabled", %r{excitedly: NoMethodError; time_ago_in_words: 3 months; number_to_currency: \$1,000,000.00})
   end
 
   it "should inherit automatic helper access properly" do
-    expect_match("automatic_helpers_inheritance", %r{C1: excitedly: NoMethodError; time_ago_in_words: NoMethodError; number_to_currency: \$1,000,000.00.*C2: excitedly: awesome!!!; time_ago_in_words: 3 months; number_to_currency: \$1,000,000.00})
+    expect_match("automatic_helpers_inheritance", %r{C1: excitedly: NoMethodError; time_ago_in_words: 3 months; number_to_currency: \$1,000,000.00.*C2: excitedly: awesome!!!; time_ago_in_words: 3 months; number_to_currency: \$1,000,000.00})
   end
 
   it "should allow access to private helpers in exactly the same way as ERb" do

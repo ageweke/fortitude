@@ -12,11 +12,50 @@ module Fortitude
         end
 
         def apply_refined_helpers_to!(o)
+          o.send(:include, ::Rails.application.routes.url_helpers)
           @helpers.each do |name, options|
             o.helper(name, options)
           end
         end
       end
+
+      ACTION_VIEW_HELPER_MODULES = [
+        'ActionView::Helpers::ActiveModelHelper',
+        'ActionView::Helpers::ActiveModelInstanceTag',
+        'ActionView::Helpers::AssetTagHelper',
+        'ActionView::Helpers::AssetUrlHelper',
+        'ActionView::Helpers::AtomFeedHelper',
+        'ActionView::Helpers::CacheHelper',
+        'ActionView::Helpers::CaptureHelper',
+        'ActionView::Helpers::CsrfHelper',
+        'ActionView::Helpers::DateHelper',
+        'ActionView::Helpers::DebugHelper',
+        'ActionView::Helpers::FormHelper',
+        'ActionView::Helpers::FormOptionsHelper',
+        'ActionView::Helpers::FormTagHelper',
+        'ActionView::Helpers::JavaScriptHelper',
+        'ActionView::Helpers::NumberHelper',
+        'ActionView::Helpers::OutputSafetyHelper',
+        'ActionView::Helpers::RecordTagHelper',
+        'ActionView::Helpers::SanitizeHelper',
+        'ActionView::Helpers::TagHelper',
+        'ActionView::Helpers::TextHelper',
+        'ActionView::Helpers::TranslationHelper',
+        'ActionView::Helpers::UrlHelper'
+      ]
+
+      ACTION_VIEW_HELPER_MODULES.each do |helper_module|
+        if const_defined?(helper_module)
+          helper_module.constantize.public_instance_methods.each do |helper_method|
+            # This is because ActionView::Helpers::FormTagHelper exposes #embed_authenticity_token_in_remote_forms=
+            # as a public instance method. This seems like it should not be included as a helper.
+            next if helper_method == :embed_authenticity_token_in_remote_forms=
+            helper helper_method
+          end
+        end
+      end
+
+      helper :default_url_options
 
       # tags/
       # active_model_helper
