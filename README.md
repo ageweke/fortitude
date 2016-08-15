@@ -1,5 +1,7 @@
 # Fortitude
 
+[![Build Status](https://travis-ci.org/ageweke/fortitude.svg?branch=master)](https://travis-ci.org/ageweke/fortitude)
+
 Fortitude is a new rendering engine for Ruby (with or without Rails), based on the same principles as
 [Erector](https://github.com/erector/erector). It expresses HTML using a Ruby DSL. By doing this, it allows you to
 factor your view layer far more (and much more naturally) than any other templating engine, allowing dramatically
