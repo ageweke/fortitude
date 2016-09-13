@@ -15,6 +15,10 @@ module Fortitude
           options = opts.fetch(:options, {})
 
           define_method(:cache_contents) do |&block|
+            if !@virtual_path
+              raise Fortitude::Errors::CantGenerateCacheDigest.new(self)
+            end
+
             cache calculate_cache_dependencies(assigns, static_keys), options do
               block.call
             end

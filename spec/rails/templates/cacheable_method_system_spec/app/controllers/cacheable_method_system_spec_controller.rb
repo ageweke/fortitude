@@ -13,9 +13,4 @@ class CacheableMethodSystemSpecController < ApplicationController
     require 'arbitrary_name/cached_widget'
     render :widget => ArbitraryName::CachedWidget.new
   end
-
-  def outside_of_views_path_two
-    require 'arbitrary_name/cached_widget_two'
-    render :widget => ArbitraryName::CachedWidgetTwo.new
-  end
 end

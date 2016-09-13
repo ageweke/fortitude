@@ -9,9 +9,6 @@ describe "Fortitude cacheable method behavior in Rails", :type => :rails do
   end
 
   it 'caches views in the lib/ folder' do
-    expect_match("outside_of_views_path", /CachedWidget 1/)
-    expect_match("outside_of_views_path", /CachedWidget 1/)
-    expect_match("outside_of_views_path_two", /CachedWidgetTwo 1/)
-    expect_match("outside_of_views_path_two", /CachedWidgetTwo 1/)
+    expect_exception("outside_of_views_path", Fortitude::Errors::CantGenerateCacheDigest, "Can't digest the widget")
   end
 end
