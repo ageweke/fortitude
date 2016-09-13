@@ -1,9 +1,9 @@
 module ArbitraryName
-  class CachedWidget < Fortitude::Widgets::Html5
+  class CachedWidgetTwo < Fortitude::Widgets::Html5
     cacheable
 
     def content
-      p "CachedWidget #{times_called}"
+      p "CachedWidgetTwo #{times_called}"
     end
 
     def times_called
