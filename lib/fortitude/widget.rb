@@ -46,6 +46,9 @@ module Fortitude
     if defined?(::Rails)
       require 'fortitude/rails/widget_methods'
       include Fortitude::Rails::WidgetMethods
+
+      require 'fortitude/widget/caching'
+      include Fortitude::Widget::Caching
     else
       require 'fortitude/widget/non_rails_widget_methods'
       include Fortitude::Widget::NonRailsWidgetMethods

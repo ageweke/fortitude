@@ -11,7 +11,7 @@ module Fortitude
     class Renderer
       class << self
         # TODO: Refactor this and render :widget => ... support into one method somewhere.
-        def render(widget_class, template_handler, local_assigns, is_partial, &block)
+        def render(widget_class, template_handler, local_assigns, is_partial, options = {}, &block)
           if ::Fortitude::Erector.is_erector_widget_class?(widget_class)
             return ::Erector::Rails.render(widget_class, template_handler, local_assigns, is_partial, &block)
           end
@@ -25,6 +25,11 @@ module Fortitude
           end
 
           widget = widget_class.new(needed_assigns)
+
+          if options[:pathname]
+            widget.instance_variable_set(:@virtual_path, options[:pathname])
+          end
+
           template_handler.with_output_buffer do
             rendering_context = template_handler.controller.fortitude_rendering_context_for(template_handler, block)
 
