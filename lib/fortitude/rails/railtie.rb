@@ -294,10 +294,10 @@ module Fortitude
         # searching Fortitude templates (the +.rb+ handler), then we try again, turning off the
         # +partial+ flag, and return that instead.
         ::ActionView::PathResolver.class_eval do
-          def find_templates_with_fortitude(name, prefix, partial, details, outside_app_allowed = false)
-            templates = find_templates_without_fortitude(name, prefix, partial, details)
+          def find_templates_with_fortitude(name, prefix, partial, details, *args)
+            templates = find_templates_without_fortitude(name, prefix, partial, details, *args)
             if partial && templates.empty? && details[:handlers] && details[:handlers].include?(:rb)
-              templates = find_templates_without_fortitude(name, prefix, false, details.merge(:handlers => [ :rb ]))
+              templates = find_templates_without_fortitude(name, prefix, false, details.merge(:handlers => [ :rb ]), *args)
             end
             templates
           end
