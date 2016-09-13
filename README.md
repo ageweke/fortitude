@@ -13,3 +13,13 @@ where occasional bugs (that will be fixed quickly) are not an issue.
 Fortitude should be production-ready in a short while, including very extensive documentation.
 
 If you're familiar with Erector and want to use Fortitude, see [README-erector.md](README-erector.md).
+
+## Notes for Rails 5 users
+If your app explicitly handles any of the `Fortitude::Error` exceptions, be aware that rails now wraps these
+in `ActionView::Template::Error`, so be sure to handle those instead. You can access the original fortitude errors with
+something like:
+```ruby
+rescue_from ActionView::Template::Error do |exception|
+  original_fortitude_exception = exception.cause
+end
+```
