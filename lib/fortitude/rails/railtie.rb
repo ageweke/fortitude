@@ -23,6 +23,167 @@ end
 module Fortitude
   module Rails
     class Railtie < ::Rails::Railtie
+      module EagerLoadWithFortitude
+        def eager_load!
+          super
+          eager_load_fortitude_views!
+        end
+
+        def eager_load_fortitude_views!
+          ::ActiveSupport::Dependencies._fortitude_view_roots.each do |load_path|
+            all_files = Dir.glob("#{load_path}/**/*.rb")
+            matcher = /\A#{Regexp.escape(load_path.to_s)}\/(.*)\.rb\Z/
+
+            all_files.sort.each do |full_path|
+              filename = File.basename(full_path, ".rb")
+              directory = File.dirname(full_path)
+
+              longer_name_regex = /^#{Regexp.escape(filename)}\..+\.rb$/i
+              longer_name = Dir.entries(directory).detect { |e| e =~ longer_name_regex }
+
+              unless longer_name
+                require_dependency File.join('views', full_path.sub(matcher, '\1'))
+              end
+            end
+          end
+        end
+      end
+
+      module FindTemplatesWithFortitude
+        def find_templates(name, prefix, partial, details, *args)
+          templates = super(name, prefix, partial, details, *args)
+          if partial && templates.empty? && details[:handlers] && details[:handlers].include?(:rb)
+            templates = super(name, prefix, false, details.merge(:handlers => [ :rb ]), *args)
+          end
+          templates
+        end
+      end
+
+      module AutoloadWithFortitude
+        def self.prepended(base)
+          class << base
+            prepend ClassMethods
+          end
+        end
+
+        module ClassMethods
+          def _fortitude_view_roots
+            @@_fortitude_view_roots
+          end
+
+          def _fortitude_view_roots=(view_roots)
+            @@_fortitude_view_roots = view_roots
+          end
+
+          # This is the method that gets called to auto-generate namespacing empty
+          # modules (_e.g._, the toplevel <tt>Views::</tt> module) for directories
+          # under an autoload path.
+          #
+          # The original method says:
+          #
+          # "Does the provided path_suffix correspond to an autoloadable module?
+          # Instead of returning a boolean, the autoload base for this module is
+          # returned."
+          #
+          # So, we just need to strip off the leading +views/+ from the +path_suffix+,
+          # and see if that maps to a directory underneath one of our view roots; if so,
+          # we'll return the path to that view root. Otherwise, we just
+          # delegate back to the superclass method.
+          def autoloadable_module?(path_suffix)
+            if path_suffix =~ %r{^(views)(/.*)?$}i
+              # If we got here, then we were passed a subpath of views/....
+              prefix = $1
+              subpath = $2
+
+              if subpath.blank?
+                @@_fortitude_view_roots.each do |view_root|
+                  return view_root if File.basename(view_root).strip.downcase == prefix.strip.downcase
+                end
+              else
+                @@_fortitude_view_roots.each do |view_root|
+                  return view_root if File.directory?(File.join(view_root, subpath))
+                end
+              end
+            end
+
+            with_fortitude_views_removed_from_autoload_path do
+              super(path_suffix)
+            end
+          end
+
+          # When we delegate back to original methods, we want them to act as if
+          # all view roots are _not_ on the autoload path. In order to be thread-safe
+          # about that, we couple this method with our override of the writer side of the
+          # <tt>mattr_accessor :autoload_paths</tt>, which simply prefers the thread-local
+          # that we set to the actual underlying variable.
+          def with_fortitude_views_removed_from_autoload_path
+            begin
+              Thread.current[:_fortitude_autoload_paths_override] = autoload_paths - @@_fortitude_view_roots
+              yield
+            ensure
+              Thread.current[:_fortitude_autoload_paths_override] = nil
+            end
+          end
+
+          # The original method says:
+          #
+          # "Search for a file in autoload_paths matching the provided suffix."
+          #
+          # So, we just look to see if the given +path_suffix+ is specifying something like
+          # <tt>views/foo/bar</tt> or the fully-qualified version thereof; if so, we glue it together properly,
+          # removing the initial <tt>views/</tt> first. (Otherwise, the mechanism would expect
+          # <tt>Views::Foo::Bar</tt> to show up in <tt>app/views/views/foo/bar</tt> (yes, a double
+          # +views+), since <tt>app/views</tt> is on the autoload path.)
+          def search_for_file(path_suffix)
+            # Remove any ".rb" extension, if present...
+            new_path_suffix = path_suffix.sub(/(\.rb)?$/, "")
+
+            found_subpath = nil
+            if new_path_suffix =~ %r{^views(/.*)$}i
+              found_subpath = $1
+            else
+              @@_fortitude_view_roots.each do |view_root|
+                if new_path_suffix =~ %r{^#{Regexp.escape(view_root)}(/.*)$}i
+                  found_subpath = $1
+                  break
+                end
+              end
+            end
+
+            if found_subpath
+              @@_fortitude_view_roots.each do |view_root|
+                full_path = File.join(view_root, "#{found_subpath}")
+                directory = File.dirname(full_path)
+
+                if File.directory?(directory)
+                  filename = File.basename(full_path)
+
+                  regexp1 = /^_?#{Regexp.escape(filename)}\./
+                  regexp2 = /\.rb$/i
+                  applicable_entries = Dir.entries(directory).select do |entry|
+                    ((entry == filename) || (entry =~ regexp1 && entry =~ regexp2)) && File.file?(File.join(directory, entry))
+                  end
+
+                  return nil if applicable_entries.length == 0
+
+                  # Prefer those without an underscore
+                  without_underscore = applicable_entries.select { |e| e !~ /^_/ }
+                  applicable_entries = without_underscore if without_underscore.length > 0
+
+                  entry_to_use = applicable_entries.sort_by { |e| e.length }.reverse.first
+                  return File.join(directory, entry_to_use)
+                end
+              end
+            end
+
+            # Make sure that we remove the views autoload path before letting the rest of
+            # the dependency mechanism go searching for files, or else <tt>app/views/foo/bar.rb</tt>
+            # *will* be found when looking for just <tt>::Foo::Bar</tt>.
+            with_fortitude_views_removed_from_autoload_path { super(path_suffix) }
+          end
+        end
+      end
+
       config.after_initialize do
         if Fortitude.refine_rails_helpers
           require 'fortitude/rails/helpers'
@@ -105,63 +266,8 @@ module Fortitude
 
         # Now, do all this work inside ::ActiveSupport::Dependencies...
         ::ActiveSupport::Dependencies.module_eval do
-          @@_fortitude_view_roots = view_roots
-
-          def self._fortitude_view_roots
-            @@_fortitude_view_roots
-          end
-
-          # This is the method that gets called to auto-generate namespacing empty
-          # modules (_e.g._, the toplevel <tt>Views::</tt> module) for directories
-          # under an autoload path.
-          #
-          # The original method says:
-          #
-          # "Does the provided path_suffix correspond to an autoloadable module?
-          # Instead of returning a boolean, the autoload base for this module is
-          # returned."
-          #
-          # So, we just need to strip off the leading +views/+ from the +path_suffix+,
-          # and see if that maps to a directory underneath one of our view roots; if so,
-          # we'll return the path to that view root. Otherwise, we just
-          # delegate back to the superclass method.
-          def autoloadable_module_with_fortitude?(path_suffix)
-            if path_suffix =~ %r{^(views)(/.*)?$}i
-              # If we got here, then we were passed a subpath of views/....
-              prefix = $1
-              subpath = $2
-
-              if subpath.blank?
-                @@_fortitude_view_roots.each do |view_root|
-                  return view_root if File.basename(view_root).strip.downcase == prefix.strip.downcase
-                end
-              else
-                @@_fortitude_view_roots.each do |view_root|
-                  return view_root if File.directory?(File.join(view_root, subpath))
-                end
-              end
-            end
-
-            with_fortitude_views_removed_from_autoload_path do
-              autoloadable_module_without_fortitude?(path_suffix)
-            end
-          end
-
-          alias_method_chain :autoloadable_module?, :fortitude
-
-          # When we delegate back to original methods, we want them to act as if
-          # all view roots are _not_ on the autoload path. In order to be thread-safe
-          # about that, we couple this method with our override of the writer side of the
-          # <tt>mattr_accessor :autoload_paths</tt>, which simply prefers the thread-local
-          # that we set to the actual underlying variable.
-          def with_fortitude_views_removed_from_autoload_path
-            begin
-              Thread.current[:_fortitude_autoload_paths_override] = autoload_paths - @@_fortitude_view_roots
-              yield
-            ensure
-              Thread.current[:_fortitude_autoload_paths_override] = nil
-            end
-          end
+          prepend ::Fortitude::Rails::Railtie::AutoloadWithFortitude
+          self._fortitude_view_roots = view_roots
 
           # The use of 'class_eval' here may seem funny, and I think it is, but, without it,
           # the +@@autoload_paths+ gets interpreted as a class variable for this *Railtie*,
@@ -171,65 +277,6 @@ module Fortitude
               Thread.current[:_fortitude_autoload_paths_override] || @@autoload_paths
             end
           EOS
-
-          # The original method says:
-          #
-          # "Search for a file in autoload_paths matching the provided suffix."
-          #
-          # So, we just look to see if the given +path_suffix+ is specifying something like
-          # <tt>views/foo/bar</tt> or the fully-qualified version thereof; if so, we glue it together properly,
-          # removing the initial <tt>views/</tt> first. (Otherwise, the mechanism would expect
-          # <tt>Views::Foo::Bar</tt> to show up in <tt>app/views/views/foo/bar</tt> (yes, a double
-          # +views+), since <tt>app/views</tt> is on the autoload path.)
-          def search_for_file_with_fortitude(path_suffix)
-            # Remove any ".rb" extension, if present...
-            new_path_suffix = path_suffix.sub(/(\.rb)?$/, "")
-
-            found_subpath = nil
-            if new_path_suffix =~ %r{^views(/.*)$}i
-              found_subpath = $1
-            else
-              @@_fortitude_view_roots.each do |view_root|
-                if new_path_suffix =~ %r{^#{Regexp.escape(view_root)}(/.*)$}i
-                  found_subpath = $1
-                  break
-                end
-              end
-            end
-
-            if found_subpath
-              @@_fortitude_view_roots.each do |view_root|
-                full_path = File.join(view_root, "#{found_subpath}")
-                directory = File.dirname(full_path)
-
-                if File.directory?(directory)
-                  filename = File.basename(full_path)
-
-                  regexp1 = /^_?#{Regexp.escape(filename)}\./
-                  regexp2 = /\.rb$/i
-                  applicable_entries = Dir.entries(directory).select do |entry|
-                    ((entry == filename) || (entry =~ regexp1 && entry =~ regexp2)) && File.file?(File.join(directory, entry))
-                  end
-
-                  return nil if applicable_entries.length == 0
-
-                  # Prefer those without an underscore
-                  without_underscore = applicable_entries.select { |e| e !~ /^_/ }
-                  applicable_entries = without_underscore if without_underscore.length > 0
-
-                  entry_to_use = applicable_entries.sort_by { |e| e.length }.reverse.first
-                  return File.join(directory, entry_to_use)
-                end
-              end
-            end
-
-            # Make sure that we remove the views autoload path before letting the rest of
-            # the dependency mechanism go searching for files, or else <tt>app/views/foo/bar.rb</tt>
-            # *will* be found when looking for just <tt>::Foo::Bar</tt>.
-            with_fortitude_views_removed_from_autoload_path { search_for_file_without_fortitude(path_suffix) }
-          end
-
-          alias_method_chain :search_for_file, :fortitude
         end
 
         # Two important comments here:
@@ -250,33 +297,7 @@ module Fortitude
         # write a spec for it, because I don't know how to actually *make* it fail. If anybody comes along later and
         # knows what would make it fail (and I double-checked, and we don't have autoloading disabled in production or
         # anything like that), let me know, so that I can write a spec for this. Thanks!
-        ::Rails::Engine.class_eval do
-          def eager_load_with_fortitude!
-            eager_load_without_fortitude!
-            eager_load_fortitude_views!
-          end
-
-          def eager_load_fortitude_views!
-            ::ActiveSupport::Dependencies._fortitude_view_roots.each do |load_path|
-              all_files = Dir.glob("#{load_path}/**/*.rb")
-              matcher = /\A#{Regexp.escape(load_path.to_s)}\/(.*)\.rb\Z/
-
-              all_files.sort.each do |full_path|
-                filename = File.basename(full_path, ".rb")
-                directory = File.dirname(full_path)
-
-                longer_name_regex = /^#{Regexp.escape(filename)}\..+\.rb$/i
-                longer_name = Dir.entries(directory).detect { |e| e =~ longer_name_regex }
-
-                unless longer_name
-                  require_dependency File.join('views', full_path.sub(matcher, '\1'))
-                end
-              end
-            end
-          end
-
-          alias_method_chain :eager_load!, :fortitude
-        end
+        ::Rails::Engine.prepend(EagerLoadWithFortitude)
 
         # And, finally, this is where we add our view roots to the set of autoload paths.
         ::ActiveSupport::Dependencies.autoload_paths += view_roots
@@ -296,23 +317,13 @@ module Fortitude
         # So, we patch #find_templates: if it's looking for a partial, doesn't find one, and is
         # searching Fortitude templates (the +.rb+ handler), then we try again, turning off the
         # +partial+ flag, and return that instead.
-        ::ActionView::PathResolver.class_eval do
-          def find_templates_with_fortitude(name, prefix, partial, details, *args)
-            templates = find_templates_without_fortitude(name, prefix, partial, details, *args)
-            if partial && templates.empty? && details[:handlers] && details[:handlers].include?(:rb)
-              templates = find_templates_without_fortitude(name, prefix, false, details.merge(:handlers => [ :rb ]), *args)
-            end
-            templates
-          end
-
-          alias_method_chain :find_templates, :fortitude
-        end
+        ::ActionView::PathResolver.prepend(FindTemplatesWithFortitude)
 
         require "fortitude/rails/template_handler"
         require "fortitude/rails/rendering_methods"
 
-        ::ActionController::Base.send(:include, ::Fortitude::Rails::RenderingMethods)
-        ::ActionMailer::Base.send(:include, ::Fortitude::Rails::RenderingMethods)
+        ::ActionController::Base.prepend(::Fortitude::Rails::RenderingMethods)
+        ::ActionMailer::Base.prepend(::Fortitude::Rails::RenderingMethods)
       end
     end
   end
