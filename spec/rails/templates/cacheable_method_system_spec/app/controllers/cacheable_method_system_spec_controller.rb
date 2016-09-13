@@ -8,4 +8,9 @@ class CacheableMethodSystemSpecController < ApplicationController
   def localization
     # nothing here
   end
+
+  def outside_of_views_path
+    require 'arbitrary_name/cached_widget'
+    render :widget => ArbitraryName::CachedWidget.new
+  end
 end
