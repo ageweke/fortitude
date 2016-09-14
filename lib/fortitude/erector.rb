@@ -40,6 +40,24 @@ module Fortitude
       end
     end
 
+    module WidgetWithFortitude
+      def widget(target, assigns = {}, options = {}, &block)
+        if (target.kind_of?(::Class) && target < ::Fortitude::Widget)
+          target = target.new(assigns)
+        end
+
+        if target.kind_of?(::Fortitude::Widget)
+          rendering_context = ::Fortitude::RenderingContext.new(
+            :delegate_object => parent,
+            :output_buffer_holder => ErectorOutputBufferHolder.new(output),
+            :helpers_object => helpers)
+          return target.render_to(rendering_context, &block)
+        else
+          return super(target, assigns, options, &block)
+        end
+      end
+    end
+
     class ErectorOutputBufferHolder
       def initialize(erector_output)
         @erector_output = erector_output
@@ -56,23 +74,5 @@ module Fortitude
 end
 
 if ::Fortitude::Erector.is_erector_available?
-  ::Erector::AbstractWidget.class_eval do
-    def widget_with_fortitude(target, assigns = {}, options = {}, &block)
-      if (target.kind_of?(::Class) && target < ::Fortitude::Widget)
-        target = target.new(assigns)
-      end
-
-      if target.kind_of?(::Fortitude::Widget)
-        rendering_context = ::Fortitude::RenderingContext.new(
-          :delegate_object => parent,
-          :output_buffer_holder => ::Fortitude::Erector::ErectorOutputBufferHolder.new(output),
-          :helpers_object => helpers)
-        return target.render_to(rendering_context, &block)
-      else
-        return widget_without_fortitude(target, assigns, options, &block)
-      end
-    end
-
-    alias_method_chain :widget, :fortitude
-  end
+  ::Erector::AbstractWidget.prepend(Fortitude::Erector::WidgetWithFortitude)
 end
