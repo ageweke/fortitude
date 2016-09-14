@@ -198,9 +198,6 @@ module Fortitude
             start_and_end_comments true
             debug true
           end
-         elsif ::Rails.env.production? && ::Rails::VERSION::MAJOR >= 5
-           # Rails 5 removes autoloading in production, but fortitude depends on it
-           ::Rails.application.config.enable_dependency_loading = true
         end
       end
 

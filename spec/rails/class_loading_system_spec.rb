@@ -14,11 +14,6 @@ describe "Rails class-loading support", :type => :rails do
     expect_exception('some_other_namespace', 'NameError', /uninitialized constant SomeNamespace/)
   end
 
-  it "should create anonymous modules with the Views:: namespace for directories under app/views/" do
-    expect_match('views_some_namespace', /^Views::SomeNamespace$/, :no_layout => true)
-    expect_match('views_some_other_namespace', /^Views::SomeNamespace::SomeOtherNamespace$/, :no_layout => true)
-  end
-
   it "should autoload widgets under app/views/" do
     expect_match('autoload_widget', /autoload_widget is here!/, :no_layout => true)
   end
