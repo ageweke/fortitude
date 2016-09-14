@@ -5,4 +5,4 @@ gemspec
 
 gem 'erector'
 
-gem 'oop_rails_server', github: 'dobtco/oop_rails_server', branch: 'rails5'
+gem 'oop_rails_server', github: 'dobtco/oop_rails_server'
