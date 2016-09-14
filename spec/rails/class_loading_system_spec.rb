@@ -31,7 +31,6 @@ describe "Rails class-loading support", :type => :rails do
   end
 
   it "should not allow me to define widgets outside of app/views/" do
-    # TODO: what is this spec testing? the action doesn't tell rails to render the outside widget
     if Gem::Version.new(rails_server_default_version) >= Gem::Version.new('5.0.0')
       expect_status('widget_defined_outside_app_views', 204)
     else
@@ -44,7 +43,6 @@ describe "Rails class-loading support", :type => :rails do
   end
 
   it "should not let me define a widget in a file starting with an underscore, and use it for a view" do
-    # TODO: what is this spec testing? the action doesn't tell rails to render the outside widget
     if Gem::Version.new(rails_server_default_version) >= Gem::Version.new('5.0.0')
       expect_status('widget_defined_outside_app_views', 204)
     else
