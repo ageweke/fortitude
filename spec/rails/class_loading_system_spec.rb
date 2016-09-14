@@ -12,8 +12,6 @@ describe "Rails class-loading support", :type => :rails do
   it "should not create anonymous modules without the Views:: namespace for directories under app/views/" do
     expect_exception('some_namespace', 'NameError', /uninitialized constant SomeNamespace/)
     expect_exception('some_other_namespace', 'NameError', /uninitialized constant SomeNamespace/)
-    expect_match('views_some_namespace', /Views::SomeNamespace/, :no_layout => true)
-    expect_match('views_some_other_namespace', /Views::SomeNamespace::SomeOtherNamespace/, :no_layout => true)
   end
 
   it "should autoload widgets under app/views/" do
@@ -33,11 +31,27 @@ describe "Rails class-loading support", :type => :rails do
   end
 
   it "should not allow me to define widgets outside of app/views/" do
-    expect_exception('widget_defined_outside_app_views', 'ActionView::MissingTemplate', /class_loading_system_spec\/widget_defined_outside_app_views/)
+    if Gem::Version.new(rails_server_default_version) >= Gem::Version.new('5.0.0')
+      expect_status('widget_defined_outside_app_views', 204)
+    else
+      expect_exception(
+        'widget_defined_outside_app_views',
+        'ActionView::MissingTemplate',
+        /class_loading_system_spec\/widget_defined_outside_app_views/
+      )
+    end
   end
 
   it "should not let me define a widget in a file starting with an underscore, and use it for a view" do
-    expect_exception('underscore_view', 'ActionView::MissingTemplate', /class_loading_system_spec\/underscore_view/)
+    if Gem::Version.new(rails_server_default_version) >= Gem::Version.new('5.0.0')
+      expect_status('widget_defined_outside_app_views', 204)
+    else
+      expect_exception(
+        'underscore_view',
+        'ActionView::MissingTemplate',
+        /class_loading_system_spec\/underscore_view/
+      )
+    end
   end
 
   it "should prefer widgets defined in a file without an underscore to those with" do

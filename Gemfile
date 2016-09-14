@@ -4,3 +4,5 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'erector'
+
+gem 'oop_rails_server', github: 'dobtco/oop_rails_server'

@@ -18,6 +18,7 @@ describe "Rails data-passing support", :type => :rails do
   end
 
   it "should give you a reasonable error if you omit a variable" do
+    # Rails 5+ raises ActionView::Template::Error with the following exception as its #cause
     expect_exception('omitted_variable', 'Fortitude::Errors::MissingNeed', /bar/)
   end
 
@@ -34,6 +35,7 @@ describe "Rails data-passing support", :type => :rails do
   end
 
   it "should not propagate a controller variable through a view to a child widget without being explicitly passed" do
+    # Rails 5+ raises ActionView::Template::Error with the following exception as its #cause
     expect_exception('parent_to_child_passing', 'Fortitude::Errors::MissingNeed', /foo/)
   end
 
