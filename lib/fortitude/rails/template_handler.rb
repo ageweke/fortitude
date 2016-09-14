@@ -14,8 +14,10 @@ module Fortitude
 
         is_partial = !! File.basename(template.identifier) =~ /^_/
 
+        pathname = "#{template.identifier =~ %r(views/(.*)) && $1}"
+
         <<-SRC
-        Fortitude::Rails::Renderer.render(#{widget_class.name}, self, local_assigns, #{is_partial.inspect}) { |*args| yield *args }
+        Fortitude::Rails::Renderer.render(#{widget_class.name}, self, local_assigns, #{is_partial.inspect}, pathname: "#{pathname}") { |*args| yield *args }
         SRC
       end
 
