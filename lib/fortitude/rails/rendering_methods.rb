@@ -6,10 +6,6 @@ module Fortitude
     module RenderingMethods
       extend ActiveSupport::Concern
 
-      included do
-        alias_method_chain :render, :fortitude
-      end
-
       def fortitude_rendering_context_for(delegate_object, yield_block)
         @_fortitude_rendering_contexts ||= { }
         @_fortitude_rendering_contexts[delegate_object.object_id] ||= create_fortitude_rendering_context(
@@ -48,19 +44,19 @@ module Fortitude
 
         passed_options = options.dup
         passed_options.delete(:widget)
-        passed_options[:text] = output_buffer.to_s
+        passed_options[:html] = output_buffer.to_s
         passed_options[:layout] = true unless passed_options.has_key?(:layout)
 
         return controller.render_to_string(passed_options)
       end
 
       def self._fortitude_register_renderer!
-        ::ActionController.add_renderer_without_fortitude(:widget) do |widget, options|
+        ::ActionController.orig_add_renderer(:widget) do |widget, options|
           ::Fortitude::Rails::RenderingMethods._fortitude_render_widget(self, widget, options)
         end
       end
 
-      def render_with_fortitude(*args, &block)
+      def render(*args, &block)
         if (options = args[0]).kind_of?(Hash) && (widget_block = options[:inline]) && (options[:type] == :fortitude)
           options.delete(:inline)
 
@@ -79,24 +75,30 @@ module Fortitude
 
           widget = widget_class.new(assigns)
           new_args = [ options.merge(:widget => widget) ] + args[1..-1]
-          return render_without_fortitude(*new_args, &block)
+          return super(*new_args, &block)
         end
 
-        return render_without_fortitude(*args, &block)
+        return super(*args, &block)
+      end
+    end
+
+    module AddRendererWithFortitude
+      def self.prepended(base)
+        class << base
+          alias_method :orig_add_renderer, :add_renderer
+          prepend ClassMethods
+        end
+      end
+
+      module ClassMethods
+        def add_renderer(key, *args, &block)
+          super(key, *args, &block)
+          ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!
+        end
       end
     end
   end
 end
 
-::ActionController.module_eval do
-  class << self
-    def add_renderer_with_fortitude(key, *args, &block)
-      add_renderer_without_fortitude(key, *args, &block)
-      ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!
-    end
-
-    alias_method_chain :add_renderer, :fortitude
-  end
-end
-
+::ActionController.prepend(Fortitude::Rails::AddRendererWithFortitude)
 ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!

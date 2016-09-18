@@ -2,6 +2,15 @@ module Fortitude
   module Errors
     class Base < StandardError; end
 
+    class CantGenerateCacheDigest < Base
+      attr_reader :widget
+
+      def initialize(widget)
+        super(%{Can't digest the widget #{widget}, since it's being rendered with `:widget =>` and doesn't have its @virtual_path set.})
+        @widget = widget
+      end
+    end
+
     class MissingNeed < Base
       attr_reader :widget, :missing_needs, :assigns
 

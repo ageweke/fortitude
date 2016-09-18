@@ -14,31 +14,47 @@ module Fortitude
 
         is_partial = !! File.basename(template.identifier) =~ /^_/
 
+        pathname = "#{template.identifier =~ %r(views/(.*)) && $1}"
+
         <<-SRC
-        Fortitude::Rails::Renderer.render(#{widget_class.name}, self, local_assigns, #{is_partial.inspect}) { |*args| yield *args }
+        Fortitude::Rails::Renderer.render(#{widget_class.name}, self, local_assigns, #{is_partial.inspect}, pathname: "#{pathname}") { |*args| yield *args }
         SRC
       end
 
       def supports_streaming?
         true
       end
+
+      module RegisterTemplateHandlerWithFortitude
+        def self.prepended(base)
+          class << base
+            alias_method :orig_register_template_handler,
+                         :register_template_handler
+            prepend ClassMethods
+          end
+        end
+
+        module ClassMethods
+          def register_template_handler(*args, &block)
+            super(*args, &block)
+
+            ActionView::Template._fortitude_register_template_handler!
+          end
+
+          def _fortitude_register_template_handler!
+            orig_register_template_handler(
+              :rb,
+              Fortitude::Rails::TemplateHandler.new
+            )
+          end
+        end
+      end
     end
   end
 end
 
-::ActionView::Template.class_eval do
-  class << self
-    def _fortitude_register_template_handler!
-      register_template_handler_without_fortitude(:rb, Fortitude::Rails::TemplateHandler.new)
-    end
-
-    def register_template_handler_with_fortitude(*args, &block)
-      register_template_handler_without_fortitude(*args, &block)
-      ActionView::Template._fortitude_register_template_handler!
-    end
-
-    alias_method_chain :register_template_handler, :fortitude
-  end
-end
+::ActionView::Template.prepend(
+  Fortitude::Rails::TemplateHandler::RegisterTemplateHandlerWithFortitude
+)
 
 ActionView::Template._fortitude_register_template_handler!
