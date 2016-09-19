@@ -25,28 +25,31 @@ Gem::Specification.new do |s|
     s.extensions << "ext/fortitude_native_ext/extconf.rb"
   end
 
-  activesupport_spec = if RUBY_VERSION =~ /^1\.8\./
-    [ ">= 3.0", "< 4.0" ]
-  else
-    [ ">= 3.0" ]
-  end
+  activesupport_spec = [ ">= 3.0" ]
+  ref_spec = [ ">= 1.0.5" ]
+  rake_spec = [ ">= 1.0" ]
+  json_spec = [ ">= 1.0" ]
 
-  ref_spec = if RUBY_VERSION =~ /^1\.8\./
-    [ ">= 1.0.5", "< 2.0.0" ]
-  else
-    [ ">= 1.0.5" ]
+  if RUBY_VERSION =~ /^1\.8\./
+    activesupport_spec << "< 4.0"
+    ref_spec << "< 2.0.0"
+    rake_spec << "< 11.0.0"
+    json_spec << "< 2.0.0"
+  elsif RUBY_VERSION =~ /^2\.[01]\./
+    activesupport_spec << "< 5.0"
   end
 
   s.add_dependency "activesupport", *activesupport_spec
   s.add_dependency "ref", *ref_spec
 
+  s.add_development_dependency "rake", *rake_spec
+  s.add_development_dependency "json", *json_spec
+
   s.add_development_dependency "bundler", "~> 1.5"
-  s.add_development_dependency "rake"
   s.add_development_dependency "rspec", "~> 2.99"
   s.add_development_dependency "rake-compiler"
-  s.add_development_dependency "json"
   s.add_development_dependency "tilt", "~> 2.0"
-  s.add_development_dependency "oop_rails_server", ">= 0.0.15"
+  s.add_development_dependency "oop_rails_server", ">= 0.0.16"
 
   # This is because i18n >= 0.7 is incompatible with Ruby 1.8.x.
   if RUBY_VERSION =~ /^1\.8\./

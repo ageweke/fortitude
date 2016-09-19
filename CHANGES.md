@@ -16,6 +16,8 @@
   a block was supplied to it or not. (Thanks to [Jeff Dickey](https://github.com/jdickey) for the bug report!)
 * Fixed an incompatibility between Fortitude and Rails 4.2.5.1, since Rails 4.2.5.1 added a fifth parameter to
   `ActionView::PathResolver#find_templates`. (Thanks to [Luke Francl](https://github.com/look) for the bug report!)
+* Fixed incompatibilities with more-recently released versions of gems (`uglifier`, `rake`, `activesupport`) that
+  otherwise broke compatibility with previous Ruby versions.
 
 ## 0.9.4, 11 February 2015
 
