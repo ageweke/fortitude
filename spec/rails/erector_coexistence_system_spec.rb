@@ -1,5 +1,5 @@
 describe "Erector coexistence support", :type => :rails do
-  uses_rails_with_template :erector_coexistence_system_spec, :additional_gemfile_lines => "gem 'erector'"
+  uses_rails_with_template :erector_coexistence_system_spec, :additional_gemfile_modifier => Proc.new { |gemfile| gemfile.ensure_gem!("erector") }
 
   begin
     gem 'erector'
