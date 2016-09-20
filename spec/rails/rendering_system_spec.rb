@@ -53,7 +53,7 @@ describe "Rails rendering support", :type => :rails do
     end
 
     it "should let you render a widget with 'render \"foo\" and the full path'" do
-      skip "Rails 4.2 makes this mean something different (render :template, vs. render :file)" unless rails_server.rails_version =~ /^(3\.|4\.[01]\.)/
+      skip "Rails 4.1/4.2 makes this mean something different (render :template, vs. render :file)" unless rails_server.rails_version =~ /^(3\.|4\.0\.)/
       expect_match("render_widget_via_file_path", /hello from a widget named Fred/)
     end
 

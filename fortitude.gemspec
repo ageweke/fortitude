@@ -35,6 +35,9 @@ Gem::Specification.new do |s|
     ref_spec << "< 2.0.0"
     rake_spec << "< 11.0.0"
     json_spec << "< 2.0.0"
+  elsif RUBY_VERSION =~ /^1\.9\./
+    activesupport_spec << "< 5.0"
+    json_spec << "< 2.0.0"
   elsif RUBY_VERSION =~ /^2\.[01]\./
     activesupport_spec << "< 5.0"
   end
