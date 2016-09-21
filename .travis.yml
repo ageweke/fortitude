@@ -2,6 +2,7 @@ sudo: false
 # 2016-09-20 ageweke -- This is temporary, and is because JRuby 1.7.26 is incompatible with Bundler 1.13.0/1,
 # because of the following issue: https://github.com/bundler/bundler/issues/4975.
 before_install:
+    - gem uninstall bundler -Ix
     - gem install bundler -v=1.12.5
 rvm:
     - "1.8.7"
