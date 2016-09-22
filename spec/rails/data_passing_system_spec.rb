@@ -18,7 +18,7 @@ describe "Rails data-passing support", :type => :rails do
   end
 
   it "should give you a reasonable error if you omit a variable" do
-    expect_exception('omitted_variable', 'Fortitude::Errors::MissingNeed', /bar/)
+    expect_actionview_exception('omitted_variable', 'Fortitude::Errors::MissingNeed', /bar/)
   end
 
   it "should not propagate un-needed variables" do
@@ -34,7 +34,7 @@ describe "Rails data-passing support", :type => :rails do
   end
 
   it "should not propagate a controller variable through a view to a child widget without being explicitly passed" do
-    expect_exception('parent_to_child_passing', 'Fortitude::Errors::MissingNeed', /foo/)
+    expect_actionview_exception('parent_to_child_passing', 'Fortitude::Errors::MissingNeed', /foo/)
   end
 
   it "should propagate a controller variable through a view to a child widget without being explicitly passed, if invoked using render :partial" do

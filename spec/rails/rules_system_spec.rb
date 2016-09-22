@@ -2,11 +2,11 @@ describe "Rails rules support", :type => :rails do
   uses_rails_with_template :rules_system_spec
 
   it "should be able to enforce tag-nesting rules in Rails" do
-    expect_exception('invalidly_nested_tag', Fortitude::Errors::InvalidElementNesting, /div/)
+    expect_actionview_exception('invalidly_nested_tag', Fortitude::Errors::InvalidElementNesting, /div/)
   end
 
   it "should still enforce tag-nesting rules inside a partial" do
-    expect_exception('invalidly_nested_tag_in_partial', Fortitude::Errors::InvalidElementNesting, /div/)
+    expect_actionview_exception('invalidly_nested_tag_in_partial', Fortitude::Errors::InvalidElementNesting, /div/)
   end
 
   it "should not enforce tag-nesting rules at the start of a partial rendered from ERb" do

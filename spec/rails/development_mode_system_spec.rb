@@ -17,7 +17,7 @@ describe "Rails development-mode support", :type => :rails do
     expect_match("reload_widget_with_html_extension", /with_html_extension.*helper: yo/)
     sleep 1
     splat_new_module_for_reload_widget_failing!
-    expect_exception("reload_widget_with_html_extension", NameError, "some_helper")
+    expect_actionview_exception("reload_widget_with_html_extension", NameError, "some_helper")
     sleep 1
     splat_new_module_for_reload_widget!
     expect_match("reload_widget_with_html_extension", /with_html_extension.*helper: yo/)
