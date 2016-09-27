@@ -21,6 +21,7 @@
   otherwise broke compatibility with previous Ruby versions.
 * Fixed an issue where Fortitude’s system for figuring out what the name of a Fortitude widget would be, based on its
   filename, could be confused by filenames ending in other extensions before `.rb` (for example, `.html.rb`).
+* Eliminated a deprecation warning from Rails 5 caused by Fortitude's use of `render :text` internally.
 
 ## 0.9.4, 11 February 2015
 

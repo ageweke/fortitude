@@ -48,7 +48,9 @@ module Fortitude
 
         passed_options = options.dup
         passed_options.delete(:widget)
-        passed_options[:text] = output_buffer.to_s
+
+        output_key = if ::Rails.version =~ /^(3\.)|(4\.0\.)/ then :text else :html end
+        passed_options[output_key] = output_buffer.to_s
         passed_options[:layout] = true unless passed_options.has_key?(:layout)
 
         return controller.render_to_string(passed_options)
