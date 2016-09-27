@@ -216,6 +216,12 @@ class WidgetFromClass17 < Fortitude::Widget; end}
       expect(wcff('wcfs10/wcfs_11/widget_from_class_23.rb', :root_dirs => tempdir)).to eq(Wcfs10::Wcfs11::WidgetFromClass23)
     end
 
+    it "should be able to use a root directory to infer a class name, even if it the class name ends in other extensions before .rb" do
+      ::Object.class_eval("module Wcfs12; end")
+      splat!('wcfs12/widget_from_class_30.html.rb', %{cname = 'WidgetFromCla' + 'ss30'; eval('class Wcfs12::' + cname + ' < ::Fortitude::Widget; end')})
+      expect(wcff('wcfs12/widget_from_class_30.html.rb', :root_dirs => tempdir)).to eq(Wcfs12::WidgetFromClass30)
+    end
+
     it "should be able to use an array of root directories to infer a class name, and find the right one" do
       ::Object.class_eval("module Wcfs10; module Wcfs11; end; end")
       splat!('bar/wcfs10/wcfs_11/widget_from_class_23.rb', %{cname = 'WidgetFromCla' + 'ss23'; eval('class Wcfs10::Wcfs11::' + cname + ' < ::Fortitude::Widget; end')})

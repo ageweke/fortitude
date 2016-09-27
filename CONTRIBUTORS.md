@@ -43,6 +43,7 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
   * Reporting an issue where you could not easily render a Fortitude widget from Erector, nor vice-versa.
+  * Fixes for compatibility with Rails 5.
 * [Karl He](https://github.com/karlhe) for:
   * Reporting an issue (and supplying an example patch) where Fortitude wasn't respecting Rails' additional view
     paths correctly &mdash; only `app/views`.
@@ -52,3 +53,5 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
 * [Luke Francl](https://github.com/look) for:
   * Reporting an incompatibility between Fortitude and Rails 4.2.5.1, and discovering the underlying cause (a fifth
     parameter added to `ActionView::PathResolver#find_templates`.)
+* [Victor Lymar](https://github.com/vlymar) for:
+  * Fixes for compatibility with Rails 5.

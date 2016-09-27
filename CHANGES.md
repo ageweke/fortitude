@@ -2,6 +2,7 @@
 
 ## 0.9.5,
 
+* Rails 5 compatibility: Fortitude now is fully compatible with Rails 5.0.0.1.
 * Significant improvements in performance to our dispatching to #t, the Rails method to produce translations of
   localized strings. Localized Rails applications tend to use this method a _lot_, so its performance can have a
   big impact on overall application performance.
@@ -18,6 +19,8 @@
   `ActionView::PathResolver#find_templates`. (Thanks to [Luke Francl](https://github.com/look) for the bug report!)
 * Fixed incompatibilities with more-recently released versions of gems (`uglifier`, `rake`, `activesupport`) that
   otherwise broke compatibility with previous Ruby versions.
+* Fixed an issue where Fortitude’s system for figuring out what the name of a Fortitude widget would be, based on its
+  filename, could be confused by filenames ending in other extensions before `.rb` (for example, `.html.rb`).
 
 ## 0.9.4, 11 February 2015
 

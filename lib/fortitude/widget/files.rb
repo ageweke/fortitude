@@ -53,7 +53,7 @@ or add a "magic comment" to the source code of this widget that looks like this:
 
             if filename[0..(root_dir.length - 1)].downcase == root_dir.downcase
               subpath = filename[(root_dir.length + 1)..-1]
-              subpath = $1 if subpath =~ /^(.*)\.rb$/i
+              subpath = $1 if subpath =~ %r{^(.*?)\.[^/]+$}i # remove all extensions
               class_names_to_try << subpath.camelize if subpath && subpath.length > 1
             end
           end
