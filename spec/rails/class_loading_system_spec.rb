@@ -12,6 +12,9 @@ describe "Rails class-loading support", :type => :rails do
   it "should not create anonymous modules without the Views:: namespace for directories under app/views/" do
     expect_exception('some_namespace', 'NameError', /uninitialized constant SomeNamespace/)
     expect_exception('some_other_namespace', 'NameError', /uninitialized constant SomeNamespace/)
+  end
+
+  it "should create anonymous modules in the Views:: namespace for directories under app/views/" do
     expect_match('views_some_namespace', /Views::SomeNamespace/, :no_layout => true)
     expect_match('views_some_other_namespace', /Views::SomeNamespace::SomeOtherNamespace/, :no_layout => true)
   end
