@@ -11,6 +11,7 @@ rvm:
 # because of the following issue: https://github.com/bundler/bundler/issues/4975.
 # - "jruby-1.7.26"
 env:
+    - FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
     - FORTITUDE_SPECS_RAILS_VERSION=4.2.7.1
     - FORTITUDE_SPECS_RAILS_VERSION=4.1.16
     - FORTITUDE_SPECS_RAILS_VERSION=4.0.13
@@ -30,3 +31,17 @@ matrix:
             env: FORTITUDE_NATIVE_EXTENSIONS=false FORTITUDE_SPECS_RAILS_VERSION=4.2.7.1
         -   rvm: 1.8.7
             env: FORTITUDE_SPECS_RAILS_VERSION=4.0.13
+        # Rails 5.x doesn't support Ruby < 2.2
+        -   rvm: 1.8.7
+            env: FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
+        -   rvm: "1.9.3-p551"
+            env: FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
+        -   rvm: "2.0.0-p648"
+            env: FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
+        -   rvm: "2.1.10"
+            env: FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
+        -   rvm: "jruby-1.7.26"
+            env: FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
+        # JRuby doesn't support Rails 5 yet
+        -   rvm: jruby-9.1.5.0
+            env: FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
