@@ -44,7 +44,7 @@ EOS
       end
 
       def suffix_method_name(method_name, suffix)
-        if method_name =~ /^(.*?)([\?\_\!]+)$/i
+        if method_name.to_s =~ /^(.*?)([\?\_\!]+)$/i
           "#{$1}#{suffix}#{$2}"
         else
           "#{method_name}#{suffix}"

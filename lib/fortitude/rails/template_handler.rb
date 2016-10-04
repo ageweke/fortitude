@@ -42,7 +42,8 @@ module Fortitude
   end
 end
 
+eigenclass = ::ActionView::Template.class_eval "class << self; self; end"
 ::Fortitude::MethodOverriding.override_methods(
-  ::ActionView::Template, ::Fortitude::Rails::RegisterTemplateHandlerOverrides, :fortitude, [ :register_template_handler ])
+  eigenclass, ::Fortitude::Rails::RegisterTemplateHandlerOverrides, :fortitude, [ :register_template_handler ])
 
 ::Fortitude::Rails::TemplateHandler.register!
