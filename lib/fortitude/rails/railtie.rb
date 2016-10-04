@@ -343,8 +343,8 @@ module Fortitude
         require "fortitude/rails/template_handler"
         require "fortitude/rails/rendering_methods"
 
-        ::ActionController::Base.send(:include, ::Fortitude::Rails::RenderingMethods)
-        ::ActionMailer::Base.send(:include, ::Fortitude::Rails::RenderingMethods)
+        ::Fortitude::Rails::RenderingMethods.include_into!(::ActionController::Base)
+        ::Fortitude::Rails::RenderingMethods.include_into!(::ActionMailer::Base)
       end
     end
   end

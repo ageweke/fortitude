@@ -6,8 +6,12 @@ module Fortitude
     module RenderingMethods
       extend ActiveSupport::Concern
 
-      included do
-        alias_method_chain :render, :fortitude
+      class << self
+        def include_into!(target)
+          target.send(:include, self)
+          ::Fortitude::MethodOverriding.override_methods(
+            target, ::Fortitude::Rails::RenderingMethods::Overrides, :fortitude, [ :render ])
+        end
       end
 
       def fortitude_rendering_context_for(delegate_object, yield_block)
@@ -57,48 +61,57 @@ module Fortitude
       end
 
       def self._fortitude_register_renderer!
-        ::ActionController.add_renderer_without_fortitude(:widget) do |widget, options|
+        ::ActionController.add_renderer(:_fortitude_widget) do |widget, options|
           ::Fortitude::Rails::RenderingMethods._fortitude_render_widget(self, widget, options)
         end
       end
 
-      def render_with_fortitude(*args, &block)
-        if (options = args[0]).kind_of?(Hash) && (widget_block = options[:inline]) && (options[:type] == :fortitude)
-          options.delete(:inline)
+      module Overrides
+        def render_uniwith_fortitude(original_method, *args, &block)
+          if (options = args[0]).kind_of?(Hash) && (widget_block = options[:inline]) && (options[:type] == :fortitude)
+            options.delete(:inline)
 
-          rendering_context = fortitude_rendering_context_for(self, nil)
-          widget_class = Class.new(Fortitude::Widgets::Html5)
-          widget_class.use_instance_variables_for_assigns(true)
-          widget_class.extra_assigns(:use)
-          widget_class.send(:define_method, :content, &widget_block)
+            rendering_context = fortitude_rendering_context_for(self, nil)
+            widget_class = Class.new(Fortitude::Widgets::Html5)
+            widget_class.use_instance_variables_for_assigns(true)
+            widget_class.extra_assigns(:use)
+            widget_class.send(:define_method, :content, &widget_block)
 
-          assigns = { }
-          instance_variables.each do |ivar_name|
-            value = instance_variable_get(ivar_name)
-            assigns[$1.to_sym] = value if ivar_name =~ /^@([^_].*)$/
+            assigns = { }
+            instance_variables.each do |ivar_name|
+              value = instance_variable_get(ivar_name)
+              assigns[$1.to_sym] = value if ivar_name =~ /^@([^_].*)$/
+            end
+            assigns = assigns.merge(options[:locals] || { })
+
+            widget = widget_class.new(assigns)
+            new_args = [ options.merge(:widget => widget) ] + args[1..-1]
+            return original_method.call(*new_args, &block)
           end
-          assigns = assigns.merge(options[:locals] || { })
 
-          widget = widget_class.new(assigns)
-          new_args = [ options.merge(:widget => widget) ] + args[1..-1]
-          return render_without_fortitude(*new_args, &block)
+          return original_method.call(*args, &block)
         end
+      end
 
-        return render_without_fortitude(*args, &block)
+      module ActionControllerOverrides
+        def add_renderer_uniwith_fortitude(original_method, key, *args, &block)
+          if key == :_fortitude_widget
+            $stderr.puts "add_renderer_uniwith_fortitude: CHANGING: #{key.inspect}"
+            original_method.call(:widget, *args, &block)
+          else
+            $stderr.puts "add_renderer_uniwith_fortitude: NOT CHANGING: #{key.inspect}"
+            original_method.call(key, *args, &block)
+            ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!
+          end
+        end
       end
     end
   end
 end
 
-::ActionController.module_eval do
-  class << self
-    def add_renderer_with_fortitude(key, *args, &block)
-      add_renderer_without_fortitude(key, *args, &block)
-      ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!
-    end
-
-    alias_method_chain :add_renderer, :fortitude
-  end
-end
+eigenclass = ::ActionController.class_eval "class << self; self; end"
+::Fortitude::MethodOverriding.override_methods(
+  eigenclass, ::Fortitude::Rails::RenderingMethods::ActionControllerOverrides, :fortitude,
+    [ :add_renderer ])
 
 ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!
