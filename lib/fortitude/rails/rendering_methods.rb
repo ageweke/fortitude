@@ -96,10 +96,8 @@ module Fortitude
       module ActionControllerOverrides
         def add_renderer_uniwith_fortitude(original_method, key, *args, &block)
           if key == :_fortitude_widget
-            $stderr.puts "add_renderer_uniwith_fortitude: CHANGING: #{key.inspect}"
             original_method.call(:widget, *args, &block)
           else
-            $stderr.puts "add_renderer_uniwith_fortitude: NOT CHANGING: #{key.inspect}"
             original_method.call(key, *args, &block)
             ::Fortitude::Rails::RenderingMethods._fortitude_register_renderer!
           end
