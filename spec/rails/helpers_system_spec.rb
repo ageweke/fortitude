@@ -2,7 +2,7 @@ describe "Rails helper support", :type => :rails do
   uses_rails_with_template :helpers_system_spec
 
   it "should support the built-in Rails helpers by default" do
-    skip("Rails 3.1 fails on this test with Ruby 2.3 only") if rails_server.rails_version =~ /^3\.1\./ && RUBY_VERSION =~ /^2\.3\./
+    skip("Rails 3.1 fails on this test with Ruby 2.3 only") if rails_server.actual_rails_version =~ /^3\.1\./ && RUBY_VERSION =~ /^2\.3\./
     expect_match("basic_helpers",
       /Three months ago: 3 months/mi,
       /A million dollars: \$1,000,000\.00/mi,

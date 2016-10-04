@@ -16,7 +16,7 @@ module Spec
       end
 
       def rails_server_wraps_template_errors?
-        !! (rails_server.rails_version =~ /^5\./)
+        !! (rails_server.actual_rails_version =~ /^5\./)
       end
 
       def expect_actionview_exception(subpath, class_name, message)

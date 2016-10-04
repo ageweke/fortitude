@@ -37,7 +37,7 @@ describe "Rails class-loading support", :type => :rails do
 
   def expect_no_template_error(subpath, controller_name, view_name)
     # Rails 5 changed this: see https://github.com/rails/rails/issues/20666, https://github.com/rails/rails/issues/19036.
-    if rails_server.rails_version =~ /^5\./
+    if rails_server.actual_rails_version =~ /^5\./
       regexp = /#{(controller_name + "_controller").camelize}##{view_name.underscore}/
       expect_exception(subpath, 'ActionController::UnknownFormat', regexp)
     else

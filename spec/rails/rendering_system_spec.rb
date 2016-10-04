@@ -37,7 +37,7 @@ describe "Rails rendering support", :type => :rails do
     end
 
     it "should let you omit the layout with 'render :widget =>', if you ask for it" do
-      unless rails_server.rails_version =~ /^3\.[01]\./
+      unless rails_server.actual_rails_version =~ /^3\.[01]\./
         # Rails 3.0 and 3.1 simply don't pass the ":layout => false" option specified in the controller through to
         # the renderer we add using ::ActionController.add_renderer. There's really nothing we can do about this,
         # so we let this one particular case fail; it seems like a bug in Rails, not in our code.
@@ -53,12 +53,12 @@ describe "Rails rendering support", :type => :rails do
     end
 
     it "should let you render a widget with 'render \"foo\" and the full path'" do
-      skip "Rails 4.1/4.2 makes this mean something different (render :template, vs. render :file)" unless rails_server.rails_version =~ /^(3\.|4\.0\.)/
+      skip "Rails 4.1/4.2 makes this mean something different (render :template, vs. render :file)" unless rails_server.actual_rails_version =~ /^(3\.|4\.0\.)/
       expect_match("render_widget_via_file_path", /hello from a widget named Fred/)
     end
 
     it "should let you render a widget with 'render \"foo\"' and the template path" do
-      skip "Rails 4.2 enables this" if rails_server.rails_version =~ /^(3\.|4\.[01]\.)/
+      skip "Rails 4.2 enables this" if rails_server.actual_rails_version =~ /^(3\.|4\.[01]\.)/
       expect_match("render_widget_via_template_path", /hello, world/)
     end
 
@@ -194,7 +194,7 @@ describe "Rails rendering support", :type => :rails do
     end
 
     it "should let you stream from a widget that's in an ERb layout" do
-      skip("Fortitude streaming test is not supported under Rails 3.0.x") if rails_server.rails_version =~ /^3\.0\./
+      skip("Fortitude streaming test is not supported under Rails 3.0.x") if rails_server.actual_rails_version =~ /^3\.0\./
       skip("Fortitude streaming test is not supported under Ruby 1.8") if RUBY_VERSION =~ /^1\.8\./
 
       chunks = collect_chunks("stream_widget_with_layout")

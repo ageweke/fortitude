@@ -41,7 +41,7 @@ describe "Rails layout support", :type => :rails do
   end
 
   it "should let you turn off the layout with render :widget" do
-    unless rails_server.rails_version =~ /^3\.[01]\./
+    unless rails_server.actual_rails_version =~ /^3\.[01]\./
       # Rails 3.0 and 3.1 simply don't pass the ":layout => false" option specified in the controller through to
       # the renderer we add using ::ActionController.add_renderer. There's really nothing we can do about this,
       # so we let this one particular case fail; it seems like a bug in Rails, not in our code.
