@@ -2,7 +2,7 @@ module Fortitude
   module MethodOverriding
     class << self
       def override_methods(target_module, override_methods_module, feature_name, method_names)
-        if RUBY_VERSION =~ /^2\./ && false
+        if RUBY_VERSION =~ /^2\./
           override_methods_using_prepend(target_module, override_methods_module, feature_name, method_names)
         else
           override_methods_using_alias_method_chain(target_module, override_methods_module, feature_name, method_names)
