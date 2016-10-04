@@ -22,23 +22,27 @@ module Fortitude
       def supports_streaming?
         true
       end
+
+      class << self
+        def register!
+          ::ActionView::Template.register_template_handler(:rb, ::Fortitude::Rails::TemplateHandler.new)
+        end
+      end
+    end
+
+    module RegisterTemplateHandlerOverrides
+      def register_template_handler_uniwith_fortitude(original_method, *args, &block)
+        original_method.call(*args, &block)
+
+        unless args[0] == :rb && args[1].instance_of?(::Fortitude::Rails::TemplateHandler)
+          original_method.call(:rb, ::Fortitude::Rails::TemplateHandler.new)
+        end
+      end
     end
   end
 end
 
-::ActionView::Template.class_eval do
-  class << self
-    def _fortitude_register_template_handler!
-      register_template_handler_without_fortitude(:rb, Fortitude::Rails::TemplateHandler.new)
-    end
+::Fortitude::MethodOverriding.override_methods(
+  ::ActionView::Template, ::Fortitude::Rails::RegisterTemplateHandlerOverrides, :fortitude, [ :register_template_handler ])
 
-    def register_template_handler_with_fortitude(*args, &block)
-      register_template_handler_without_fortitude(*args, &block)
-      ActionView::Template._fortitude_register_template_handler!
-    end
-
-    alias_method_chain :register_template_handler, :fortitude
-  end
-end
-
-ActionView::Template._fortitude_register_template_handler!
+::Fortitude::Rails::TemplateHandler.register!
