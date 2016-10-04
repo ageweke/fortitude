@@ -1,3 +1,5 @@
+require 'fortitude/support/method_overriding'
+
 module Fortitude
   module Erector
     class << self
@@ -52,27 +54,29 @@ module Fortitude
       private
       attr_reader :erector_output
     end
+
+    module ErectorAbstractWidgetOverrides
+      def widget_uniwith_fortitude(original_method, target, assigns = {}, options = {}, &block)
+        if (target.kind_of?(::Class) && target < ::Fortitude::Widget)
+          target = target.new(assigns)
+        end
+
+        if target.kind_of?(::Fortitude::Widget)
+          rendering_context = ::Fortitude::RenderingContext.new(
+            :delegate_object => parent,
+            :output_buffer_holder => ::Fortitude::Erector::ErectorOutputBufferHolder.new(output),
+            :helpers_object => helpers)
+          return target.render_to(rendering_context, &block)
+        else
+          return original_method.call(target, assigns, options, &block)
+        end
+      end
+    end
   end
 end
 
 if ::Fortitude::Erector.is_erector_available?
-  ::Erector::AbstractWidget.class_eval do
-    def widget_with_fortitude(target, assigns = {}, options = {}, &block)
-      if (target.kind_of?(::Class) && target < ::Fortitude::Widget)
-        target = target.new(assigns)
-      end
-
-      if target.kind_of?(::Fortitude::Widget)
-        rendering_context = ::Fortitude::RenderingContext.new(
-          :delegate_object => parent,
-          :output_buffer_holder => ::Fortitude::Erector::ErectorOutputBufferHolder.new(output),
-          :helpers_object => helpers)
-        return target.render_to(rendering_context, &block)
-      else
-        return widget_without_fortitude(target, assigns, options, &block)
-      end
-    end
-
-    alias_method_chain :widget, :fortitude
-  end
+  ::Fortitude::MethodOverriding.override_methods(
+    ::Erector::AbstractWidget, ::Fortitude::Erector::ErectorAbstractWidgetOverrides, :fortitude,
+    [ :widget ])
 end

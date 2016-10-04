@@ -262,27 +262,27 @@ module Fortitude
           eigenclass, ActiveSupportDependenciesOverrides::Common, :fortitude,
           [ :autoload_paths ])
 
-        # Two important comments here:
-        #
-        # 1: We also need to patch ::Rails::Engine.eager_load! so that it loads classes under all view roots. However, we
-        # can't just add them to the normal eager load paths, because that will allow people to do "require 'foo/bar'"
-        # and have it match app/views/foo/bar.rb, which we don't want. So, instead, we load these classes ourselves.
-        # Note that we ALSO have to do things slightly differently than Rails does it, because we need to skip loading
-        # 'foo.rb' if 'foo.html.rb' exists -- and because we have to require the fully-qualified pathname, since
-        # app/views is not actually on the load path.
-        #
-        # 2: I (ageweke) added this very late in the path of Fortitude development, after trying to use Fortitude in a
-        # deployment (production) environment in which widgets just weren't getting loaded at all. Yet there's something
-        # I don't understand: clearly, without this code, widgets will not be eager-loaded (which is probably not a
-        # great thing for performance reasons)...but I think they still should get auto-loaded and hence actually work
-        # just fine. But they don't in that environment (you'll get errors like "uninitialized constant Views::Base").
-        # Since I understand what's going on and have the fix for it here, that's fine...except that I can't seem to
-        # write a spec for it, because I don't know how to actually *make* it fail. If anybody comes along later and
-        # knows what would make it fail (and I double-checked, and we don't have autoloading disabled in production or
-        # anything like that), let me know, so that I can write a spec for this. Thanks!
-        ::Rails::Engine.class_eval do
-          def eager_load_with_fortitude!
-            eager_load_without_fortitude!
+        module RailsEngineOverrides
+          # Two important comments here:
+          #
+          # 1: We also need to patch ::Rails::Engine.eager_load! so that it loads classes under all view roots. However, we
+          # can't just add them to the normal eager load paths, because that will allow people to do "require 'foo/bar'"
+          # and have it match app/views/foo/bar.rb, which we don't want. So, instead, we load these classes ourselves.
+          # Note that we ALSO have to do things slightly differently than Rails does it, because we need to skip loading
+          # 'foo.rb' if 'foo.html.rb' exists -- and because we have to require the fully-qualified pathname, since
+          # app/views is not actually on the load path.
+          #
+          # 2: I (ageweke) added this very late in the path of Fortitude development, after trying to use Fortitude in a
+          # deployment (production) environment in which widgets just weren't getting loaded at all. Yet there's something
+          # I don't understand: clearly, without this code, widgets will not be eager-loaded (which is probably not a
+          # great thing for performance reasons)...but I think they still should get auto-loaded and hence actually work
+          # just fine. But they don't in that environment (you'll get errors like "uninitialized constant Views::Base").
+          # Since I understand what's going on and have the fix for it here, that's fine...except that I can't seem to
+          # write a spec for it, because I don't know how to actually *make* it fail. If anybody comes along later and
+          # knows what would make it fail (and I double-checked, and we don't have autoloading disabled in production or
+          # anything like that), let me know, so that I can write a spec for this. Thanks!
+          def eager_load_uniwith_fortitude!(original_method)
+            original_method.call
             eager_load_fortitude_views!
           end
 
@@ -304,39 +304,41 @@ module Fortitude
               end
             end
           end
-
-          alias_method_chain :eager_load!, :fortitude
         end
+
+        ::Fortitude::MethodOverriding.override_methods(
+          ::Rails::Engine, RailsEngineOverrides, :fortitude, [ :eager_load! ])
 
         # And, finally, this is where we add our view roots to the set of autoload paths.
         ::ActiveSupport::Dependencies.autoload_paths += view_roots
 
-        # This is our support for partials. Fortitude doesn't really have a distinction between
-        # partials and "full" templates -- everything is just a widget, which is much more elegant --
-        # but we still want you to be able to render a widget <tt>Views::Foo::Bar</tt> by saying
-        # <tt>render :partial => 'foo/bar'</tt> (from ERb, although you can do it from Fortitude if
-        # you want for some reason, too).
-        #
-        # Normally, ActionView only looks for partials in files starting with an underscore. We
-        # do want to allow this, too (in the above case, if you define the widget in the file
-        # <tt>app/views/foo/_bar.rb</tt>, it will still work fine); however, we also want to allow
-        # you to define it in a file that does _not_ start with an underscore ('cause these are
-        # Ruby classes, and that's just plain weird).
-        #
-        # So, we patch #find_templates: if it's looking for a partial, doesn't find one, and is
-        # searching Fortitude templates (the +.rb+ handler), then we try again, turning off the
-        # +partial+ flag, and return that instead.
-        ::ActionView::PathResolver.class_eval do
-          def find_templates_with_fortitude(name, prefix, partial, details, *args)
-            templates = find_templates_without_fortitude(name, prefix, partial, details, *args)
+        module ActionViewPathResolverOverrides
+          # This is our support for partials. Fortitude doesn't really have a distinction between
+          # partials and "full" templates -- everything is just a widget, which is much more elegant --
+          # but we still want you to be able to render a widget <tt>Views::Foo::Bar</tt> by saying
+          # <tt>render :partial => 'foo/bar'</tt> (from ERb, although you can do it from Fortitude if
+          # you want for some reason, too).
+          #
+          # Normally, ActionView only looks for partials in files starting with an underscore. We
+          # do want to allow this, too (in the above case, if you define the widget in the file
+          # <tt>app/views/foo/_bar.rb</tt>, it will still work fine); however, we also want to allow
+          # you to define it in a file that does _not_ start with an underscore ('cause these are
+          # Ruby classes, and that's just plain weird).
+          #
+          # So, we patch #find_templates: if it's looking for a partial, doesn't find one, and is
+          # searching Fortitude templates (the +.rb+ handler), then we try again, turning off the
+          # +partial+ flag, and return that instead.
+          def find_templates_uniwith_fortitude(original_method, name, prefix, partial, details, *args)
+            templates = original_method.call(name, prefix, partial, details, *args)
             if partial && templates.empty? && details[:handlers] && details[:handlers].include?(:rb)
-              templates = find_templates_without_fortitude(name, prefix, false, details.merge(:handlers => [ :rb ]), *args)
+              templates = original_method.call(name, prefix, false, details.merge(:handlers => [ :rb ]), *args)
             end
             templates
           end
-
-          alias_method_chain :find_templates, :fortitude
         end
+
+        ::Fortitude::MethodOverriding.override_methods(
+          ::ActionView::PathResolver, ActionViewPathResolverOverrides, :fortitude, [ :find_templates ])
 
         require "fortitude/rails/template_handler"
         require "fortitude/rails/rendering_methods"
