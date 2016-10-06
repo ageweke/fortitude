@@ -22,8 +22,8 @@ describe "Rails helper support", :type => :rails do
                  /Excitedly: NoMethodError/mi,
                  /Root Path: \//,
                  /Foo Path: \/foo/,
-                 /Foo Url: http:\/\/example.com\/foo/,
-                 /Foo Url with host override: http:\/\/override.com\/foo/)
+                 /Foo Url: http:\/\/example.com(:\d+)?\/foo/,
+                 /Foo Url with host override: http:\/\/override.com(:\d+)?\/foo/)
   end
 
   it "should refine the built-in Rails helpers by default" do
