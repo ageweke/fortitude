@@ -11,13 +11,15 @@ describe "Rails helper support", :type => :rails do
 
   it 'should support built-in Rails helpers even when automatic_helper_access is false' do
     expect_match("rails_helpers_without_automatic_helper_access",
+                 /Excitedly: NoMethodError/mi,
                  /Three months ago: 3 months/mi,
                  /A million dollars: \$1,000,000\.00/mi,
-                 /class="debug_dump"/mi)
+                 /class=["']debug_dump["']/mi)
   end
 
   it 'should support url helpers even when automatic_helper_access is false' do
     expect_match('url_helpers_without_automatic_helper_access',
+                 /Excitedly: NoMethodError/mi,
                  /Root Path: \//,
                  /Foo Path: \/foo/,
                  /Foo Url: http:\/\/example.com\/foo/,

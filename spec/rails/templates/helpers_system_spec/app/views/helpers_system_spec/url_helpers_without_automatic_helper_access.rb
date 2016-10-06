@@ -2,6 +2,12 @@ class Views::HelpersSystemSpec::UrlHelpersWithoutAutomaticHelperAccess < Fortitu
   automatic_helper_access false
 
   def content
+    excitedly_value = begin
+      excitedly("great")
+    rescue => e
+      e.class.name
+    end
+
     root_path_value = begin
       root_path
     rescue => e
@@ -25,6 +31,8 @@ class Views::HelpersSystemSpec::UrlHelpersWithoutAutomaticHelperAccess < Fortitu
     rescue => e
       e.class.name
     end
+
+    p "Excitedly: #{excitedly_value}"
 
     p "Root Path: #{root_path_value}"
 

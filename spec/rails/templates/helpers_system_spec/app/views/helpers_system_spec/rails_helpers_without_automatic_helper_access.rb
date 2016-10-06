@@ -2,6 +2,12 @@ class Views::HelpersSystemSpec::RailsHelpersWithoutAutomaticHelperAccess < Forti
   automatic_helper_access false
 
   def content
+    excitedly_value = begin
+      excitedly("great")
+    rescue => e
+      e.class.name
+    end
+
     three_months_value = begin
       distance_of_time_in_words_to_now(3.months.ago)
     rescue => e
@@ -19,6 +25,8 @@ class Views::HelpersSystemSpec::RailsHelpersWithoutAutomaticHelperAccess < Forti
     rescue => e
       e.class.name
     end
+
+    p "Excitedly: #{excitedly_value}"
 
     p "Three months ago: #{three_months_value}"
 

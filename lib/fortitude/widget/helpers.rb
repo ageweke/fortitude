@@ -41,10 +41,16 @@ module Fortitude
               "effective_block = block"
             end
 
+            call_part = if source_method_name.to_s =~ /\=\s*$/
+              ".send(:#{source_method_name}, "
+            else
+              ".#{source_method_name}("
+            end
+
             text = <<-EOS
     def #{name}(*args, &block)
       #{block_transform}
-      #{prefix}(@_fortitude_rendering_context.helpers_object.#{source_method_name}(*args, &effective_block))#{suffix}
+      #{prefix}(@_fortitude_rendering_context.helpers_object#{call_part}*args, &effective_block))#{suffix}
     end
 EOS
 

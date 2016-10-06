@@ -25,6 +25,13 @@
 * Removed usage of `alias_method_chain` on Ruby 2.0 and later, in favor of `Module#prepend`. This removes deprecation
   warnings otherwise triggered by Rails 5. (Using `Module#prepend` causes problems in JRuby, so `alias_method_chain`
   is still used on JRuby instead.)
+* Changed the behavior of `automatic_helper_access false` so that, in a Rails application, it still makes all the
+  built-in Rails helpers properly accessible, but does not make user-defined helpers accessible. (If there are even
+  certain built-in Rails helpers you don’t want people using, you can easily override them in your widget class to
+  raise an exception.) Without this, `automatic_helper_access false` became so cumbersome to use that it was nearly
+  pointless. (Thanks to [Matt Walters](https://github.com/mattwalters) for the pull request!)
+* Fixed an issue where explicitly declaring an assignment method as a helper (_e.g._, `helper :foo=`) did not work
+  properly.
 
 ## 0.9.4, 11 February 2015
 

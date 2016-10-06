@@ -27,6 +27,14 @@ describe "Fortitude helper support", :type => :system do
         "foo #{result} bar"
       end
 
+      def helper5=(arg)
+        @helper5 = arg
+      end
+
+      def helper5
+        "aa#{@helper5}bb"
+      end
+
       def p(input)
         "pp#{input}pp"
       end
@@ -85,18 +93,25 @@ describe "Fortitude helper support", :type => :system do
     it "should allow calling a method that's overridden on Widget" do
       expect(render(widget_class_with_content { text invoke_helper(:p, "a") })).to eq("ppapp")
     end
+
+    it "should allow calling a helper method that uses a setter" do
+      expect(render(widget_class_with_content { invoke_helper(:helper5=, "ccc"); text invoke_helper(:helper5) })).to eq("aacccbb")
+    end
   end
 
   it "should, by default, allow automatic access to helpers" do
     expect(render(widget_class_with_content { text "helper1: #{helper1}" })).to eq("helper1: this is helper1")
     expect(render(widget_class_with_content { text "helper2: #{helper2("yo")}" })).to eq("helper2: this is yo helper2")
     expect(render(widget_class_with_content { helper3("ho") })).to eq("this is ho helper3")
+    expect(render(widget_class_with_content { self.helper5 = "ccc"; text helper5 })).to eq("aacccbb")
   end
 
   it "should indicate that it responds to helpers using respond_to? for automatic helper methods" do
     expect(render(widget_class_with_content { text "respond_to helper1: #{respond_to?(:helper1)}" } )).to eq("respond_to helper1: true")
     expect(render(widget_class_with_content { text "respond_to helper2: #{respond_to?(:helper2)}" } )).to eq("respond_to helper2: true")
     expect(render(widget_class_with_content { text "respond_to helper3: #{respond_to?(:helper3)}" } )).to eq("respond_to helper3: true")
+    expect(render(widget_class_with_content { text "respond_to helper5=: #{respond_to?(:helper5=)}" } )).to eq("respond_to helper5=: true")
+    expect(render(widget_class_with_content { text "respond_to helper5: #{respond_to?(:helper5)}" } )).to eq("respond_to helper5: true")
   end
 
   it "should not allow automatic access to helpers if we say not to" do
@@ -121,17 +136,23 @@ describe "Fortitude helper support", :type => :system do
           e.class.name
         end
 
-        text "helper1: #{helper1_value}, helper2: #{helper2_value}, helper3: #{helper3_value}"
+        helper5equal_value = begin
+          self.helper5 = 'ccc'
+        rescue => e
+          e.class.name
+        end
+
+        text "helper1: #{helper1_value}, helper2: #{helper2_value}, helper3: #{helper3_value}; helper5equal: #{helper5equal_value}"
       end
     end
 
-    expect(render(wc)).to eq("helper1: NameError, helper2: NoMethodError, helper3: NoMethodError")
+    expect(render(wc)).to eq("helper1: NameError, helper2: NoMethodError, helper3: NoMethodError; helper5equal: NoMethodError")
   end
 
   it "should allow manually declaring helpers" do
     wc = widget_class do
       automatic_helper_access false
-      helper :helper1, :helper3
+      helper :helper1, :helper3, :helper5=, :helper5
       def content
         helper2_value = begin
           helper2("foo")
@@ -141,10 +162,12 @@ describe "Fortitude helper support", :type => :system do
 
         text "helper1: #{helper1}, helper2: #{helper2_value}, helper3: "
         helper3("hi")
+        self.helper5 = 'ccc'
+        text ", helper5: #{helper5}"
       end
     end
 
-    expect(render(wc)).to eq("helper1: this is helper1, helper2: NoMethodError, helper3: this is hi helper3")
+    expect(render(wc)).to eq("helper1: this is helper1, helper2: NoMethodError, helper3: this is hi helper3, helper5: aacccbb")
   end
 
   it "should allow overriding a manually-declared helper, and allow use of #super" do
@@ -208,14 +231,22 @@ describe "Fortitude helper support", :type => :system do
     wc = widget_class do
       helper :h2a, :call => :helper2
       helper :h2b, :call => :helper2, :transform => :output_return_value
+      helper :h5a, :call => :helper5=
+      helper :h5b=, :call => :helper5=
+      helper :helper5
 
       def content
         h2b("yo")
-        text ", h2a: #{h2a('xx')}, done"
+        text ", h2a: #{h2a('xx')}"
+        self.h5a('ccc')
+        text ", h5a: #{helper5}"
+        self.h5b = 'ddd'
+        text ", h5b: #{helper5}"
+        text ", done"
       end
     end
 
-    expect(render(wc)).to eq("this is yo helper2, h2a: this is xx helper2, done")
+    expect(render(wc)).to eq("this is yo helper2, h2a: this is xx helper2, h5a: aacccbb, h5b: aadddbb, done")
   end
 
   it "should allow declaring helpers with :transform = nil, false, or none" do

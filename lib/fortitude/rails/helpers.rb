@@ -4,11 +4,11 @@ module Fortitude
       class << self
         def helper(name, options = { })
           @helpers ||= { }
-          @helpers[name] = options
+          @helpers[normalize_helper_name(name)] = options
         end
 
         def helper_options(name)
-          @helpers[name.to_s.strip.downcase.to_sym]
+          @helpers[normalize_helper_name(name)]
         end
 
         def apply_refined_helpers_to!(o)
@@ -17,45 +17,63 @@ module Fortitude
             o.helper(name, options)
           end
         end
-      end
 
-      ACTION_VIEW_HELPER_MODULES = [
-        'ActionView::Helpers::ActiveModelHelper',
-        'ActionView::Helpers::ActiveModelInstanceTag',
-        'ActionView::Helpers::AssetTagHelper',
-        'ActionView::Helpers::AssetUrlHelper',
-        'ActionView::Helpers::AtomFeedHelper',
-        'ActionView::Helpers::CacheHelper',
-        'ActionView::Helpers::CaptureHelper',
-        'ActionView::Helpers::CsrfHelper',
-        'ActionView::Helpers::DateHelper',
-        'ActionView::Helpers::DebugHelper',
-        'ActionView::Helpers::FormHelper',
-        'ActionView::Helpers::FormOptionsHelper',
-        'ActionView::Helpers::FormTagHelper',
-        'ActionView::Helpers::JavaScriptHelper',
-        'ActionView::Helpers::NumberHelper',
-        'ActionView::Helpers::OutputSafetyHelper',
-        'ActionView::Helpers::RecordTagHelper',
-        'ActionView::Helpers::SanitizeHelper',
-        'ActionView::Helpers::TagHelper',
-        'ActionView::Helpers::TextHelper',
-        'ActionView::Helpers::TranslationHelper',
-        'ActionView::Helpers::UrlHelper'
-      ]
+        ALL_BUILTIN_HELPER_MODULES = {
+          ActionView::Helpers => %w{
+            ActiveModelHelper
+            ActiveModelInstanceTag
+            AssetTagHelper
+            AssetUrlHelper
+            AtomFeedHelper
+            CacheHelper
+            CaptureHelper
+            CsrfHelper
+            DateHelper
+            DebugHelper
+            FormHelper
+            FormOptionsHelper
+            FormTagHelper
+            JavaScriptHelper
+            NumberHelper
+            OutputSafetyHelper
+            RecordTagHelper
+            SanitizeHelper
+            TagHelper
+            TextHelper
+            TranslationHelper
+            UrlHelper
+          }
+        }
 
-      ACTION_VIEW_HELPER_MODULES.each do |helper_module|
-        if const_defined?(helper_module)
-          helper_module.constantize.public_instance_methods.each do |helper_method|
-            # This is because ActionView::Helpers::FormTagHelper exposes #embed_authenticity_token_in_remote_forms=
-            # as a public instance method. This seems like it should not be included as a helper.
-            next if helper_method == :embed_authenticity_token_in_remote_forms=
-            helper helper_method
+        def declare_all_builtin_rails_helpers!
+          ALL_BUILTIN_HELPER_MODULES.each do |base_module, constant_names|
+            constant_names.each do |constant_name|
+              if base_module.const_defined?(constant_name)
+                helper_module = base_module.const_get(constant_name)
+                helper_module.public_instance_methods.each do |helper_method_name|
+                  # This is because ActionView::Helpers::FormTagHelper exposes #embed_authenticity_token_in_remote_forms=
+                  # as a public instance method. This seems like it should not be included as a helper.
+                  # next if helper_method_name.to_s == 'embed_authenticity_token_in_remote_forms='
+                  helper helper_method_name
+                end
+              end
+            end
           end
+
+          helper :default_url_options
+        end
+
+        private
+        def normalize_helper_name(name)
+          name.to_s.strip.downcase.to_sym
         end
       end
 
-      helper :default_url_options
+      # This gives us all built-in Rails helpers, whether they're refined or not; our re-declarations of helpers,
+      # below, will override any of these. We need to grab all built-in Rails helpers because we want them all
+      # formally declared -- that is, even if +automatic_helper_access+ is set to +false+, built-in Rails helpers
+      # should still work properly.
+      declare_all_builtin_rails_helpers!
 
       # tags/
       # active_model_helper
