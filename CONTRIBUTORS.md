@@ -56,3 +56,5 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     parameter added to `ActionView::PathResolver#find_templates`.)
 * [Victor Lymar](https://github.com/vlymar) for:
   * Fixes for compatibility with Rails 5.
+* [Matt Walters](https://github.com/mattwalters) for:
+  * A patch to make built-in Rails helpers work even when `automatic_helper_access` was set to `false`.
