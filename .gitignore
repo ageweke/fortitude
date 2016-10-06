@@ -18,3 +18,4 @@ lib/*.bundle
 /*.sublime-project
 /*.sublime-workspace
 /doc/source/.retina_images_workaround
+*.swp

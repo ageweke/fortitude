@@ -83,4 +83,8 @@ class HelpersSystemSpecController < ApplicationController
   def helpers_that_output_when_refined
     # nothing here
   end
+
+  def default_url_options
+    { :host => 'example.com' }
+  end
 end
