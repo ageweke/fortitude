@@ -38,6 +38,13 @@ describe "Rails complex helper support", :type => :rails do
         OUTSIDE_AFTER}mix)
   end
 
+  it "should render a block passed to a label correctly" do
+    expect_match("label_block_test",
+      %r{<label.*person_name.*>\s*
+        Foo\s*
+        </label>}mix)
+  end
+
   it "should cache based on a name properly" do
     expect_match("cache_test?a=a1&b=b1",
       /before_cache\(a1,b1\).*inside_cache\(a1,b1\).*after_cache\(a1,b1\)/mi)

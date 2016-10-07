@@ -4,7 +4,7 @@ module Fortitude
     class YieldedObjectOutputter < YIELDED_OBJECT_OUTPUTTER_SUPERCLASS
       class << self
         def wrap_block_as_needed(output_target, for_method_name, original_block, yielded_methods_to_output)
-          if original_block && yielded_methods_to_output
+          if original_block && original_block.arity > 0 && yielded_methods_to_output
             lambda do |yielded_object, *args|
               outputter = new(output_target, yielded_object, for_method_name, yielded_methods_to_output)
               original_block.call(outputter, *args)
