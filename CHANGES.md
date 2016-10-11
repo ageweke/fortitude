@@ -32,6 +32,8 @@
   pointless. (Thanks to [Matt Walters](https://github.com/mattwalters) for the pull request!)
 * Fixed an issue where explicitly declaring an assignment method as a helper (_e.g._, `helper :foo=`) did not work
   properly.
+* Fixed an issue where passing a block to (_e.g._) `f.label`, where `f` is the object yielded to a `form_for` helper,
+  did not work properly. (Thanks to [Adam Becker](https://github.com/ajb) for the bug report and test case!)
 
 ## 0.9.4, 11 February 2015
 

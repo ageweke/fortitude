@@ -45,6 +45,8 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
   * Reporting an issue where you could not easily render a Fortitude widget from Erector, nor vice-versa.
   * Fixes for compatibility with Rails 5.
   * Fix for a deprecation warning from Rails 5 caused by Fortitude's use of `render :text` internally.
+  * Reporting an issue and providing a test case and patch for an issue where calling `f.label` with a block, where
+    `f` is the object yielded to Rails' `form_for`, would cause an exception from Fortitude.
 * [Karl He](https://github.com/karlhe) for:
   * Reporting an issue (and supplying an example patch) where Fortitude wasn't respecting Rails' additional view
     paths correctly &mdash; only `app/views`.
