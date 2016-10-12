@@ -1,0 +1,25 @@
+def safe_system(cmd)
+  $stderr.puts "Running: #{cmd}"
+  result = system("#{cmd} 2>&1")
+  unless result && $? && $?.success?
+    raise "Command failed: #{$?.inspect}"
+  end
+end
+
+if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_s == 'jruby' && defined?(JRUBY_VERSION) && JRUBY_VERSION.to_s =~ /^1\.7\./
+  safe_system("gem update --system")
+
+  target_dir = "/home/travis/.rvm/gems"
+  targets = Dir.entries(target_dir).select { |e| e =~ /^jruby\-.*@global$/i }
+
+  targets.each do |target|
+    safe_system("gem uninstall -i '#{target}' bundler")
+  end
+
+  safe_system("gem install bundler -v 1.12.5 --no-rdoc --no-ri --no-document")
+else
+  ruby_engine = if defined?(RUBY_ENGINE) then RUBY_ENGINE.inspect else 'nil' end
+  jruby_version = if defined?(JRUBY_VERSION) then JRUBY_VERSION.inspect else 'nil' end
+
+  puts "No need to fix Bundler versions. RUBY_ENGINE is #{ruby_engine} and JRUBY_VERSION is #{jruby_version}."
+end
