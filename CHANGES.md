@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.9.5,
+## 0.9.5, 12 October 2016
 
 * Rails 5 compatibility: Fortitude now is fully compatible with Rails 5.0.0.1.
 * Significant improvements in performance to our dispatching to #t, the Rails method to produce translations of
