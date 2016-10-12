@@ -10,7 +10,7 @@ if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_s == 'jruby' && defined?(JRUBY_VERSIO
   safe_system("gem update --system")
 
   target_dir = "/home/travis/.rvm/gems"
-  targets = Dir.entries(target_dir).select { |e| e =~ /^jruby\-.*@global$/i }
+  targets = Dir.entries(target_dir).select { |e| e =~ /^jruby\-#{JRUBY_VERSION}.*@global$/i }
 
   targets.each do |target|
     full_path = File.join(target_dir, target)
