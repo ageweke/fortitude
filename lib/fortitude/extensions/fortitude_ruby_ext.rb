@@ -10,13 +10,27 @@ require 'erb'
     '"' => '&quot;'
   }
 
+  PROC_FOR_ESCAPE_ATTRIBUTE_VALUE__ = Proc.new do |match|
+    TABLE_FOR_ESCAPE_ATTRIBUTE_VALUE__[match]
+  end
+
+  if RUBY_VERSION =~ /^1\.8\./
+    def _fortitude_append_escaped_string_for_value(output)
+      output.original_concat(self.gsub(/[&\"]/, &PROC_FOR_ESCAPE_ATTRIBUTE_VALUE__))
+    end
+  else
+    def _fortitude_append_escaped_string_for_value(output)
+      output.original_concat(self.gsub(/[&\"]/, TABLE_FOR_ESCAPE_ATTRIBUTE_VALUE__))
+    end
+  end
+
   def _fortitude_append_escaped_string(output, for_attribute_value)
     raise ArgumentError, "You can only append to a String" unless output.kind_of?(String)
 
     if html_safe?
       output.original_concat(self)
     elsif for_attribute_value
-      output.original_concat(self.gsub(/[&\"]/, TABLE_FOR_ESCAPE_ATTRIBUTE_VALUE__))
+      _fortitude_append_escaped_string_for_value(output)
     else
       output.original_concat(ERB::Util.html_escape(self))
     end
