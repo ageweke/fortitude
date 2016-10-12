@@ -40,6 +40,9 @@
   [`ActionView::ViewPaths.append_view_path`](http://api.rubyonrails.org/classes/ActionView/ViewPaths/ClassMethods.html#method-i-prepend_view_path)
   and related methods) would not be able to figure out the proper class name of the widget, and would fail. (Thanks
   to [Leaf](https://github.com/leafo) for the bug report!)
+* Added the ability for the `inline_html` method on a widget class to accept a `Fortitude::RenderingContext`, thus
+  allowing you to use it with code requiring access to helpers. (Thanks to [Adam Becker](https://github.com/ajb) for
+  the bug report!)
 
 ## 0.9.4, 11 February 2015
 

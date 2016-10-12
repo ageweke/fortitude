@@ -52,6 +52,8 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     `f` is the object yielded to Rails' `form_for`, would cause an exception from Fortitude.
   * Reporting an issue where Fortitude was escaping characters that it didn’t need to in attribute values
     (specifically, `<`, `>`, and `'`).
+  * Reporting an issue where you couldn't use `inline_html` in a way that allowed you to pass a
+    `Fortitude::RenderingContext`, thus preventing you from using it with code that required access to helpers.
 * [Karl He](https://github.com/karlhe) for:
   * Reporting an issue (and supplying an example patch) where Fortitude wasn't respecting Rails' additional view
     paths correctly &mdash; only `app/views`.

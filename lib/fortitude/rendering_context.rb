@@ -5,6 +5,12 @@ module Fortitude
   class RenderingContext
     attr_reader :output_buffer_holder, :instance_variable_set, :helpers_object
 
+    class << self
+      def default_rendering_context
+        new({ })
+      end
+    end
+
     def initialize(options)
       options.assert_valid_keys(:delegate_object, :output_buffer_holder, :helpers_object, :instance_variables_object,
         :yield_block, :render_yield_result)

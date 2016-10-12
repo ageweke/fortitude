@@ -39,7 +39,8 @@ module Fortitude
       end
 
       # PUBLIC API
-      def to_html(rendering_context = ::Fortitude::RenderingContext.new({ }))
+      def to_html(rendering_context = nil)
+        rendering_context ||= ::Fortitude::RenderingContext.default_rendering_context
         render_to(rendering_context)
         rendering_context.output_buffer_holder.output_buffer
       end
