@@ -36,6 +36,10 @@
   did not work properly. (Thanks to [Adam Becker](https://github.com/ajb) for the bug report and test case!)
 * Reduced escaping in attribute values: only `"` and `&` need to be escaped, not `<`, `>`, or `'`. (Thanks to
   [Adam Becker](https://github.com/ajb) for the bug report!)
+* Fixed an issue where, under certain extremely rare circumstances, adding a view path in the controller (using
+  [`ActionView::ViewPaths.append_view_path`](http://api.rubyonrails.org/classes/ActionView/ViewPaths/ClassMethods.html#method-i-prepend_view_path)
+  and related methods) would not be able to figure out the proper class name of the widget, and would fail. (Thanks
+  to [Leaf](https://github.com/leafo) for the bug report!)
 
 ## 0.9.4, 11 February 2015
 

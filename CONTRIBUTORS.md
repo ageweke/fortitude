@@ -39,6 +39,9 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     a memory leak.
   * Reporting an issue where use of Rails' `form_for` and/or `fields_for` from within another `form_for` or
     `fields_for` block would not produce the correct output.
+  * Reporting an issue where, under certain extremely rare circumstances, adding a view path in the controller (using
+    [`ActionView::ViewPaths.append_view_path`](http://api.rubyonrails.org/classes/ActionView/ViewPaths/ClassMethods.html#method-i-prepend_view_path)
+    and related methods) would not be able to figure out the proper class name of the widget, and would fail.
 * [Adam Becker](https://github.com/ajb) for:
   * Discussion and details around exactly what `:attribute => true`, `:attribute => false`, and so on should render
     from Fortitude.
