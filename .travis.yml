@@ -7,9 +7,13 @@ rvm:
     - "2.2.5"
     - "2.3.1"
     - "jruby-9.1.5.0"
+    - "jruby-1.7.26"
 # 2016-09-20 ageweke -- This is temporary, and is because JRuby 1.7.26 is incompatible with Bundler 1.13.0/1,
 # because of the following issue: https://github.com/bundler/bundler/issues/4975.
-# - "jruby-1.7.26"
+before_install:
+    - gem update --system
+    - gem uninstall -i /home/travis/.rvm/gems/jruby-d19@global bundler
+    - gem install bundler -v 1.12.5 --no-rdoc --no-ri --no-document
 env:
     - FORTITUDE_SPECS_RAILS_VERSION=5.0.0.1
     - FORTITUDE_SPECS_RAILS_VERSION=4.2.7.1
