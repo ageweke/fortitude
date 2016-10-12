@@ -253,8 +253,8 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("<hr &lt;&amp;&quot;&gt;=\"foo\">") { hr '<&">' => "foo" }
   end
 
-  it "should escape attribute values" do
-    should_render_to("<hr class=\"&lt;&amp;&quot;&gt;\">") { hr :class => "<&\">" }
+  it "should escape attribute values, but only the necessary characters" do
+    should_render_to("<hr class=\"<&amp;&quot;>\">") { hr :class => "<&\">" }
   end
 
   it "should separate multiple attributes with spaces" do
@@ -336,9 +336,9 @@ describe "Fortitude tag rendering", :type => :system do
     should_render_to("<p and&amp;&lt;&gt;&quot;this=\"bar\"></p>") { p foo => "bar" }
   end
 
-  it "should render an arbitrary object as an attribute value, escaping it" do
+  it "should render an arbitrary object as an attribute value, escaping the necessary characters" do
     foo = arbitrary_object_with_to_s("and&<>\"this")
-    should_render_to("<p foo=\"and&amp;&lt;&gt;&quot;this\"></p>") { p :foo => foo }
+    should_render_to("<p foo=\"and&amp;<>&quot;this\"></p>") { p :foo => foo }
   end
 
   it "should render an arbitrary object as an attribute key nested in a hash, escaping it" do

@@ -57,13 +57,13 @@ public class FortitudeNativeLibrary implements Library {
                 outputString.cat(selfString);
             } else {
                 byte[] selfBytes = selfString.getBytes();
-                fortitude_escaped_strcpy(outputString, selfBytes);
+                fortitude_escaped_strcpy(outputString, selfBytes, false);
             }
 
             return runtime.getNil();
         }
 
-        public static void fortitude_escaped_strcpy(RubyString output, byte[] source) {
+        public static void fortitude_escaped_strcpy(RubyString output, byte[] source, boolean forAttributeValue) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int bufferPos = 0;
 
@@ -84,28 +84,6 @@ public class FortitudeNativeLibrary implements Library {
                     buffer[bufferPos++] = ';';
                     break;
 
-                case LESS_THAN_BYTE:
-                    buffer[bufferPos++] = '&';
-                    buffer[bufferPos++] = 'l';
-                    buffer[bufferPos++] = 't';
-                    buffer[bufferPos++] = ';';
-                    break;
-
-                case GREATER_THAN_BYTE:
-                    buffer[bufferPos++] = '&';
-                    buffer[bufferPos++] = 'g';
-                    buffer[bufferPos++] = 't';
-                    buffer[bufferPos++] = ';';
-                    break;
-
-                case SINGLE_QUOTE_BYTE:
-                    buffer[bufferPos++] = '&';
-                    buffer[bufferPos++] = '#';
-                    buffer[bufferPos++] = '3';
-                    buffer[bufferPos++] = '9';
-                    buffer[bufferPos++] = ';';
-                    break;
-
                 case DOUBLE_QUOTE_BYTE:
                     buffer[bufferPos++] = '&';
                     buffer[bufferPos++] = 'q';
@@ -113,6 +91,40 @@ public class FortitudeNativeLibrary implements Library {
                     buffer[bufferPos++] = 'o';
                     buffer[bufferPos++] = 't';
                     buffer[bufferPos++] = ';';
+                    break;
+
+                case LESS_THAN_BYTE:
+                    if (forAttributeValue) {
+                        buffer[bufferPos++] = '<';
+                    } else {
+                        buffer[bufferPos++] = '&';
+                        buffer[bufferPos++] = 'l';
+                        buffer[bufferPos++] = 't';
+                        buffer[bufferPos++] = ';';
+                    }
+                    break;
+
+                case GREATER_THAN_BYTE:
+                    if (forAttributeValue) {
+                        buffer[bufferPos++] = '>';
+                    } else {
+                        buffer[bufferPos++] = '&';
+                        buffer[bufferPos++] = 'g';
+                        buffer[bufferPos++] = 't';
+                        buffer[bufferPos++] = ';';
+                    }
+                    break;
+
+                case SINGLE_QUOTE_BYTE:
+                    if (forAttributeValue) {
+                        buffer[bufferPos++] = '\'';
+                    } else {
+                        buffer[bufferPos++] = '&';
+                        buffer[bufferPos++] = '#';
+                        buffer[bufferPos++] = '3';
+                        buffer[bufferPos++] = '9';
+                        buffer[bufferPos++] = ';';
+                    }
                     break;
 
                 default:
@@ -130,11 +142,11 @@ public class FortitudeNativeLibrary implements Library {
     public static class FortitudeHashExtensions {
         public static final byte SPACE = (byte) ' ';
 
-        public static void fortitude_append_to(IRubyObject object, RubyString rbOutput) {
+        public static void fortitude_append_to(IRubyObject object, RubyString rbOutput, boolean forAttributeValue) {
             if (object instanceof RubyString) {
-                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, ((RubyString) object).getBytes());
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, ((RubyString) object).getBytes(), forAttributeValue);
             } else if (object instanceof RubySymbol) {
-                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, ((RubyString) ((RubySymbol) object).to_s()).getBytes());
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, ((RubyString) ((RubySymbol) object).to_s()).getBytes(), forAttributeValue);
             } else if (object instanceof RubyArray) {
                 RubyArray array = (RubyArray) object;
 
@@ -143,16 +155,16 @@ public class FortitudeNativeLibrary implements Library {
                     if (i > 0) {
                         rbOutput.cat(SPACE);
                     }
-                    fortitude_append_to(element, rbOutput);
+                    fortitude_append_to(element, rbOutput, forAttributeValue);
                 }
             } else if (object instanceof RubyNil) {
                 // nothing here
             } else if (object instanceof RubyFixnum) {
                 RubyString asString = ((RubyFixnum) object).to_s();
-                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes());
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes(), forAttributeValue);
             } else {
                 RubyString asString = (RubyString) ((RubyBasicObject) object).callMethod("to_s");
-                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes());
+                FortitudeStringExtensions.fortitude_escaped_strcpy(rbOutput, asString.getBytes(), forAttributeValue);
             }
         }
 
@@ -177,10 +189,10 @@ public class FortitudeNativeLibrary implements Library {
 
                     if (prefix != null) {
                         newPrefix = (RubyString) prefix.dup();
-                        fortitude_append_to(key, newPrefix);
+                        fortitude_append_to(key, newPrefix, false);
                     } else {
                         newPrefix = RubyString.newEmptyString(runtime);
-                        fortitude_append_to(key, newPrefix);
+                        fortitude_append_to(key, newPrefix, false);
                     }
 
                     newPrefix.cat('-');
@@ -196,19 +208,19 @@ public class FortitudeNativeLibrary implements Library {
                         // nothing here
                     }
 
-                    fortitude_append_to(key, output);
+                    fortitude_append_to(key, output, false);
 
                     if ((value instanceof RubyBoolean) && (value.isTrue())) {
                         if (this.allowsBareAttributes.isTrue()) {
                             // ok, nothing here
                         } else {
                             output.cat(EQUALS_QUOTE);
-                            fortitude_append_to(key, output);
+                            fortitude_append_to(key, output, false);
                             output.cat('"');
                         }
                     } else {
                         output.cat(EQUALS_QUOTE);
-                        fortitude_append_to(value, output);
+                        fortitude_append_to(value, output, true);
                         output.cat('"');
                     }
                 }

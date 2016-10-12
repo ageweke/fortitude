@@ -34,6 +34,8 @@
   properly.
 * Fixed an issue where passing a block to (_e.g._) `f.label`, where `f` is the object yielded to a `form_for` helper,
   did not work properly. (Thanks to [Adam Becker](https://github.com/ajb) for the bug report and test case!)
+* Reduced escaping in attribute values: only `"` and `&` need to be escaped, not `<`, `>`, or `'`. (Thanks to
+  [Adam Becker](https://github.com/ajb) for the bug report!)
 
 ## 0.9.4, 11 February 2015
 

@@ -18,7 +18,7 @@ void Init_fortitude_native_ext() {
 #define BUF_SIZE 256
 #define MAX_SUBSTITUTION_LENGTH 6
 
-void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
+void fortitude_escaped_strcpy(VALUE rb_output, const char * src, int for_attribute_value) {
     char buf[BUF_SIZE + 1];
     char* buf_pos = buf;
     char* max_buf_pos = buf + (BUF_SIZE - MAX_SUBSTITUTION_LENGTH);
@@ -39,28 +39,28 @@ void fortitude_escaped_strcpy(VALUE rb_output, const char * src) {
             *buf_pos++ = 'm';
             *buf_pos++ = 'p';
             *buf_pos++ = ';';
-        } else if (ch == '<') {
-            *buf_pos++ = '&';
-            *buf_pos++ = 'l';
-            *buf_pos++ = 't';
-            *buf_pos++ = ';';
-        } else if (ch == '>') {
-            *buf_pos++ = '&';
-            *buf_pos++ = 'g';
-            *buf_pos++ = 't';
-            *buf_pos++ = ';';
-        } else if (ch == '\'') {
-            *buf_pos++ = '&';
-            *buf_pos++ = '#';
-            *buf_pos++ = '3';
-            *buf_pos++ = '9';
-            *buf_pos++ = ';';
         } else if (ch == '"') {
             *buf_pos++ = '&';
             *buf_pos++ = 'q';
             *buf_pos++ = 'u';
             *buf_pos++ = 'o';
             *buf_pos++ = 't';
+            *buf_pos++ = ';';
+        } else if (ch == '<' && (! for_attribute_value)) {
+            *buf_pos++ = '&';
+            *buf_pos++ = 'l';
+            *buf_pos++ = 't';
+            *buf_pos++ = ';';
+        } else if (ch == '>' && (! for_attribute_value)) {
+            *buf_pos++ = '&';
+            *buf_pos++ = 'g';
+            *buf_pos++ = 't';
+            *buf_pos++ = ';';
+        } else if (ch == '\'' && (! for_attribute_value)) {
+            *buf_pos++ = '&';
+            *buf_pos++ = '#';
+            *buf_pos++ = '3';
+            *buf_pos++ = '9';
             *buf_pos++ = ';';
         } else {
             if (ch == '\0') {
@@ -92,11 +92,11 @@ VALUE method_append_escaped_string(VALUE self, VALUE rb_output) {
         return Qnil;
     }
 
-    fortitude_escaped_strcpy(rb_output, c_self);
+    fortitude_escaped_strcpy(rb_output, c_self, 0);
     return Qnil;
 }
 
-void fortitude_append_to(VALUE object, VALUE rb_output) {
+void fortitude_append_to(VALUE object, VALUE rb_output, int for_attribute_value) {
     ID to_s;
     char buf[25];
     long value;
@@ -111,11 +111,11 @@ void fortitude_append_to(VALUE object, VALUE rb_output) {
 
     switch (TYPE(object)) {
         case T_STRING:
-            fortitude_escaped_strcpy(rb_output, RSTRING_PTR(object));
+            fortitude_escaped_strcpy(rb_output, RSTRING_PTR(object), for_attribute_value);
             break;
 
         case T_SYMBOL:
-            fortitude_escaped_strcpy(rb_output, rb_id2name(SYM2ID(object)));
+            fortitude_escaped_strcpy(rb_output, rb_id2name(SYM2ID(object)), for_attribute_value);
             break;
 
         case T_ARRAY:
@@ -125,7 +125,7 @@ void fortitude_append_to(VALUE object, VALUE rb_output) {
                 if (i > 0) {
                     rb_str_cat2(rb_output, " ");
                 }
-                fortitude_append_to(array_element, rb_output);
+                fortitude_append_to(array_element, rb_output, for_attribute_value);
             }
 
         case T_NONE:
@@ -140,7 +140,7 @@ void fortitude_append_to(VALUE object, VALUE rb_output) {
 
         default:
             new_string = rb_funcall(object, to_s, 0);
-            fortitude_escaped_strcpy(rb_output, RSTRING_PTR(new_string));
+            fortitude_escaped_strcpy(rb_output, RSTRING_PTR(new_string), for_attribute_value);
             break;
     }
 }
@@ -175,12 +175,12 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE key_and_value_d
             switch (TYPE(prefix)) {
                 case T_STRING:
                     new_prefix_as_string = rb_funcall(prefix, dup, 0);
-                    fortitude_append_to(key, new_prefix_as_string);
+                    fortitude_append_to(key, new_prefix_as_string, 0);
                     break;
 
                 case T_NIL:
                     new_prefix_as_string = rb_str_new("", 0);
-                    fortitude_append_to(key, new_prefix_as_string);
+                    fortitude_append_to(key, new_prefix_as_string, 0);
                     break;
 
                 default:
@@ -212,12 +212,12 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE key_and_value_d
                     break;
             }
 
-            fortitude_append_to(key, rb_output);
+            fortitude_append_to(key, rb_output, 0);
             if (TYPE(allows_bare_attributes) == T_TRUE) {
                 /* ok */
             } else {
                 rb_str_cat2(rb_output, "=\"");
-                fortitude_append_to(key, rb_output);
+                fortitude_append_to(key, rb_output, 1);
                 rb_str_cat2(rb_output, "\"");
             }
             break;
@@ -238,9 +238,9 @@ int fortitude_append_key_and_value(VALUE key, VALUE value, VALUE key_and_value_d
                     break;
             }
 
-            fortitude_append_to(key, rb_output);
+            fortitude_append_to(key, rb_output, 0);
             rb_str_cat2(rb_output, "=\"");
-            fortitude_append_to(value, rb_output);
+            fortitude_append_to(value, rb_output, 1);
             rb_str_cat2(rb_output, "\"");
             break;
     }
