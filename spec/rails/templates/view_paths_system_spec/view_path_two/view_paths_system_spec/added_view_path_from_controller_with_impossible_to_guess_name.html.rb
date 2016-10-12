@@ -1,6 +1,6 @@
 $stderr.puts "LOADED AT:\n    #{caller.join("\n    ")}"
 
-initial = "class Views::ViewPathsSystemSpec::AddedViewPathFromControllerWithImposs"
+initial = "class ViewPathsSystemSpec::AddedViewPathFromControllerWithImposs"
 
 rest = <<-EOS
 ibleToGuessName < Fortitude::Widgets::Html5
