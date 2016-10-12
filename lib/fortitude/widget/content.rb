@@ -13,8 +13,8 @@ module Fortitude
           out
         end
 
-        def inline_html(assigns = { }, &block)
-          inline_subclass(&block).new(assigns).to_html
+        def inline_html(assigns = { }, rendering_context = nil, &block)
+          inline_subclass(&block).new(assigns).to_html(rendering_context)
         end
 
         # INTERNAL USE ONLY

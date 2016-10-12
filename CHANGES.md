@@ -34,6 +34,9 @@
   properly.
 * Fixed an issue where passing a block to (_e.g._) `f.label`, where `f` is the object yielded to a `form_for` helper,
   did not work properly. (Thanks to [Adam Becker](https://github.com/ajb) for the bug report and test case!)
+* Added the ability for the `inline_html` method on a widget class to accept a `Fortitude::RenderingContext`, thus
+  allowing you to use it with code requiring access to helpers. (Thanks to [Adam Becker](https://github.com/ajb) for
+  the bug report!)
 
 ## 0.9.4, 11 February 2015
 
