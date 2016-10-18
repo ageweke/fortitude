@@ -48,14 +48,14 @@ describe "Rails generator support", :type => :rails do
 
   describe "controller generation" do
     it "should be able to generate a controller action that creates a Fortitude view" do
-      generate!("controller gen_con1 act_ion1 -e fortitude")
+      generate!("controller gen_con1 act_ion1")
       ensure_file_matches!('app/views/gen_con1/act_ion1.html.rb', /Views::GenCon1::ActIon1\s*<\s*Views::Base/)
       ensure_action_matches!('gen_con1/act_ion1', %r{<h1>\s*GenCon1#act_ion1\s*</h1>\s*<p>\s*Find me in app/views/gen_con1/act_ion1.html.rb\s*</p>}mi)
     end
 
     it "should generate a Views::Base file" do
       clean_views_base!
-      generate!("controller gencon2 action2 -e fortitude")
+      generate!("controller gencon2 action2")
       ensure_views_base_is_correct!
     end
 
@@ -63,22 +63,28 @@ describe "Rails generator support", :type => :rails do
       prior_contents = "class Views::Base < Fortitude::Widget\n  doctype :html5\n  def something\n  end\nend"
       File.open(views_base_path, 'w') { |f| f.puts prior_contents }
 
-      generate!("controller gencon3 action3 -e fortitude")
+      generate!("controller gencon3 action3")
 
       expect(File.exist?(views_base_path)).to be_truthy
       expect(File.read(views_base_path).strip).to eq(prior_contents.strip)
+    end
+
+    it "should allow switching back to ERb if desired" do
+      generate!("controller gen_con4 act_ion1 -e erb")
+      expect(File.exist?(File.join(rails_server.rails_root, 'app/views/gen_con4/act_ion1.html.rb'))).to be_falsey
+      expect(File.exist?(File.join(rails_server.rails_root, 'app/views/gen_con4/act_ion1.html.erb'))).to be_truthy
     end
   end
 
   describe "mailer generation" do
     it "should be able to generate a mailer that creates a Fortitude view and layout" do
-      generate!("mailer gen1 act_ion1 -e fortitude")
+      generate!("mailer gen1 act_ion1")
       ensure_file_matches!('app/views/gen1_mailer/act_ion1.html.rb', /Views::Gen1Mailer::ActIon1\s*<\s*Views::Base/)
     end
 
     it "should generate a Views::Base file" do
       clean_views_base!
-      generate!("mailer gen1 act_ion1 -e fortitude")
+      generate!("mailer gen1 act_ion1")
       ensure_views_base_is_correct!
     end
 
@@ -86,7 +92,7 @@ describe "Rails generator support", :type => :rails do
       prior_contents = "class Views::Base < Fortitude::Widget\n  doctype :html5\n  def something\n  end\nend"
       File.open(views_base_path, 'w') { |f| f.puts prior_contents }
 
-      generate!("mailer gen1 act_ion1 -e fortitude")
+      generate!("mailer gen1 act_ion1")
 
       expect(File.exist?(views_base_path)).to be_truthy
       expect(File.read(views_base_path).strip).to eq(prior_contents.strip)
@@ -95,7 +101,7 @@ describe "Rails generator support", :type => :rails do
 
   describe "scaffold generation" do
     it "should be able to generate a scaffold" do
-      generate!("scaffold MyModel foo:string bar:integer -e fortitude")
+      generate!("scaffold MyModel foo:string bar:integer")
 
       # We need to disable CSRF protection, since we're not using a session
       application_controller = File.join(rails_server.rails_root, 'app', 'controllers', 'application_controller.rb')

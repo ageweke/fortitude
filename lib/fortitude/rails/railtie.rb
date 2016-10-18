@@ -25,6 +25,8 @@ end
 module Fortitude
   module Rails
     class Railtie < ::Rails::Railtie
+      config.app_generators.template_engine :fortitude
+
       class << self
         def _fortitude_view_roots
           @_fortitude_view_roots_mutex.synchronize do
