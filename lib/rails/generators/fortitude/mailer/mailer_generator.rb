@@ -17,6 +17,10 @@ module Fortitude
       def formats
         [:html]
       end
+
+      def format
+        :html
+      end
     end
   end
 end

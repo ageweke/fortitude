@@ -1,4 +1,8 @@
-class Views::<%= class_name.camelize %>Mailer::<%= @action.camelize %> < Views::Base
+<%
+our_class_name = class_name.camelize
+our_class_name += "Mailer" if @path =~ %r{_mailer/}
+-%>
+class Views::<%= our_class_name %>::<%= @action.camelize %> < Views::Base
   needs :greeting
 
   def content

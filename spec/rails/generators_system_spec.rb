@@ -76,9 +76,25 @@ describe "Rails generator support", :type => :rails do
   end
 
   describe "mailer generation" do
+    def mailer_path_suffix
+      if rails_server.actual_rails_version =~ /^3\.0\./
+        ""
+      else
+        "_mailer"
+      end
+    end
+
+    def mailer_class_suffix
+      if rails_server.actual_rails_version =~ /^3\.0\./
+        ""
+      else
+        "Mailer"
+      end
+    end
+
     it "should be able to generate a mailer that creates a Fortitude view and layout" do
       generate!("mailer gen1 act_ion1")
-      ensure_file_matches!('app/views/gen1_mailer/act_ion1.html.rb', /Views::Gen1Mailer::ActIon1\s*<\s*Views::Base/)
+      ensure_file_matches!("app/views/gen1#{mailer_path_suffix}/act_ion1.html.rb", /Views::Gen1#{mailer_class_suffix}::ActIon1\s*<\s*Views::Base/)
     end
 
     it "should generate a Views::Base file" do
