@@ -5,6 +5,8 @@ class Views::ComplexHelpersSystemSpec::FormForTest < Fortitude::Widgets::Html5
       text "INSIDE_BEFORE"
       text "FIRST: "
       f.text_field :first_name
+      text "MIDDLE: "
+      f.send(:text_field, :middle_name)
       text "LAST: "
       f.text_field :last_name
       text "INSIDE_AFTER"

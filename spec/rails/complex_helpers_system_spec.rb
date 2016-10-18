@@ -6,6 +6,7 @@ describe "Rails complex helper support", :type => :rails do
       %r{OUTSIDE_BEFORE\s*<form.*action=\"/complex_helpers_system_spec/form_for_test\".*
         INSIDE_BEFORE\s*
         FIRST:\s*<input.*person_first_name.*/>\s*
+        MIDDLE:\s*<input.*person_middle_name.*/>\s*
         LAST:\s*<input.*person_last_name.*/>\s*
         INSIDE_AFTER\s*
         </form>\s*
