@@ -20,21 +20,24 @@ class Views::<%= plural_table_name.camelize %>::Form < Views::Base
 
 <% attributes.each do |attribute| -%>
 <% if attribute.password_digest? -%>
-      edit_field(f, :password_field, :password)
-      edit_field(f, :password_field, :password_confirmation)
+      div(class: :field) {
+        f.label :password
+        f.password_field :password
+      }
+
+      div(class: :field) {
+        f.label :password_confirmation
+        f.password_field :password_confirmation
+      }
 <% else -%>
-      edit_field(f, :<%= attribute.field_type %>, :<%= attribute.column_name %>)
+      div(class: :field) {
+        f.label :<%= attribute.column_name %>
+        f.<%= attribute.field_type %> :<%= attribute.column_name %>
+      }
 <% end -%>
 <% end -%>
 
       div(class: :actions) { f.submit }
     end
-  end
-
-  def edit_field(form, field_type, column_name)
-    div(class: :field) {
-      form.label column_name
-      form.send(field_type, column_name)
-    }
   end
 end

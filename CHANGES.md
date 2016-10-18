@@ -1,5 +1,11 @@
 # Fortitude Releases
 
+## 0.9.6,
+
+* Generator support: generation of controllers, mailers, and scaffolding will now produce nice Fortitude views
+  instead of ERb views. (You can add `-e erb` to your `rails generate` command line to switch back to ERb if
+  desired.) Thanks to [Gaelan](https://github.com/Gaelan) for the suggestion!
+
 ## 0.9.5, 12 October 2016
 
 * Rails 5 compatibility: Fortitude now is fully compatible with Rails 5.0.0.1.

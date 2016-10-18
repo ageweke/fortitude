@@ -67,3 +67,5 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
   * Fixes for compatibility with Rails 5.
 * [Matt Walters](https://github.com/mattwalters) for:
   * A patch to make built-in Rails helpers work even when `automatic_helper_access` was set to `false`.
+* [Gaelan](https://github.com/Gaelan) for:
+  * Suggesting generator support for Fortitude.

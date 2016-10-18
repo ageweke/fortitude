@@ -11,7 +11,7 @@ class Views::<%= plural_table_name.camelize %>::Show < Views::Base
     }
 <% end %>
 
-    link_to 'Edit", edit_<%= singular_table_name %>_path(<%= singular_table_name %>)
+    link_to "Edit", edit_<%= singular_table_name %>_path(<%= singular_table_name %>)
     text " | "
     link_to 'Back', <%= index_helper %>_path
   end

@@ -35,6 +35,7 @@ describe "Rails generator support", :type => :rails do
   def ensure_action_matches!(subpath, regexp)
     response = rails_server.get(subpath)
     expect(response).to match(regexp)
+    response
   end
 
   describe "base view generation" do
@@ -95,6 +96,46 @@ describe "Rails generator support", :type => :rails do
   describe "scaffold generation" do
     it "should be able to generate a scaffold" do
       generate!("scaffold MyModel foo:string bar:integer -e fortitude")
+
+      # We need to disable CSRF protection, since we're not using a session
+      application_controller = File.join(rails_server.rails_root, 'app', 'controllers', 'application_controller.rb')
+      application_controller_contents = File.read(application_controller)
+      if (! application_controller_contents.gsub!(/^\s*protect_from_forgery.*$/, "protect_from_forgery :with => :null_session"))
+        application_controller_contents.gsub!(/^end\Z/, "  protect_from_forgery :with => :null_session\nend\n")
+      end
+      File.open(application_controller, 'w') { |f| f.puts application_controller_contents }
+
+      # Need this to create the table (which will be in SQLite by default, which is easy), or else
+      # the controller actions will fail since there will be no such table.
+      rails_server.run_command_in_rails_root!("rake db:migrate")
+
+      ensure_file_matches!('app/views/my_models/index.html.rb', %r{class Views::MyModels::Index < Views::Base})
+      ensure_file_matches!('app/views/my_models/show.html.rb', %r{class Views::MyModels::Show < Views::Base})
+      ensure_file_matches!('app/views/my_models/edit.html.rb', %r{class Views::MyModels::Edit < Views::Base})
+      ensure_file_matches!('app/views/my_models/new.html.rb', %r{class Views::MyModels::New < Views::Base})
+      ensure_file_matches!('app/views/my_models/form.html.rb', %r{class Views::MyModels::Form < Views::Base})
+
+      # This won't check that the views all have the right HTML in them (that's nearly impossible without
+      # just duplicating exactly what they're supposed to contain, right here), but it will check that they
+      # compile and produce some kind of HTML output.
+      ensure_action_matches!('my_models', %r{<h1>\s*My Models\s*</h1>}m)
+      new_html = ensure_action_matches!('my_models/new', %r{<form.*action=["']/my_models["']}m)
+
+      # Now, we try to create one
+      response = rails_server.post('my_models', :post_variables => {
+        'my_model[foo]' => 'foo1', 'my_model[bar]' => 23456, :commit => 'Create My model' },
+        :ignore_status_code => true)
+
+      new_url = if (300..399).include?(Integer(response.code))
+        response['Location']
+      else
+        raise "Response didn't seem to give us a redirect: #{response.code.inspect} (from #{response.inspect})"
+      end
+      path = URI.parse(new_url).path
+
+      ensure_action_matches!(path, %r{foo1.*23456}m)
+      ensure_action_matches!("#{path}/edit", %r{Editing.*foo1.*23456}m)
+      ensure_action_matches!("my_models", %r{<h1>\s*My Models\s*</h1>.*foo1.*23456}m)
     end
   end
 end
