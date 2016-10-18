@@ -21,6 +21,10 @@ describe "Rails data-passing support", :type => :rails do
     expect_actionview_exception('omitted_variable', 'Fortitude::Errors::MissingNeed', /bar/)
   end
 
+  it "should not give you an error just because a variable is set to nil" do
+    expect_match("nil_data_widget", /foo is: &quot;the_foo&quot;/, /bar is: nil/)
+  end
+
   it "should not propagate un-needed variables" do
     expect_match("extra_variables", /foo method call: the_foo/, /foo instance var: nil/,
       /bar method call: NoMethodError/, /bar instance var: nil/,

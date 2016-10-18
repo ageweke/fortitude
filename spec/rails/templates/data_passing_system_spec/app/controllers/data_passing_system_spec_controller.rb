@@ -12,6 +12,11 @@ class DataPassingSystemSpecController < ApplicationController
     render :action => 'passing_data_widget'
   end
 
+  def nil_data_widget
+    @foo = "the_foo"
+    @bar = nil
+  end
+
   def passing_locals_widget
     render :locals => { :foo => 'local_foo', :bar => 'local_bar' }
   end
