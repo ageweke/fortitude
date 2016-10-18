@@ -12,7 +12,6 @@ describe "Rails generator support", :type => :rails do
   end
 
   def ensure_views_base_is_correct!
-    views_base_path = File.join(rails_server.rails_root, 'app', 'views', 'base.rb')
     expect(File.exist?(views_base_path)).to be_truthy
 
     contents = File.read(views_base_path)
@@ -120,6 +119,10 @@ describe "Rails generator support", :type => :rails do
       ensure_file_matches!('app/views/my_models/edit.html.rb', %r{class Views::MyModels::Edit < Views::Base})
       ensure_file_matches!('app/views/my_models/new.html.rb', %r{class Views::MyModels::New < Views::Base})
       ensure_file_matches!('app/views/my_models/form.html.rb', %r{class Views::MyModels::Form < Views::Base})
+
+      # Ruby 1.8.7 and Rails 3.0.x seems to have issues unless we do this, sadly...
+      rails_server.stop!
+      rails_server.start!
 
       # This won't check that the views all have the right HTML in them (that's nearly impossible without
       # just duplicating exactly what they're supposed to contain, right here), but it will check that they

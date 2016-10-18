@@ -2,9 +2,9 @@ class Views::<%= plural_table_name.camelize %>::Show < Views::Base
   needs :<%= singular_table_name %>, :notice => nil
 
   def content
-    p notice, id: :notice
+    p notice, :id => :notice
 
-<% attributes.reject(&:password_digest?).each do |attribute| -%>
+<% attributes.reject { |a| a.respond_to?(:password_digest?) && a.password_digest? }.each do |attribute| -%>
     p {
       strong "<%= attribute.human_name %>:"
       text <%= singular_table_name %>.<%= attribute.name %>
