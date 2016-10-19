@@ -77,7 +77,7 @@ describe "Rails generator support", :type => :rails do
 
   describe "mailer generation" do
     def mailer_path_suffix
-      if rails_server.actual_rails_version =~ /^3\.0\./
+      if rails_server.actual_rails_version =~ /^[34]\./
         ""
       else
         "_mailer"
@@ -85,7 +85,7 @@ describe "Rails generator support", :type => :rails do
     end
 
     def mailer_class_suffix
-      if rails_server.actual_rails_version =~ /^3\.0\./
+      if rails_server.actual_rails_version =~ /^[34]\./
         ""
       else
         "Mailer"
