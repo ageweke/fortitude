@@ -54,6 +54,8 @@ Fortitude is written by [Andrew Geweke](https://github.com/ageweke), with contri
     (specifically, `<`, `>`, and `'`).
   * Reporting an issue where you couldn't use `inline_html` in a way that allowed you to pass a
     `Fortitude::RenderingContext`, thus preventing you from using it with code that required access to helpers.
+  * Reporting an issue where Rails' `_url`/`_path` helpers wouldn't pick up parameters set from the inbound request
+    correctly.
 * [Karl He](https://github.com/karlhe) for:
   * Reporting an issue (and supplying an example patch) where Fortitude wasn't respecting Rails' additional view
     paths correctly &mdash; only `app/views`.

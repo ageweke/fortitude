@@ -68,6 +68,11 @@ describe "Rails complex helper support", :type => :rails do
         </label>}mix)
   end
 
+  it "should allow implicitly carrying through things like IDs from one request to another" do
+    id = rand(1_000_000)
+    expect(rails_server.get("/carryover/#{id}")).to match(%r{Edit:\s*.*/carryover/#{id}/edit})
+  end
+
   it "should cache based on a name properly" do
     expect_match("cache_test?a=a1&b=b1",
       /before_cache\(a1,b1\).*inside_cache\(a1,b1\).*after_cache\(a1,b1\)/mi)

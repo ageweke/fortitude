@@ -12,9 +12,15 @@ module Fortitude
         end
 
         def apply_refined_helpers_to!(o)
-          o.send(:include, ::Rails.application.routes.url_helpers)
           @helpers.each do |name, options|
             o.helper(name, options)
+          end
+
+          url_helpers_module = ::Rails.application.routes.url_helpers
+          metaclass = o.instance_eval("class << self; self; end")
+
+          metaclass.send(:define_method, :_fortitude_allow_helper_even_without_automatic_helper_access?) do |method_name|
+            url_helpers_module.instance_methods.include?(method_name.to_sym)
           end
         end
 
@@ -45,6 +51,11 @@ module Fortitude
           }
         }
 
+        # We could use the mechanism used above for the url_helpers_module, but this makes access to these helpers
+        # much faster -- they end up with real methods defined for them, instead of using method_missing magic
+        # every time. We don't necessarily want to do that for the url_helpers_module, because there can be tons and
+        # tons of methods in there...and because we initialize early-enough on that methods aren't defined there yet,
+        # anyway.
         def declare_all_builtin_rails_helpers!
           ALL_BUILTIN_HELPER_MODULES.each do |base_module, constant_names|
             constant_names.each do |constant_name|

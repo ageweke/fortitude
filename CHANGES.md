@@ -8,6 +8,8 @@
 * Fixed an issue where if you tried to invoke methods on the object yielded to a `form_for` call or similar
   by using `send` instead of calling it directly (_e.g._, `form_for(...) do |f|`, then `f.send(:text_field, ...)`
   instead of `f.text_field ...`), the method invocation would appear to be ignored.
+* Fixed an issue where Rails `_url`/`_path` helpers didn't correctly pick up parameters set from the incoming
+  request. (Thanks to [Adam Becker](https://github.com/ajb) for the bug report!)
 
 ## 0.9.5, 12 October 2016
 

@@ -56,13 +56,27 @@ module Fortitude
         out
       end
 
+      def _fortitude_use_helper?(method_name)
+        unless @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(method_name, true)
+          return false
+        end
+
+        return self.class.automatic_helper_access ||
+          (self.class.respond_to?(:_fortitude_allow_helper_even_without_automatic_helper_access?) &&
+           self.class._fortitude_allow_helper_even_without_automatic_helper_access?(method_name))
+      end
+
+      def _fortitude_allow_helper_even_without_automatic_helper_access?(method_name)
+        false
+      end
+
       def _fortitude_target_method_and_args_for_method_missing(missing_method_name, *missing_method_args, &missing_method_block)
         if self.class.extra_assigns == :use && missing_method_args.length == 0 && (! missing_method_block)
           ivar_name = self.class.instance_variable_name_for_need(missing_method_name)
           return [ self, :instance_variable_get, ivar_name ] if instance_variable_defined?(ivar_name)
         end
 
-        if self.class.automatic_helper_access && @_fortitude_rendering_context && @_fortitude_rendering_context.helpers_object && @_fortitude_rendering_context.helpers_object.respond_to?(missing_method_name, true)
+        if _fortitude_use_helper?(missing_method_name)
           return [ @_fortitude_rendering_context.helpers_object, missing_method_name, *missing_method_args ]
         end
 
