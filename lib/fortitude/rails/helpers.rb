@@ -17,10 +17,18 @@ module Fortitude
           end
 
           url_helpers_module = ::Rails.application.routes.url_helpers
+
+          test_base_class = Class.new
+          test_base_instance = test_base_class.new
+
+          test_class = Class.new
+          test_class.send(:include, url_helpers_module)
+          test_instance = test_class.new
+
           metaclass = o.instance_eval("class << self; self; end")
 
           metaclass.send(:define_method, :_fortitude_allow_helper_even_without_automatic_helper_access?) do |method_name|
-            url_helpers_module.instance_methods.include?(method_name.to_sym)
+            test_instance.respond_to?(method_name) && (! test_base_instance.respond_to?(method_name))
           end
         end
 
