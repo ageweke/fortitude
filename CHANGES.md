@@ -5,6 +5,9 @@
 * Generator support: generation of controllers, mailers, and scaffolding will now produce nice Fortitude views
   instead of ERb views. (You can add `-e erb` to your `rails generate` command line to switch back to ERb if
   desired.) Thanks to [Gaelan](https://github.com/Gaelan) for the suggestion!
+* Fixed an issue where if you tried to invoke methods on the object yielded to a `form_for` call or similar
+  by using `send` instead of calling it directly (_e.g._, `form_for(...) do |f|`, then `f.send(:text_field, ...)`
+  instead of `f.text_field ...`), the method invocation would appear to be ignored.
 
 ## 0.9.5, 12 October 2016
 
