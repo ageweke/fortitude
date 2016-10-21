@@ -1,6 +1,6 @@
 # Fortitude Releases
 
-## 0.9.6,
+## 0.9.6, 21 October 2016
 
 * Generator support: generation of controllers, mailers, and scaffolding will now produce nice Fortitude views
   instead of ERb views. (You can add `-e erb` to your `rails generate` command line to switch back to ERb if
