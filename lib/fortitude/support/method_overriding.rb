@@ -62,7 +62,9 @@ EOS
 EOS
 
           target_module.send(:include, override_methods_module)
-          target_module.send(:alias_method_chain, method_name, feature_name)
+          # Below is equivalent to using alias_method_chain(method_name, feature_name)
+          target_module.send(:alias_method, without_name, method_name)
+          target_module.send(:alias_method, method_name, with_name)
         end
       end
 
