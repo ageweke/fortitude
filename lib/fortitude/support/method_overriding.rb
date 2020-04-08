@@ -25,11 +25,7 @@ module Fortitude
       # we currently fall back to using alias_method_chain on JRuby. (You only get deprecation warnings with this
       # when running with Rails 5, which is not yet supported by JRuby anyway, at least as of this writing.)
       def override_methods(target_module, override_methods_module, feature_name, method_names)
-        if RUBY_VERSION =~ /^2\./ && (! ((RUBY_ENGINE || '').to_s.downcase.strip == 'jruby'))
-          override_methods_using_prepend(target_module, override_methods_module, feature_name, method_names)
-        else
-          override_methods_using_alias_method_chain(target_module, override_methods_module, feature_name, method_names)
-        end
+        override_methods_using_prepend(target_module, override_methods_module, feature_name, method_names)
       end
 
       private
@@ -46,24 +42,6 @@ EOS
         end
 
         target_module.send(:prepend, override_methods_module)
-      end
-
-      def override_methods_using_alias_method_chain(target_module, override_methods_module, feature_name, method_names = nil)
-        method_names.each do |method_name|
-          universal_name = universal_method_name(method_name, feature_name)
-          with_name = with_feature_name(method_name, feature_name)
-          without_name = without_feature_name(method_name, feature_name)
-
-          override_methods_module.class_eval <<-EOS
-  def #{with_name}(*args, &block)
-    original_method = Proc.new { |*args, &block| #{without_name}(*args, &block) }
-    #{universal_name}(original_method, *args, &block)
-  end
-EOS
-
-          target_module.send(:include, override_methods_module)
-          target_module.send(:alias_method_chain, method_name, feature_name)
-        end
       end
 
       def suffix_method_name(method_name, suffix)

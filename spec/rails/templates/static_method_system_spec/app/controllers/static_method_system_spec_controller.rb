@@ -1,5 +1,5 @@
 class StaticMethodSystemSpecController < ApplicationController
-  before_filter :set_locale
+  before_action :set_locale
 
   def set_locale
     I18n.locale = params[:locale] if params[:locale]
